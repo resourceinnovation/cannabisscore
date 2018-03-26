@@ -1,0 +1,30 @@
+{
+    "name": "resourceinnovation/cannabisscore",
+    "description": "SurvLoop is a Laravel-based engine for designing a database and creating a mobile-friendly user interface to fill it.",
+    "keywords": [
+        "Resource Innovation Institute",
+        "Cannabis PowerScore",
+        "marijuana",
+        "energy",
+    	"laravel", 
+    	"SurvLoop", 
+    	"survey"
+    ],
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Morgan Lesko",
+            "homepage": "https://github.com/resourceinnovation/cannabisscore",
+            "email": "mo@wikiworldorder.org",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "doctrine/dbal": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "CannabisScore\\": "src/"
+        }
+    }
+}
