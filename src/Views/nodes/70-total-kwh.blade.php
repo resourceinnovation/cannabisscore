@@ -4,7 +4,7 @@
 <div class="nodeHalfGap"></div>
 <div id="nLabel{{ $nID }}" class="nPrompt">
     <label for="n{{ $nID }}FldID" class="w100">
-        How many total annual kilowatt hours (kWh) did you use?
+        Over the <b>same 12-month period</b>, how many total annual kilowatt hours (kWh) did you use?
     </label>
     <div id="nLabel{{ $nID }}notes" class="subNote">
         <p>

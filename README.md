@@ -1,9 +1,9 @@
 
 # resourceinnovation/cannabisscore
 
-[![Laravel](https://img.shields.io/badge/Laravel-5.3-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-5.6-orange.svg?style=flat-square)](http://laravel.com)
 [![SurvLoop](https://img.shields.io/badge/SurvLoop-0.0-orange.svg?style=flat-square)](https://github.com/wikiworldorder/survloop)
-[![License](https://img.shields.io/aur/license/yaourt.svg?style=flat-square)](https://www.gnu.org/licenses/gpl.html)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis 
 community, and the industry, to prepare, track, and grow in ever more sustainable directions. 
@@ -152,3 +152,17 @@ Here's the TODO list for the next release (**1.0**). It's my first time building
 
 Please help educate me on best practices for sharing code in this community.
 Please report any issue you find in the issues page.
+
+# <a name="security-help"></a>Reporting a security vulnerability
+
+We want to ensure that the Cannabis PowerScore is a secure HTTP open data platform for everyone. 
+If you've discovered a security vulnerability in powerscore.resourceinnovation.org, 
+we appreciate your help in disclosing it to us in a responsible manner.
+
+Publicly disclosing a vulnerability can put the entire community at risk. 
+If you've discovered a security concern, please email us at wikiworldorder *at* protonmail.com. 
+We'll work with you to make sure that we understand the scope of the issue, and that we fully address your concern. 
+We consider correspondence sent to wikiworldorder *at* protonmail.com our highest priority, 
+and work to address any issues that arise as quickly as possible.
+
+After a security vulnerability has been corrected, a release will be deployed as soon as possible.

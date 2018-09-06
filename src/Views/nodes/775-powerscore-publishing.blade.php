@@ -1,18 +1,17 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/775-powerscore-publishing.blade.php -->
-<h1 class="mT0 slBlueDark">Un-Publish These PowerScores?</h1>
+<h1 class="slBlueDark">Un-Publish These PowerScores?</h1>
 <p>Hi Derek!</p>
 <p>Here's the list of completed PowerScores which were not included in you cleaned up Excel sheet. 
-Should all of these be removed from the list of 'published' scores which others are compared to? 
-The scores with ID's below 1241 are a very safe bet to remove from this set, but are the all rest really outliers?</p>
+Should all of these be removed from the list of 'published' scores which others are compared to?</p>
 <p>Just wanted to double-check. Thanks!-)</p>
 <table border=0 class="table table-striped w100"><tr>
 <th>Score ID#</th>
 <th>Farm Name</th>
 <th>Overall</th>
-<th class="taR">Facility Score <div class="slGrey fPerc66">kWh/SqFt</div></th>
-<th class="taR">Production Score <div class="slGrey fPerc66">g/kWh</div></th>
-<th class="taR">Lighting Score <div class="slGrey fPerc66">kWh/SqFt</div></th>
-<th class="taR">HVAC Score <div class="slGrey fPerc66">kWh/SqFt</div></th>
+<th class="taR">Facility Score <sup class="slBlueDark">kWh/SqFt</sup></th>
+<th class="taR">Production Score <sup class="slBlueDark">g/kWh</sup></th>
+<th class="taR">Lighting Score <sup class="slBlueDark">kWh/SqFt</sup></th>
+<th class="taR">HVAC Score <sup class="slBlueDark">kWh/SqFt</sup></th>
 <th class="taR">Grams</th>
 <th class="taR">kWh</th>
 <th class="taR">Sq Ft</th>
@@ -39,8 +38,8 @@ The scores with ID's below 1241 are a very safe bet to remove from this set, but
     <td class="taR">{{ number_format($ps->PsGrams) }}</td>
     <td class="taR">{{ number_format($ps->PsKWH) }}</td>
     <td class="taR">{{ number_format($ps->PsTotalSize) }}</td>
-    <td>{{ str_replace('Multiple Environments', 'Multiple Env', 
-        $GLOBALS["SL"]->getDefValue('PowerScore Farm Types', $ps->PsCharacterize)) }}</td>
+    <td>{{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
+        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}</td>
     <td>{{ $ps->PsCounty }} {{ $ps->PsState }}</td>
     </tr>
 @empty

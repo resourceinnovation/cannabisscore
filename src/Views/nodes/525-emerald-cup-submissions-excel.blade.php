@@ -29,10 +29,10 @@
     <td> @if (isset($s->PsEmail) && trim($s->PsEmail) != '') {{ $s->PsEmail }} @endif </td>
     <td>{{ $s->PsCounty }} {{ $s->PsState }}</td>
     <td>{{ date("n/j/Y", strtotime($s->created_at)) }}</td>
-    <td> @if ($s->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete')) Yes @else No @endif </td>
+    <td> @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete')) Yes @else No @endif </td>
     <td> @if (in_array($s->PsID, $cultClassicIds)) Yes @endif </td>
     <td> @if (in_array($s->PsID, $emeraldIds)) Yes @endif </td>
-    @if ($s->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete'))
+    @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
         <td>{{ round($s->PsEfficOverall) }}%</td>
         <td>{{ round($s->PsRnkFacility) }}%</td>
         <td>{{ round($s->PsRnkProduction) }}%</td>

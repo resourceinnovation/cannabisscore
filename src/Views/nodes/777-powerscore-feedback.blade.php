@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/777-powerscore-feedback.blade.php -->
 
-<h1 class="mT0 slBlueDark">PowerScore Feedback Survey</h1>
+<h1 class="slBlueDark">PowerScore Feedback Survey</h1>
 <a href="/start/powerscore-feedback" target="_blank">/start/powerscore-feedback</a>
 <table border=0 class="table table-striped w100">
 <tr>

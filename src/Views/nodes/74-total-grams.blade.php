@@ -2,8 +2,8 @@
 <div id="node{{ $nID }}" class="nodeWrap">
 <div class="nodeHalfGap"></div>
 <div id="nLabel{{ $nID }}" class="nPrompt"><label for="n{{ $nID }}FldID" class="w100">
-    @if ($nID == 74) How many total grams of cannabis flower and byproduct were sold? 
-    @else How many total grams of cannabis flower and byproduct do you plan to sell?
+    @if ($nID == 74) Over the 12-month period, how many total grams of cannabis flower and byproduct were produced? 
+    @else Over the 12-month period, how many total grams of cannabis flower and byproduct do you plan to produce?
     @endif <span class="red">*required</span>
 </label></div>
 <div class="nFld" style="font-size: 20px;">

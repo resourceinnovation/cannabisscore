@@ -2,9 +2,11 @@
 
 <a class="btn btn-default pull-right" href="?excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
     Export to Excel</a>
-<h1 class="mT0 slBlueDark">{{ $filtTitle }} PowerScores</h1>
+<h1 class="slBlueDark">{{ $filtTitle }} PowerScores</h1>
 <a id="tblScrlBtn" class="btn btn-default btn-sm pull-right" href="javascript:;"
-    >Show All <i class="fa fa-expand mR5"></i></a>
+    >Show All <i class="fa fa-expand mL5"></i></a>
+<a class="btn btn-default btn-sm pull-right mR10" href="?getRandom=1"
+    >Pick Random <i class="fa fa-search mL5"></i></a>
 <p class="slGrey">
 Click a PowerScore's row or ID# to load the full report lower down on this page. 
 Click the <i class="fa fa-external-link" aria-hidden="true"></i> icon 
@@ -35,7 +37,9 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
         <nobr><a href="javascript:;" class="btn btn-primary" 
             >#{{ $s->PsID }}</a>
     </td><td class="psOpen" data-psid="{{ $s->PsID }}">
-        <div class="fPerc125 bld mTn5"> @if (isset($s->PsName) && trim($s->PsName) != '') {{ $s->PsName }} @endif </div>
+        <div class="fPerc125 bld mTn5">
+            @if (isset($s->PsName) && trim($s->PsName) != '') {{ $s->PsName }} @endif
+        </div>
         {{ $s->PsCounty }} {{ $s->PsState }}
         @if (isset($s->PsEmail) && trim($s->PsEmail) != '') 
             <br /><a href="mailto:{{ $s->PsEmail }}">{{ $s->PsEmail }}</a>
@@ -47,7 +51,7 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
         @if (in_array($s->PsID, $cultClassicIds)) <br /><span class="slBlueDark"
             ><i class="fa fa-certificate" aria-hidden="true"></i> Cultivation Classic</span> @endif
     </td>
-    @if ($s->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete'))
+    @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
         <td class="psOpen" data-psid="{{ $s->PsID }}">
             <b class="fPerc133">{{ round($s->PsEfficOverall) }}%</b> <div class="fPerc80">
             @if (isset($s->PsRnkFacility) && $s->PsRnkFacility > 0) 
@@ -97,7 +101,8 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
 .psOpen { cursor: pointer; }
 tr.psRowA1 { border: inherit; }
 tr.psRowA2 { border-top: 1px #8EAD67 solid; border-bottom: 1px #8EAD67 solid; box-shadow: 0px 0px 10px #8EAD67; }
-.psFrame { height: 700px; width: 100%; box-shadow: 0px 0px 10px #8EAD67; border: 0px none; border-collapse: collapse; }
+.psFrame { height: 700px; width: 100%; box-shadow: 0px 0px 10px #8EAD67; 
+    border: 0px none; border-collapse: collapse; }
 td.psRowTd, table tr td.psRowTd { padding: 0px; }
 </style>
 <script type="text/javascript">
@@ -111,42 +116,44 @@ alert(document.getElementById("psFrame"+psid+"").scrollHeight);
                 var newH = parseInt(document.getElementById("psFrame"+psid+"").style.height.replace("px", ""))+100;
                 document.getElementById("psFrame"+psid+"").style.height = (newH)+"px";
             }
-	        setTimeout(function() { checkScrollHgt(psid) }, 2000);
+            setTimeout(function() { checkScrollHgt(psid) }, 2000);
         }
         */
         return true;
     }
     function loadPsReport(psid) {
-	    if (document.getElementById("psRowB"+psid+"")) {
-	        document.getElementById("psRowB"+psid+"").style.display='table-row';
-	        document.getElementById("psRowB"+psid+"").innerHTML='<td colspan=8 class="psRowTd"><iframe id="psFrame'+psid+'" class="psFrame" src="/calculated/u-'+psid+'?refresh=1&frame=1&hidePromos=1"></iframe></td>';
-	        setTimeout(function() { checkScrollHgt(psid) }, 500);
-	    }
-	    return true;
+        if (document.getElementById("psRowB"+psid+"")) {
+            document.getElementById("psRowB"+psid+"").style.display='table-row';
+            document.getElementById("psRowB"+psid+"").innerHTML='<td colspan=8 class="psRowTd"><iframe <?php
+                ?>id="psFrame'+psid+'" class="psFrame" src="/calculated/u-'+psid+'?refresh=1&frame=1<?php
+                ?>&hidePromos=1"></iframe></td>';
+            setTimeout(function() { checkScrollHgt(psid) }, 500);
+        }
+        return true;
     }
     $(document).on("click", ".psOpen", function() {
         var psid = $(this).attr("data-psid");
         loadPsReport(psid);
-	});
+    });
     $(document).on("mouseenter", ".psOpen", function() {
         var psid = $(this).attr("data-psid");
-	    if (document.getElementById("psRowA"+psid+"")) {
-	        document.getElementById("psRowA"+psid+"").className="psRowA2";
-	    }
-	});
+        if (document.getElementById("psRowA"+psid+"")) {
+            document.getElementById("psRowA"+psid+"").className="psRowA2";
+        }
+    });
     $(document).on("mouseleave", ".psOpen", function() {
         var psid = $(this).attr("data-psid");
-	    if (document.getElementById("psRowA"+psid+"")) {
-	        document.getElementById("psRowA"+psid+"").className="psRowA1";
-	    }
-	});
-	
-	@if ($GLOBALS["SL"]->REQ->has('refresh') && intVal($GLOBALS["SL"]->REQ->get('refresh')) == 1)
+        if (document.getElementById("psRowA"+psid+"")) {
+            document.getElementById("psRowA"+psid+"").className="psRowA1";
+        }
+    });
+    
+    @if ($GLOBALS["SL"]->REQ->has('refresh') && intVal($GLOBALS["SL"]->REQ->get('refresh')) == 1)
         @forelse ($cupScores as $i => $s)
             setTimeout(function() { loadPsReport({{ $s->PsID }}); }, {{ $i*10000 }});
         @empty
         @endforelse
-	@endif
-	
+    @endif
+    
 });
 </script>

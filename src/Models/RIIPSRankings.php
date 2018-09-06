@@ -11,9 +11,9 @@ class RIIPSRankings extends Model
     protected $fillable   = 
     [    
 		'PsRnkPSID', 
-		'PsRnkFilterByClimate', 
-		'PsRnkFarmType', 
+		'PsRnkFilters', 
 		'PsRnkOverall', 
+		'PsRnkOverallAvg', 
 		'PsRnkFacility', 
 		'PsRnkProduction', 
 		'PsRnkHVAC', 

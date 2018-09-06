@@ -4,19 +4,20 @@
         <h1 class="m0 scoreBig">PowerScore Report #{{ $psid }}</h1>
         <div class="slGrey">
         @if (isset($sessData["PowerScore"][0]->PsCharacterize)) 
-            <nobr>{{ $GLOBALS["SL"]->getDefValue('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) 
+            <nobr>{{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) 
                 }}</nobr> —
         @endif
         <nobr>
         @if (isset($sessData["PowerScore"][0]->PsZipCode)) 
-            {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipCity($sessData["PowerScore"][0]->PsZipCode))) }},
+            {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipProperty($sessData["PowerScore"][0]->PsZipCode))) }},
         @endif
         @if (isset($sessData["PowerScore"][0]->PsState)) 
             {{ $GLOBALS["SL"]->states->getState($sessData["PowerScore"][0]->PsState) }}
         @endif
         </nobr> —
         @if (isset($sessData["PowerScore"][0]->PsAshrae)) 
-            <nobr>Climate Zone {{ $sessData["PowerScore"][0]->PsAshrae }}</nobr>
+            <nobr> @if ($sessData["PowerScore"][0]->PsAshrae != 'Canada') Climate Zone @endif 
+                {{ $sessData["PowerScore"][0]->PsAshrae }}</nobr>
         @endif
         </div>
     </div>
@@ -84,7 +85,7 @@
     
         @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
             <div class="row p0 mB20">
-                <div class="col-md-6"><div class="pL10 slGrey">
+                <div class="col-md-6"><div class="pL10 slGrey fPerc80">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = @if ($efficAvgCnt > 1) ( @endif
@@ -93,7 +94,7 @@
                         @endforeach
                     @endif @if ($efficAvgCnt > 1) ) / {{ $efficAvgCnt }} @endif </div>
                 </div></div>
-                <div class="col-md-6"><div class="pL10 slGrey">
+                <div class="col-md-6"><div class="pL10 slGrey fPerc80">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = @if ($efficAvgCnt > 1) ( @endif
@@ -103,7 +104,7 @@
                     @endif @if ($efficAvgCnt > 1) ) / {{ $efficAvgCnt }} @endif </div>
                 </div></div>
             </div>
-            <div class="pL10 slGrey">
+            <div class="pL10 slGrey fPerc80">
             @if (sizeof($printEfficLgt) > 0)
                 @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
             @endif
@@ -128,37 +129,8 @@
     </div>
     <div class="col-md-4">
         <div id="farmFilts" class="round20 brdDshGry p20 mT20">
-            <h3 class="mT10 mB5"><span class="slBlueDark">Compare to other farms...</span></h3>
-            <div class="row mB20">
-                <div class="col-md-7">
-                    <select name="filtFarm" id="filtFarmID" class="form-control ntrStp slTab w100" autocomplete="off" 
-                        {!! $GLOBALS["SL"]->tabInd() !!}>
-                        <option value="0" @if ($filtFarm == 0) SELECTED @endif >of all types</option>
-                        <option value="143" @if ($filtFarm == 143) SELECTED @endif >
-                            @if ($sessData["PowerScore"][0]->PsCharacterize == $filtFarm) that are also outdoor @else that are outdoor @endif
-                            </option>
-                        <option value="144" @if ($filtFarm == 144) SELECTED @endif >
-                            @if ($sessData["PowerScore"][0]->PsCharacterize == $filtFarm) that are also indoor @else that are indoor @endif
-                            </option>
-                        <option value="145" @if ($filtFarm == 145) SELECTED @endif >
-                            @if ($sessData["PowerScore"][0]->PsCharacterize == $filtFarm) that are also greenhouse @else that are greenhouse @endif
-                            </option>
-                        <option value="223" @if ($filtFarm == 223) SELECTED @endif >
-                            @if ($sessData["PowerScore"][0]->PsCharacterize == $filtFarm) also with multiple environments 
-                            @else with multiple environments @endif
-                            </option>
-                    </select>
-                    <select name="filtClimate" id="filtClimateID" class="form-control ntrStp slTab w100" 
-                        autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!}>
-                        <option value="0" @if ($filtClimate == 0) SELECTED @endif >across the U.S.</option>
-                        <option value="1" @if ($filtClimate == 1) SELECTED @endif
-                            >also in ASHRAE Climate Zone {{ $sessData["PowerScore"][0]->PsAshrae }}</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <a href="javascript:;" class="btn btn-lg btn-primary w100 mT10 ovrSho updateScoreFilts">Compare</a>
-                </div>
-            </div>
+            <h3 class="mT0 mB5"><span class="wht">Compare to other farms...</span></h3>
+            {!! $psFilters !!}
         </div>
     </div>
 </div>
@@ -225,27 +197,23 @@
 </style>
 <script type="text/javascript"> $(document).ready(function() {
 	
+    {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
 	function reloadGuages() {
-	    if (document.getElementById('psScoreOverall')) document.getElementById('psScoreOverall').innerHTML = '';
-	    if (document.getElementById('psScoreFacility')) document.getElementById('psScoreFacility').innerHTML = '';
-	    if (document.getElementById('psScoreProduction')) document.getElementById('psScoreProduction').innerHTML = '';
-	    if (document.getElementById('psScoreHvac')) document.getElementById('psScoreHvac').innerHTML = '';
-	    if (document.getElementById('psScoreLighting')) document.getElementById('psScoreLighting').innerHTML = '';
-	    var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}{!! $hasRefresh !!}";
-	    if (document.getElementById("filtClimateID") && parseInt(document.getElementById("filtClimateID").value) == 1) {
-	        baseUrl += "&climate=1";
-	    }
-	    if (document.getElementById("filtFarmID") && parseInt(document.getElementById("filtFarmID").value) > 0) {
-	        baseUrl += "&farm="+document.getElementById("filtFarmID").value.trim();
-	    }
-        setTimeout(function() { $("#psScoreOverall").load(   ""+baseUrl+"&eff=Overall"); },   1200);
-        setTimeout(function() { $("#psScoreFacility").load(  ""+baseUrl+"&eff=Facility"); },   900);
-        setTimeout(function() { $("#psScoreProduction").load(""+baseUrl+"&eff=Production"); }, 600);
-        setTimeout(function() { $("#psScoreHvac").load(      ""+baseUrl+"&eff=HVAC"); },       300);
-        setTimeout(function() { $("#psScoreLighting").load(  ""+baseUrl+"&eff=Lighting"); },     1);
+	    var spn = '<i class="fa-li fa fa-spinner fa-spin"></i>';
+	    if (document.getElementById('psScoreOverall')) document.getElementById('psScoreOverall').innerHTML = spn;
+	    if (document.getElementById('psScoreFacility')) document.getElementById('psScoreFacility').innerHTML = spn;
+	    if (document.getElementById('psScoreProduction')) document.getElementById('psScoreProduction').innerHTML = spn;
+	    if (document.getElementById('psScoreHvac')) document.getElementById('psScoreHvac').innerHTML = spn;
+	    if (document.getElementById('psScoreLighting')) document.getElementById('psScoreLighting').innerHTML = spn;
+	    var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}{!! $hasRefresh !!}"+gatherFilts();
+        setTimeout(function() { $("#psScoreOverall").load(   ""+baseUrl+"&eff=Overall"); },    2400);
+        setTimeout(function() { $("#psScoreFacility").load(  ""+baseUrl+"&eff=Facility"); },   2000);
+        setTimeout(function() { $("#psScoreProduction").load(""+baseUrl+"&eff=Production"); }, 1600);
+        setTimeout(function() { $("#psScoreHvac").load(      ""+baseUrl+"&eff=HVAC"); },       1200);
+        setTimeout(function() { $("#psScoreLighting").load(  ""+baseUrl+"&eff=Lighting"); },      1);
         return true;
     }
-    setTimeout(function() { reloadGuages(); }, 1);
+    setTimeout(function() { reloadGuages(); }, 300);
     
     $(document).on("click", ".updateScoreFilts", function() { reloadGuages(); });
     

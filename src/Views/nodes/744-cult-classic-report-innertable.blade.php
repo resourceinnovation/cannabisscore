@@ -23,8 +23,9 @@
 </b></tr>
 @forelse ($farms as $i => $f)
     <tr>
-    <td class=" @if ($f['ps'] && isset($f['ps']->PsStatus) && $f['ps']->PsStatus 
-        == $GLOBALS['SL']->getDefID('PowerScore Status', 'Complete')) slGreenDark @else slRedLight @endif " >
+    <td class=" @if ($f['ps'] && isset($f['ps']->PsStatus) && in_array($f['ps']->PsStatus, [ 
+        $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete'),
+        $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') ])) slGreenDark @else slRedLight @endif " >
         @if (isset($f["name"]) && trim($f["name"]) != '') {{ $f["name"] }} @endif </td>
     @if (!isset($f["ps"]) || !isset($f["ps"]->PsID))
         <td class="slRedLight"><b>0</b></td>
@@ -35,22 +36,25 @@
             @endforeach </span>
         @endif </td><td colspan=4 >&nbsp;</td>
     @else
-        <td @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete')) class="slGreenDark"
+        <td @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ])) class="slGreenDark"
             @else class="slRedLight" @endif ><b>
-            @if ($f["ps"]->PsStatus != $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete')) 0
+            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) 0
             @elseif ($f["ps"]->PsEfficOverall > 66) 2
             @elseif ($f["ps"]->PsEfficOverall > 33) 1.5
             @else 1
             @endif
         </b></td>
         <td>
-            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete')) Yes @else No @endif
+            @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ])) Yes @else No @endif
         </td>
         @if ($GLOBALS["SL"]->REQ->has('excel')) <td>#{{ $f["ps"]->PsID }}</td>
         @else <td><a href="/calculated/u-{{ $f['ps']->PsID }}" target="_blank"
-            @if ($f["ps"]->PsStatus != $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete')) class="slRedLight"
+            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) class="slRedLight"
             @endif >#{{ $f["ps"]->PsID }}</a></td> @endif
-        @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->getDefID('PowerScore Status', 'Complete'))
+        @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ]))
             <td>{{ round($f["ps"]->PsEfficOverall) }}%</td>
             <td>{{ round($f["ps"]->PsRnkFacility) }}%</td>
             <td>{{ round($f["ps"]->PsRnkProduction) }}%</td>
