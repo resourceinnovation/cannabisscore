@@ -1595,7 +1595,7 @@ class CannabisScore extends SurvFormTree
     
     public function multiRecordCheckIntro($cnt = 1)
     {
-        return '<a id="hidivBtnUnfinished' . $this->currNode() . '" class="btn btn-lg btn-default w100 hidivBtn" '
+        return '<a id="hidivBtnUnfinished' . $this->currNode() . '" class="btn btn-lg btn-secondary w100 hidivBtn" '
             . 'href="javascript:;">You Have ' . (($cnt == 1) ? 'An Unfinished PowerScore' : 'Unfinished PowerScores') 
             . '</a>';
     }
@@ -2772,11 +2772,34 @@ class CannabisScore extends SurvFormTree
             }
         }
         $this->chkScoreFilters();
+        $xtra = "";
+        if ($GLOBALS["SL"]->REQ->has('review')) {
+            $this->v["fltCmpl"] = 0;
+            $xtra = "->whereNotNull('PsNotes')->where('PsNotes', 'NOT LIKE', '')";
+        }
         $eval = "\$this->v['allscores'] = " . $GLOBALS["SL"]->modelPath('PowerScore') . "::" 
-            . $this->filterAllPowerScoresPublic() . "->where('PsEfficFacility', '>', 0)"
-                . "->where('PsEfficProduction', '>', 0)->where('PsEfficLighting', '>', 0)"
-                . "->where('PsEfficHvac', '>', 0)->orderBy(\$this->v['sort'][0], \$this->v['sort'][1])->get();";
+            . $this->filterAllPowerScoresPublic() . $xtra
+            . "->where('PsEfficFacility', '>', 0)->where('PsEfficProduction', '>', 0)"
+            . "->where('PsEfficLighting', '>', 0)->where('PsEfficHvac', '>', 0)"
+            . "->orderBy(\$this->v['sort'][0], \$this->v['sort'][1])->get();";
         eval($eval);
+        $this->v["allmores"] = [];
+        if ($this->v["allscores"]->isNotEmpty()) {
+            foreach ($this->v["allscores"] as $ps) {
+                $this->v["allmores"][$ps->PsID] = [ "areaIDs" => [] ];
+                $this->v["allmores"][$ps->PsID]["areas"] = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                    ->get();
+                if ($this->v["allmores"][$ps->PsID]["areas"]->isNotEmpty()) {
+                    foreach ($this->v["allmores"][$ps->PsID]["areas"] as $area) {
+                        $this->v["allmores"][$ps->PsID]["areaIDs"][] = $area->PsAreaID;
+                    }
+                }
+                $this->v["allmores"][$ps->PsID]["lights"] = RIIPSLightTypes::whereIn('PsLgTypAreaID', 
+                    $this->v["allmores"][$ps->PsID]["areaIDs"])
+                    ->get();
+            }
+        }
+//echo '<pre>'; print_r($this->v["allmores"]); echo '</pre>'; exit;
         $this->getAllscoresAvgFlds();
         if ($GLOBALS["SL"]->REQ->has('excel')) {
             $this->v["showFarmNames"] = $GLOBALS["SL"]->REQ->has('farmNames');

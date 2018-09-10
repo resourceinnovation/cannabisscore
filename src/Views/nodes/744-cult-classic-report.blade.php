@@ -1,5 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/744-cult-classic-report.blade.php -->
-<a class="btn btn-default pull-right" href="?excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+<a class="btn btn-secondary float-right" href="?excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
     Export to Excel</a>
 <h1 class="slBlueDark">Cultivation Classic Final Report</h1>
 <div class="fPerc125 mB10">

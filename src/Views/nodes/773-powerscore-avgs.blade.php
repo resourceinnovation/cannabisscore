@@ -7,7 +7,12 @@
 <a href="#sqftFixture" class="mL5 mR5">Sqft/Fixture</a> - 
 <a href="#hvac" class="mL5 mR5">HVAC Adoption</a>
 
-<!--- <a class="pull-right btn btn-default mT5" href="/dash/compare-powerscore-averages?excel=1"
+
+<h1 class="slBlueDark">Completed PowerScore Box & Whiskers</h1>
+
+
+
+<!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
     ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
 <h1 class="slBlueDark">Completed PowerScore Averages</h1>
 

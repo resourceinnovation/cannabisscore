@@ -9,10 +9,10 @@ Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-s
 community, and the industry, to prepare, track, and grow in ever more sustainable directions. 
 The Cannabis PowerScore database is built using 
 <a href="https://github.com/wikiworldorder/survloop" target="_blank">SurvLoop</a>, atop 
-<a href="https://laravel.com/" target="_blank">Laravel</a>. 
-<a href="http://ResourceInnovation.org" target="_blank">ResourceInnovation.org</a>
-<a href="http://CannabisPowerScore.org" target="_blank">CannabisPowerScore.org</a>
-<a href="http://PowerScore.ResourceInnovation.org" target="_blank">PowerScore.ResourceInnovation.org</a>
+<a href="https://laravel.com/" target="_blank">Laravel</a>. <br />
+<a href="http://ResourceInnovation.org" target="_blank">ResourceInnovation.org</a><br />
+<a href="http://CannabisPowerScore.org" target="_blank">CannabisPowerScore.org</a><br />
+<a href="http://PowerScore.ResourceInnovation.org" target="_blank">PowerScore.ResourceInnovation.org</a><br />
 SurvLoop is a Laravel-based engine for designing a database and creating a mobile-friendly user interface to fill it. 
 
 # Table of Contents
@@ -27,7 +27,7 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 # <a name="requirements"></a>Requirements
 
 * php: >=5.6.4
-* <a href="https://packagist.org/packages/laravel/framework" target="_blank">laravel/framework</a>: 5.3.*
+* <a href="https://packagist.org/packages/laravel/framework" target="_blank">laravel/framework</a>: 5.6.*
 * <a href="https://packagist.org/packages/wikiworldorder/survloop" target="_blank">wikiworldorder/survloop</a>: 0.*
 
 # <a name="getting-started"></a>Getting Started
@@ -54,7 +54,6 @@ $ nano composer.json
 ...
 "require": {
 	...
-    "wikiworldorder/survloop": "0.*",
     "resourceinnovation/cannabisscore": "0.*",
 	...
 },
@@ -63,7 +62,6 @@ $ nano composer.json
 	...
 	"psr-4": {
 		...
-		"SurvLoop\\": "vendor/wikiworldorder/survloop/src/",
 		"CannabisScore\\": "vendor/resourceinnovation/cannabisscore/src/",
 	}
 	...
@@ -93,6 +91,7 @@ $ nano config/app.php
 'aliases' => [
 	...
 	'SurvLoop'	 => 'WikiWorldOrder\SurvLoop\SurvLoopFacade',
+    'CannabisScore'  => 'ResourceInnovation\CannabisScore\CannabisScoreFacade',
 	...
 ],
 ...

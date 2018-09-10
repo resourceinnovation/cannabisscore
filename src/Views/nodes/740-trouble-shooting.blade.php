@@ -1,7 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/740-trouble-shooting.blade.php -->
 @if (isset($importResult)) {!! $importResult !!} @endif
-<div class="pull-right mT5 mB5"><a href="?refresh=1" class="btn btn-default btn-sm">Re-Calculate All PowerScores</a></div>
-<a href="#lgtNew" class="pull-right">New Lighting Sub-Score Calculations &darr;</a>
+<div class="float-right mT5 mB5"><a href="?refresh=1" class="btn btn-secondary btn-sm">Re-Calculate All PowerScores</a></div>
+<a href="#lgtNew" class="float-right">New Lighting Sub-Score Calculations &darr;</a>
 <h2>Troubleshooting</h2>
 
 @if (isset($hvcChk) && sizeof($hvcChk) > 0)
@@ -17,7 +17,7 @@
         <th>Current (Simple)<div class="slGrey fPerc66">kWh/sqft</div></th>
         <th>Weighted Stages <nobr>(Formula #2)</nobr><div class="slGrey fPerc66">kWh/sqft</div></th>
         <th colspan=2 >Sum of Stages <nobr>(Formula #1)</nobr>
-            <div class="slGrey fPerc66"><span class="pull-right">MWh</span> kWh</div></th>
+            <div class="slGrey fPerc66"><span class="float-right">MWh</span> kWh</div></th>
     </tr>
     <tr class="slBlueDark">
         <th>Calculation Average</th>

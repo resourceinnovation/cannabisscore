@@ -84,6 +84,7 @@ class RIIPowerScore extends Model
 		'PsVersionAB', 
 		'PsIsMobile', 
 		'PsSubmissionProgress', 
+		'PsNotes', 
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -40,7 +40,7 @@
                 <td><div>ft<sup>2</sup></div></td>
             </tr>
             <tr>
-                <td colspan=2 class="taR"><a href="javascript:;" class="pull-right btn btn-default areaCalcTot"
+                <td colspan=2 class="taR"><a href="javascript:;" class="float-right btn btn-secondary areaCalcTot"
                     >Add Up Square Feet & Apply Total &darr;</a></td>
                 <td></td>
             </tr>
@@ -49,7 +49,7 @@
     </div>
 </div>
 <div class="nFld" style="font-size: 20px;">
-    <input class="form-control input-lg ntrStp slTab" type="number" name="n398fld" id="n398FldID" 
+    <input class="form-control form-control-lg ntrStp slTab" type="number" name="n398fld" id="n398FldID" 
         onKeyUp=" checkNodeUp('398', -1, 0);  checkMin('398', 0); "  data-nid="398" min="0" 
         @if (isset($powerScore) && isset($powerScore->PsTotalSize)) value="{{ $powerScore->PsTotalSize }}" @endif 
         {!! $GLOBALS["SL"]->tabInd() !!}>

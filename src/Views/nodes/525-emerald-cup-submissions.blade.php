@@ -1,11 +1,11 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/525-emerald-cup-submissions.blade.php -->
 
-<a class="btn btn-default pull-right" href="?excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+<a class="btn btn-secondary float-right" href="?excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
     Export to Excel</a>
 <h1 class="slBlueDark">{{ $filtTitle }} PowerScores</h1>
-<a id="tblScrlBtn" class="btn btn-default btn-sm pull-right" href="javascript:;"
+<a id="tblScrlBtn" class="btn btn-secondary btn-sm float-right" href="javascript:;"
     >Show All <i class="fa fa-expand mL5"></i></a>
-<a class="btn btn-default btn-sm pull-right mR10" href="?getRandom=1"
+<a class="btn btn-secondary btn-sm float-right mR10" href="?getRandom=1"
     >Pick Random <i class="fa fa-search mL5"></i></a>
 <p class="slGrey">
 Click a PowerScore's row or ID# to load the full report lower down on this page. 

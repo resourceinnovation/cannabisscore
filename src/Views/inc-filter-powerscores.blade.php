@@ -131,7 +131,7 @@
         @endforeach
         </select>
 @if ($nID != 490) </div><div class="col-md-2"> @else </div></div> @endif
-        <a href="javascript:;" class="btn btn-lg btn-primary updateScoreFilts pull-right"
+        <a href="javascript:;" class="btn btn-lg btn-primary updateScoreFilts float-right"
             ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
         <div class="mT10"><a id="hidivBtnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>

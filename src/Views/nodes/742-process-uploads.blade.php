@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/742-process-uploads.blade.php -->
 <div id="fixedHeader" class="fixed">
-    <div id="animLoadingUploads" class="pull-right disBlo slBlueDark">
+    <div id="animLoadingUploads" class="float-right disBlo slBlueDark">
         <i>Loading...</i> <img src="/cannabisscore/uploads/greenometer-spinner.gif" border=0 height=40 ></div>
     <h2>Processing Uploads</h2>
 </div>
@@ -30,11 +30,11 @@
         <div class="nFld mT0 slBlueDark">
             <div class="bld">Total Annual kWh:</div>
             <nobr><input type="number" name="kwh{{ $ps->PsID }}" id="kwh{{ $ps->PsID }}ID" min="0" autocomplete="off"
-                class="form-control input-lg ntrStp slTab disIn" style="width: 130px;" 
+                class="form-control form-control-lg ntrStp slTab disIn" style="width: 130px;" 
                 {!! $GLOBALS["SL"]->tabInd() !!} @if (isset($ps->PsKWH)) value="{{ $ps->PsKWH }}" @endif >
             <span class="mL5">kWh</span></nobr>
         </div>
-        <div class="taR"><a class="btn btn-info btn-xs mT10 mB10 monthlyCalcTot" href="javascript:;" 
+        <div class="taR"><a class="btn btn-info btn-sm mT10 mB10 monthlyCalcTot" href="javascript:;" 
             data-psid="{{ $ps->PsID }}" >Add Up &larr;<br />
             <nobr>&nbsp;&nbsp;&nbsp;&uarr; & Apply Total&nbsp;&nbsp;&nbsp;</nobr></a></div>
         <a class="btn btn-primary btn-lg w100 mT20 monthlyCalcSave" href="javascript:;" data-psid="{{ $ps->PsID }}"

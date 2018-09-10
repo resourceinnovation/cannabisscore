@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/637-email-list.blade.php -->
 <div><br /></div>
-<a id="hidivBtnAllEma" class="hidivBtn pull-right" href="javascript:;">All Email Addresses</a>
+<a id="hidivBtnAllEma" class="hidivBtn float-right" href="javascript:;">All Email Addresses</a>
 <h1 class="slBlueDark disIn">Send Bulk Email</h1>
 <a href="/dashboard/emails" class="mL10">Manage Email Templates</a>
 
@@ -15,7 +15,7 @@
     
     <div class="p10"></div>
     
-    <select name="list" id="listID" class="form-control input-lg w100">
+    <select name="list" id="listID" class="form-control form-control-lg w100">
         <option value="all" @if (!isset($wchLst) || trim($wchLst) == '' || trim($wchLst) == 'all') SELECTED @endif 
             >Send to all email addresses of completed PowerScores</option>
         <option value="abv" @if (isset($wchLst) && trim($wchLst) == 'abv') SELECTED @endif 
@@ -32,7 +32,7 @@
     
     <div class="row">
         <div class="col-md-8">
-            <select name="ema" id="emaID" class="form-control input-lg w100">
+            <select name="ema" id="emaID" class="form-control form-control-lg w100">
                 <option value="0" @if (!isset($wchEma) || intVal($wchEma) == 0) SELECTED @endif 
                     >Select an email template to send</option>
                 {!! $GLOBALS["SL"]->loadEmailDropOpts($wchEma, 1) !!}

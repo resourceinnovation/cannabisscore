@@ -1,23 +1,28 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores.blade.php -->
 <div class="row bgWht">
-    <div class="col-md-9">
-        <h1 class="slBlueDark"> @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h1>
-    </div><div class="col-md-3 taR">
+    <div class="col-md-8">
+        <a href="/dash/compare-powerscores"><h1 class="slBlueDark"> 
+        @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h1></a>
+    </div><div class="col-md-4 taR">
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-        <a class="btn btn-default mT20 mR5" href="/dash/compare-powerscores?random=1" target="_blank">Get Random</a>
-        <a class="btn btn-default mT20" href="/dash/compare-powerscores?srt={{ $sort[0] }}&srta={{ $sort[1] }}{{ 
+        @if (!$GLOBALS["SL"]->REQ->has('review'))
+            <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?review=1">Under Review</a>
+        @else <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores">All Complete</a> @endif
+        <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?random=1" target="_blank">Get Random</a>
+        <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?srt={{ $sort[0] }}&srta={{ $sort[1] }}{{ 
             $urlFlts }}&excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
     @endif
     </div>
 </div>
 @if (isset($psFilters))
-    <div class="round20 row2 mB20 p15">{!! $psFilters !!}</div> 
+    @if (!$GLOBALS["SL"]->REQ->has('review')) <div class="round20 row2 mB20 p15">{!! $psFilters !!}</div>
+    @else <div></div> @endif
     <div class="mTn15"><b>{{ $allscores->count() }} Found</b></div>
 @elseif (isset($psFilter))
     <div class="mB5"><b class="mR20">{{ $allscores->count() }} Found</b> {!! $psFilter !!}</div>
 @endif
 
-<table border=0 class="table table-striped w100 bgWht">
+<table border=0 class="table w100 bgWht">
 <tr>
 <th>
     {!! view('vendor.survloop.inc-tbl-head-sort', [
@@ -135,7 +140,7 @@
 </tr>
 
 @forelse ($allscores as $i => $ps)
-    <tr>
+    <tr @if ($i%2 == 0) class="row2" @endif >
     <td><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">
         @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif</a>
     @if (!$isExcel && in_array($ps->PsID, $cultClassicIds))
@@ -149,34 +154,37 @@
         {{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
             $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}
         @if (isset($fltCmpl) && $fltCmpl == 0 && $isAdmin)
-            <br />{{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
+            <br /> @if ($ps->PsStatus == 243) <span class="slBlueDark">Complete</span>
+            @elseif ($ps->PsStatus == 364) <span class="slRedDark">Archived</span>
+            @else {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
+            @endif
         @endif
     </td>
     <td>{{ round($ps->PsEfficOverall) }}%
         @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
             && isset($allranks[$ps->PsID]->PsRnkOverallAvg)) <div class="slGrey fPerc66">{{ 
             $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkOverallAvg) }}%</div> @endif
-        </td>
+    </td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
         @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
             && isset($allranks[$ps->PsID]->PsRnkFacility)) <div class="slGrey fPerc66">{{ 
             $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkFacility) }}%</div> @endif
-        </td>
+    </td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
         @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
             && isset($allranks[$ps->PsID]->PsRnkProduction)) <div class="slGrey fPerc66">{{ 
             $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkProduction) }}%</div> @endif
-        </td>
+    </td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
         @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
             && isset($allranks[$ps->PsID]->PsRnkHVAC)) <div class="slGrey fPerc66">{{ 
             $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkHVAC) }}%</div> @endif
-        </td>
+    </td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
         @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
             && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
             $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
-        </td>
+    </td>
     @if (!$isExcel)
         <td class="fPerc66">
             @if ($ps->PsGrams > 0)     {{ number_format($ps->PsGrams) }} g<br /> @endif
@@ -194,6 +202,12 @@
             >{{ $ps->PsEmail }}</a></div></td>
     @endif
     </tr>
+    @if ($GLOBALS["SL"]->REQ->has('review'))
+        <tr class="brdTopNon @if ($i%2 == 0) row2 @endif " >
+            <td class="taR"><div class="mTn10 slGrey fPerc66">Review Notes:</div></td>
+            <td colspan=9 ><div class="mTn15"><i>{!! $ps->PsNotes !!}</i></div></td>
+        </tr>
+    @endif
 @empty
     <tr><td colspan=11 class="slGrey" ><i>No PowerScores found.</i></td></tr>
 @endforelse

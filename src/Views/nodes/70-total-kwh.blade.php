@@ -50,7 +50,7 @@
             </tr>
         @endfor
         <tr><td colspan="4" >
-            <a id="monthlyCalcTot" href="javascript:;" class="btn btn-default w100"
+            <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary w100"
                 >Add Up All kWh & Apply Total &darr;</a>
         </td></tr>
         </table>
@@ -60,7 +60,7 @@
 <div class="nFld mT0 slBlueDark fPerc133">
     <h3 class="disIn mR20">Total Annual Kilowatt Hours:</h3>
     <input type="number" name="n{{ $nID }}fld" id="n{{ $nID }}FldID" data-nid="{{ $nID }}" min="0" autocomplete="off"
-        class="form-control input-lg ntrStp slTab disIn mL20" style="width: 130px;" 
+        class="form-control form-control-lg ntrStp slTab disIn mL20" style="width: 130px;" 
         onKeyUp=" checkNodeUp('{{ $nID }}', -1, 0);" {!! $GLOBALS["SL"]->tabInd() !!}
         @if (isset($powerScore) && isset($powerScore->PsKWH)) value="{{ $powerScore->PsKWH }}" @endif >
     <span class="mL5">kWh</span> <span class="red mL10">*required</span>
