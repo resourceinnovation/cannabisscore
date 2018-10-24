@@ -15,14 +15,14 @@
 		<th class="areaTh"><nobr>Mother Plants</nobr></th>
 		<td colspan=2 id="n405r1Td" class="w100 opac100">
 		    <div class="row m0 p0">
-		        <div class="col-md-5">
+		        <div class="col-5">
                     <nobr><input type="number" name="n405r1fld" id="n405r1FldID" data-nid="405" 
                         @if (isset($psAreas["Mother"]->PsAreaLgtArtifPerc)) 
                             value="{{ $psAreas['Mother']->PsAreaLgtArtifPerc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
-		        <div class="col-md-7 slideCol">
+		        <div class="col-7 slideCol">
                     <div id="n405r1slider" class="ui-slider ui-slider-horizontal slSlider"></div>
                 </div>
             </div>
@@ -38,14 +38,14 @@
 		<th class="areaTh"><nobr>Clone Plants</nobr></th>
 		<td colspan=2 id="n405r2Td" class="w100 opac100">
 		    <div class="row m0 p0">
-		        <div class="col-md-5">
+		        <div class="col-5">
                     <nobr><input type="number" name="n405r2fld" id="n405r2FldID" data-nid="405" 
                         @if (isset($psAreas["Clone"]->PsAreaLgtArtifPerc)) 
                             value="{{ $psAreas['Clone']->PsAreaLgtArtifPerc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
-		        <div class="col-md-7 slideCol">
+		        <div class="col-7 slideCol">
                     <div id="n405r2slider" class="ui-slider ui-slider-horizontal slSlider"></div>
                 </div>
             </div>
@@ -61,14 +61,14 @@
 		<th class="areaTh"><nobr>Vegetating &nbsp;</nobr></th>
 		<td colspan=2 class="w100">
 		    <div class="row m0 p0">
-		        <div class="col-md-5">
+		        <div class="col-5">
                     <nobr><input type="number" name="n405r3fld" id="n405r3FldID" data-nid="405" 
                         @if (isset($psAreas["Veg"]->PsAreaLgtArtifPerc)) 
                             value="{{ $psAreas['Veg']->PsAreaLgtArtifPerc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
-		        <div class="col-md-7 slideCol">
+		        <div class="col-7 slideCol">
                     <div id="n405r3slider" class="ui-slider ui-slider-horizontal slSlider"></div>
                 </div>
             </div>
@@ -80,14 +80,14 @@
 		<th class="areaTh"><nobr>Flowering &nbsp;</nobr></th>
 		<td colspan=2 class="w100">
 		    <div class="row m0 p0">
-		        <div class="col-md-5">
+		        <div class="col-5">
                     <nobr><input type="number" name="n405r4fld" id="n405r4FldID" data-nid="405" 
                         @if (isset($psAreas["Flower"]->PsAreaLgtArtifPerc)) 
                             value="{{ $psAreas['Flower']->PsAreaLgtArtifPerc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
-		        <div class="col-md-7 slideCol">
+		        <div class="col-7 slideCol">
                     <div id="n405r4slider" class="ui-slider ui-slider-horizontal slSlider"></div>
                 </div>
             </div>

@@ -31,7 +31,7 @@
     <div class="p15"></div>
     
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-8">
             <select name="ema" id="emaID" class="form-control form-control-lg w100">
                 <option value="0" @if (!isset($wchEma) || intVal($wchEma) == 0) SELECTED @endif 
                     >Select an email template to send</option>
@@ -39,14 +39,14 @@
             </select>
             <div class="p10"></div>
             <div class="row">
-                <div class="col-md-2 pT5">
+                <div class="col-2 pT5">
                     Email From:
                 </div>
-                <div class="col-md-5">
+                <div class="col-5">
                     <input type="text" name="replyTo" id="replyToID" class="form-control w100"
                         value="{!! 'info@' . $GLOBALS['SL']->getParentDomain() !!}" >
                 </div>
-                <div class="col-md-5">
+                <div class="col-5">
                     <input type="text" name="replyName" id="replyNameID" class="form-control w100"
                         value="{!! $GLOBALS['SL']->sysOpts['site-name'] !!}" >
                 </div>
@@ -55,7 +55,7 @@
             <div id="testSendLoading" class="w100 disNon taC">{!! $GLOBALS["SL"]->sysOpts["spinner-code"] !!}</div>
             <div id="testSendResults" class="w100"></div>
         </div>
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="row2 p20 mL20 mR20 mTn10">
                 First, Send A Test Email To: <input type="text" name="testEmail" id="testEmailID" class="form-control" 
                     @if ($user && isset($user->email)) value="{{ $user->email }}" @endif >
@@ -67,7 +67,7 @@
     <div class="p10"></div>
     
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-8">
         @if (isset($scoreLists[$wchLst]) && sizeof($scoreLists[$wchLst]) > 0)
             <input type="checkbox" name="scoreAll" value="{{ sizeof($scoreLists[$wchLst]) }}" class="mR10" 
                 onClick="checkBoxAll('score', this.value, this.checked);" autocomplete="off"
@@ -85,7 +85,7 @@
             </table>
         @endif
         </div>
-        <div class="col-md-4 pT20">
+        <div class="col-4 pT20">
             <a id="hidivBtnSendChk" class="btn btn-primary btn-xl w100 hidivBtn" href="javascript:;">Send Bulk Email</a>
             <div id="hidivSendChk" class="disNon pT20 red">
                 <i class="red fPerc133">Please confirm you want to bulk send...</i><br />

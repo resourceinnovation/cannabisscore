@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations.blade.php -->
 <div id="efficBlockOver" class="row">
-    <div class="col-md-6 efficHeads">
+    <div class="col-6 efficHeads">
         <h1 class="m0 scoreBig">PowerScore Report #{{ $psid }}</h1>
         <div class="slGrey">
         @if (isset($sessData["PowerScore"][0]->PsCharacterize)) 
@@ -21,19 +21,19 @@
         @endif
         </div>
     </div>
-    <div class="col-md-6 p0" id="psScoreOverall"></div>
+    <div class="col-6 p0" id="psScoreOverall"></div>
 </div>
 
 @if (isset($sessData["PowerScore"][0]->PsEfficFacility) && $sessData["PowerScore"][0]->PsEfficFacility > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-md-4 efficHeads"><h3 class="m0 scoreBig">Facility Efficiency:</h3></div>
-            <div class="col-md-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-4 efficHeads"><h3 class="m0 scoreBig">Facility Efficiency:</h3></div>
+            <div class="col-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficFacility)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficFacility, 3) }}
                 @else 0 @endif &nbsp;&nbsp;kWh / sq ft
             </h3></div>
-            <div class="col-md-5 p0" id="psScoreFacility"></div>
+            <div class="col-5 p0" id="psScoreFacility"></div>
         </div>
     </div>
 @endif
@@ -41,13 +41,13 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficProduction) && $sessData["PowerScore"][0]->PsEfficProduction > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-md-4 efficHeads"><h3 class="m0 scoreBig">Production Efficiency:</h3></div>
-            <div class="col-md-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-4 efficHeads"><h3 class="m0 scoreBig">Production Efficiency:</h3></div>
+            <div class="col-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficProduction)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficProduction, 3) }}
                 @else 0 @endif &nbsp;&nbsp;grams / kWh
             </h3></div>
-            <div class="col-md-5 p0" id="psScoreProduction"></div>
+            <div class="col-5 p0" id="psScoreProduction"></div>
         </div>
     </div>
 @endif
@@ -55,13 +55,13 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficHvac) && $sessData["PowerScore"][0]->PsEfficHvac > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-md-4 efficHeads"><h3 class="m0 scoreBig">HVAC Efficiency:</h3></div>
-            <div class="col-md-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-4 efficHeads"><h3 class="m0 scoreBig">HVAC Efficiency:</h3></div>
+            <div class="col-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficHvac)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficHvac, 3) }}
                 @else 0 @endif &nbsp;&nbsp;kWh / sq ft
             </h3></div>
-            <div class="col-md-5 p0" id="psScoreHvac"></div>
+            <div class="col-5 p0" id="psScoreHvac"></div>
         </div>
     </div>
 @endif
@@ -69,46 +69,57 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-md-4 efficHeads"><h3 class="m0 scoreBig">Lighting Efficiency:</h3></div>
-            <div class="col-md-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-4 efficHeads"><h3 class="m0 scoreBig">Lighting Efficiency:</h3></div>
+            <div class="col-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficLighting))
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }} 
-                @else 0 @endif &nbsp;&nbsp;kWh / sq ft
+                @else 0 @endif &nbsp;&nbsp;W / sq ft
             </h3></div>
-            <div class="col-md-5 p0" id="psScoreLighting"></div>
+            <div class="col-5 p0" id="psScoreLighting"></div>
         </div>
     </div>
 @endif
 
-<div class="row">
-    <div class="col-md-8">
+@if (!$GLOBALS["SL"]->REQ->has('print'))
+    <div class="row">
+        <div class="col-8">
+@endif
     
         @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
             <div class="row p0 mB20">
-                <div class="col-md-6"><div class="pL10 slGrey fPerc80">
+                <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-4 @else col-6 @endif ">
+                <div class="pL10 slGrey fPerc80">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
-                            @if ($i == 0) = @if ($efficAvgCnt > 1) ( @endif
-                                {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
+                            @if ($i == 0) = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
                             @else + {!! $calcRow["eng"] !!} @if ($i < sizeof($printEfficLgt)-1) <br /> @endif @endif
                         @endforeach
-                    @endif @if ($efficAvgCnt > 1) ) / {{ $efficAvgCnt }} @endif </div>
+                    @endif </div>
                 </div></div>
-                <div class="col-md-6"><div class="pL10 slGrey fPerc80">
+                <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-3 @else col-6 @endif ">
+                <div class="pL10 slGrey fPerc80">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
-                            @if ($i == 0) = @if ($efficAvgCnt > 1) ( @endif
-                                {!! $calcRow["num"] !!} <div class="pL10 slGrey">
+                            @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
                             @else + {!! $calcRow["num"] !!} @if ($i < sizeof($printEfficLgt)-1) <br /> @endif @endif
                         @endforeach
-                    @endif @if ($efficAvgCnt > 1) ) / {{ $efficAvgCnt }} @endif </div>
+                    @endif </div>
                 </div></div>
+                @if ($GLOBALS["SL"]->REQ->has('print'))
+                    <div class="col-5"><div class="slGrey fPerc80">
+                    @if (sizeof($printEfficLgt) > 0)
+                        @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
+                    @endif
+                    </div></div>
+                @endif
             </div>
-            <div class="pL10 slGrey fPerc80">
-            @if (sizeof($printEfficLgt) > 0)
-                @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
+            @if (!$GLOBALS["SL"]->REQ->has('print'))
+                <div class="pL10 slGrey fPerc80">
+                @if (sizeof($printEfficLgt) > 0)
+                    @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
+                @endif
+                </div>
             @endif
-            </div>
         @endif
         <div class="p10 m5"></div>
     
@@ -116,24 +127,27 @@
             <p><i>Not enough data provided to calculate {{ $noprints }} efficiency.</i></p>
         @endif
         <div id="cmtLnkSpacer"></div>
+        @if (!$GLOBALS["SL"]->REQ->has('print'))
+            <p>Come back to check your PowerScore again soon, 
+            because your rank will change as more farms see how they stack up!</p>
+        @endif
         <p>
-        Come back to check your PowerScore again soon, 
-        because your rank will change as more farms see how they stack up!
-        </p><p>
         <sup>*</sup> Overall rankings are determined by an equally weighted average among the categories applied: 
         Facility Efficiency, Production Efficiency, Lighting, HVAC. 
-        Please explore the <a href="/public-comments-stakeholder-feedback">Public Commenting</a> 
-        page to share more insight and stakeholder feedback.
+        You can read more <a href="/about-powerscore-calculations">About these PowerScore Calculations</a>,
+        and please <a href="https://resourceinnovation.org/contact/" target="_blank">Contact Us</a> with any feedback.
         </p>
         <div class="p10"></div>
-    </div>
-    <div class="col-md-4">
-        <div id="farmFilts" class="round20 brdDshGry p20 mT20">
-            <h3 class="mT0 mB5"><span class="wht">Compare to other farms...</span></h3>
-            {!! $psFilters !!}
+@if (!$GLOBALS["SL"]->REQ->has('print'))
+        </div>
+        <div class="col-4">
+            <div id="farmFilts" class="round20 brdDshGry p20 mT20">
+                <h3 class="mT0 mB5"><span class="wht">Compare to other farms...</span></h3>
+                {!! $psFilters !!}
+            </div>
         </div>
     </div>
-</div>
+@endif
 
 <div class="p10"></div>
 
@@ -217,4 +231,8 @@
     
     $(document).on("click", ".updateScoreFilts", function() { reloadGuages(); });
     
-}); </script>
+});
+
+@if ($GLOBALS["SL"]->REQ->has('print')) setTimeout("window.print()", 3000); @endif
+
+</script>

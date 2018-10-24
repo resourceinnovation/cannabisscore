@@ -2,16 +2,16 @@
 <div class="p10 m5"></div>
 <h1>PowerScore Report #{{ $sessData["PowerScore"][0]->getKey() }}</h1>
 <div class="row mT20 mB10">
-    <div class="col-md-4"><h2 class="m0 scoreBig">Facility Efficiency:</h2></div>
-    <div class="col-md-4"><h2 class="m0 scoreBig">
+    <div class="col-4"><h2 class="m0 scoreBig">Facility Efficiency:</h2></div>
+    <div class="col-4"><h2 class="m0 scoreBig">
         @if (isset($sessData["PowerScore"][0]->PsEfficFacility)) 
             {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficFacility, 3) }}
         @else 0 @endif &nbsp;&nbsp;kWh / Square foot
     </h2></div>
-    <div class="col-md-4">
+    <div class="col-4">
         @if (isset($sessData["PowerScore"][0]->PsEfficFacility))
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-4">
                     <img class="mTn10" border=0 style="height: 55px;"
                         @if (($efficPercs["Facility"]["ash"][0]+$efficPercs["Facility"]["ash"][1]) > 5)
                             src="/cannabisscore/uploads/greenometer-anim-{{ (5*ceil($efficPercs["Facility"]["ash"][3]/20)) }}.gif"
@@ -36,7 +36,7 @@
                     </script>
 */ ?>
                 </div>
-                <div class="col-md-8 pT10">
+                <div class="col-8 pT10">
                     @if (($efficPercs["Facility"]["ash"][0]+$efficPercs["Facility"]["ash"][1]) > 5)
                         Better than {!! $efficPercs["Facility"]["ash"][3] !!}% 
                         in climate zone {{ $sessData["PowerScore"][0]->PsAshrae }}
@@ -50,16 +50,16 @@
 </div>
 <hr>
 <div class="row mT20 mB10">
-    <div class="col-md-4"><h2 class="m0 scoreBig">Production Efficiency:</h2></div>
-    <div class="col-md-4"><h2 class="m0 scoreBig">
+    <div class="col-4"><h2 class="m0 scoreBig">Production Efficiency:</h2></div>
+    <div class="col-4"><h2 class="m0 scoreBig">
         @if (isset($sessData["PowerScore"][0]->PsEfficProduction)) 
             {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficProduction, 3) }}
         @else 0 @endif &nbsp;&nbsp;Grams / kWh
     </h2></div>
-    <div class="col-md-4">
+    <div class="col-4">
         @if (isset($sessData["PowerScore"][0]->PsEfficFacility))
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-4">
                     <img class="mTn10" border=0 style="height: 55px;"
                     @if (($efficPercs["Production"]["ash"][0]+$efficPercs["Production"]["ash"][1]) > 5)
                         src="/cannabisscore/uploads/greenometer-anim-{{ (5*ceil($efficPercs["Production"]["ash"][3]/20)) }}.gif"
@@ -84,7 +84,7 @@
                     </script>
 */ ?>
                 </div>
-                <div class="col-md-8 pT10">
+                <div class="col-8 pT10">
                     @if (($efficPercs["Production"]["ash"][0]+$efficPercs["Production"]["ash"][1]) > 5)
                         Better than {!! $efficPercs["Production"]["ash"][3] !!}% 
                         in climate zone {{ $sessData["PowerScore"][0]->PsAshrae }}
@@ -105,16 +105,16 @@
     <div id="hidivLgtInfo" class="disNon">
 @endif
 <div class="row mT20 mB10">
-    <div class="col-md-4"><h2 class="m0 scoreBig">Lighting Efficiency:</h2></div>
-    <div class="col-md-4"><h2 class="m0 scoreBig">
+    <div class="col-4"><h2 class="m0 scoreBig">Lighting Efficiency:</h2></div>
+    <div class="col-4"><h2 class="m0 scoreBig">
         @if (isset($sessData["PowerScore"][0]->PsEfficLighting))
             {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }} 
-        @else 0 @endif &nbsp;&nbsp;kWh / Square foot
+        @else 0 @endif &nbsp;&nbsp;W / sq ft
     </h2></div>
-    <div class="col-md-4">
+    <div class="col-4">
         @if (isset($sessData["PowerScore"][0]->PsEfficFacility))
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-4">
                     <img class="mTn10" border=0 style="height: 55px;"
                         @if (($efficPercs["Lighting"]["ash"][0]+$efficPercs["Lighting"]["ash"][1]) > 5)
                             src="/cannabisscore/uploads/greenometer-anim-{{ (5*ceil($efficPercs["Lighting"]["ash"][3]/20)) }}.gif"
@@ -139,7 +139,7 @@
                     </script>
 */ ?>
                 </div>
-                <div class="col-md-8 pT10">
+                <div class="col-8 pT10">
                     @if (($efficPercs["Lighting"]["ash"][0]+$efficPercs["Lighting"]["ash"][1]) > 5)
                         Better than {!! $efficPercs["Lighting"]["ash"][3] !!}% 
                         in climate zone {{ $sessData["PowerScore"][0]->PsAshrae }}
@@ -152,7 +152,7 @@
     </div>
 </div>
 <div class="row mT10 mB10 slGrey">
-    <div class="col-md-4"><div class="pL10">
+    <div class="col-4"><div class="pL10">
     = 
     @if (isset($sessData["PowerScore"][0]->PsEfficLightingMother) 
         && $sessData["PowerScore"][0]->PsEfficLightingMother > 0)
@@ -168,7 +168,7 @@
     ( (Veg Watts x 18) / Veg Square foot )<br /> + 
     ( (Flower Watts x 12) / Flower Square foot )
     </div></div></div>
-    <div class="col-md-4"><div class="pL10">
+    <div class="col-4"><div class="pL10">
         = 
         @if (isset($sessData["PowerScore"][0]->PsEfficLightingMother) 
             && $sessData["PowerScore"][0]->PsEfficLightingMother > 0)
@@ -199,11 +199,11 @@
 @endif
 
 <div class="row mT20">
-    <div class="col-md-8">
+    <div class="col-8">
         <p><a href="/public-comments-stakeholder-feedback"><i>
         Please explore Public Commenting to share more insight and stakeholder feedback.</i></a></p>
     </div>
-    <div class="col-md-4">
+    <div class="col-4">
         <div class="slGrey">
         <p><i>Ranking (Above Average, Average, Below Average) within 
         <span class="scoreBig"><a href="https://www.ashrae.org/" target="_blank">ASHRAE</a> 

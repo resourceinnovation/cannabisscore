@@ -2,12 +2,17 @@
 <div class="row">
 @if (!isset($eff) || trim($eff) == '')
 @elseif (trim($eff) == 'Overall')
-    @if ($hasOverall)
-        <div class="col-md-6 efficGuageWrapBig disNon" id="guageOverall"></div>
+    @if (!$GLOBALS["SL"]->REQ->has('print'))
+        @if ($hasOverall)
+            <div class="col-6 efficGuageWrapBig disNon" id="guageOverall"></div>
+        @else
+            <div class="col-6"><div class="disNon"><div class="disNon" id="guageOverall"></div></div></div>
+        @endif
+        <div class="col-6 taR disNon" id="guageOverallTxt">
     @else
-        <div class="col-md-6"><div class="disNon"><div class="disNon" id="guageOverall"></div></div></div>
+        <div class="col-12 taR" id="guageOverallTxt">
     @endif
-    <div class="col-md-6 taR disNon" id="guageOverallTxt"><div class="efficGuageTxtOver">
+    <div class="efficGuageTxtOver">
         @if ($hasOverall)
             <div class="m0 scoreBig fPerc133">
                 Overall: 
@@ -44,12 +49,14 @@
         </div>
     </div></div>
 @else
-    <div class="col-md-5 efficGuageWrap disNon" id="guage{{ $eff }}"></div>
-    <div class="col-md-7 efficGuageWrapTxt disNon" id="guage{{ $eff }}Txt"><div class="efficGuageTxt">
+    @if (!$GLOBALS["SL"]->REQ->has('print'))
+        <div class="col-5 efficGuageWrap disNon" id="guage{{ $eff }}"></div>
+        <div class="col-7 efficGuageWrapTxt disNon" id="guage{{ $eff }}Txt">
+    @else
+        <div class="col-12 taR efficGuageWrapTxt" id="guage{{ $eff }}Txt">
+    @endif
+    <div class="efficGuageTxt">
         <h4 class="disIn">{!! $currGuage . $GLOBALS["SL"]->numSupscript($currGuage) !!} percentile</h4>
-        @if (isset($currGuageTot) && intVal($currGuageTot) > 0)
-            <div class="slGrey">out of {{ $currGuageTot }}</div>
-        @endif
     </div></div>
 @endif
 </div>

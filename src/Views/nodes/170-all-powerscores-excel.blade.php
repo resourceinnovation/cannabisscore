@@ -1,11 +1,13 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores-excel.blade.php -->
 <tr>
 <th>Score ID#</th>
+@if (isset($fltCmpl) && $fltCmpl != 243) <th>Status</th> @endif
+<th>Score ID#</th>
 @if ($showFarmNames) <th>Farm Name</th> @endif
 <th>Overall</th>
 <th>Facility Score (kWh/SqFt)</th>
 <th>Production Score (g/kWh)</th>
-<th>Lighting Score (kWh/SqFt)</th>
+<th>Lighting Score (W/SqFt)</th>
 <th>HVAC Score (kWh/SqFt)</th>
 <th>Grams</th>
 <th>kWh</th>
@@ -36,6 +38,7 @@
 </tr>
 <tr>
     <th>Averages</th>
+    @if (isset($fltCmpl) && $fltCmpl != 243) <th> </th> @endif
     @if ($showFarmNames) <th> </th> @endif
     <th>{{ round($psAvg->PsEfficOverall) }}%</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficFacility, 3) }}</th>
@@ -59,6 +62,9 @@
 @forelse ($allscores as $i => $ps)
     <tr>
     <td>#{{ $ps->PsID }}</td>
+    @if (isset($fltCmpl) && $fltCmpl != 243)
+        <td>{{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}</td>
+    @endif
     @if ($showFarmNames) <td> @if (isset($ps->PsName)) {{ $ps->PsName }} @endif </td> @endif
     <td>{{ round($ps->PsEfficOverall) }}%</td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}</td>
@@ -95,9 +101,9 @@
                         <td> @if (isset($area->PsAreaHvacOther) && trim($area->PsAreaHvacOther) != '') 
                             {{ $area->PsAreaHvacOther }} @endif </td>
                         <td> @if (isset($area->PsAreaDaysCycle)) {{ $area->PsAreaDaysCycle }} @endif </td>
+                        <td> @if (isset($area->PsAreaSize)) {{ number_format($area->PsAreaSize) }} @endif </td>
                         <td> @if (isset($area->PsAreaTotalLightWatts)) 
                             {{ number_format($area->PsAreaTotalLightWatts) }} @endif </td>
-                        <td> @if (isset($area->PsAreaSize)) {{ number_format($area->PsAreaSize) }} @endif </td>
                         <td>
                         @if ($allmores[$ps->PsID]["lights"]->isNotEmpty())
                             <?php $foundLgt = false; ?>

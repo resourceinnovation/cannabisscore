@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores.blade.php -->
 <div class="row" >
-@if ($nID != 490) <div class="col-md-2"> @else <div class="col-md-6"> @endif
+@if ($nID != 490) <div class="col-2"> @else <div class="col-6"> @endif
         <select name="fltFarm" id="filtFarmID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="0"   @if (!isset($fltFarm) || $fltFarm == 0)  SELECTED @endif >All Farm Types</option>
@@ -9,17 +9,17 @@
             <option value="145" @if (isset($fltFarm) && $fltFarm == 145) SELECTED @endif 
                 >Greenhouse/Hybrid/Mixed Light</option>
         </select>
-@if ($nID != 490) </div><div class="col-md-2"> @endif
+@if ($nID != 490) </div><div class="col-2"> @endif
         <select name="fltClimate" id="filtClimateID" class="form-control ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->climateZoneDrop($fltClimate) !!}
         </select>
-@if ($nID != 490) </div><div class="col-md-2"> @endif
+@if ($nID != 490) </div><div class="col-2"> @endif
         <select name="fltState" id="fltStateID" class="form-control ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->stateDrop($fltState, true) !!}
         </select>
-</div><div class=" @if ($nID != 490) col-md-2 @else col-md-6 @endif ">
+</div><div class=" @if ($nID != 490) col-2 @else col-6 @endif ">
         <select name="fltLght" id="fltLghtID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltLght') 
@@ -71,7 +71,7 @@
                 >{{ $type }} - LED</option>
         @endforeach
         </select>
-@if ($nID != 490) </div><div class="col-md-2"> @endif
+@if ($nID != 490) </div><div class="col-2"> @endif
         <select name="fltHvac" id="fltHvacID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltHvac') 
@@ -130,7 +130,7 @@
                 >{{ $type }} - None</option>
         @endforeach
         </select>
-@if ($nID != 490) </div><div class="col-md-2"> @else </div></div> @endif
+@if ($nID != 490) </div><div class="col-2"> @else </div></div> @endif
         <a href="javascript:;" class="btn btn-lg btn-primary updateScoreFilts float-right"
             ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
         <div class="mT10"><a id="hidivBtnFiltsAdv" class="hidivBtn" href="javascript:;"
@@ -139,14 +139,15 @@
     <?php /* @if (isset($psid) && $psid > 0)
         <label><input type="checkbox" name="psid" id="psidID" value=""></label>
     @endif */ ?>
-<div id="hidivFiltsAdv" class="row
+<div id="hidivFiltsAdv" class="
     @if ((isset($fltPerp) && intVal($fltPerp) == 1) || (isset($fltPump) && intVal($fltPump) == 1) 
         || (isset($fltWtrh) && intVal($fltWtrh) == 1) || (isset($fltManu) && intVal($fltManu) == 1) 
         || (isset($fltAuto) && intVal($fltAuto) == 1) || (isset($fltVert) && intVal($fltVert) == 1)
         || (isset($fltRenew) && sizeof($fltRenew) > 0) || (isset($fltCmpl) && $fltCmpl != 243)
         || (isset($fltCup) && intVal($fltCup) > 0)) disBlo
     @else disNon @endif ">
-@if ($nID != 490) <div class="col-md-2 pT10"> 
+    <div class="row">
+@if ($nID != 490) <div class="col-2 pT10"> 
         <select name="fltCmpl" id="fltCmplID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="242" @if (isset($fltCmpl) && $fltCmpl == 242) SELECTED @endif >Incomplete Scores</option>
@@ -164,8 +165,8 @@
                 >Emerald Cup Regenerative Award</option>
         </select>
         
-    </div><div class="col-md-4 pT10">
-@else <div class="col-md-12 pT20"> @endif
+    </div><div class="col-4 pT10">
+@else <div class="col-12 pT20"> @endif
         <label><input type="checkbox" name="fltPerp" id="fltPerpID" value="1" autocomplete="off"
             @if (isset($fltPerp) && intVal($fltPerp) == 1) CHECKED @endif 
             > <span class="mL5">Perpetual Harvesting</span></label><br />
@@ -184,7 +185,7 @@
         <label><input type="checkbox" name="fltVert" id="fltVertID" value="1" autocomplete="off"
             @if (isset($fltVert) && intVal($fltVert) == 1) CHECKED @endif 
             > <span class="mL5">Vertical Stacking</span></label><br />
-@if ($nID != 490) </div><div class="col-md-2 pT10"> 
+@if ($nID != 490) </div><div class="col-2 pT10"> 
 @else <br /><u class="slGrey fPerc133">Energy Sources</u><br /> @endif
         <label><input type="checkbox" name="fltRenew[]" id="fltRenew1" value="149" autocomplete="off"
             @if (isset($fltRenew) && in_array(149, $fltRenew)) CHECKED @endif 
@@ -201,7 +202,7 @@
         <label><input type="checkbox" name="fltRenew[]" id="fltRenew5" value="158" autocomplete="off"
             @if (isset($fltRenew) && in_array(158, $fltRenew)) CHECKED @endif 
             > <span class="mL5">Pelton Wheel</span></label><br />
-@if ($nID != 490) </div><div class="col-md-2 pT10"> @endif
+@if ($nID != 490) </div><div class="col-2 pT10"> @endif
         <label><input type="checkbox" name="fltRenew[]" id="fltRenew6" value="153" autocomplete="off"
             @if (isset($fltRenew) && in_array(153, $fltRenew)) CHECKED @endif 
             > <span class="mL5">Generator</span></label><br />
@@ -217,6 +218,7 @@
         <label><input type="checkbox" name="fltRenew[]" id="fltRenew10" value="157" autocomplete="off"
             @if (isset($fltRenew) && in_array(157, $fltRenew)) CHECKED @endif 
             > <span class="mL5">Other Energy Source</span></label><br />
+    </div>
     </div>
 </div>
 

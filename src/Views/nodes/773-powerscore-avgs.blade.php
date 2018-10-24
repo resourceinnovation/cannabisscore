@@ -7,11 +7,6 @@
 <a href="#sqftFixture" class="mL5 mR5">Sqft/Fixture</a> - 
 <a href="#hvac" class="mL5 mR5">HVAC Adoption</a>
 
-
-<h1 class="slBlueDark">Completed PowerScore Box & Whiskers</h1>
-
-
-
 <!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
     ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
 <h1 class="slBlueDark">Completed PowerScore Averages</h1>
@@ -110,6 +105,11 @@
 {!! $statLgts->tblFltDatRowPerc('area', 'farm', 'kWh') !!}
 {!! $statLgts->tblSpacerRow('area') !!}
 {!! $statLgts->tblFltDatColPerc('area', 'farm', 'kWh') !!}
+{!! $statLgts->tblSpacerRow('area') !!}
+{!! $statLgts->tblHeaderRow('area') !!}
+{!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'W', 'sqft') !!}
+{!! $statLgts->tblSpacerRow('area') !!}
+{!! $statLarf->tblFltRowsCalcDiv('area', 'farm', 'W', 'sqft') !!}
 </table>
 
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
@@ -151,3 +151,34 @@
 {!! $statHvac->pieTblPercHas('area', 'hvac') !!}
 
 {!! $statHvac->pieTblBlksPercHas('area', 'hvac', 'farm', 'Lighting Adoption: ') !!}
+
+
+
+<div class="nodeAnchor"><a name="sources"></a></div>
+<div class="p20"></div>
+<h2 class="slBlueDark">On-Site Energy Sources</h2>
+<div class="row">
+    <div class="col-6">Indoor ({{ $enrgys["cmpl"][144][0] }}) {!! $enrgys["pie"][144] !!}</div>
+    <div class="col-6">Greenhouse/Mixed ({{ $enrgys["cmpl"][145][0] }}) {!! $enrgys["pie"][145] !!}</div>
+</div>
+<div class="row">
+    <div class="col-6">Outdoor ({{ $enrgys["cmpl"][143][0] }}) {!! $enrgys["pie"][143] !!}</div>
+    <div class="col-6">Outdoor Adjusted ({{ sizeof($enrgys["extra"][1]) }}) {!! $enrgys["pie"][143143] !!}</div>
+</div>
+<table border=0 class="table table-striped w100">
+    <tr>
+    <th>&nbsp;</th>
+    <th>Indoor</th>
+    <th>Greenhouse/Mixed</th>
+    <th>Outdoor</th>
+    <th>Outdoor Adjusted</th>
+    </tr>
+@foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $j => $renew)
+    <tr>
+    <th>{{ $renew->DefValue }}</th>
+    @foreach ([144, 145, 143] as $type) <td>{{ $enrgys["cmpl"][$type][$renew->DefID] }}</td> @endforeach
+    <td>{{ $enrgys["extra"][143][$renew->DefID] }}</td>
+    </tr>
+@endforeach
+</table>
+<div class="slGrey"><i>Outdoor Adjusted PowerScores: #{!! implode(', #', $enrgys["extra"][1]) !!}</i></div>

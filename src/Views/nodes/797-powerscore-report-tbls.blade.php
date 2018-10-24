@@ -248,7 +248,7 @@ square feet is used.
 <div class="p15">
 <h3>Table 7: Business Overview: Administrative Totals</h3>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-6">
         <table class="table w100">
         <tr>
             <th> </th>
@@ -267,7 +267,7 @@ square feet is used.
         </tr>
         </table>
     </div>
-    <div class="col-md-6">
+    <div class="col-6">
         <table class="table w100">
         <tr>
             <th>&nbsp;</th>

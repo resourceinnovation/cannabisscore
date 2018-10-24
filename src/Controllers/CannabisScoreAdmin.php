@@ -30,16 +30,23 @@ class CannabisScoreAdmin extends AdminSubsController
         $treeMenu = [];
         if ($this->v["user"]->hasRole('administrator|staff|databaser|brancher')) {
             $treeMenu[] = $this->admMenuLnk('javascript:;', 'PowerScores', '<i class="fa fa-star"></i>', 1, [
-                $this->admMenuLnk('/dash/compare-powerscores',  'Compare All Scores'),
-                $this->admMenuLnk('/dash/compare-powerscore-averages', 'Score Averages'),
-                $this->admMenuLnk('/dash/powerscore-final-report', 'Written Report'),
-                $this->admMenuLnk('/dash/cultivation-classic-final-report', 'Cultivation Classic'),
-                //$this->admMenuLnk('/dash/manage-published-scores', 'Un-Publish Scores', '', 1, []),
+                $this->admMenuLnk('javascript:;',  'Raw Score Data', '', 1, [
+                    $this->admMenuLnk('/dash/compare-powerscores',              'Compare All Scores'),
+                    $this->admMenuLnk('/dash/compare-powerscores?review=1',     'Scores Under Review'),
+                    $this->admMenuLnk('/dash/compare-powerscores?lighting=1',   'Raw Lighting Data'),
+                    $this->admMenuLnk('/dash/cultivation-classic-final-report', 'Cultivation Classic'),
+                    $this->admMenuLnk('/dash/nwpcc-import',                     'NWPCC Import')
+                    ]),
+                $this->admMenuLnk('javascript:;', 'Score Analysis', '', 1, [
+                    $this->admMenuLnk('/dash/compare-powerscore-averages', 'Score Averages'),
+                    $this->admMenuLnk('/dash/powerscore-final-report', 'Written Report')
+                    ]),
                 $this->admMenuLnk('/dash/process-uploads', 'Process Uploads', '', 1, []),
-                $this->admMenuLnk('/dash/nwpcc-import', 'NWPCC Import', '', 1, []),
-                $this->admMenuLnk('/dash/powerscore-software-troubleshooting', 'Troubleshooting', '', 1, []),
-                $this->admMenuLnk('/dash/powerscore-beta-feedback-surveys', 'Feedback Survey', '', 1, []),
-                $this->admMenuLnk('/dash/export-emails', 'Emails Export', '', 1, [])
+                $this->admMenuLnk('javascript:;', 'More Tools', '', 1, [
+                    $this->admMenuLnk('/dash/powerscore-software-troubleshooting', 'Troubleshooting'),
+                    $this->admMenuLnk('/dash/powerscore-beta-feedback-surveys', 'Feedback Survey'),
+                    $this->admMenuLnk('/dash/export-emails', 'Emails Export')
+                    ])
                 ]);
             return $this->addAdmMenuBasics($treeMenu);
         } elseif ($this->v["user"]->hasRole('partner')) {

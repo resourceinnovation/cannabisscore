@@ -20,6 +20,8 @@ class RIIPSAreas extends Model
 		'PsAreaRoomNew', 
 		'PsAreaLgtArtif', 
 		'PsAreaTotalLightWatts', 
+		'PsAreaCalcWatts',
+		'PsAreaCalcSize',
 		'PsAreaLightingEffic', 
 		'PsAreaHasStage', 
 		'PsAreaLgtSun', 

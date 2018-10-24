@@ -56,7 +56,7 @@
                     }} grams / kWh<br /> @endif
             @if (isset($s->PsEfficLighting) && $s->PsEfficLighting > 0)
                 <span class="slGrey">L:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficLighting, 3) 
-                    }} kWh / sq ft<br /> @endif
+                    }} W / sq ft<br /> @endif
             @if (isset($s->PsEfficHvac) && $s->PsEfficHvac > 0) 
                 <span class="slGrey">H:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficHvac, 3) 
                     }} kWh / sq ft<br /> @endif

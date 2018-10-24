@@ -1,9 +1,12 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/740-trouble-shooting.blade.php -->
 @if (isset($importResult)) {!! $importResult !!} @endif
-<div class="float-right mT5 mB5"><a href="?refresh=1" class="btn btn-secondary btn-sm">Re-Calculate All PowerScores</a></div>
-<a href="#lgtNew" class="float-right">New Lighting Sub-Score Calculations &darr;</a>
+<div class="float-right mT5 mB5">
+    <a href="?recalc=1" class="btn btn-secondary btn-sm">Recalc Sub-Scores</a>
+    <a href="?refresh=1" class="btn btn-secondary btn-sm">Recalc Rankings</a>
+</div>
 <h2>Troubleshooting</h2>
 
+<a href="#lgtNew" class="float-right">New Lighting Sub-Score Calculations &darr;</a>
 @if (isset($hvcChk) && sizeof($hvcChk) > 0)
     <h3 class="slBlueDark">HVAC Efficiency Score</h3>
     <p class="slGrey"><b>New Formula #2:</b> multiplying each growth stage's HVAC kWh/score estimate

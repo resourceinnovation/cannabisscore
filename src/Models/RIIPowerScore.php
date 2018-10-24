@@ -37,6 +37,7 @@ class RIIPowerScore extends Model
 		'PsGrams', 
 		'PsKWH', 
 		'PsTotalSize', 
+		'PsTotalCanopySize',
 		'PsHavestsPerYear', 
 		'PsHarvestBatch', 
 		'PsHasWaterPump', 

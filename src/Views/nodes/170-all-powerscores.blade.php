@@ -1,9 +1,9 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores.blade.php -->
 <div class="row bgWht">
-    <div class="col-md-8">
+    <div class="col-8">
         <a href="/dash/compare-powerscores"><h1 class="slBlueDark"> 
         @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h1></a>
-    </div><div class="col-md-4 taR">
+    </div><div class="col-4 taR"><div class="mTn10 pB10">
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
         @if (!$GLOBALS["SL"]->REQ->has('review'))
             <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?review=1">Under Review</a>
@@ -12,7 +12,7 @@
         <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?srt={{ $sort[0] }}&srta={{ $sort[1] }}{{ 
             $urlFlts }}&excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
     @endif
-    </div>
+    </div></div>
 </div>
 @if (isset($psFilters))
     @if (!$GLOBALS["SL"]->REQ->has('review')) <div class="round20 row2 mB20 p15">{!! $psFilters !!}</div>
@@ -68,7 +68,7 @@
 </th>
 <th>
     {!! view('vendor.survloop.inc-tbl-head-sort', [
-        "eng"    => 'Lighting Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
+        "eng"    => 'Lighting Score <div class="fPerc66 slGrey">W/SqFt</div>',
         "srtVal" => 'PsEfficLighting',
         "sort"   => $sort
         ])->render() !!}
