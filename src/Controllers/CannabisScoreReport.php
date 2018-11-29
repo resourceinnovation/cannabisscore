@@ -21,6 +21,7 @@ class CannabisScoreReport extends CannabisScore
     {
         $this->prepReport();
         return view('vendor.cannabisscore.powerscore-report-preview', [
+            "uID"      => $this->v["uID"],
             "sessData" => $this->sessData->dataSets 
         ]);
     }

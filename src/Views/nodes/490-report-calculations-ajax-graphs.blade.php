@@ -4,21 +4,22 @@
 @elseif (trim($eff) == 'Overall')
     @if (!$GLOBALS["SL"]->REQ->has('print'))
         @if ($hasOverall)
-            <div class="col-6 efficGuageWrapBig disNon" id="guageOverall"></div>
+            <div class="col-md-6 efficGuageWrapBig disNon" id="guageOverall"></div>
         @else
-            <div class="col-6"><div class="disNon"><div class="disNon" id="guageOverall"></div></div></div>
+            <div class="col-md-6"><div class="disNon"><div class="disNon" id="guageOverall"></div></div></div>
         @endif
-        <div class="col-6 taR disNon" id="guageOverallTxt">
+        <div class="col-md-6 taR disNon" id="guageOverallTxt">
     @else
         <div class="col-12 taR" id="guageOverallTxt">
     @endif
     <div class="efficGuageTxtOver">
         @if ($hasOverall)
-            <div class="m0 scoreBig fPerc133">
-                Overall: 
+            <div class="m0 scoreBig fPerc133"> Overall: 
                 @if ($currGuage > 66) Leader @elseif ($currGuage > 33) Middle-of-the-Pack @else Upgrade Candidate @endif
             </div>
-            <div class="slGrey">Your farm is performing overall<sup>*</sup> in the</div>
+            <div class="slGrey">
+                Your farm @if ($isPast) is performing @else would perform @endif overall<sup>*</sup> in the
+            </div>
             <h2 class="m0 scoreBig">{!! $currGuage . $GLOBALS["SL"]->numSupscript($currGuage) !!} percentile</h2>
             <div class="slGrey mB10">
         @else
@@ -50,8 +51,8 @@
     </div></div>
 @else
     @if (!$GLOBALS["SL"]->REQ->has('print'))
-        <div class="col-5 efficGuageWrap disNon" id="guage{{ $eff }}"></div>
-        <div class="col-7 efficGuageWrapTxt disNon" id="guage{{ $eff }}Txt">
+        <div class="col-md-5 efficGuageWrap disNon" id="guage{{ $eff }}"></div>
+        <div class="col-md-7 efficGuageWrapTxt disNon" id="guage{{ $eff }}Txt">
     @else
         <div class="col-12 taR efficGuageWrapTxt" id="guage{{ $eff }}Txt">
     @endif

@@ -11,23 +11,20 @@ class RIIPSAreas extends Model
     protected $fillable   = 
     [    
 		'PsAreaPSID', 
-		'PsAreaSize', 
 		'PsAreaType', 
+		'PsAreaHasStage', 
+		'PsAreaSize', 
+		'PsAreaLgtSun', 
 		'PsAreaLgtDep', 
-		'PsAreaCanopyArea', 
-		'PsAreaDaysCycle', 
-		'PsAreaRoomExisting', 
-		'PsAreaRoomNew', 
 		'PsAreaLgtArtif', 
 		'PsAreaTotalLightWatts', 
-		'PsAreaCalcWatts',
-		'PsAreaCalcSize',
 		'PsAreaLightingEffic', 
-		'PsAreaHasStage', 
-		'PsAreaLgtSun', 
+		'PsAreaDaysCycle', 
 		'PsAreaVertStack', 
 		'PsAreaHvacType', 
 		'PsAreaHvacOther', 
+		'PsAreaCalcWatts', 
+		'PsAreaCalcSize', 
     ];
     
     // END SurvLoop auto-generated portion of Model

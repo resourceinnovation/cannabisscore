@@ -44,7 +44,8 @@ class CannabisScoreAdmin extends AdminSubsController
                 $this->admMenuLnk('/dash/process-uploads', 'Process Uploads', '', 1, []),
                 $this->admMenuLnk('javascript:;', 'More Tools', '', 1, [
                     $this->admMenuLnk('/dash/powerscore-software-troubleshooting', 'Troubleshooting'),
-                    $this->admMenuLnk('/dash/powerscore-beta-feedback-surveys', 'Feedback Survey'),
+                    $this->admMenuLnk('/dash/in-survey-feedback',                  'In-Survey Feedback'),
+                    $this->admMenuLnk('/dash/powerscore-beta-feedback-surveys',    'Followup Survey'),
                     $this->admMenuLnk('/dash/export-emails', 'Emails Export')
                     ])
                 ]);

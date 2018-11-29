@@ -1,7 +1,7 @@
 
 # resourceinnovation/cannabisscore
 
-[![Laravel](https://img.shields.io/badge/Laravel-5.6-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-5.7-orange.svg?style=flat-square)](http://laravel.com)
 [![SurvLoop](https://img.shields.io/badge/SurvLoop-0.0-orange.svg?style=flat-square)](https://github.com/wikiworldorder/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -26,22 +26,24 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 
 # <a name="requirements"></a>Requirements
 
-* php: >=5.6.4
-* <a href="https://packagist.org/packages/laravel/framework" target="_blank">laravel/framework</a>: 5.6.*
+* php: >=7.2.11
+* <a href="https://packagist.org/packages/laravel/framework" target="_blank">laravel/framework</a>: 5.7.*
 * <a href="https://packagist.org/packages/wikiworldorder/survloop" target="_blank">wikiworldorder/survloop</a>: 0.*
 
 # <a name="getting-started"></a>Getting Started
 
-These instructs can also be found at <a href="https://survloop.org/how-to-install-survloop" target="_blank"
-    >SurvLoop.org/how-to-install-survloop</a>, including step-by-step instructions on how to Laravel in its
-    development environment, and how to setup a basic server for it.
+The instructions below include the needed steps to install Laravel, SurvLoop, as well as the Cannabis PowerScore system.
+For more on creating environments to host Laravel, you can find more instructions on
+<a href="https://survloop.org/how-to-install-laravel-on-a-digital-ocean-server" target="_blank">SurvLoop.org</a>.
 
-The instructions below include the needed steps to install SurvLoop, as well as the Cannabis PowerScore system.
-
-* Install Laravel's default user authentication, one required package, and SurvLoop:
+* Use Composer to install Laravel with default user authentication, one required package:
 
 ```
+$ composer global require "laravel/installer"
+$ composer create-project laravel/laravel PowerScore "5.7.*"
+$ cd PowerScore
 $ php artisan make:auth
+$ php artisan vendor:publish --tag=laravel-notifications
 ```
 
 * Update `composer.json` to add requirements and an easier SurvLoop and CannabisScore reference:
@@ -118,6 +120,16 @@ $ composer dump-autoload
 $ php artisan db:seed --class=SurvLoopSeeder
 $ php artisan db:seed --class=CannabisScoreSeeder
 ```
+
+* For now, to apply database design changes to the same installation you are working in, depending on your server, 
+you might also need something like this...
+
+```
+$ chown -R www-data:33 app/Models
+$ chown -R www-data:33 database
+```
+
+* Browse to load the style sheets, etc.. /dashboard/css-reload
 
 * Log into admin dashboard...
 
