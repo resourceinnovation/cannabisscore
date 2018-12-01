@@ -20,17 +20,20 @@ class RIICreateTables extends Migration
 			$table->foreign('PsUserID')->references('id')->on('users');
 			$table->integer('PsStatus')->unsigned()->nullable();
 			$table->integer('PsTimeType')->unsigned()->nullable();
+			$table->integer('PsYear')->nullable();
 			$table->integer('PsPrivacy')->unsigned()->nullable();
 			$table->string('PsZipCode', 10)->nullable();
-			$table->string('PsCounty', 50)->nullable();
-			$table->string('PsState', 2)->nullable();
-			$table->string('PsAshrae', 2)->nullable();
+			$table->string('PsCounty', 255)->nullable();
+			$table->string('PsState', 255)->nullable();
+			$table->string('PsCountry', 100)->nullable();
+			$table->string('PsAshrae', 10)->nullable();
 			$table->string('PsEmail')->nullable();
 			$table->boolean('PsNewsletter')->default('1')->nullable();
 			$table->boolean('PsMemberInterest')->nullable();
 			$table->string('PsName')->nullable();
 			$table->integer('PsCharacterize')->unsigned()->nullable();
 			$table->double('PsEfficOverall')->nullable();
+			$table->double('PsEfficOverSimilar')->nullable();
 			$table->double('PsEfficFacility')->nullable();
 			$table->double('PsEfficProduction')->nullable();
 			$table->double('PsEfficLighting')->nullable();
@@ -42,6 +45,7 @@ class RIICreateTables extends Migration
 			$table->double('PsGrams')->nullable();
 			$table->double('PsKWH')->nullable();
 			$table->double('PsTotalSize')->nullable();
+			$table->double('PsTotalCanopySize')->nullable();
 			$table->integer('PsHavestsPerYear')->nullable();
 			$table->char('PsHarvestBatch', 1)->nullable();
 			$table->boolean('PsHasWaterPump')->nullable();
@@ -89,6 +93,7 @@ class RIICreateTables extends Migration
 			$table->string('PsVersionAB')->nullable();
 			$table->string('PsIsMobile')->nullable();
 			$table->integer('PsSubmissionProgress')->nullable();
+			$table->longText('PsNotes')->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSRankings', function(Blueprint $table)
@@ -96,9 +101,9 @@ class RIICreateTables extends Migration
 			$table->increments('PsRnkID');
 			$table->integer('PsRnkPSID')->unsigned()->nullable();
 			$table->foreign('PsRnkPSID')->references('PsID')->on('RII_PowerScore');
-			$table->boolean('PsRnkFilterByClimate')->nullable();
-			$table->integer('PsRnkFarmType')->nullable();
+			$table->string('PsRnkFilters')->nullable();
 			$table->double('PsRnkOverall')->nullable();
+			$table->double('PsRnkOverallAvg')->nullable();
 			$table->double('PsRnkFacility')->nullable();
 			$table->double('PsRnkProduction')->nullable();
 			$table->double('PsRnkHVAC')->nullable();
@@ -188,7 +193,6 @@ class RIICreateTables extends Migration
 			$table->foreign('PsAreaPSID')->references('PsID')->on('RII_PowerScore');
 			$table->integer('PsAreaType')->unsigned()->nullable();
 			$table->boolean('PsAreaHasStage')->nullable();
-			$table->double('PsAreaCanopyArea')->nullable();
 			$table->double('PsAreaSize')->nullable();
 			$table->boolean('PsAreaLgtSun')->nullable();
 			$table->boolean('PsAreaLgtDep')->nullable();
@@ -199,6 +203,8 @@ class RIICreateTables extends Migration
 			$table->boolean('PsAreaVertStack')->nullable();
 			$table->integer('PsAreaHvacType')->unsigned()->nullable();
 			$table->longText('PsAreaHvacOther')->nullable();
+			$table->double('PsAreaCalcWatts')->nullable();
+			$table->double('PsAreaCalcSize')->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSAreasBlds', function(Blueprint $table)
@@ -259,6 +265,16 @@ class RIICreateTables extends Migration
 			$table->string('PsRefEmail')->nullable();
 			$table->timestamps();
 		});
+		Schema::create('RII_PSCommunications', function(Blueprint $table)
+		{
+			$table->increments('PsComID');
+			$table->integer('PsComPSID')->unsigned()->nullable();
+			$table->foreign('PsComPSID')->references('PsID')->on('RII_PowerScore');
+			$table->integer('PsComUser')->unsigned()->nullable();
+			$table->foreign('PsComUser')->references('id')->on('users');
+			$table->longText('PsComDescription')->nullable();
+			$table->timestamps();
+		});
 		Schema::create('RII_PsFeedback', function(Blueprint $table)
 		{
 			$table->increments('PsfID');
@@ -298,50 +314,6 @@ class RIICreateTables extends Migration
 			$table->string('PubPrcIsMobile')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_ConsumerSurvey', function(Blueprint $table)
-		{
-			$table->increments('ConID');
-			$table->string('ConVersionAB')->nullable();
-			$table->string('ConAreYouConsumer')->nullable();
-			$table->integer('ConSubmissionProgress')->nullable();
-			$table->string('ConIPaddy')->nullable();
-			$table->string('ConTreeVersion')->nullable();
-			$table->string('ConUniqueStr')->nullable();
-			$table->integer('ConUserID')->unsigned()->nullable();
-			$table->foreign('ConUserID')->references('id')->on('users');
-			$table->string('ConIsMobile')->nullable();
-			$table->string('ConAreYouConsumerOther')->nullable();
-			$table->string('ConHowOften')->nullable();
-			$table->string('ConWhatKindsOther')->nullable();
-			$table->string('ConYouNotice')->nullable();
-			$table->string('ConOftenSustainable')->nullable();
-			$table->integer('ConBusCommitment')->nullable();
-			$table->string('ConKnowMore')->nullable();
-			$table->string('ConSpendMore')->nullable();
-			$table->string('ConIssuesMatter')->nullable();
-			$table->string('ConGender')->nullable();
-			$table->string('ConEducation')->nullable();
-			$table->string('ConStudent')->nullable();
-			$table->string('ConEmployed')->nullable();
-			$table->longText('ConMeaning')->nullable();
-			$table->timestamps();
-		});
-		Schema::create('RII_ConsumerPurchase', function(Blueprint $table)
-		{
-			$table->increments('ConPurchID');
-			$table->integer('ConPurchConID')->unsigned()->nullable();
-			$table->foreign('ConPurchConID')->references('ConID')->on('RII_ConsumerSurvey');
-			$table->integer('ConPurchWhatKinds')->unsigned()->nullable();
-			$table->timestamps();
-		});
-		Schema::create('RII_ConsumerIssues', function(Blueprint $table)
-		{
-			$table->increments('ConIsuID');
-			$table->integer('ConIsuConID')->unsigned()->nullable();
-			$table->foreign('ConIsuConID')->references('ConID')->on('RII_ConsumerSurvey');
-			$table->string('ConIsuIssuesMatter')->nullable();
-			$table->timestamps();
-		});
 	
     }
 
@@ -368,11 +340,9 @@ class RIICreateTables extends Migration
 		Schema::drop('RII_PSLightTypes');
 		Schema::drop('RII_PSForCup');
 		Schema::drop('RII_PsReferral');
+		Schema::drop('RII_PSCommunications');
 		Schema::drop('RII_PsFeedback');
 		Schema::drop('RII_PublicProcess');
-		Schema::drop('RII_ConsumerSurvey');
-		Schema::drop('RII_ConsumerPurchase');
-		Schema::drop('RII_ConsumerIssues');
 	
     }
 }
