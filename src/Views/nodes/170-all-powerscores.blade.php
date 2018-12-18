@@ -139,78 +139,80 @@
     </th>
 </tr>
 
-@forelse ($allscores as $i => $ps)
-    <tr @if ($i%2 == 0) class="row2" @endif >
-    <td><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">
-        @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif</a>
-    @if (!$isExcel && in_array($ps->PsID, $cultClassicIds))
-        <div class="mTn5 mBn5 slGrey fPerc66"><i class="fa fa-certificate" aria-hidden="true"></i> CC</div>
-    @endif
-    @if (!$isExcel && in_array($ps->PsID, $emeraldIds))
-        <div class="mTn5 mBn5 slGrey fPerc66"><i class="fa fa-certificate" aria-hidden="true"></i> EC</div>
-    @endif
-    </td>
-    <td>
-        {{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
-            $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}
-        @if (isset($fltCmpl) && $fltCmpl == 0 && $isAdmin)
-            <br /> @if ($ps->PsStatus == 243) <span class="slBlueDark">Complete</span>
-            @elseif ($ps->PsStatus == 364) <span class="slRedDark">Archived</span>
-            @else {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
-            @endif
+@if ($allscores && $allscores->isNotEmpty())
+    @foreach ($allscores as $i => $ps)
+        <tr @if ($i%2 == 0) class="row2" @endif >
+        <td><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">
+            @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif</a>
+        @if (!$isExcel && in_array($ps->PsID, $cultClassicIds))
+            <div class="mTn5 mBn5 slGrey fPerc66"><i class="fa fa-certificate" aria-hidden="true"></i> CC</div>
         @endif
-    </td>
-    <td>{{ round($ps->PsEfficOverall) }}%
-        @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-            && isset($allranks[$ps->PsID]->PsRnkOverallAvg)) <div class="slGrey fPerc66">{{ 
-            $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkOverallAvg) }}%</div> @endif
-    </td>
-    <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
-        @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-            && isset($allranks[$ps->PsID]->PsRnkFacility)) <div class="slGrey fPerc66">{{ 
-            $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkFacility) }}%</div> @endif
-    </td>
-    <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
-        @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-            && isset($allranks[$ps->PsID]->PsRnkProduction)) <div class="slGrey fPerc66">{{ 
-            $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkProduction) }}%</div> @endif
-    </td>
-    <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
-        @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-            && isset($allranks[$ps->PsID]->PsRnkHVAC)) <div class="slGrey fPerc66">{{ 
-            $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkHVAC) }}%</div> @endif
-    </td>
-    <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
-        @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-            && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
-            $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
-    </td>
-    @if (!$isExcel)
-        <td class="fPerc66">
-            @if ($ps->PsGrams > 0)     {{ number_format($ps->PsGrams) }} g<br /> @endif
-            @if ($ps->PsKWH > 0)       {{ number_format($ps->PsKWH) }} kWh<br /> @endif
-            @if ($ps->PsTotalSize > 0) {{ number_format($ps->PsTotalSize) }} sq ft @endif
-    @else
-        <td>{{ $ps->PsGrams }}</td>
-        <td>{{ $ps->PsKWH }}</td>
-        <td>{{ $ps->PsTotalSize }}
-    @endif </td>
-    <td>{{ $ps->PsCounty }} {{ $ps->PsState }} {{ $ps->PsZipCode }}
-    @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-        <a id="hidivBtn{{ $ps->PsID }}Ema" class="hidivBtnSelf disBlo mTn5 fPerc66 slGrey" href="javascript:;">@</a>
-        <div id="hidiv{{ $ps->PsID }}Ema" class="disNon mTn5"><a href="mailto:{{ $ps->PsEmail }}" class="slGrey"
-            >{{ $ps->PsEmail }}</a></div></td>
-    @endif
-    </tr>
-    @if ($GLOBALS["SL"]->REQ->has('review'))
-        <tr class="brdTopNon @if ($i%2 == 0) row2 @endif " >
-            <td class="taR"><div class="mTn10 slGrey fPerc66">Review Notes:</div></td>
-            <td colspan=9 ><div class="mTn15"><i>{!! $ps->PsNotes !!}</i></div></td>
+        @if (!$isExcel && in_array($ps->PsID, $emeraldIds))
+            <div class="mTn5 mBn5 slGrey fPerc66"><i class="fa fa-certificate" aria-hidden="true"></i> EC</div>
+        @endif
+        </td>
+        <td>
+            {{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
+                $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}
+            @if (isset($fltCmpl) && $fltCmpl == 0 && $isAdmin)
+                <br /> @if ($ps->PsStatus == 243) <span class="slBlueDark">Complete</span>
+                @elseif ($ps->PsStatus == 364) <span class="slRedDark">Archived</span>
+                @else {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
+                @endif
+            @endif
+        </td>
+        <td>{{ round($ps->PsEfficOverall) }}%
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkOverallAvg)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkOverallAvg) }}%</div> @endif
+        </td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkFacility)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkFacility) }}%</div> @endif
+        </td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkProduction)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkProduction) }}%</div> @endif
+        </td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkHVAC)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkHVAC) }}%</div> @endif
+        </td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
+        </td>
+        @if (!$isExcel)
+            <td class="fPerc66">
+                @if ($ps->PsGrams > 0)     {{ number_format($ps->PsGrams) }} g<br /> @endif
+                @if ($ps->PsKWH > 0)       {{ number_format($ps->PsKWH) }} kWh<br /> @endif
+                @if ($ps->PsTotalSize > 0) {{ number_format($ps->PsTotalSize) }} sq ft @endif
+        @else
+            <td>{{ $ps->PsGrams }}</td>
+            <td>{{ $ps->PsKWH }}</td>
+            <td>{{ $ps->PsTotalSize }}
+        @endif </td>
+        <td>{{ $ps->PsCounty }} {{ $ps->PsState }} {{ $ps->PsZipCode }}
+        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
+            <a id="hidivBtn{{ $ps->PsID }}Ema" class="hidivBtnSelf disBlo mTn5 fPerc66 slGrey" href="javascript:;">@</a>
+            <div id="hidiv{{ $ps->PsID }}Ema" class="disNon mTn5"><a href="mailto:{{ $ps->PsEmail }}" class="slGrey"
+                >{{ $ps->PsEmail }}</a></div></td>
+        @endif
         </tr>
-    @endif
-@empty
-    <tr><td colspan=11 class="slGrey" ><i>No PowerScores found.</i></td></tr>
-@endforelse
+        @if ($GLOBALS["SL"]->REQ->has('review'))
+            <tr class="brdTopNon @if ($i%2 == 0) row2 @endif " >
+                <td class="taR"><div class="mTn10 slGrey fPerc66">Review Notes:</div></td>
+                <td colspan=9 ><div class="mTn15"><i>{!! $ps->PsNotes !!}</i></div></td>
+            </tr>
+        @endif
+    @endforeach
+@else
+    <tr><td colspan=11 class="slGrey"><i>No PowerScores found.</i></td></tr>
+@endif
 </table>
 
 @if (isset($reportExtras)) {!! $reportExtras !!} @endif

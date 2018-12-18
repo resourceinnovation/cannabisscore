@@ -13,16 +13,6 @@
 
 Route::group(['middleware' => ['web']], function () {
     
-    Route::get('/admin', [
-        'uses' => 'CannabisScore\Controllers\CannabisScoreAdmin@dashHome', 
-        'middleware' => ['auth']
-    ]);
-    
-    Route::get('/dashboard', [
-        'uses' => 'CannabisScore\Controllers\CannabisScoreAdmin@dashHome', 
-        'middleware' => ['auth']
-    ]);
-
 });    
 
 ?>

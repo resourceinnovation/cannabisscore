@@ -140,14 +140,44 @@
         <label><input type="checkbox" name="psid" id="psidID" value=""></label>
     @endif */ ?>
 <div id="hidivFiltsAdv" class="
-    @if ((isset($fltPerp) && intVal($fltPerp) == 1) || (isset($fltPump) && intVal($fltPump) == 1) 
-        || (isset($fltWtrh) && intVal($fltWtrh) == 1) || (isset($fltManu) && intVal($fltManu) == 1) 
-        || (isset($fltAuto) && intVal($fltAuto) == 1) || (isset($fltVert) && intVal($fltVert) == 1)
-        || (isset($fltRenew) && sizeof($fltRenew) > 0) || (isset($fltCmpl) && $fltCmpl != 243)
-        || (isset($fltCup) && intVal($fltCup) > 0)) disBlo
+    @if ((isset($fltSize) && intVal($fltSize) > 0) || (isset($fltPerp) && intVal($fltPerp) == 1) 
+        || (isset($fltPump) && intVal($fltPump) == 1) || (isset($fltWtrh) && intVal($fltWtrh) == 1) 
+        || (isset($fltManu) && intVal($fltManu) == 1) || (isset($fltAuto) && intVal($fltAuto) == 1) 
+        || (isset($fltVert) && intVal($fltVert) == 1) || (isset($fltRenew) && sizeof($fltRenew) > 0) 
+        || (isset($fltCmpl) && $fltCmpl != 243) || (isset($fltCup) && intVal($fltCup) > 0))
+        disBlo
     @else disNon @endif ">
-    <div class="row">
-@if ($nID != 490) <div class="col-2 pT10"> 
+@if ($nID == 490)
+    @if (isset($psFiltChks)) <div class="pT20">{!! $psFiltChks !!}</div> @endif
+@else
+    <div class="row"><div class="col-2 pT10"> 
+        <select name="fltSize" id="fltSizeID" class="form-control ntrStp slTab mT5" autocomplete="off" 
+            {!! $GLOBALS["SL"]->tabInd() !!} >
+            <option value="0" @if (!isset($fltSize) || intVal($fltSize) == 0) SELECTED @endif 
+                >All Farm Sizes (Square feet of flower canopy, annual average)</option>
+            <option value="375" @if (isset($fltSize) && $fltSize == 375) SELECTED @endif 
+                >&lt; 5,000 square feet</option>
+            <option value="376" @if (isset($fltSize) && $fltSize == 376) SELECTED @endif 
+                >5,000-10,000 sf</option>
+            <option value="377" @if (isset($fltSize) && $fltSize == 377) SELECTED @endif 
+                >10,000-50,000 sf</option>
+            <option value="378" @if (isset($fltSize) && $fltSize == 378) SELECTED @endif 
+                >50,000+ sf</option>
+        </select>
+        <select name="fltCup" id="fltCupID" class="form-control ntrStp slTab mT20" autocomplete="off" 
+            {!! $GLOBALS["SL"]->tabInd() !!} >
+            <option value="0" @if (!isset($fltCup) || intVal($fltCup) == 0) SELECTED @endif 
+                >No Competition/Set Filter</option>
+            <option value="230" @if (isset($fltCup) && $fltCup == 230) SELECTED @endif 
+                >Cultivation Classic</option>
+            <option value="231" @if (isset($fltCup) && $fltCup == 231) SELECTED @endif 
+                >Emerald Cup Regenerative Award</option>
+            <option value="369" @if (isset($fltCup) && $fltCup == 369) SELECTED @endif 
+                >NWPCC Import</option>
+        </select>
+    </div><div class="col-4 pT10">
+        @if (isset($psFiltChks)) {!! $psFiltChks !!} @endif
+    </div><div class="col-2 pT10">
         <select name="fltCmpl" id="fltCmplID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="242" @if (isset($fltCmpl) && $fltCmpl == 242) SELECTED @endif >Incomplete Scores</option>
@@ -155,21 +185,13 @@
             <option value="364" @if (isset($fltCmpl) && $fltCmpl == 364) SELECTED @endif >Archived Scores</option>
             <option value="0" @if (isset($fltCmpl) && intVal($fltCmpl) == 0) SELECTED @endif >All</option>
         </select>
-        <select name="fltCup" id="fltCupID" class="form-control ntrStp slTab mT20" autocomplete="off" 
+        <select name="fltFut" id="fltFutID" class="form-control ntrStp slTab mT20" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
-            <option value="0" @if (!isset($fltCup) || intVal($fltCup) == 0) SELECTED @endif 
-                >No Competition Filter</option>
-            <option value="230" @if (isset($fltCup) && $fltCup == 230) SELECTED @endif 
-                >Cultivation Classic</option>
-            <option value="231" @if (isset($fltCup) && $fltCup == 231) SELECTED @endif 
-                >Emerald Cup Regenerative Award</option>
-        </select>
-        
-    </div><div class="col-4 pT10">
-@else <div class="col-12 pT20"> @endif
-        @if (isset($psFiltChks)) {!! $psFiltChks !!} @endif
-    </div>
-    </div>
+            <option value="232" @if (!isset($fltFut) || $fltFut == 232) SELECTED @endif >Past-Looking Scores</option>
+            <option value="233" @if (isset($fltFut) && $fltFut == 233) SELECTED @endif >Future-Looking Scores</option>
+        </select>    
+    </div></div>
+@endif
 </div>
 
 <input type="hidden" name="tblBaseUrl" id="tblBaseUrlID" value="/dash/compare-powerscores">

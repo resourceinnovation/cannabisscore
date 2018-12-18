@@ -4,17 +4,17 @@
 
 <h4>
 As of {{ date("F j, Y") }}, Resource Innovation Institute's <b class="slBlueDark">Cannabis PowerScore</b> 
-has collected complete data for <b class="slBlueDark">{{ number_format(sizeof($allscores)) }} observations</b> 
+has collected complete data for <b class="slBlueDark">{{ number_format($allscores->count()) }} observations</b> 
 of growers' annual production.
 </h4>
 
 <p>
 Thus far,
-{{ round(100*$statMisc->getDatTot('PsIncentiveWants')/sizeof($allscores)) }}%
+{{ round(100*$statMisc->getDatTot('PsIncentiveWants')/$allscores->count()) }}%
 of the survey respondents 
 would like to work with their utilities to increase the energy efficiency of their operations,
-and {{ round(100*$statMisc->getDatTot('PsIncentiveUsed')/sizeof($allscores)) }}% have done so in the past.
-And a total of {{ round(100*$statMisc->getDatTot('PsConsiderUpgrade')/sizeof($allscores)) }}% are 
+and {{ round(100*$statMisc->getDatTot('PsIncentiveUsed')/$allscores->count()) }}% have done so in the past.
+And a total of {{ round(100*$statMisc->getDatTot('PsConsiderUpgrade')/$allscores->count()) }}% are 
 considering upgrades in the next 12 months.
 </p>
 
@@ -258,12 +258,12 @@ square feet is used.
         <tr>
             <th>Medical Licenses</th>
             <td>{{ $statMisc->getDatTot('lic141') }}</td>
-            <td>{{ round(100*$statMisc->getDatTot('lic141')/sizeof($allscores)) }}%</td>
+            <td>{{ round(100*$statMisc->getDatTot('lic141')/$allscores->count()) }}%</td>
         </tr>
         <tr>
             <th>Recreational Licenses</th>
             <td>{{ $statMisc->getDatTot('lic142') }}</td>
-            <td>{{ round(100*$statMisc->getDatTot('lic142')/sizeof($allscores)) }}%</td>
+            <td>{{ round(100*$statMisc->getDatTot('lic142')/$allscores->count()) }}%</td>
         </tr>
         </table>
     </div>

@@ -126,7 +126,7 @@
 {!! view('vendor.cannabisscore.nodes.170-avg-powerscores-innertable-headers', [ ])->render() !!}
 
 <?php $firstRow = true; ?>
-@foreach ($psTechs as $fld => $name)
+@foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name)
     <tr @if ($firstRow) class="brdTop" @endif ><?php $firstRow = false; ?>
         <th>{{ $name }}</th>
         <td class="brdRgt"> @if ($allAvgs["avgs"][$fld]["ovr"][0] > 0) {{ 

@@ -11,11 +11,17 @@ function gatherFilts() {
     if (document.getElementById("filtFarmID") && parseInt(document.getElementById("filtFarmID").value) > 0) {
         baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }
+    if (document.getElementById("fltFutID") && parseInt(document.getElementById("fltFutID").value) > 0) {
+        baseUrl += "&fltFut="+document.getElementById("fltFutID").value.trim();
+    }
     if (document.getElementById("fltLghtID") && document.getElementById("fltLghtID").value.trim() != '') {
         baseUrl += "&fltLght="+document.getElementById("fltLghtID").value.trim();
     }
     if (document.getElementById("fltHvacID") && document.getElementById("fltHvacID").value.trim() != '') {
         baseUrl += "&fltHvac="+document.getElementById("fltHvacID").value.trim();
+    }
+    if (document.getElementById("fltSizeID") && parseInt(document.getElementById("fltSizeID").value) > 0) {
+        baseUrl += "&fltSize="+parseInt(document.getElementById("fltSizeID").value);
     }
     if (document.getElementById("fltPerpID") && document.getElementById("fltPerpID").checked) {
         baseUrl += "&fltPerp=1";

@@ -5,16 +5,6 @@ use Illuminate\Support\ServiceProvider;
 
 class CannabisScoreServiceProvider extends ServiceProvider
 {
-    public function register()
-    {
-        /*
-        $this->app->bind('wikiworldorder-survloop', function()
-        {
-            return new Demo;
-        });
-        */
-    }
-
     public function boot()
     {
         require __DIR__ . '/routes.php';
@@ -27,6 +17,5 @@ class CannabisScoreServiceProvider extends ServiceProvider
                 => base_path('database/migrations/2018_11_30_000000_rii_create_tables.php'),
               __DIR__.'/Database/RIISeeder.php' => base_path('database/seeds/RIISeeder.php')
         ]);
-        //$this->loadViewsFrom(__DIR__ . '/Views', 'survloop');
     }
 }
