@@ -133,7 +133,7 @@ class ScoreVars extends TreeSurvForm
         return false;
     }
     
-    protected function tblsInPackage()
+    public function tblsInPackage()
     {
         if ($this->dbID == 1) {
             return ['PSUtilities', 'PSUtiliZips'];

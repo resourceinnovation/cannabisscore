@@ -35,7 +35,6 @@ class CannabisScore extends ScoreImports
 {
     public function printPreviewReport($isAdmin = false)
     {
-        $this->prepReport();
         return view('vendor.cannabisscore.powerscore-report-preview', [
             "uID"      => $this->v["uID"],
             "sessData" => $this->sessData->dataSets
