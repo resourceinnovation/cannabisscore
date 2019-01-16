@@ -45,13 +45,13 @@ class ScoreVars extends TreeSurvForm
         // Establishing Main Navigation Organization, with Node ID# and Section Titles
         $this->majorSections = [];
         if ($GLOBALS["SL"]->treeID == 1) {
-            $this->majorSections[] = array(45,  'Your Farm',            'active');
-            $this->majorSections[] = array(64,  'Growing Environments', 'active');
-            $this->majorSections[] = array(608, 'Lighting',             'active');
-            $this->majorSections[] = array(609, 'HVAC',                 'active');
-            $this->majorSections[] = array(65,  'Annual Totals',        'active');
-            $this->majorSections[] = array(844, 'Other Techniques',     'active');
-            //$this->majorSections[] = array(67,  'Contact',              'active');
+            $this->majorSections[] = [45,  'Your Farm',            'active'];
+            $this->majorSections[] = [64,  'Growing Environments', 'active'];
+            $this->majorSections[] = [608, 'Lighting',             'active'];
+            $this->majorSections[] = [609, 'HVAC',                 'active'];
+            $this->majorSections[] = [65,  'Annual Totals',        'active'];
+            $this->majorSections[] = [844, 'Other Techniques',     'active'];
+            //$this->majorSections[] = [67,  'Contact',              'active'];
             $this->minorSections = [ [], [], [], [], [], [], [] ];
         }
         

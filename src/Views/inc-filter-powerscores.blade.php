@@ -196,8 +196,7 @@
 
 <input type="hidden" name="tblBaseUrl" id="tblBaseUrlID" value="/dash/compare-powerscores">
 <script type="text/javascript"> $(document).ready(function() {
-        
-        
+    
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
     function applySort(srtType) {
         var currDir = '{{ $sort[1] }}';

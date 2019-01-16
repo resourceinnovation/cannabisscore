@@ -36,6 +36,20 @@ class CannabisScoreSearcher extends Searcher
         return true;
     }
     
+    protected function getArchivedCoreIDs($coreTbl = '')
+    {
+        $ret = [];
+        $chk = RIIPowerScore::where('PsStatus', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived'))
+            ->select('PsID')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $rec) {
+                $ret[] = $rec->PsID;
+            }
+        }
+        return $ret;
+    }
+    
     public function searchResultsXtra($treeID = -3)
     {
         if ($treeID <= 0) {

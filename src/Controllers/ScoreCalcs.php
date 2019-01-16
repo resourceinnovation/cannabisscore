@@ -61,7 +61,8 @@ class ScoreCalcs extends ScoreUtils
                 }
             }
             if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
-                $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
+                $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac 
+                    = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
             }
             $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize = 0;
             $watts = $sqft = [];

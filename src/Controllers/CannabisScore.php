@@ -112,7 +112,7 @@ class CannabisScore extends ScoreImports
             $report = new ScoreReportAvgs;
             $ret .= $report->getPowerScoreFinalReport();
         } elseif ($nID == 853) {
-            $this->searchResultsXtra(1);
+            $this->initSearcher(1);
             $this->searcher->loadAllScoresPublic();
             $report = new ScoreReportFound;
             $ret .= $report->getFoundReport($nID, $this->searcher->v["allscores"]);
@@ -289,7 +289,8 @@ class CannabisScore extends ScoreImports
     
     public function printReport490()
     {
-        $this->searchResultsXtra();
+        $this->initSearcher();
+        $this->searcher->getSearchFilts();
         $this->getAllReportCalcs();
         $this->getSimilarStats();
         $this->searcher->v["nID"] = 490;
@@ -339,13 +340,15 @@ class CannabisScore extends ScoreImports
     protected function ajaxFutureYields()
     {
         $this->v["nID"] = 20202020;
-        $this->searchResultsXtra();
+        $this->initSearcher();
+        $this->searcher->getSearchFilts();
         $this->getAllReportCalcs();
         $this->getSimilarStats();
         $this->loadAreaLgtTypes();
         $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        $this->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)->render();
+        $this->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
+            ->render();
         $this->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render();
         return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
     }
@@ -357,7 +360,7 @@ class CannabisScore extends ScoreImports
                 ['Overall', 'Facility', 'Production', 'HVAC', 'Lighting'])) {
             return '';
         }
-        $this->searchResultsXtra();
+        $this->initSearcher();
         if ($this->searcher->v["powerscore"] && isset($this->searcher->v["powerscore"]->PsID)) {
             $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->PsTimeType 
                 == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));

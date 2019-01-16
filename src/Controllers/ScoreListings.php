@@ -45,7 +45,8 @@ class ScoreListings
                     . $GLOBALS["SL"]->sysOpts["spinner-code"] . '</center>';
             }
         }
-        $this->searcher->searchResultsXtra();
+        $this->searcher->getSearchFilts();
+        //$this->searcher->searchResultsXtra();
         $xtra = "";
         if ($GLOBALS["SL"]->REQ->has('review')) {
             $this->v["fltCmpl"] = 0;

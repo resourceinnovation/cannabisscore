@@ -4,9 +4,9 @@ namespace CannabisScore\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use CannabisScore\Controllers\CannabisScore;
-use SurvLoop\Controllers\AdminMenu;
+use SurvLoop\Controllers\AdminController;
 
-class CannabisScoreAdmin extends AdminMenu
+class CannabisScoreAdmin extends AdminController
 {
     protected function initExtra(Request $request)
     {

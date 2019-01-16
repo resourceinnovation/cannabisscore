@@ -49,7 +49,7 @@ class CannabisScoreAdminMenu extends AdminMenu
                 $this->admMenuLnk('/dash/powerscore-final-report',             'Written Report')
                 ]);
         }
-        return $this->addAdmMenuBasics($treeMenu);
+        return $treeMenu;
     }
     
 }
