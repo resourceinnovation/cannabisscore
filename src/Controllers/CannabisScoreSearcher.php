@@ -194,6 +194,9 @@ class CannabisScoreSearcher extends Searcher
     
     public function filterAllPowerScoresPublic()
     {
+        if (!isset($this->v["fltCmpl"])) {
+            $this->searchResultsXtra();
+        }
         $eval = "whereIn('PsStatus', [" . (($this->v["fltCmpl"] == 0) ? (($this->v["isAdmin"]) ? "242, 243, 364" : 243)
             : $this->v["fltCmpl"]) . "])->where('PsTimeType', " 
             . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")";

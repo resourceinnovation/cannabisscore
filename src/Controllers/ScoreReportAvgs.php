@@ -25,7 +25,6 @@ class ScoreReportAvgs extends ScoreReportStats
 {
     public function getAllPowerScoreAvgsPublic()
     {
-        $this->initSearcher();
         $this->calcAllPowerScoreAvgs();
         $this->v["psTechs"] = $GLOBALS["CUST"]->psTechs();
         if ($GLOBALS["SL"]->REQ->has('excel')) {
@@ -38,6 +37,7 @@ class ScoreReportAvgs extends ScoreReportStats
     public function getMorePowerStats()
     {
         $this->initSearcher();
+        $this->prepStatFilts();
         $this->calcMorePowerStats();
         if ($GLOBALS["SL"]->REQ->has('excel')) {
             $innerTable = view('vendor.cannabisscore.nodes.170-avg-powerscores-innertable', $this->v)->render();
@@ -48,9 +48,10 @@ class ScoreReportAvgs extends ScoreReportStats
     
     public function getPowerScoreFinalReport()
     {
-        $this->initSearcher();
         $this->calcAllPowerScoreAvgs();
-        //$GLOBALS["SL"]->x["needsCharts"] = true;
+        $this->v["allscores"] = $this->searcher->v["allscores"];
+        $this->calcMorePowerStats();
+        $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.797-powerscore-report-tbls', $this->v)->render();
     }
     
@@ -98,8 +99,6 @@ class ScoreReportAvgs extends ScoreReportStats
     
     protected function calcMorePowerStats()
     {
-        $this->initSearcher();
-        $this->prepStatFilts();
         $this->v["statMisc"] = new SurvStatsGraph;
         $this->v["statMisc"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
         $this->v["statMisc"]->addDataType('g', 'Grams', 'g');                           // stat var a

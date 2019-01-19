@@ -63,18 +63,18 @@ considering upgrades in the next 12 months.
 @foreach ($farmTypes as $name => $defID)
     <tr>
         <th>{{ $name }}</th>
-        <td>{{ number_format($statLgts->getDatTot('sqft', 'a' . $defID)*$statScor->tagTot["a"]["a" 
-            . $defID]["avg"]["row"][3]) }}</td>
+        <td><?php /* {{ number_format($statLgts->getDatTot('sqft', 'a' . $defID)
+            *$statScor->tagTot["a"]["a" . $defID]["avg"]["row"][3]) }} */ ?></td>
         <td>{{ number_format($statLgts->getDatTot('sqft', 'a' . $defID)) }}</td>
-        <td>{{ number_format($statScor->tagTot["a"]["a" . $defID]["avg"]["row"][3]) }}</td>
+        <td><?php /* {{ number_format($statScor->tagTot["a"]["a" . $defID]["avg"]["row"][3]) }} */ ?></td>
         <td>{{ number_format($statMisc->getDatCnt('a' . $defID)) }}</td>
     </tr>
 @endforeach
 <tr class="brdTop">
     <th>Aggregated</th>
-    <td>{{ number_format($statLgts->getDatTot('sqft')*$statScor->tagTot["a"]["1"]["avg"]["row"][3]) }}</td>
+    <td><?php /* {{ number_format($statLgts->getDatTot('sqft')*$statScor->tagTot["a"]["1"]["avg"]["row"][3]) }} */ ?></td>
     <td>{{ number_format($statLgts->getDatTot('sqft')) }}</td>
-    <td>{{ number_format($statScor->tagTot["a"]["1"]["avg"]["row"][3]) }}</td>
+    <td><?php /* {{ number_format($statScor->tagTot["a"]["1"]["avg"]["row"][3]) }} */ ?></td>
     <td>{{ number_format($statMisc->getDatCnt()) }}</td>
 </tr>
 </table>
@@ -90,12 +90,12 @@ considering upgrades in the next 12 months.
 @foreach ($farmTypes as $name => $defID)
     <tr>
         <th>{{ $name }}</th>
-        <td>{{ number_format($statScor->tagTot["a"]["a" . $defID]["avg"]["row"][0]) }}</td>
+        <td><?php /* {{ number_format($statScor->tagTot["a"]["a" . $defID]["avg"]["row"][0]) }} */ ?></td>
     </tr>
 @endforeach
 <tr class="brdTop">
     <th>Aggregated</th>
-    <td>{{ number_format($statScor->tagTot["a"]["1"]["avg"]["row"][0]) }}</td>
+    <td><?php /* {{ number_format($statScor->tagTot["a"]["1"]["avg"]["row"][0]) }} */ ?></td>
 </tr>
 </table>
 </div>
@@ -163,20 +163,25 @@ of the total power consumption in the grow operations.
 
 <p>
 For an indoor grow environment, the average lighting power density is 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["avg"]["row"][2], 3)) }}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["avg"]["row"][2], 3)) }} */ ?>
 kilowatt-hours per square foot; the lowest level is 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["min"]["row"][2], 3)) }}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["min"]["row"][2], 3)) }} */ ?>
 kilowatt-hours per square foot; and highest level is about 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["max"]["row"][2], 3)) }}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a144"]["max"]["row"][2], 3)) }} */ ?>
 kilowatt-hours per square foot. For greenhouses/hybrid/mixed light, the average is 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["avg"]["row"][2], 3))}}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["avg"]["row"][2], 3))}} */ ?>
 kilowatt-hours per square foot; the lowest is 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["min"]["row"][2], 3)) }}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["min"]["row"][2], 3)) }} */ ?>
 kilowatt-hour per square foot; and the highest is 
-{{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["max"]["row"][2], 3)) }}
+__
+<?php /* {{ number_format($GLOBALS["SL"]->sigFigs($statScor->tagTot["a"]["a145"]["max"]["row"][2], 3)) }} */ ?>
 kilowatt-hours per square foot.
 </p>
-
 
 <div class="p15">
 <h3 class="mB0">Table 5: Average PowerScores for High-Efficient Lamps</h3>

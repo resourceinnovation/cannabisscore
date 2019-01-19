@@ -117,6 +117,7 @@ class ScoreReportFound extends ScoreReportStats
         $this->v["statLeads"]->calcStats();
         $this->v["statEnv"]->calcStats();
         $this->v["statEnv"]->calcBlds();
+        $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.853-founders-circle-report', $this->v)->render();
     }
 }

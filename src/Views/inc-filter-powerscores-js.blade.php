@@ -1,4 +1,4 @@
-<!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores-js.blade.php -->
+/* generated from resources/views/vendor/cannabisscore/inc-filter-powerscores-js.blade.php */
 
 function gatherFilts() {
     var baseUrl = @if ($GLOBALS["SL"]->REQ->has('lighting')) "&lighting=1"; @else ""; @endif

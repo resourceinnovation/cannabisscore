@@ -13,6 +13,7 @@ namespace CannabisScore\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RIIPowerScore;
+use CannabisScore\Controllers\ScoreLookups;
 use SurvLoop\Controllers\TreeSurvForm;
 
 class ScoreVars extends TreeSurvForm
@@ -20,27 +21,10 @@ class ScoreVars extends TreeSurvForm
     // Initializing a bunch of things which are not [yet] automatically determined by the software
     protected function initExtra(Request $request)
     {
-        // Shortcuts...
-        $this->v["defCmplt"] = $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete');
-        $this->v["farmTypes"] = [
-            'Indoor'           => $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Indoor'),
-            'Greenhouse/Mixed' => $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Greenhouse/Hybrid/Mixed Light'),
-            'Outdoor'          => $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Outdoor')
-            ];
-        $this->v["areaTypes"] = [
-            'Mother' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants'),
-            'Veg'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'),
-            'Flower' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'),
-            'Dry'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing')
-            ];
-        $this->v["areaTypesFilt"] = [
-            'Flower' => $this->v["areaTypes"]["Flower"],
-            'Veg'    => $this->v["areaTypes"]["Veg"],
-            'Clone'  => $this->v["areaTypes"]["Clone"],
-            'Mother' => $this->v["areaTypes"]["Mother"]
-            ];
-            
+        $lookups = new ScoreLookups;
+        foreach ($lookups->v as $var => $val) {
+            $this->v[$var] = $val;
+        }
             
         // Establishing Main Navigation Organization, with Node ID# and Section Titles
         $this->majorSections = [];

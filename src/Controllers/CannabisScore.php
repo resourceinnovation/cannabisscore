@@ -361,6 +361,8 @@ class CannabisScore extends ScoreImports
             return '';
         }
         $this->initSearcher();
+        $this->searcher->searchResultsXtra(1);
+        $this->searcher->searchFiltsURLXtra();
         if ($this->searcher->v["powerscore"] && isset($this->searcher->v["powerscore"]->PsID)) {
             $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->PsTimeType 
                 == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));

@@ -13,6 +13,7 @@ use DB;
 use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
 use SurvLoop\Controllers\SurvStatsGraph;
+use CannabisScore\Controllers\ScoreLookups;
 use CannabisScore\Controllers\ScoreStats;
 
 class ScoreReportStats
@@ -23,6 +24,10 @@ class ScoreReportStats
     
     protected function prepStatFilts()
     {
+        $lookups = new ScoreLookups;
+        foreach ($lookups->v as $var => $val) {
+            $this->v[$var] = $val;
+        }
         $this->v["sfFarms"] = [
             [144, 145, 143],
             ['Indoor', 'Greenhouse/Mixed', 'Outdoor']
