@@ -104,6 +104,7 @@ class ScoreCalcs extends ScoreUtils
                         $watts["Mother"] = $sqft["Mother"] = 0;
                     }
                 }
+                $hasLights = 0;
                 foreach ($this->sessData->dataSets["PSAreas"] as $a => $area) {
                     foreach ($this->v["areaTypes"] as $typ => $defID) {
                         if ($area->PsAreaType == $defID && $typ != 'Dry') {
@@ -113,6 +114,7 @@ class ScoreCalcs extends ScoreUtils
                             if ($watts[$typ] > 0) {
                                 $this->sessData->dataSets["PSAreas"][$a]->PsAreaLgtArtif = 1;
                                 if (intVal($sqft[$typ]) > 0) {
+                                    $hasLights++;
                                     $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic 
                                         = $watts[$typ]/$sqft[$typ];
                                     $this->sessData->dataSets["PowerScore"][0]->{ 'PsEfficLighting' . $typ }
@@ -125,6 +127,9 @@ class ScoreCalcs extends ScoreUtils
                             $this->sessData->dataSets["PSAreas"][$a]->save();
                         }
                     }
+                }
+                if ($hasLights == 0) {
+                    $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting = 0.00000001;
                 }
             }
             $this->sessData->dataSets["PowerScore"][0]->save();

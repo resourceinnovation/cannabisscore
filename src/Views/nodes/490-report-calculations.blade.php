@@ -75,8 +75,9 @@
         <div class="row">
             <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">Lighting Efficiency:</h3></div>
             <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
-                @if (isset($sessData["PowerScore"][0]->PsEfficLighting))
-                    {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }} 
+                @if (isset($sessData["PowerScore"][0]->PsEfficLighting) 
+                    && $sessData["PowerScore"][0]->PsEfficLighting != 0.00000001)
+                    {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>W / sq ft</nobr>
             </h3></div>
             <div class="col-lg-5 p0" id="psScoreLighting"></div>
@@ -89,7 +90,8 @@
         <div class=" @if ($isPast) col-md-8 @else col-md-7 @endif ">
 @endif
     
-        @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
+        @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0
+            && $sessData["PowerScore"][0]->PsEfficLighting != 0.00000001)
             <div class="row p0 mB20">
                 <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-4 @else col-md-7 @endif ">
                 <div class="pL10 slGrey fPerc80">
@@ -106,8 +108,8 @@
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
                             @else + {!! $calcRow["num"] !!} @if ($i < sizeof($printEfficLgt)-1) <br /> @endif @endif
-                        @endforeach
-                    @endif </div>
+                        @endforeach </div>
+                    @endif
                 </div></div>
                 @if ($GLOBALS["SL"]->REQ->has('print'))
                     <div class="col-md-5"><div class="slGrey fPerc80">
