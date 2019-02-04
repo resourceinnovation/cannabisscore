@@ -62,8 +62,6 @@ class CannabisScore extends ScoreImports
             $GLOBALS["SL"]->loadStates();
             $this->getStateUtils();
             $ret .= view('vendor.cannabisscore.nodes.362-utilities-by-state', $this->v)->render();
-        } elseif ($nID == 490) {
-            $ret .= $this->customPrint490($nID);
         } elseif ($nID == 502) {
             $this->chkUtilityOffers();
             $ret .= view('vendor.cannabisscore.nodes.502-utility-offers', $this->v)->render();
@@ -78,14 +76,33 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 548) {
             $this->prepFeedbackSkipLnk();
             $ret .= view('vendor.cannabisscore.nodes.548-powerscore-feedback-score-link', $this->v)->render();
-        } elseif ($nID == 508) {
-            $this->prepUtilityRefTitle();
-            $ret .= view('vendor.cannabisscore.nodes.508-utility-referral-title', $this->v)->render();
         } elseif ($nID == 148) { // this should be built-in
             $this->sessData->dataSets["PowerScore"][0]->PsStatus = $this->v["defCmplt"];
             $this->sessData->dataSets["PowerScore"][0]->save();
             session()->put('PowerScoreOwner', $this->coreID);
             session()->put('PowerScoreOwner' . $this->coreID, $this->coreID);
+            
+        } elseif ($nID == 490) {
+            $ret .= $this->customPrint490($nID);
+        } elseif ($nID == 860) {
+            if (isset($this->sessData->dataSets["PSForCup"])) {
+                $deetVal = '';
+                foreach ($this->sessData->dataSets["PSForCup"] as $i => $cup) {
+                    if (isset($cup->PsCupCupID) && intVal($cup->PsCupCupID) > 0) {
+                        $deetVal .= (($i > 0) ? ', ' : '') 
+                            . $GLOBALS["SL"]->def->getVal('PowerScore Competitions', $cup->PsCupCupID);
+                    }
+                }
+                return ['Competition', $deetVal, $nID];
+            }
+        } elseif ($nID == 861) {
+            if (isset($this->sessData->dataSets["PowerScore"])
+                && isset($this->sessData->dataSets["PowerScore"][0]->PsYear)) {
+                return ['Growing Year', $this->sessData->dataSets["PowerScore"][0]->PsYear, $nID];
+            }
+        } elseif ($nID == 508) {
+            $this->prepUtilityRefTitle();
+            $ret .= view('vendor.cannabisscore.nodes.508-utility-referral-title', $this->v)->render();
             
         // PowerScore Reporting
         } elseif ($nID == 744) {
@@ -400,15 +417,19 @@ class CannabisScore extends ScoreImports
                         ->first();
                 }
             }
-            $this->searcher->v["currGuage"] = round($currRanks->{ 'PsRnk' . $this->searcher->v["eff"] });
-            $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->PsEfficFacility) 
-                && isset($this->searcher->v["powerscore"]->PsEfficProduction) 
-                && isset($this->searcher->v["powerscore"]->PsEfficHvac) 
-                && isset($this->searcher->v["powerscore"]->PsEfficLighting) 
-                && $this->searcher->v["powerscore"]->PsEfficFacility > 0
-                && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
-                && $this->searcher->v["powerscore"]->PsEfficHvac > 0
-                && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
+            $this->searcher->v["currGuage"] = 0;
+            $this->searcher->v["hasOverall"] = false;
+            if (isset($currRanks->{ 'PsRnk' . $this->searcher->v["eff"] })) {
+                $this->searcher->v["currGuage"] = round($currRanks->{ 'PsRnk' . $this->searcher->v["eff"] });
+                $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->PsEfficFacility) 
+                    && isset($this->searcher->v["powerscore"]->PsEfficProduction) 
+                    && isset($this->searcher->v["powerscore"]->PsEfficHvac) 
+                    && isset($this->searcher->v["powerscore"]->PsEfficLighting) 
+                    && $this->searcher->v["powerscore"]->PsEfficFacility > 0
+                    && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
+                    && $this->searcher->v["powerscore"]->PsEfficHvac > 0
+                    && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
+            }
             return view('vendor.cannabisscore.nodes.490-report-calculations-ajax-graphs', $this->searcher->v)->render();
         }
         return '';
@@ -417,11 +438,23 @@ class CannabisScore extends ScoreImports
     // returns an array of overrides for ($currNodeSessionData, ???... 
     protected function printNodeSessDataOverride($nID = -3, $tmpSubTier = [], $nIDtxt = '', $currNodeSessionData = '')
     {
-        if (sizeof($this->sessData->dataSets) == 0) return [];
+        if (sizeof($this->sessData->dataSets) == 0) {
+            return [];
+        }
         if ($nID == 49) {
             if (isset($this->sessData->dataSets["PSFarm"]) 
                 && isset($this->sessData->dataSets["PSFarm"][0]->PsFrmType)) {
                 return [$this->sessData->dataSets["PSFarm"][0]->PsFrmType];
+            }
+        } elseif (in_array($nID, [864, 865])) {
+            if (!isset($this->sessData->dataSets["PowerScore"]) 
+                || !isset($this->sessData->dataSets["PowerScore"][0]->PsYear)
+                || trim($this->sessData->dataSets["PowerScore"][0]->PsYear) == '') {
+                if (intVal(date("n")) <= 6) {
+                    return [intVal(date("Y"))-1];
+                } else {
+                    return [intVal(date("Y"))];
+                }
             }
         } elseif ($nID == 57) {
             if (isset($this->sessData->dataSets["PowerScore"][0]->PsSourceUtilityOther)

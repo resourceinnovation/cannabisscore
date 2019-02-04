@@ -35,13 +35,14 @@ class CannabisScoreGlobals
     public function getHvacEffic($defID)
     {
         switch ($defID) {
-            case 247: return 115;
-            case 248: return 77;
-            case 249: return 104;
-            case 250: return 65;
-            case 360: return 0.0000001;
-            case 251: // Other HVAC System calculations, coming soon?
-                      break;
+            case 247: return 115; // System A
+            case 248: return 77;  // System B
+            case 249: return 104; // System C
+            case 250: return 65;  // System D
+            case 356: return 90;  // System E (average of A-D)
+            case 357: return 90;  // System F
+            case 251: return 90;  // Other System
+            case 360: return 0.0000001; // None
         }
         return 0;
     }

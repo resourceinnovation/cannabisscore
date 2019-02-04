@@ -145,9 +145,12 @@ class ScoreVars extends TreeSurvForm
     protected function allTechEmpty()
     {
         $ret = [ 141 => 0, 142 => 0 ]; // medical, recreational
-        foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) $ret[$fld] = 0;
-        foreach ($GLOBALS["CUST"]->psContact() as $fld => $name) $ret[$fld] = 0;
-        
+        foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
+            $ret[$fld] = 0;
+        }
+        foreach ($GLOBALS["CUST"]->psContact() as $fld => $name) {
+            $ret[$fld] = 0;
+        }
         return $ret;
     }
     

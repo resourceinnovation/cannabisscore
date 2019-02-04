@@ -342,7 +342,9 @@ class ScoreUtils extends ScoreVars
         if (isset($this->sessData->dataSets["PSAreas"]) && sizeof($this->sessData->dataSets["PSAreas"]) > 0) {
             foreach ($this->sessData->dataSets["PSAreas"] as $i => $area) {
                 foreach ($this->v["areaTypes"] as $typ => $defID) {
-                    if ($type == $typ && $area->PsAreaType == $defID) return $area->{ $fldName };
+                    if ($type == $typ && $area->PsAreaType == $defID) {
+                        return $area->{ $fldName };
+                    }
                 }
             }
         }
@@ -376,8 +378,12 @@ class ScoreUtils extends ScoreVars
     protected function getAreaLights($areaID = -3, $areaType = '')
     {
         $ret = [];
-        if ($areaID <= 0 && trim($areaType) != '') $areaID = $this->getAreaFld($areaType, 'PsAreaID');
-        if ($areaID <= 0) return [];
+        if ($areaID <= 0 && trim($areaType) != '') {
+            $areaID = $this->getAreaFld($areaType, 'PsAreaID');
+        }
+        if ($areaID <= 0) {
+            return [];
+        }
         return $this->sessData->getRowIDsByFldVal('PSLightTypes', [ 'PsLgTypAreaID' => $areaID ], true);
     }
     

@@ -61,7 +61,8 @@
         <div class="row">
             <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">HVAC Efficiency:</h3></div>
             <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
-                @if (isset($sessData["PowerScore"][0]->PsEfficHvac)) 
+                @if (isset($sessData["PowerScore"][0]->PsEfficHvac)
+                    && $sessData["PowerScore"][0]->PsEfficHvac > 0.000001) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficHvac, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>kWh / sq ft</nobr>
             </h3></div>
@@ -76,7 +77,7 @@
             <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">Lighting Efficiency:</h3></div>
             <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) 
-                    && $sessData["PowerScore"][0]->PsEfficLighting != 0.00000001)
+                    && $sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>W / sq ft</nobr>
             </h3></div>
@@ -91,7 +92,7 @@
 @endif
     
         @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0
-            && $sessData["PowerScore"][0]->PsEfficLighting != 0.00000001)
+            && $sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
             <div class="row p0 mB20">
                 <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-4 @else col-md-7 @endif ">
                 <div class="pL10 slGrey fPerc80">

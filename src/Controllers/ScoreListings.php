@@ -142,58 +142,33 @@ class ScoreListings
     
     public function getCultClassicReport()
     {
-        $this->v["farms"] = [];
+        $this->v["farms"] = $this->v["psAdded"] = $this->v["namesChecked"] = [];
         $chk = RIICompetitors::where('CmptYear', '=', date("Y"))
-            ->where('CmptCompetition', '=', $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic'))
+            ->where('CmptCompetition', '=', $GLOBALS["SL"]->def->getID('PowerScore Competitions','Cultivation Classic'))
             ->orderBy('CmptName', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $farm) {
-                $this->v["farms"][$i] = [ "name" => $farm->CmptName, "ps" => [], "srch" => [] ];
-                $chk2 = DB::table('RII_PowerScore')
-                    ->leftJoin('RII_PSRankings', function ($join) {
-                        $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-                            ->where('RII_PSRankings.PsRnkFilters', '');
-                    })
-                    ->where('RII_PowerScore.PsName', 'LIKE', $farm->CmptName)
-                    ->whereIn('RII_PowerScore.PsStatus', [$this->v["defCmplt"], 364])
-                    ->orderBy('RII_PowerScore.PsID', 'desc')
-                    ->get();
-                if ($chk2->isNotEmpty()) {
-                    foreach ($chk2 as $j => $ps) {
-                        if ($j == 0) {
-                            $this->v["farms"][$i]["ps"] = $ps;
-                        }
-                    }
-                } else {
-                    $chk2 = RIIPowerScore::where('PsName', 'LIKE', $farm->CmptName)
-                        ->where('PsStatus', 'LIKE', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
-                        ->orderBy('PsID', 'desc')
-                        ->get();
-                    if ($chk2->isNotEmpty()) {
-                        foreach ($chk2 as $j => $ps) {
-                            if ($j == 0) {
-                                $this->v["farms"][$i]["ps"] = $ps;
-                            }
-                        }
-                    } else {
-                        $srchs = $GLOBALS["SL"]->parseSearchWords($farm->CmptName);
-                        if (sizeof($srchs) > 0) {
-                            foreach ($srchs as $srch) {
-                                $chk2 = RIIPowerScore::where('PsName', 'LIKE', '%' . $srch . '%')
-                                    ->get();
-                                if ($chk2->isNotEmpty()) {
-                                    foreach ($chk2 as $j => $ps) {
-                                        if (isset($ps->PsName) && trim($ps->PsName) != '' 
-                                            && !isset($this->v["farms"][$i]["srch"][$ps->PsID])) {
-                                            $this->v["farms"][$i]["srch"][$ps->PsID] = $ps->PsName;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                $this->loadCultClassicFarmName($i, $farm->CmptName);
+            }
+        }
+        $chk = DB::table('RII_PowerScore')
+            ->join('RII_PSForCup', function ($join) {
+                $join->on('RII_PSForCup.PsCupPSID', '=', 'RII_PowerScore.PsID')
+                    ->where('RII_PSForCup.PsCupCupID', 
+                        $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic'));
+            })
+            ->leftJoin('RII_PSRankings', function ($join) {
+                $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
+                    ->where('RII_PSRankings.PsRnkFilters', '');
+            })
+            ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
+            ->whereNotIn('RII_PowerScore.PsID', $this->v["psAdded"])
+            ->orderBy('RII_PowerScore.PsName', 'asc')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $i => $ps) {
+                $this->loadCultClassicID($ps);
             }
         }
         $this->v["farmTots"] = [ 0, 0 ];
@@ -213,8 +188,82 @@ class ScoreListings
         if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
             $innerTable = view('vendor.cannabisscore.nodes.744-cult-classic-report-innertable', $this->v)->render();
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, 'CultClassic-PowerScoreReport-' . date("Y-m-d") . '.xls');
-        } else {
-            return view('vendor.cannabisscore.nodes.744-cult-classic-report', $this->v)->render();
         }
+        $GLOBALS["SL"]->pageBodyOverflowX();
+        return view('vendor.cannabisscore.nodes.744-cult-classic-report', $this->v)->render();
     }
+    
+    protected function loadCultClassicFarmName($i, $farmName = '')
+    {
+        $this->v["namesChecked"][] = $farmName;
+        $this->v["farms"][$i] = [
+            "name" => $farmName,
+            "ps"   => [],
+            "srch" => []
+            ];
+        $chk2 = DB::table('RII_PowerScore')
+            ->leftJoin('RII_PSRankings', function ($join) {
+                $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
+                    ->where('RII_PSRankings.PsRnkFilters', '');
+            })
+            ->where('RII_PowerScore.PsName', 'LIKE', $farmName)
+            ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
+            ->whereIn('RII_PowerScore.PsStatus', [$this->v["defCmplt"], 364])
+            ->orderBy('RII_PowerScore.PsID', 'desc')
+            ->get();
+        if ($chk2->isNotEmpty()) {
+            foreach ($chk2 as $j => $ps) {
+                if ($j == 0) {
+                    $this->v["farms"][$i]["ps"] = $ps;
+                    $this->v["psAdded"][] = $ps->PsID;
+                }
+            }
+        } else {
+            $chk2 = RIIPowerScore::where('PsName', 'LIKE', $farmName)
+                ->where('PsStatus', 'LIKE', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
+                ->where('PsYear', 'LIKE', (date("Y")-1))
+                ->orderBy('PsID', 'desc')
+                ->get();
+            if ($chk2->isNotEmpty()) {
+                foreach ($chk2 as $j => $ps) {
+                    if ($j == 0) {
+                        $this->v["farms"][$i]["ps"] = $ps;
+                        $this->v["psAdded"][] = $ps->PsID;
+                    }
+                }
+            } else {
+                $srchs = $GLOBALS["SL"]->parseSearchWords($farmName);
+                if (sizeof($srchs) > 0) {
+                    foreach ($srchs as $srch) {
+                        $chk2 = RIIPowerScore::where('PsName', 'LIKE', '%' . $srch . '%')
+                            ->where('PsYear', 'LIKE', (date("Y")-1))
+                            ->get();
+                        if ($chk2->isNotEmpty()) {
+                            foreach ($chk2 as $j => $ps) {
+                                if (isset($ps->PsName) && trim($ps->PsName) != '' 
+                                    && !isset($this->v["farms"][$i]["srch"][$ps->PsID])) {
+                                    $this->v["farms"][$i]["srch"][$ps->PsID] = $ps->PsName;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    protected function loadCultClassicID($ps)
+    {
+        if (!isset($ps->PsName) || !in_array($ps->PsName, $this->v["namesChecked"])) {
+            $this->v["psAdded"][] = $ps->PsID;
+            $this->v["farms"][] = [
+                "name" => ((isset($ps->PsName)) ? trim($ps->PsName) : ''),
+                "ps"   => $ps,
+                "srch" => []
+                ];
+        }
+        return true;
+    }
+    
 }
