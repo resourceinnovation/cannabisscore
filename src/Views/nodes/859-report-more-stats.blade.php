@@ -2,6 +2,7 @@
 
 <!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
     ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">More Live Statistics</h1>
 <p>
 &darr; <a href="#sqft" class="mL5 mR5">Sqaure Footage</a> - 
@@ -12,9 +13,10 @@
 <a href="#sqftFixture" class="mL5 mR5">Sqft/Fixture</a> - 
 <a href="#hvac" class="mL5 mR5">HVAC Adoption</a>
 </p>
+</div>
 
 <div class="nodeAnchor"><a name="sqft"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">1. Square Footage by Growth Stage</h2>
 <table border=0 class="table table-striped w100">
 {!! $statSqft->tblHeaderRow('area') !!}
@@ -27,9 +29,10 @@
 {!! $statSqft->tblSpacerRow('area') !!}
 {!! $statSqft->tblFltDatRatio2Col('area', 'farm', 'sqft', 162, 'Average Ratios to Flowering') !!}
 </table>
+</div>
 
 <div class="nodeAnchor"><a name="prod"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">2. Stats & Techniques by Production Types</h2>
 <table border=0 class="table table-striped w100">
 {!! $statMisc->tblHeaderRow('farm') !!}
@@ -52,16 +55,18 @@
 {!! $statMisc->tblHeaderRow('farm') !!}
 {!! $statMisc->tblPercHasDat('farm', [ 'PsConsiderUpgrade', 'PsIncentiveWants', 'PsIncentiveUsed', 'PsNewsletter' ]) !!}
 </table>
+</div>
 
 <div class="nodeAnchor"><a name="lighting"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">3. Lighting Techniques By Growth Stage</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
 {!! $statLgts->tblFltBlksPercHasDat('area', 'farm', [ 'arf', 'dep', 'sun' ]) !!}
 </table>
+</div>
 
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">4. Lighting Kilowatt Hours (kWh)</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -79,16 +84,17 @@
 {!! $statLgts->tblHeaderRow('area') !!}
 {!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'W', 'sqft') !!}
 </table>
+</div>
 
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">5. Lighting Adoption: All Farms</h2>
 {!! $statLgts->pieTblPercHas('area', 'lgty') !!}
-
 {!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', 'Lighting Adoption: ') !!}
+</div>
 
 <div class="nodeAnchor"><a name="sqftFixture"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">6. Square Feet per Lighting Fixture</h2>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -100,9 +106,10 @@
     $statLgts->tblFltRowsBlksCalc('area', 'lgty', 'farm', 'sqft/lgtfx', 'sum', 'Square Feet per Fixture: ')) !!}
 {!! $statLgts->delCurrHide('lgty') !!}
 </table>
+</div>
 
 <div class="nodeAnchor"><a name="hvac"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">7. HVAC Adoption: All Farms</h2>
 <ul>
 <li><b>System A</b> - Conventional Air Conditioning with Supplemental Portable Dehumidification Units 
@@ -117,13 +124,11 @@
 <li><b>System F</b> - Greenhouse HVAC Systems</li>
 </ul>
 {!! $statHvac->pieTblPercHas('area', 'hvac') !!}
-
 {!! $statHvac->pieTblBlksPercHas('area', 'hvac', 'farm', 'Lighting Adoption: ') !!}
-
-
+</div>
 
 <div class="nodeAnchor"><a name="sources"></a></div>
-<div class="p20"></div>
+<div class="slCard nodeWrap">
 <h2 class="slBlueDark">8. On-Site Energy Sources</h2>
 <div class="row">
     <div class="col-6">Indoor ({{ $enrgys["cmpl"][144][0] }}) {!! $enrgys["pie"][144] !!}</div>
@@ -150,3 +155,4 @@
 @endforeach
 </table>
 <div class="slGrey"><i>Outdoor Adjusted PowerScores: #{!! implode(', #', $enrgys["extra"][1]) !!}</i></div>
+</div>

@@ -1,5 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores.blade.php -->
-<div class="row bgWht">
+<div class="slCard nodeWrap">
+<div class="row">
     <div class="col-8">
         <a href="/dash/compare-powerscores"><h1 class="slBlueDark"> 
         @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h1></a>
@@ -21,7 +22,9 @@
 @elseif (isset($psFilter))
     <div class="mB5"><b class="mR20">{{ $allscores->count() }} Found</b> {!! $psFilter !!}</div>
 @endif
+</div>
 
+<div class="slCard nodeWrap">
 <table border=0 class="table w100 bgWht">
 <tr>
 <th>
@@ -214,5 +217,6 @@
     <tr><td colspan=11 class="slGrey"><i>No PowerScores found.</i></td></tr>
 @endif
 </table>
+</div>
 
-@if (isset($reportExtras)) {!! $reportExtras !!} @endif
+@if (isset($reportExtras)) <div class="slCard nodeWrap">{!! $reportExtras !!}</div> @endif

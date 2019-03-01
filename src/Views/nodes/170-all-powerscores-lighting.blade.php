@@ -1,6 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores-lighting.blade.php -->
 @if (!$GLOBALS["SL"]->REQ->has('excel'))
-    <div class="row bgWht">
+    <div class="slCard nodeWrap">
+    <div class="row">
         <div class="col-8">
             <a href="/dash/compare-powerscores"><h1 class="slBlueDark">Compare All Lighting</h1></a>
         </div><div class="col-4 taR"><div class="mTn10 pB10">
@@ -15,10 +16,12 @@
     @elseif (isset($psFilter))
         <div class="mB5">{!! $psFilter !!}</div>
     @endif
+    </div>
 @endif
 
 @foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $i => $area)
     @if (!$GLOBALS["SL"]->REQ->has('excel'))
+        <div class="slCard nodeWrap">
         <h2 class="slBlueDark">{{ $area->DefValue }} ({{ sizeof($allights[$area->DefID]) }})</h2>
         <table border=0 class="table w100 bgWht">
     @else <tr><td colspan=5>{{ $area->DefValue }} ({{ sizeof($allights[$area->DefID]) }})</td></tr>
@@ -94,10 +97,11 @@
             <tr><td colspan=5 class="slGrey" ><i>No PowerScores found.</i></td></tr>
         @endforelse
         @if (!$GLOBALS["SL"]->REQ->has('excel'))
-            </table>
-            <div class="p20">&nbsp;</div>
+            </table></div>
         @endif
     @endif
 @endforeach
 
-@if (!$GLOBALS["SL"]->REQ->has('excel') && isset($reportExtras)) {!! $reportExtras !!} @endif
+@if (!$GLOBALS["SL"]->REQ->has('excel') && isset($reportExtras))
+    <div class="slCard nodeWrap">{!! $reportExtras !!}</div>
+@endif

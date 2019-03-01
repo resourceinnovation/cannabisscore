@@ -90,21 +90,19 @@ class CannabisScoreSearcher extends Searcher
     
     public function searchFiltsURLXtra()
     {
-        $this->v["sort"] = [ 'PsEfficOverall', 'desc' ];
+        $this->v["sort"] = [ 'PsID', 'desc' ];
         if ($GLOBALS["SL"]->REQ->has('srt') && trim($GLOBALS["SL"]->REQ->get('srt')) != '') {
             $this->v["sort"][0] = $GLOBALS["SL"]->REQ->get('srt');
             if ($GLOBALS["SL"]->REQ->has('srta') && in_array(trim($GLOBALS["SL"]->REQ->get('srta')), ['asc', 'desc'])) {
                 $this->v["sort"][1] = $GLOBALS["SL"]->REQ->get('srta');
             }
         }
-        $this->v["urlFlts"] = $this->v["xtraFltsDesc"] = '';
+        $this->v["xtraFltsDesc"] = '';
+        $this->v["urlFlts"] = '&fltFarm=' . $this->v["fltFarm"];
         if ($GLOBALS["SL"]->REQ->has('lighting')) {
             $this->v["urlFlts"] .= '&lighting=1';
         }
         //if ($this->v["psid"] > 0) $this->v["urlFlts"] .= '&ps=' . $this->v["psid"];
-        if (intVal($this->v["fltFarm"]) > 0) {
-            $this->v["urlFlts"] .= '&fltFarm=' . $this->v["fltFarm"];
-        }
         if (intVal($this->v["fltFut"]) > 0) {
             $this->v["urlFlts"] .= '&fltFut=' . $this->v["fltFut"];
         }

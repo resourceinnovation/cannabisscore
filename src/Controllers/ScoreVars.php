@@ -11,8 +11,10 @@
   */
 namespace CannabisScore\Controllers;
 
+use DB;
 use Illuminate\Http\Request;
 use App\Models\RIIPowerScore;
+use App\Models\RIIManufacturers;
 use CannabisScore\Controllers\ScoreLookups;
 use SurvLoop\Controllers\TreeSurvForm;
 
@@ -31,7 +33,7 @@ class ScoreVars extends TreeSurvForm
         if ($GLOBALS["SL"]->treeID == 1) {
             $this->majorSections[] = [45,  'Your Farm',            'active'];
             $this->majorSections[] = [64,  'Growing Environments', 'active'];
-            $this->majorSections[] = [608, 'Lighting',             'active'];
+            $this->majorSections[] = [911, 'Lighting',             'active'];
             $this->majorSections[] = [609, 'HVAC',                 'active'];
             $this->majorSections[] = [65,  'Annual Totals',        'active'];
             $this->majorSections[] = [844, 'Other Techniques',     'active'];
@@ -137,6 +139,15 @@ class ScoreVars extends TreeSurvForm
         return '';
     }
     
+    protected function getAreaIdTypeName($areaID)
+    {
+        $area = $this->sessData->getRowById('PSAreas', $areaID);
+        if ($area && isset($area->PsAreaType)) {
+            return $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $area->PsAreaType);
+        }
+        return '';
+    }
+    
     public function xmlAllAccess()
     {
         return false;
@@ -152,6 +163,91 @@ class ScoreVars extends TreeSurvForm
             $ret[$fld] = 0;
         }
         return $ret;
+    }
+    
+    protected function loadManufactIDs()
+    {
+        if (!isset($this->v["manufacts"])) {
+            $this->v["manufacts"] = [];
+            $chk = RIIManufacturers::get();
+            if ($chk->isNotEmpty()) {
+                foreach ($chk as $manu) {
+                    $this->v["manufacts"][$manu->ManuID] = $manu->ManuName;
+                }
+            }
+        }
+        return $this->v["manufacts"];
+    }
+    
+    protected function convertLightScoreType2ImportType($scoreType = 0)
+    {
+        switch (intVal($scoreType)) {
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended HPS)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended HPS)'):
+                return ['Double Ended HPS', 'Single Ended HPS', 'HID', 'HPS'];
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended MH)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended MH)'):
+                return ['MH', 'MH/HPS Lamps'];
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'CMH'):
+                return ['Ceramic Metal Halide'];
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'Fluorescent'):
+                return ['Fluorescent', 'Fluorescent + Halogen', 'Fluorescent Induction'];
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'LED'):
+                return ['LED'];
+        }
+        return [];
+    }
+    
+    protected function convertLightImportType2ScoreType($importType = '')
+    {
+        switch (trim($importType)) {
+            case 'Double Ended HPS': 
+            case 'HID':
+            case 'HPS':
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended HPS)');
+            case 'Single Ended HPS': 
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended HPS)');
+            case 'MH': 
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended MH)');
+            case 'Ceramic Metal Halide':
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'CMH');
+            case 'Fluorescent': 
+            case 'Fluorescent + Halogen': 
+            case 'Fluorescent Induction': 
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'Fluorescent');
+            case 'LED':
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'LED');
+            case 'MH/HPS Lamps': 
+            case 'CFL': 
+            case 'Plasma': 
+        }
+        return 0;
+    }
+    
+    protected function loadLightImportTypeConverts()
+    {
+        $this->v["lightImportTypeConvert"] = [];
+        $chk = DB::table('RII_LightModels')
+            ->distinct('LgtModTech')
+            ->select('LgtModTech')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $mod) {
+                $this->v["lightImportTypeConvert"][$mod->LgtModTech] 
+                    = $this->convertLightImportType2ScoreType($mod->LgtModTech);
+            }
+        }
+        return $this->v["lightImportTypeConvert"];
+    }
+    
+    protected function getAllLightModels()
+    {
+        return DB::table('RII_LightModels')
+            ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', '=', 'RII_LightModels.LgtModManuID')
+            ->orderBy('RII_Manufacturers.ManuName', 'asc')
+            ->orderBy('RII_LightModels.LgtModName', 'asc')
+            ->select('RII_LightModels.*')
+            ->get();
     }
     
 }

@@ -1,8 +1,9 @@
 <?php
 /**
   * CannabisScore extends ScoreImports extends ScoreAdminMisc extends ScoreReports extends ScoreListings
-  * extends ScoreCalcs extends ScoreUtils extends ScoreVars extends TreeSurvForm. This class contains the 
-  * majority of SurvLoop functions which are overwritten, and delegates most of the work.
+  * extends ScoreCalcs extends ScoreUtils extends ScorePowerUtilities extends ScoreLightModels 
+  * extends ScoreVars extends TreeSurvForm. This class contains the majority of 
+  * SurvLoop functions which are overwritten, and delegates most of the work.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
@@ -138,11 +139,13 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 786) {
             $ret .= $this->adminSearchResults();
         } elseif ($nID == 726) {
-            $ret .= '<div class="p20"></div><div id="726graph" class="w100" style="height: 600px;"></div>';
-            $GLOBALS["SL"]->pageAJAX .= '$("#726graph").load("/dashboard/surv-1/sessions/graph-daily"); ';
-            $GLOBALS["SL"]->x["needsCharts"] = true;
+            $ret .= $this->printDashSessGraph();
             
         // Admin Tools
+        } elseif ($nID == 914) {
+            $ret .= $this->printMgmtManufacturers($nID);
+        } elseif ($nID == 917) {
+            $ret .= $this->printMgmtLightModels($nID);
         } elseif ($nID == 845) {
             $ret .= $this->printAdminPsComms();
         } elseif ($nID == 637) {
@@ -189,11 +192,15 @@ class CannabisScore extends ScoreImports
                     ->get();
                 if ($utIDs->isNotEmpty()) {
                     $ids = [];
-                    foreach ($utIDs as $u) $ids[] = $u->PsUtZpUtilID;
+                    foreach ($utIDs as $u) {
+                        $ids[] = $u->PsUtZpUtilID;
+                    }
                     $uts = RIIPSUtilities::whereIn('PsUtID', $ids)
                         ->get(); // will be upgrade to check for farm's zip code
                     if ($uts->isNotEmpty()) {
-                        foreach ($uts as $i => $ut) $curr->addTmpResponse($ut->PsUtID, $ut->PsUtName);
+                        foreach ($uts as $i => $ut) {
+                            $curr->addTmpResponse($ut->PsUtID, $ut->PsUtName);
+                        }
                     }
                 }
             }
@@ -207,7 +214,9 @@ class CannabisScore extends ScoreImports
     
     protected function postNodePublicCustom($nID = -3, $tmpSubTier = [])
     { 
-        if (empty($tmpSubTier)) $tmpSubTier = $this->loadNodeSubTier($nID);
+        if (empty($tmpSubTier)) {
+            $tmpSubTier = $this->loadNodeSubTier($nID);
+        }
         list($tbl, $fld) = $this->allNodes[$nID]->getTblFld();
         
         if ($nID == 47) {
@@ -258,6 +267,12 @@ class CannabisScore extends ScoreImports
                 }
             }
             return true;
+            
+            
+        } elseif ($nID == 914) {
+            return $this->addManufacturers($nID);
+        } elseif ($nID == 917) {
+            return $this->addLightModels($nID);
         }
         return false; // false to continue standard post processing
     }
@@ -306,10 +321,17 @@ class CannabisScore extends ScoreImports
     
     public function printReport490()
     {
+        if ($GLOBALS["SL"]->REQ->has('step') && $GLOBALS["SL"]->REQ->has('postAction')
+            && trim($GLOBALS["SL"]->REQ->get('postAction')) != '') {
+            return $this->redir($GLOBALS["SL"]->REQ->get('postAction'), true);
+        }
         $this->initSearcher();
         $this->searcher->getSearchFilts();
         $this->getAllReportCalcs();
-        $this->getSimilarStats();
+        if (!$GLOBALS["SL"]->REQ->has('fltFarm')) {
+            $this->searcher->v["fltFarm"] = $this->sessData->dataSets["PowerScore"][0]->PsCharacterize;
+            $this->searcher->searchFiltsURLXtra();
+        }
         $this->searcher->v["nID"] = 490;
         $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
@@ -331,6 +353,8 @@ class CannabisScore extends ScoreImports
             return $this->ajaxFutureYields();
         } elseif ($type == 'adm-comms') {
             return $this->admCommsForm($request);
+        } elseif ($type == 'light-search') {
+            return $this->ajaxLightSearch($request);
         }
         return '';
     }
@@ -506,21 +530,19 @@ class CannabisScore extends ScoreImports
             if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
             return intVal($area->PsAreaHasStage);
         } elseif ($condition == '#MotherArtificialLight') {
-            $area = $this->getArea('Mother');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
-            return intVal($area->PsAreaLgtArtif);
+            return $this->runCondArtifArea('Mother');
         } elseif ($condition == '#CloneArtificialLight') {
-            $area = $this->getArea('Clone');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
-            return intVal($area->PsAreaLgtArtif);
+            return $this->runCondArtifArea('Clone');
         } elseif ($condition == '#VegArtificialLight') {
-            $area = $this->getArea('Veg');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
-            return intVal($area->PsAreaLgtArtif);
+            return $this->runCondArtifArea('Veg');
         } elseif ($condition == '#FlowerArtificialLight') {
-            $area = $this->getArea('Flower');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
-            return intVal($area->PsAreaLgtArtif);
+            return $this->runCondArtifArea('Flower');
+        } elseif ($condition == '#HasArtificialLight') { // could be replaced by OR functionality
+            if ($this->runCondArtifArea('Mother') == 1 || $this->runCondArtifArea('Clone') == 1
+                || $this->runCondArtifArea('Veg') == 1 || $this->runCondArtifArea('Flower') == 1) {
+                return 1;
+            }
+            return 0;
         } elseif ($condition == '#MotherSunlight') {
             $area = $this->getArea('Mother');
             if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
@@ -604,9 +626,20 @@ class CannabisScore extends ScoreImports
         return -1;
     }
     
+    private function runCondArtifArea($areaName)
+    {
+        $area = $this->getArea($areaName);
+        if (!isset($area) || !isset($area->PsAreaHasStage)) {
+            return 0;
+        }
+        return intVal($area->PsAreaLgtArtif);
+    }
+    
     public function sendEmailBlurbsCustom($emailBody, $deptID = -3)
     {
-        if (!isset($this->sessData->dataSets["PowerScore"])) return $emailBody;
+        if (!isset($this->sessData->dataSets["PowerScore"])) {
+            return $emailBody;
+        }
         $rankSim = $this->getSimilarStats();
         $dynamos = [
             '[{ PowerScore }]',

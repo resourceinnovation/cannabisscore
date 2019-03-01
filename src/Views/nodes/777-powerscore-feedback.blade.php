@@ -1,5 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/777-powerscore-feedback.blade.php -->
-
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">PowerScore Feedback Survey</h1>
 <a href="/start/powerscore-feedback" target="_blank">/start/powerscore-feedback</a>
 <table border=0 class="table table-striped w100">
@@ -23,10 +23,10 @@
 <td> @if (isset($row->PsEfficOverall)) {{ round($row->PsEfficOverall) }}% @endif </td>
 <td><a href="/calculated/u-{{ $row->PsfPsID }}" target="_blank">#{{ $row->PsfPsID }} 
     @if (isset($row->PsName)) <br />{{ $row->PsName }} @endif </a></td>
-<td> @if (isset($row->created_at)) {{ date("n/j g:ia", strtotime($row->created_at)) }} @endif </td>
+<td> @if (isset($row->created_at)) {{ date("n/j/y g:ia", strtotime($row->created_at)) }} @endif </td>
 </tr>
 @empty
 
 @endforelse
-
 </table>
+</div>

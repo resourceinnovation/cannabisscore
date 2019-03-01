@@ -25,6 +25,9 @@ class RIIPSAreas extends Model
 		'PsAreaHvacOther', 
 		'PsAreaCalcWatts', 
 		'PsAreaCalcSize', 
+		'PsAreaLgtPattern', 
+		'PsAreaLgtFixSize1', 
+		'PsAreaLgtFixSize2', 
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -1,9 +1,8 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/742-process-uploads.blade.php -->
-<div id="fixedHeader" class="fixed">
-    <div id="animLoadingUploads" class="float-right disBlo slBlueDark">
-        <i>Loading...</i> <img src="/cannabisscore/uploads/greenometer-spinner.gif" border=0 height=40 ></div>
-    <h2>Processing Uploads</h2>
-</div>
+<p>&nbsp;</p>
+<div id="animLoadingUploads" class="float-right disBlo slBlueDark">
+    <i>Loading...</i> <img src="/cannabisscore/uploads/greenometer-spinner.gif" border=0 height=40 ></div>
+<h2>Processing Uploads</h2>
 <div class="p20 m20"></div>
 </form>
 <table class="table table-striped">

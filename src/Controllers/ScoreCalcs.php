@@ -420,10 +420,6 @@ class ScoreCalcs extends ScoreUtils
             $this->v["psid"] = $this->sessData->dataSets["PowerScore"][0]->getKey();
             $this->v["hasRefresh"] = (($GLOBALS["SL"]->REQ->has('refresh')) ? '&refresh=1' : '')
                 . (($GLOBALS["SL"]->REQ->has('print')) ? '&print=1' : '');
-            $this->v["filtClimate"] = (($GLOBALS["SL"]->REQ->has('climate') 
-                && intVal($GLOBALS["SL"]->REQ->get('climate')) == 1) ? 1 : 0);
-            $this->v["filtFarm"] = (($GLOBALS["SL"]->REQ->has('farm')) 
-                ? intVal($GLOBALS["SL"]->REQ->get('farm')) : 0);
             $GLOBALS["SL"]->loadStates();
             return true;
         }
@@ -435,11 +431,15 @@ class ScoreCalcs extends ScoreUtils
         if (!$ps && isset($this->sessData->dataSets["PowerScore"]) 
             && sizeof($this->sessData->dataSets["PowerScore"]) > 0) {
             $ps = $this->sessData->dataSets["PowerScore"][0];
+        } elseif ($this->coreID > 0) {
+            $ps = RIIPowerScore::find($this->coreID);
         }
-        $chk = RIIPSRankings::where('PsRnkPSID', $ps->PsID)
-            ->where('PsRnkFilters', '&fltFarm=' . $ps->PsCharacterize)
-            ->first();
-        return $chk;
+        if ($ps && isset($ps->PsID)) {
+            return RIIPSRankings::where('PsRnkPSID', $ps->PsID)
+                ->where('PsRnkFilters', '&fltFarm=' . $ps->PsCharacterize)
+                ->first();
+        }
+        return new RIIPSRankings;
     }
     
 }

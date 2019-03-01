@@ -2,14 +2,14 @@
 
 function gatherFilts() {
     var baseUrl = @if ($GLOBALS["SL"]->REQ->has('lighting')) "&lighting=1"; @else ""; @endif
+    if (document.getElementById("filtFarmID")) {
+        baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
+    }
     if (document.getElementById("fltStateID") && document.getElementById("fltStateID").value.trim() != '') {
         baseUrl += "&fltState="+document.getElementById("fltStateID").value.trim();
     }
     if (document.getElementById("filtClimateID") && document.getElementById("filtClimateID").value.trim() != '') {
         baseUrl += "&fltClimate="+document.getElementById("filtClimateID").value.trim();
-    }
-    if (document.getElementById("filtFarmID") && parseInt(document.getElementById("filtFarmID").value) > 0) {
-        baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }
     if (document.getElementById("fltFutID") && parseInt(document.getElementById("fltFutID").value) > 0) {
         baseUrl += "&fltFut="+document.getElementById("fltFutID").value.trim();

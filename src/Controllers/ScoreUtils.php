@@ -12,17 +12,16 @@
 namespace CannabisScore\Controllers;
 
 use DB;
+use Illuminate\Http\Request;
 use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
 use App\Models\RIIPSRenewables;
 use App\Models\RIIPSMonthly;
-use App\Models\RIIPSUtilities;
-use App\Models\RIIPSUtiliZips;
 use App\Models\RIIPSForCup;
 use App\Models\SLZips;
 use CannabisScore\Controllers\ScoreVars;
 
-class ScoreUtils extends ScoreVars
+class ScoreUtils extends ScorePowerUtilities
 {   
     
     public function multiRecordCheckIntro($cnt = 1)
@@ -189,22 +188,45 @@ class ScoreUtils extends ScoreVars
     
     protected function getLoopItemLabelCustom($loop, $itemRow = [], $itemInd = -3)
     {
-        if ($loop == 'Growth Stages') {
+        if (in_array($loop, ['Growth Stages', 'Harvest Stages'])) {
             switch (intVal($itemRow->PsAreaType)) {
-                case 237: return 'mother plants';     break;
-                case 160: return 'clone plants';      break;
-                case 161: return 'vegetating plants'; break;
-                case 162: return 'flowering plants';  break;
-                case 163: return 'drying / curing';   break;
+                case 237: return 'Mother Plants';     break;
+                case 160: return 'Clone Plants';      break;
+                case 161: return 'Vegetating Plants'; break;
+                case 162: return 'Flowering Plants';  break;
+                case 163: return 'Drying / Curing';   break;
+            }
+        } elseif ($loop == 'Types of Light Fixtures') {
+            if ($itemRow && isset($itemRow->PsLgTypAreaID)) {
+                $lgtDesc = '<b>' . $this->getAreaIdTypeName($itemRow->PsLgTypAreaID) . ':</b> ';
+                if (isset($itemRow->PsLgTypCount) && trim($itemRow->PsLgTypCount) != '') {
+                    $lgtDesc .= number_format($itemRow->PsLgTypCount) . ' fixtures, ';
+                }
+                if (isset($itemRow->PsLgTypWattage) && trim($itemRow->PsLgTypWattage) != '') {
+                    $lgtDesc .= number_format($itemRow->PsLgTypWattage) . 'W each';
+                }
+                $lgtDesc .= '</h3>';
+                if (isset($itemRow->PsLgTypLight) && intVal($itemRow->PsLgTypLight) > 0) {
+                    $lgtDesc .= $GLOBALS["SL"]->def->getVal('PowerScore Light Types', $itemRow->PsLgTypLight);
+                    if ((isset($itemRow->PsLgTypMake) && trim($itemRow->PsLgTypMake) != '') 
+                        || (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '')) {
+                        $lgtDesc .= ', ';
+                    }
+                }
+                if (isset($itemRow->PsLgTypMake) && trim($itemRow->PsLgTypMake) != '') {
+                    $lgtDesc .= $itemRow->PsLgTypMake;
+                    if (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '') {
+                        $lgtDesc .= ', ';
+                    }
+                }
+                if (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '') {
+                    $lgtDesc .= $itemRow->PsLgTypModel;
+                }
+                $lgtDesc .= '<h3 class="disNon">';
+                return $lgtDesc;
             }
         }
         return '';
-    }
-    
-    protected function postTableHvac($nID, $hvacSet = 'Cooling')
-    {
-        $set = 'PowerScore HVAC ' . $hvacSet;
-        
     }
     
     protected function nIDgetRenew($nID)
@@ -218,96 +240,6 @@ class ScoreUtils extends ScoreVars
             case 81: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Pelton Wheel');
         }
         return -3;
-    }
-    
-    protected function chkUtilityOffers()
-    {
-        $this->v["utilOffer"] = ['', ''];
-        $GLOBALS["SL"]->loadStates();
-        /*
-        $this->v["utilOffer"][0] = $GLOBALS["SL"]->states->getState($this->sessData->dataSets["PowerScore"][0]->PsState)
-            . ' Energy Group';
-        $this->v["utilOffer"][1] = '/start/referral/?new=1&u=6&s=' . $this->coreID;
-        */
-        return $this->v["utilOffer"];
-    }
-    
-    public function loadUtils()
-    {
-        $this->v["powerUtils"] = $this->v["powerUtilsInd"] = [];
-        $chk = RIIPSUtilities::orderBy('PsUtName', 'asc')
-            ->get();
-        if ($chk->isNotEmpty()) {
-            foreach ($chk as $i => $u) {
-                $this->v["powerUtilsInd"][$u->PsUtID] = sizeof($this->v["powerUtils"]);
-                $this->v["powerUtils"][] = [
-                    "id"     => $u->PsUtID, 
-                    "name"   => $u->PsUtName, 
-                    "zips"   => [], 
-                    "states" => []
-                    ];
-            }
-        }
-        return $this->v["powerUtils"];
-    }
-    
-    public function getUtilZips()
-    {
-        $this->loadUtils();
-        $chk = RIIPSUtiliZips::get();
-        if ($chk->isNotEmpty()) {
-            foreach ($chk as $i => $uz) {
-                if (isset($uz->PsUtZpZipCode) && isset($this->v["powerUtilsInd"][$uz->PsUtZpUtilID])) {
-                    $ind = $this->v["powerUtilsInd"][$uz->PsUtZpUtilID];
-                    if (!in_array($uz->PsUtZpZipCode, $this->v["powerUtils"][$ind]["zips"])) {
-                        $this->v["powerUtils"][$ind]["zips"][] = $uz->PsUtZpZipCode;
-                    }
-                }
-            }
-        }
-        return $this->v["powerUtils"];
-    }
-    
-    public function getUtilStates()
-    {
-        $this->getUtilZips();
-        if (sizeof($this->v["powerUtils"]) > 0) {
-            foreach ($this->v["powerUtils"] as $ind => $u) {
-                $chk = SLZips::whereIn('ZipZip', $u["zips"])
-                    ->select('ZipState')
-                    ->distinct()
-                    ->get();
-                if ($chk->isNotEmpty()) {
-                    foreach ($chk as $i => $z) {
-                        if (!in_array($z->ZipState, $this->v["powerUtils"][$ind]["states"])) {
-                            $this->v["powerUtils"][$ind]["states"][] = $z->ZipState;
-                        }
-                    }
-                }
-            }
-        }
-        return $this->v["powerUtils"];
-    }
-    
-    public function getStateUtils()
-    {
-        $this->getUtilStates();
-        $this->v["statePowerUtils"] = [];
-        if (sizeof($this->v["powerUtils"]) > 0) {
-            $GLOBALS["SL"]->loadStates();
-            foreach ($this->v["powerUtils"] as $ind => $u) {
-                if (sizeof($u["states"]) > 0) {
-                    foreach ($u["states"] as $s) {
-                        $s = $GLOBALS["SL"]->states->getState($s);
-                        if (!isset($this->v["statePowerUtils"][$s])) $this->v["statePowerUtils"][$s] = [];
-                        if (!in_array($u["id"], $this->v["statePowerUtils"][$s])) {
-                            $this->v["statePowerUtils"][$s][] = $u["id"];
-                        }
-                    }
-                }
-            }
-        }
-        return ksort($this->v["statePowerUtils"]);
     }
     
     protected function getArea($type = 'Mother') 

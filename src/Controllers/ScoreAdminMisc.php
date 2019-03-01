@@ -17,7 +17,10 @@ use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
 use App\Models\RIIPSMonthly;
 use App\Models\RIIPSCommunications;
+use App\Models\RIIManufacturers;
+use App\Models\RIILightModels;
 use App\Models\SLUploads;
+use SurvLoop\Controllers\SurvTrends;
 use CannabisScore\Controllers\ScoreCalcs;
 
 class ScoreAdminMisc extends ScoreCalcs
@@ -225,26 +228,6 @@ class ScoreAdminMisc extends ScoreCalcs
                 }
                 $this->v["sendResults"] .= $GLOBALS["SL"]->opnAjax() . $ajax . $GLOBALS["SL"]->clsAjax();
             }
-        }
-        $chk = RIIPowerScore::where(function ($query) {
-                $query->whereNull('PsEfficOverSimilar')
-                      ->orWhere('PsEfficOverSimilar', 'LIKE', 0);
-            })
-            ->where('PsEmail', 'NOT LIKE', '')
-            ->where('PsEmail', 'NOT LIKE', 'NWPCC@NWPCC.com')
-            ->where('PsEfficFacility', '>', 0)
-            ->where('PsEfficProduction', '>', 0)
-            ->where('PsEfficLighting', '>', 0)
-            ->where('PsEfficHvac', '>', 0)
-            ->get();
-        if ($chk->isNotEmpty()) {
-            $this->v["sendResults"] .= '<h3>Calculating...</h3>';
-            foreach ($chk as $i => $ps) {
-                $this->v["sendResults"] .= '<iframe id="calcEmaPs' . $ps->PsID . '" src="" class="fL"
-                    style="height: 260px; width: 130px;"></iframe>';
-            }
-            $this->v["sendResults"] .= '<div class="fC"></div><hr>Once all the above frames have loaded, then these '
-                . 'records have been recalculated and updated.<hr>';
         }
         $chk = RIIPowerScore::where('PsEmail', 'NOT LIKE', '')
             ->orderBy('PsEmail', 'asc')
@@ -530,6 +513,37 @@ class ScoreAdminMisc extends ScoreCalcs
         return view('vendor.cannabisscore.nodes.786-admin-search-results', $this->v)->render();
     }
     
+    protected function printDashSessGraph()
+    {
+        $this->v["isDash"] = true;
+        $grapher = new SurvTrends('' . rand(1000000, 10000000) . '');
+        $grapher->addDataLineType('complete', 'Complete', '', '#116D38', '#116D38');
+        $grapher->addDataLineType('archived', 'Archived', '', '#70A787', '#70A787');
+        $grapher->addDataLineType('incomplete', 'Incomplete', '', '#FDD471', '#FDD471');
+        $recentAttempts = RIIPowerScore::whereNotNull('PsZipCode')
+            ->where('PsZipCode', 'NOT LIKE', '')
+            ->where('created_at', '>=', $grapher->getPastStartDate() . ' 00:00:00')
+            ->select('PsStatus', 'created_at')
+            ->get();
+        if ($recentAttempts->isNotEmpty()) {
+            foreach ($recentAttempts as $i => $rec) {
+                switch ($rec->PsStatus) {
+                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'):
+                        $grapher->addDayTally('incomplete', $rec->created_at);
+                        break;
+                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'):
+                        $grapher->addDayTally('complete', $rec->created_at);
+                        break;
+                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived'):
+                        $grapher->addDayTally('archived', $rec->created_at);
+                        break;
+                }
+            }
+        }
+        return '<h2 class="slBlueDark">Recent PowerScore Submission Attempts</h2>' . $grapher->printDailyGraph()
+            . '<style> #mainBody { background: #E7F0EB; } </style>';
+    }
+    
     protected function printAdminPsComms()
     {
         $comms = $adms = [];
@@ -565,6 +579,80 @@ class ScoreAdminMisc extends ScoreCalcs
             return view('vendor.cannabisscore.nodes.845-admin-communications-log-form', $this->v)->render();
         }
         return '';
+    }
+    
+    protected function printMgmtManufacturers($nID = -3)
+    {
+        return view('vendor.cannabisscore.nodes.914-manage-manufacturers', [
+            "manus" => RIIManufacturers::orderBy('ManuName', 'asc')->get()            
+            ])->render();
+    }
+    
+    protected function addManufacturers($nID = -3)
+    {
+        if ($GLOBALS["SL"]->REQ->has('addManu') && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
+            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addManu'));
+            if (sizeof($lines) > 0) {
+                foreach ($lines as $i => $line) {
+                    $line = trim($line);
+                    if ($line != '') {
+                        $chk = RIIManufacturers::where('ManuName', 'LIKE', $line)
+                            ->first();
+                        if (!$chk || !isset($chk->ManuID)) {
+                            $chk = new RIIManufacturers;
+                            $chk->ManuName = $line;
+                            $chk->save();
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    protected function printMgmtLightModels($nID = -3)
+    {
+        $this->loadManufactIDs();
+        $this->v["models"] = $this->getAllLightModels();
+        return view('vendor.cannabisscore.nodes.917-manage-lighting-models', $this->v)->render();
+    }
+    
+    protected function addLightModels($nID = -3)
+    {
+        if ($GLOBALS["SL"]->REQ->has('addModels') && trim($GLOBALS["SL"]->REQ->get('addModels')) != '') {
+            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addModels'));
+            if (sizeof($lines) > 0) {
+                foreach ($lines as $i => $line) {
+                    $line = trim($line);
+                    if ($line != '') {
+                        $cols = $GLOBALS["SL"]->mexplode("\t", $line);
+                        if (sizeof($cols) == 3) {
+                            foreach ($cols as $i => $col) {
+                                $cols[$i] = trim($col);
+                            }
+                            $manu = RIIManufacturers::where('ManuName', 'LIKE', $cols[0])
+                                ->first();
+                            if (!$manu || !isset($manu->ManuName)) {
+                                $manu = new RIIManufacturers;
+                                $manu->ManuName = $cols[0];
+                                $manu->save();
+                            }
+                            $chk = RIILightModels::where('LgtModManuID', 'LIKE', $manu->ManuID)
+                                ->where('LgtModName', 'LIKE', $cols[1])
+                                ->first();
+                            if (!$chk || !isset($chk->LgtModID)) {
+                                $chk = new RIILightModels;
+                                $chk->LgtModManuID = $manu->ManuID;
+                                $chk->LgtModName = $cols[1];
+                            }
+                            $chk->LgtModTech = $cols[2];
+                            $chk->save();
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
     
     protected function tmpDebug($str = '')
