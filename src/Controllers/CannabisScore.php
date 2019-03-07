@@ -545,11 +545,15 @@ class CannabisScore extends ScoreImports
             return 0;
         } elseif ($condition == '#MotherSunlight') {
             $area = $this->getArea('Mother');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
+            if (!isset($area) || !isset($area->PsAreaHasStage)) {
+                return 0;
+            }
             return intVal($area->PsAreaLgtSun);
         } elseif ($condition == '#CloneSunlight') {
             $area = $this->getArea('Clone');
-            if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
+            if (!isset($area) || !isset($area->PsAreaHasStage)) {
+                return 0;
+            }
             return intVal($area->PsAreaLgtSun);
         } elseif ($condition == '#VegSunlight') {
             $area = $this->getArea('Veg');
