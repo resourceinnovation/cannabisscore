@@ -50,7 +50,10 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 701) {
             $this->pageJSvalid .= "errorFocus[errorFocus.length] = new Array('701', 'n575fld0'); var idList = "
                 . "new Array('n575fld0', 'n577fld0', 'n578fld0', 'n579fld0', 'n306fld0', 'n495fld0', 'n574fld0'); "
-                . "reqFormFldRadioCustom('701', idList); ";
+                . "function tryRadioCustom() { if (typeof addReqNodeRadioCustom === \"function\") "
+                . "addReqNodeRadioCustom('701', 'reqFormFldRadioCustom', idList); \n"
+                . "else setTimeout(\"tryRadioCustom()\", 500); return !0 \n } \n"
+                . "setTimeout(\"tryRadioCustom()\", 100); \n";
         } elseif ($nID == 393) {
             $GLOBALS["SL"]->pageAJAX .= view('vendor.cannabisscore.nodes.393-area-lighting-ajax', [
                 "areas" => $this->sessData->getLoopRowIDs('Growth Stages')
@@ -285,9 +288,7 @@ class CannabisScore extends ScoreImports
             && isset($this->sessData->dataSets["PowerScore"][0]->PsGrams)) {
             $this->v["currSessData"] = $this->sessData->dataSets["PowerScore"][0]->PsGrams;
         }
-        $this->pageJSvalid .= "if (document.getElementById('n" . $nIDtxt 
-            . "VisibleID') && document.getElementById('n" . $nIDtxt 
-            . "VisibleID').value == 1) reqFormFldGreater('" . $nIDtxt . "', 0.00000001);\n";
+        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt . "', 'reqFormFldGreater', 0.00000001);\n";
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
     }
     
@@ -296,9 +297,7 @@ class CannabisScore extends ScoreImports
         $this->v["nID"]         = $nID;
         $this->v["powerScore"]  = $this->sessData->dataSets["PowerScore"][0];
         $this->v["powerMonths"] = $this->sortMonths();
-        $this->pageJSvalid .= "if (document.getElementById('n" . $nIDtxt 
-            . "VisibleID') && document.getElementById('n" . $nIDtxt 
-            . "VisibleID').value == 1) reqFormFldGreater('" . $nIDtxt . "', 0);\n";
+        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt . "', 'reqFormFldGreater', 0);\n";
         return view('vendor.cannabisscore.nodes.70-total-kwh', $this->v)->render();
     }
     

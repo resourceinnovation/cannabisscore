@@ -60,8 +60,8 @@
 <div class="nFld mT0 slBlueDark fPerc133">
     <h3 class="disIn mR20">Total Annual Kilowatt Hours:</h3>
     <input type="number" name="n{{ $nID }}fld" id="n{{ $nID }}FldID" data-nid="{{ $nID }}" min="0" autocomplete="off"
-        class="form-control form-control-lg ntrStp slTab disIn mL20" style="width: 130px;" 
-        onKeyUp=" checkNodeUp('{{ $nID }}', -1, 0);" {!! $GLOBALS["SL"]->tabInd() !!}
+        class="form-control form-control-lg ntrStp slTab slNodeChange disIn mL20" style="width: 130px;" 
+         {!! $GLOBALS["SL"]->tabInd() !!}
         @if (isset($powerScore) && isset($powerScore->PsKWH)) value="{{ $powerScore->PsKWH }}" @endif >
     <span class="mL5">kWh</span> <span class="red mL10">*required</span>
 </div>

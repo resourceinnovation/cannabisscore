@@ -49,8 +49,8 @@
     </div>
 </div>
 <div class="nFld" style="font-size: 20px;">
-    <input class="form-control form-control-lg ntrStp slTab" type="number" name="n398fld" id="n398FldID" 
-        onKeyUp=" checkNodeUp('398', -1, 0);  checkMin('398', 0); "  data-nid="398" min="0" 
+    <input class="form-control form-control-lg ntrStp slTab slNodeChange" type="number" name="n398fld" id="n398FldID" 
+        onKeyUp="checkMin('398', 0); "  data-nid="398" min="0" 
         @if (isset($powerScore) && isset($powerScore->PsTotalSize)) value="{{ $powerScore->PsTotalSize }}" @endif 
         {!! $GLOBALS["SL"]->tabInd() !!}>
 </div>
