@@ -48,7 +48,7 @@
     @else 
         <td colspan=12 >{!! $GLOBALS["SL"]->getNodePageName($s->PsSubmissionProgress) !!}</td>
     @endif
-    <td>https://cannabispowerscore.org/calculated/u-{{ $s->PsID }}</td>
+    <td>http://cannabispowerscore.org/calculated/u-{{ $s->PsID }}</td>
     </tr>
 @empty
     <tr><td colspan=8 ><i>No records found.</i></td></tr>

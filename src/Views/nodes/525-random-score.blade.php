@@ -13,6 +13,6 @@ This little tool selects a random PowerScore which have completed the survey, an
     }); </script>
 @else
     <center><div class="p20 m20"></div>
-    <a href="?getRandom=2" class="btn btn-xl btn-primary">Pick A Random Score</a>
+    <a href="?getRandom=2" class="btn btn-lg btn-xl btn-primary">Pick A Random Score</a>
     <div class="p20 m20"></div></center>
 @endif

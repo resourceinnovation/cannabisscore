@@ -323,9 +323,9 @@ class ScoreUtils extends ScorePowerUtilities
     {
         if (isset($this->v["profileUser"]) && isset($this->v["profileUser"]->id) 
             && $this->v["profileUser"]->id == $this->v["uID"] && $this->isUserPastCultClassic($this->v["uID"])) {
-            return '<a href="/start/calculator?new=1&cups=230&time=232" class="btn btn-lg btn-primary w100">'
+            return '<a href="/start/calculator?new=1&cups=230&time=232" class="btn btn-lg btn-primary btn-block">'
                 . 'Start A Fresh PowerScore for the Cultivation Classic</a><br /><br />'
-                . '<a href="/start/calculator?new=1" class="btn btn-lg btn-primary w100">'
+                . '<a href="/start/calculator?new=1" class="btn btn-lg btn-primary btn-block">'
                 . 'Start A Fresh PowerScore</a>';
         }
         return '';

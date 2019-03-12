@@ -1,7 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/548-powerscore-feedback-score-link.blade.php -->
 <p>&nbsp;</p>
 @if (isset($psOwner) && intVal($psOwner) > 0)
-    <a href="/calculated/u-{{ $psOwner }}" class="btn btn-xl btn-danger w100" style="padding: 100px 20px;"
+    <a href="/calculated/u-{{ $psOwner }}" class="btn btn-lg btn-xl btn-danger w100" style="padding: 100px 20px;"
         >Click Here<br /><nobr>to see how</nobr> <nobr>you stack up...</nobr><br /><br />
         PowerScore <nobr>Report #{{ $psOwner }}</nobr><br /></a>
 @endif

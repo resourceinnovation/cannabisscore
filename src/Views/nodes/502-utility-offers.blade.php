@@ -7,7 +7,7 @@
             may be able to offer help and incentives to make your grow more efficient, lowering your bills.</h3>
         </div><div class="col-4">
             <div class="pT10 pB10">
-                <a href="{{ $utilOffer[1] }}" class="btn btn-primary btn-xl" 
+                <a href="{{ $utilOffer[1] }}" class="btn btn-primary btn-lg btn-xl" 
                     style="background: #6E9045; box-shadow: 0px 1px 10px #FFF; color: #FFF;"
                     >Send your report to <i>{{ $utilOffer[0] }}</i></a>
             </div>

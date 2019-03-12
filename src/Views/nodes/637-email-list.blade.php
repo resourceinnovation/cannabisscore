@@ -86,10 +86,10 @@
         @endif
         </div>
         <div class="col-4 pT20">
-            <a id="hidivBtnSendChk" class="btn btn-primary btn-xl w100 hidivBtn" href="javascript:;">Send Bulk Email</a>
+            <a id="hidivBtnSendChk" class="btn btn-primary btn-lg btn-xl w100 hidivBtn" href="javascript:;">Send Bulk Email</a>
             <div id="hidivSendChk" class="disNon pT20 red">
                 <i class="red fPerc133">Please confirm you want to bulk send...</i><br />
-                <a id="sendCnfmBtn" class="btn btn-primary btn-xl w100" href="javascript:;">Yes, SEND IT</a>
+                <a id="sendCnfmBtn" class="btn btn-primary btn-lg btn-xl w100" href="javascript:;">Yes, SEND IT</a>
             </div>
         </div>
     </div>

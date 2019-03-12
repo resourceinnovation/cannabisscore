@@ -76,9 +76,9 @@
         <td> @if (isset($f["ps"]->PsEmail) && trim($f["ps"]->PsEmail) != '') {{ $f["ps"]->PsEmail }} @endif </td>
         <td>{{ date("n/j/Y", strtotime($f["ps"]->created_at)) }}</td>
         <td>
-        @if ($GLOBALS["SL"]->REQ->has('excel')) https://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}
+        @if ($GLOBALS["SL"]->REQ->has('excel')) http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}
         @else <a href="/calculated/u-{{ $f['ps']->PsID }}" target="_blank"
-            >https://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}</a>
+            >http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}</a>
         @endif
         </td>
     @endif
