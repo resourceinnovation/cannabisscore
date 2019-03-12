@@ -11,8 +11,8 @@
 namespace CannabisScore\Controllers;
 
 use App\Models\RIIPSAreasBlds;
-use SurvLoop\Controllers\SurvStatsTbl;
-use SurvLoop\Controllers\SurvStatsGraph;
+use SurvLoop\Controllers\Stats\SurvStatsTbl;
+use SurvLoop\Controllers\Stats\SurvStatsGraph;
 
 class ScoreStatEnvs extends SurvStatsGraph
 {

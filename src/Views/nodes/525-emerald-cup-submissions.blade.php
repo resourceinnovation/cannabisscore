@@ -84,7 +84,7 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
             {{ number_format($s->PsTotalSize) }} sq ft
         </td>
     @else 
-        <td colspan=4 class="psOpen" data-psid="{{ $s->PsID }}" ><i class="slRedDark">
+        <td colspan=4 class="psOpen" data-psid="{{ $s->PsID }}" ><i class="txtDanger">
             {!! $GLOBALS["SL"]->getNodePageName($s->PsSubmissionProgress) !!}
         </i></td>
     @endif

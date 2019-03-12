@@ -12,11 +12,11 @@
 namespace CannabisScore\Controllers;
 
 use App\Models\SLNodeSaves;
-use SurvLoop\Controllers\Globals;
 use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
 use App\Models\RIIPSRanks;
 use App\Models\RIIPSRankings;
+use SurvLoop\Controllers\Globals\Globals;
 use CannabisScore\Controllers\ScoreUtils;
 
 class ScoreCalcs extends ScoreUtils

@@ -9,9 +9,9 @@
   */
 namespace CannabisScore\Controllers;
 
-use SurvLoop\Controllers\SurvStatsTbl;
-use SurvLoop\Controllers\SurvStatTh;
-use SurvLoop\Controllers\SurvStatsGraph;
+use SurvLoop\Controllers\Stats\SurvStatsTbl;
+use SurvLoop\Controllers\Stats\SurvStatTh;
+use SurvLoop\Controllers\Stats\SurvStatsGraph;
 
 class ScoreStats extends SurvStatsGraph
 {

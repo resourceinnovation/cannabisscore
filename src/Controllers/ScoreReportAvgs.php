@@ -16,7 +16,7 @@ use App\Models\RIIPSLightTypes;
 use App\Models\RIIPSRenewables;
 use App\Models\RIIPSForCup;
 use App\Models\RIIPSLicenses;
-use SurvLoop\Controllers\SurvStatsGraph;
+use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\CannabisScoreSearcher;
 use CannabisScore\Controllers\ScoreReportStats;

@@ -159,7 +159,7 @@
                 $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}
             @if (isset($fltCmpl) && $fltCmpl == 0 && $isAdmin)
                 <br /> @if ($ps->PsStatus == 243) <span class="slBlueDark">Complete</span>
-                @elseif ($ps->PsStatus == 364) <span class="slRedDark">Archived</span>
+                @elseif ($ps->PsStatus == 364) <span class="txtDanger">Archived</span>
                 @else {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
                 @endif
             @endif

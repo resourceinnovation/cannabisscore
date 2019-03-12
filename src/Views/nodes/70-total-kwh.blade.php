@@ -57,7 +57,7 @@
                     </tr>
                 @endfor
                 </table>
-                <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary w100 mT20"
+                <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary btn-block mT20"
                     >Add Up All kWh & Apply Total &darr;</a>
             </div>
         </div>
@@ -97,7 +97,7 @@
             </tr>
         @endfor
         <tr><td colspan="4" >
-            <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary w100"
+            <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary btn-block"
                 >Add Up All kWh & Apply Total &darr;</a>
         </td></tr>
         </table>

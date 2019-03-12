@@ -2,7 +2,7 @@
 <div class="slWebReport">
 
 <div class="slCard nodeWrap">
-    <h1 class="slBlueDark">Written Report <span class="f12 slGrey">w/ live stats</span></h1>
+    <h1 class="slBlueDark">Written Report <span class="slGrey">w/ live stats</span></h1>
     <h4>
     As of {{ date("F j, Y") }}, Resource Innovation Institute's <b class="slBlueDark">Cannabis PowerScore</b> 
     has collected complete data for <b class="slBlueDark">{{ number_format($allscores->count()) }} observations</b> 

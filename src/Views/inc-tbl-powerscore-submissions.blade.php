@@ -29,7 +29,7 @@
     </td><td class="psOpen" data-psid="{{ $s->PsID }}">
         @if (isset($s->PsStatus))
             <div class=" @if ($s->PsStatus == $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete')) 
-            slGreenDark @else slRedDark @endif ">
+            slGreenDark @else txtDanger @endif ">
             {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $s->PsStatus) }}</div>
         @endif
         {{ date("n/j, g:ia", strtotime($s->created_at)) }}
@@ -67,7 +67,7 @@
             {{ number_format($s->PsTotalSize) }} sq ft
         </td>
     @else 
-        <td colspan=4 class="psOpen" data-psid="{{ $s->PsID }}" ><i class="slRedDark">
+        <td colspan=4 class="psOpen" data-psid="{{ $s->PsID }}" ><i class="txtDanger">
             {!! $GLOBALS["SL"]->getNodePageName($s->PsSubmissionProgress) !!}
         </i></td>
     @endif

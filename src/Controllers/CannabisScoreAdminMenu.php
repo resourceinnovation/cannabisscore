@@ -9,7 +9,7 @@
   */
 namespace CannabisScore\Controllers;
 
-use SurvLoop\Controllers\AdminMenu;
+use SurvLoop\Controllers\Admin\AdminMenu;
 
 class CannabisScoreAdminMenu extends AdminMenu
 {

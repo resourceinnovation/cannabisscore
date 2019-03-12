@@ -12,7 +12,7 @@ namespace CannabisScore\Controllers;
 use DB;
 use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
-use SurvLoop\Controllers\SurvStatsGraph;
+use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreLookups;
 use CannabisScore\Controllers\ScoreStats;
 

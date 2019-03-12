@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use App\Models\RIIPowerScore;
 use App\Models\RIIManufacturers;
 use CannabisScore\Controllers\ScoreLookups;
-use SurvLoop\Controllers\TreeSurvForm;
+use SurvLoop\Controllers\Tree\TreeSurvForm;
 
 class ScoreVars extends TreeSurvForm
 {

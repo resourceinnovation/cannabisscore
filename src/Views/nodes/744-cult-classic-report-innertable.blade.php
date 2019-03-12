@@ -25,10 +25,10 @@
     <tr>
     <td class=" @if ($f['ps'] && isset($f['ps']->PsStatus) && in_array($f['ps']->PsStatus, [ 
         $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete'),
-        $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') ])) slGreenDark @else slRedLight @endif " >
+        $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') ])) slGreenDark @else txtDanger @endif " >
         @if (isset($f["name"]) && trim($f["name"]) != '') {{ $f["name"] }} @endif </td>
     @if (!isset($f["ps"]) || !isset($f["ps"]->PsID))
-        <td class="slRedLight"><b>0</b></td>
+        <td class="txtDanger"><b>0</b></td>
         <td colspan=14 >No @if ($GLOBALS["SL"]->REQ->has("search") && sizeof($f["srch"]) > 0)
             <span class="slGrey fPerc80">
             @foreach ($f["srch"] as $psID => $psName)
@@ -38,7 +38,7 @@
     @else
         <td @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ])) class="slGreenDark"
-            @else class="slRedLight" @endif ><b>
+            @else class="txtDanger" @endif ><b>
             @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) 0
             @elseif ($f["ps"]->PsEfficOverall > 66) 2
             @elseif ($f["ps"]->PsEfficOverall > 33) 1.5
@@ -51,7 +51,7 @@
         </td>
         @if ($GLOBALS["SL"]->REQ->has('excel')) <td>#{{ $f["ps"]->PsID }}</td>
         @else <td><a href="/calculated/u-{{ $f['ps']->PsID }}" target="_blank"
-            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) class="slRedLight"
+            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) class="txtDanger"
             @endif >#{{ $f["ps"]->PsID }}</a></td> @endif
         @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ]))
@@ -68,7 +68,7 @@
             <td>{{ number_format($f["ps"]->PsKWH) }}</td>
             <td>{{ number_format($f["ps"]->PsTotalSize) }}</td>
         @else 
-            <td colspan=12 class="slRedLight" >
+            <td colspan=12 class="txtDanger" >
                 <i>Page: {!! $GLOBALS["SL"]->getNodePageName($f["ps"]->PsSubmissionProgress) !!}</i>
             </td>
         @endif
