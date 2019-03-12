@@ -15,7 +15,54 @@
         For example, billing cycle Dec. 18-Jan. 17 has more days in January, so January should be selected.
         </p>
         
-        <table class="table table-striped mT10" id="monthers" >
+        
+    @if ($GLOBALS["SL"]->REQ->has('test'))
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-striped mT10 monthers" >
+                <tr>
+                    <td><i>Month</i></td>
+                    <td>&nbsp;</td>
+                    <td><i>kWh</i></td>
+                </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-striped monthers">
+                @for ($mon = 1; $mon <= 12; $mon++)
+                    @if ($mon == 7)
+                        </table></div><div class="col-md-6"><table class="table table-striped monthers">
+                    @endif
+                    <tr>
+                    <td id="elec{{ $mon }}th" @if ($mon != 1) class="slBlueDark pL15 pT15" @endif >
+                        @if ($mon == 1)
+                            <select name="elecMonth" id="elecMonthID" class="form-control ntrStp slTab slBlueDark" 
+                                style="width: 60px;" autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!}>
+                            @for ($j = 1; $j <= 12; $j++)
+                                <option value="{{ $j }}" @if ($j == $powerMonths[0]->PsMonthMonth) SELECTED @endif >
+                                    {{ $GLOBALS["SL"]->num2Month3($j) }}</option>
+                            @endfor
+                            </select>
+                        @else {{ $GLOBALS["SL"]->num2Month3($powerMonths[$mon-1]->PsMonthMonth) }} @endif
+                    </td>
+                    <td> @if ($mon > 1) + @endif </td>
+                    <td><nobr>
+                        <input type="number" name="elec{{ $mon }}a" id="elec{{ $mon }}aID" 
+                            class="form-control disIn ntrStp slTab"
+                            @if (isset($powerMonths[$mon-1]->PsMonthKWH1)) value="{{ $powerMonths[$mon-1]->PsMonthKWH1 }}" 
+                            @endif autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!}> kWh
+                    </nobr></td>
+                    </tr>
+                @endfor
+                </table>
+                <a id="monthlyCalcTot" href="javascript:;" class="btn btn-secondary w100 mT20"
+                    >Add Up All kWh & Apply Total &darr;</a>
+            </div>
+        </div>
+    @else
+        <table class="table table-striped mT10 monthers" >
         <tr>
             <td><i>Month</i></td>
             <td>&nbsp;</td>
@@ -54,6 +101,7 @@
                 >Add Up All kWh & Apply Total &darr;</a>
         </td></tr>
         </table>
+    @endif
 
     </div>
 </div>
@@ -100,10 +148,10 @@ $(document).ready(function(){
 });
 </script>
 <style>
-#monthers tr td, #monthers tr th { border: 0px none; color: #8C8676; }
-#monthers tr td.slBlueDark { color: #8EAD67; }
-#monthers tr th select.form-control { width: 60px; }
-#monthers tr td .form-control.disIn, #monthers tr th .form-control.disIn { width: 90px; }
+.monthers tr td, .monthers tr th { border: 0px none; color: #8C8676; }
+.monthers tr td.slBlueDark { color: #8EAD67; }
+.monthers tr th select.form-control { width: 60px; }
+.monthers tr td .form-control.disIn, .monthers tr th .form-control.disIn { width: 90px; }
 
 #arears tr td div { padding-top: 7px; }
 #arears tr td.taR { font-size: 16px; }

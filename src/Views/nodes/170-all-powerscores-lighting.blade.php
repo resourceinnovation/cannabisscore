@@ -28,35 +28,35 @@
     @endif
     <tr>
     <th>
-        {!! view('vendor.survloop.inc-tbl-head-sort', [
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Score ID#',
             "srtVal" => 'PsID',
             "sort"   => $sort
             ])->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.inc-tbl-head-sort', [
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Light Types',
             "srtVal" => 'type',
             "sort"   => $sort
             ])->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.inc-tbl-head-sort', [
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Watts / SF',
             "srtVal" => 'wsft',
             "sort"   => $sort
             ])->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.inc-tbl-head-sort', [
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Days',
             "srtVal" => 'days',
             "sort"   => $sort
             ])->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.inc-tbl-head-sort', [
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Hours',
             "srtVal" => 'hour',
             "sort"   => $sort

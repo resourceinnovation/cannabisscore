@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "wikiworldorder/survloop": "^0.1.6"
+        "wikiworldorder/survloop": "*@dev"
     },
     "autoload": {
         "psr-4": {

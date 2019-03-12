@@ -141,7 +141,7 @@ class ScoreStatEnvs extends SurvStatsGraph
             }
             $this->tblOut[] = $row;
         }
-        return view('vendor.survloop.inc-stat-tbl-percs', [ "tblOut" => $this->tblOut ])->render();
+        return view('vendor.survloop.reports.inc-stat-tbl-percs', [ "tblOut" => $this->tblOut ])->render();
     }
     
     

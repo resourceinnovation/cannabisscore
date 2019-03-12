@@ -28,20 +28,20 @@
 <table border=0 class="table w100 bgWht">
 <tr>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Score ID#',
         "srtVal" => 'PsID',
         "sort"   => $sort
         ])->render() !!}
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Type',
         "srtVal" => 'PsCharacterize',
         "sort"   => $sort
         ])->render() !!}
     @if (isset($fltCmpl) && $fltCmpl == 0 && $isAdmin)
-        <br />{!! view('vendor.survloop.inc-tbl-head-sort', [
+        <br />{!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Status',
             "srtVal" => 'PsStatus',
             "sort"   => $sort
@@ -49,35 +49,35 @@
     @endif
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Overall',
         "srtVal" => 'PsEfficOverall',
         "sort"   => $sort
         ])->render() !!}
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Facility Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
         "srtVal" => 'PsEfficFacility',
         "sort"   => $sort
         ])->render() !!}
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Production Score <div class="fPerc66 slGrey">g/kWh</div>',
         "srtVal" => 'PsEfficProduction',
         "sort"   => $sort
         ])->render() !!}
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Lighting Score <div class="fPerc66 slGrey">W/SqFt</div>',
         "srtVal" => 'PsEfficLighting',
         "sort"   => $sort
         ])->render() !!}
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'HVAC Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
         "srtVal" => 'PsEfficHvac',
         "sort"   => $sort
@@ -85,19 +85,19 @@
 </th>
 <th>
     @if (!$isExcel) <span class="fPerc80"><span class="mR10"> @endif
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Grams',
         "srtVal" => 'PsGrams',
         "sort"   => $sort
         ])->render() !!}
     @if (!$isExcel) </span><span class="mR10"> @else </th><th> @endif
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'kWh',
         "srtVal" => 'PsKWH',
         "sort"   => $sort
         ])->render() !!}
     @if (!$isExcel) </span> @else </th><th> @endif
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Sq Ft',
         "srtVal" => 'PsTotalSize',
         "sort"   => $sort
@@ -105,18 +105,18 @@
     @if (!$isExcel) </span> @endif
 </th>
 <th>
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'County State',
         "srtVal" => 'PsCounty',
         "sort"   => $sort
         ])->render() !!}
-    {!! view('vendor.survloop.inc-tbl-head-sort', [
+    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Zip',
         "srtVal" => 'PsZipCode',
         "sort"   => $sort
         ])->render() !!}
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-        <br />{!! view('vendor.survloop.inc-tbl-head-sort', [
+        <br />{!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Email',
             "srtVal" => 'PsEmail',
             "sort"   => $sort
