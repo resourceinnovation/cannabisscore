@@ -139,6 +139,7 @@ class ScoreCalcs extends ScoreUtils
     
     protected function calcCurrScoreRanks()
     {
+//echo '<br /><br /><br /><h2>' . $this->searcher->v["urlFlts"] . '</h2>';
         $this->v["ranksCache"] = RIIPSRanks::where('PsRnkFilters', $this->searcher->v["urlFlts"])
             ->first();
         if (!$this->v["ranksCache"] || !isset($this->v["ranksCache"]->PsRnkID)) {
@@ -187,6 +188,7 @@ class ScoreCalcs extends ScoreUtils
                     +$r[$ps->PsID]["hvac"])/4;
                 $l["oraw"][] = $r[$ps->PsID]["oraw"];
             }
+            
             sort($l["oraw"], SORT_NUMERIC);
             foreach ($allscores as $i => $ps) {
                 $r[$ps->PsID]["over"] = $GLOBALS["SL"]->getArrPercentile($l["oraw"], $r[$ps->PsID]["oraw"], true);
@@ -194,7 +196,7 @@ class ScoreCalcs extends ScoreUtils
             
             // Now store calculated ranks for individual scores...
             foreach ($allscores as $i => $ps) {
-                if (trim($this->searcher->v["urlFlts"]) == '') {
+                if (in_array(trim($this->searcher->v["urlFlts"]), ['', '&fltFarm=0'])) {
                     RIIPowerScore::find($ps->PsID)->update([ 'PsEfficOverall' => $r[$ps->PsID]["over"] ]);
                 }
                 if (trim($this->searcher->v["urlFlts"]) == '&fltFarm=' . $ps->PsCharacterize) {
@@ -268,7 +270,6 @@ class ScoreCalcs extends ScoreUtils
     
     protected function recalcAllSubScores()
     {
-        
 ///////////////// One Time
         if ($GLOBALS["SL"]->REQ->has('recalc2')) {
             $chk = SLNodeSaves::where('NodeSaveTblFld', 'PSAreas:PsAreaSize')
@@ -313,12 +314,18 @@ class ScoreCalcs extends ScoreUtils
         $freshDone = $cnt = -1;
         $curr = (($GLOBALS["SL"]->REQ->has('currFlt')) ? $GLOBALS["SL"]->REQ->get('currFlt') : '');
         foreach ($GLOBALS["CUST"]->v["fltComb"] as $flt => $opts) {
-            if ($curr == '') $curr = $flt;
+            if ($curr == '') {
+                $curr = $flt;
+            }
             $cnt++;
-            if ($nextFlt == '' && $freshDone >= 0) $nextFlt = $flt;
+            if ($nextFlt == '' && $freshDone >= 0) {
+                $nextFlt = $flt;
+            }
             if ($freshDone < 0 && $curr == $flt) {
                 $freshDone = $cnt;
-                foreach ($GLOBALS["CUST"]->v["fltComb"] as $f => $o) $this->searcher->v[$f] = $o[0];
+                foreach ($GLOBALS["CUST"]->v["fltComb"] as $f => $o) {
+                    $this->searcher->v[$f] = $o[0];
+                }
                 foreach ($opts as $j => $opt) {
                     $this->searcher->v[$flt] = $opt;
                     $this->searcher->searchFiltsURLXtra();

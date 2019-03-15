@@ -39,7 +39,7 @@ class CannabisScore extends ScoreImports
         return view('vendor.cannabisscore.powerscore-report-preview', [
             "uID"      => $this->v["uID"],
             "sessData" => $this->sessData->dataSets
-            ]);
+            ])->render();
     }
     
     protected function customNodePrint($nID = -3, $tmpSubTier = [], $nIDtxt = '', $nSffx = '', $currVisib = 1)
