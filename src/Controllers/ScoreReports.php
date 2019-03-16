@@ -13,20 +13,9 @@ namespace CannabisScore\Controllers;
 
 use DB;
 use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSLightTypes;
-use App\Models\RIIPSRenewables;
-use App\Models\RIIPSAreasBlds;
-use App\Models\RIIPSForCup;
-use App\Models\RIIPSRankings;
-use App\Models\RIICompetitors;
-use App\Models\RIIPSLicenses;
-use SurvLoop\Controllers\Stats\SurvStatsGraph;
-use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreListings;
 
 class ScoreReports extends ScoreListings
 {
-    
     
 }

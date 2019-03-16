@@ -125,7 +125,7 @@ class ScoreListings
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $s) {
                 $this->v["allranks"][$s->PsID] = RIIPSRankings::where('PsRnkPSID', $s->PsID)
-                    ->where('PsRnkFilters', '')
+                    ->where('PsRnkFilters', '&fltFarm=0')
                     ->first();
             }
         }
@@ -139,6 +139,7 @@ class ScoreListings
 //echo '<pre>'; print_r($this->searcher->v["allscores"]); echo '</pre>'; exit;
         return view('vendor.cannabisscore.nodes.170-all-powerscores', $this->searcher->v)->render();
     }
+    
     
     public function getCultClassicReport()
     {
@@ -160,7 +161,7 @@ class ScoreListings
             })
             ->leftJoin('RII_PSRankings', function ($join) {
                 $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-                    ->where('RII_PSRankings.PsRnkFilters', '');
+                    ->where('RII_PSRankings.PsRnkFilters', '&fltFarm=0');
             })
             ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
             ->whereNotIn('RII_PowerScore.PsID', $this->v["psAdded"])
@@ -204,7 +205,7 @@ class ScoreListings
         $chk2 = DB::table('RII_PowerScore')
             ->leftJoin('RII_PSRankings', function ($join) {
                 $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-                    ->where('RII_PSRankings.PsRnkFilters', '');
+                    ->where('RII_PSRankings.PsRnkFilters', '&fltFarm=0');
             })
             ->where('RII_PowerScore.PsName', 'LIKE', $farmName)
             ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
@@ -265,5 +266,4 @@ class ScoreListings
         }
         return true;
     }
-    
 }
