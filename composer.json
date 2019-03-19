@@ -25,6 +25,7 @@
     "autoload": {
         "psr-4": {
             "CannabisScore\\": "src/"
+            "CannabisScore\\Models\\": "storage/app/models/cannabisscore",
         }
     }
 }
