@@ -27,5 +27,15 @@
             "CannabisScore\\": "src/"
             "CannabisScore\\Models\\": "storage/app/models/cannabisscore",
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CannabisScore\\CannabisScoreServiceProvider"
+            ],
+            "aliases": {
+                "CannabisScore": "CannabisScore\\CannabisScoreFacade"
+            }
+        }
     }
 }
