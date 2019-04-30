@@ -28,6 +28,9 @@ class RIIPSAreas extends Model
 		'PsAreaLgtPattern', 
 		'PsAreaLgtFixSize1', 
 		'PsAreaLgtFixSize2', 
+		'PsAreaGallons', 
+		'PsAreaWaterFreq', 
+		'PsAreaWateringMethod', 
     ];
     
     // END SurvLoop auto-generated portion of Model

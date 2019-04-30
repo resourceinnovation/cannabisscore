@@ -347,8 +347,11 @@ class CannabisScore extends ScoreImports
         return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
     }
     
-    public function printPsRankingFilters()
+    public function printPsRankingFilters($nID)
     {
+        $this->initSearcher();
+        $this->searcher->getSearchFilts();
+        $this->searcher->v["nID"] = $nID;
         $this->searcher->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
             ->render();
         return '<div id="scoreRankFiltWrap"><h4>Compare to other farms</h4><div class="pT5"></div>' . 
@@ -425,34 +428,26 @@ class CannabisScore extends ScoreImports
                 ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
                 ->first();
             if (!$currRanks || !isset($currRanks->PsRnkOverall) || $GLOBALS["SL"]->REQ->has('refresh')) {
-                if (isset($this->searcher->v["powerscore"]->PsTimeType) && $this->searcher->v["powerscore"]->PsTimeType 
-                    == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
+                if (isset($this->searcher->v["powerscore"]->PsTimeType) 
+                    && $this->searcher->v["powerscore"]->PsTimeType 
+                        == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
                     $ranks = RIIPSRanks::where('PsRnkFilters', '')
                         ->first();
-                    $currRanks = new RIIPSRankings;
-                    $currRanks->PsRnkPSID = $this->searcher->v["powerscore"]->PsID;
-                    $currRanks->PsRnkFacility = $GLOBALS["SL"]->getArrPercentileStr(
-                        $ranks->PsRnkFacility, $this->searcher->v["powerscore"]->PsEfficFacility);
-                    $currRanks->PsRnkProduction = $GLOBALS["SL"]->getArrPercentileStr(
-                        $ranks->PsRnkProduction, $this->searcher->v["powerscore"]->PsEfficProduction, true);
-                    $currRanks->PsRnkLighting = $GLOBALS["SL"]->getArrPercentileStr(
-                        $ranks->PsRnkLighting, $this->searcher->v["powerscore"]->PsEfficLighting);
-                    $currRanks->PsRnkHVAC = $GLOBALS["SL"]->getArrPercentileStr(
-                        $ranks->PsRnkHVAC, $this->searcher->v["powerscore"]->PsEfficHvac);
-                    $currRanks->PsRnkOverallAvg = ($currRanks->PsRnkFacility+$currRanks->PsRnkProduction
-                        +$currRanks->PsRnkLighting+$currRanks->PsRnkHVAC)/4;
-                    $currRanks->PsRnkOverall = $GLOBALS["SL"]->getArrPercentileStr(
-                        $ranks->PsRnkOverallAvg, $currRanks->PsRnkOverallAvg);
-                    $currRanks->save();
+                    $currRanks = $this->ajaxScorePercNewRank($ranks);
                     $this->searcher->v["powerscore"]->PsEfficOverall = $currRanks->PsRnkOverall;
                     $this->searcher->v["powerscore"]->save();
                 } else {
                     $urlFlts = $this->searcher->v["urlFlts"];
-                    // $this->calcAllScoreRanks();
+                    $this->calcAllScoreRanks();
                     $this->searcher->v["urlFlts"] = $urlFlts;
                     $currRanks = RIIPSRankings::where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
                         ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
                         ->first();
+                    if (!$currRanks) {
+                        $ranks = RIIPSRanks::where('PsRnkFilters', $this->searcher->v["urlFlts"])
+                            ->first();
+                        $currRanks = $this->ajaxScorePercNewRank($ranks);
+                    }
                 }
             }
             $this->searcher->v["currGuage"] = 0;
@@ -471,6 +466,29 @@ class CannabisScore extends ScoreImports
             return view('vendor.cannabisscore.nodes.490-report-calculations-ajax-graphs', $this->searcher->v)->render();
         }
         return '';
+    }
+    
+    // returns an array of overrides for ($currNodeSessionData, ???... 
+    protected function ajaxScorePercNewRank($ranks)
+    {
+        $currRanks = new RIIPSRankings;
+        $currRanks->PsRnkPSID = $this->searcher->v["powerscore"]->PsID;
+        if ($ranks && isset($ranks->PsRnkFacility)) {
+            $currRanks->PsRnkFacility = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->PsRnkFacility, $this->searcher->v["powerscore"]->PsEfficFacility);
+            $currRanks->PsRnkProduction = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->PsRnkProduction, $this->searcher->v["powerscore"]->PsEfficProduction, true);
+            $currRanks->PsRnkLighting = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->PsRnkLighting, $this->searcher->v["powerscore"]->PsEfficLighting);
+            $currRanks->PsRnkHVAC = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->PsRnkHVAC, $this->searcher->v["powerscore"]->PsEfficHvac);
+            $currRanks->PsRnkOverallAvg = ($currRanks->PsRnkFacility+$currRanks->PsRnkProduction
+                +$currRanks->PsRnkLighting+$currRanks->PsRnkHVAC)/4;
+            $currRanks->PsRnkOverall = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->PsRnkOverallAvg, $currRanks->PsRnkOverallAvg);
+            $currRanks->save();
+        }
+        return $currRanks;
     }
     
     // returns an array of overrides for ($currNodeSessionData, ???... 

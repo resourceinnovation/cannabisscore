@@ -290,6 +290,7 @@
         setTimeout(function() { $("#psScoreProduction").load(""+baseUrl+"&eff=Production"); }, 1600);
         setTimeout(function() { $("#psScoreHvac").load(      ""+baseUrl+"&eff=HVAC"); },       1200);
         setTimeout(function() { $("#psScoreLighting").load(  ""+baseUrl+"&eff=Lighting"); },      1);
+        console.log(baseUrl+"&eff=Overall");
         return true;
     }
     setTimeout(function() { reloadGuages(); }, 300);

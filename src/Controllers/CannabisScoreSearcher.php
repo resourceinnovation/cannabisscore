@@ -478,13 +478,17 @@ class CannabisScoreSearcher extends Searcher
                 $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic'))
             ->get();
         if ($chk->isNotEmpty()) {
-            foreach ($chk as $c) $this->v["cultClassicIds"][] = $c->PsCupPSID;
+            foreach ($chk as $c) {
+                $this->v["cultClassicIds"][] = $c->PsCupPSID;
+            }
         }
         $chk = RIIPSForCup::where('PsCupCupID', 
                 $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Emerald Cup Regenerative Award'))
             ->get();
         if ($chk->isNotEmpty()) {
-            foreach ($chk as $c) $this->v["emeraldIds"][] = $c->PsCupPSID;
+            foreach ($chk as $c) {
+                $this->v["emeraldIds"][] = $c->PsCupPSID;
+            }
         }
         return true;
     }

@@ -1,6 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores.blade.php -->
-
-@if ($nID != 490) <div class="row" ><div class="col-2"> @endif
+@if ($nID != 946) <div class="row" ><div class="col-2"> @endif
         <select name="fltFarm" id="filtFarmID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="0"   @if (!isset($fltFarm) || $fltFarm == 0)  SELECTED @endif >All Farm Types</option>
@@ -9,7 +8,7 @@
             <option value="145" @if (isset($fltFarm) && $fltFarm == 145) SELECTED @endif 
                 >Greenhouse/Hybrid/Mixed Light</option>
         </select>
-@if ($nID != 490) 
+@if ($nID != 946) 
     </div><div class="col-2">
         <select name="fltClimate" id="filtClimateID" class="form-control ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
@@ -21,7 +20,7 @@
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->stateDrop($fltState, true) !!}
         </select>
-@if ($nID != 490) </div><div class="col-2"> @endif
+@if ($nID != 946) </div><div class="col-2"> @endif
         <select name="fltLght" id="fltLghtID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltLght') 
@@ -73,7 +72,7 @@
                 >{{ $type }} - LED</option>
         @endforeach
         </select>
-@if ($nID != 490) </div><div class="col-2"> @endif
+@if ($nID != 946) </div><div class="col-2"> @endif
         <select name="fltHvac" id="fltHvacID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltHvac') 
@@ -132,10 +131,10 @@
                 >{{ $type }} - None</option>
         @endforeach
         </select>
-@if ($nID != 490)
+@if ($nID != 946)
     </div><div class="col-2"> 
-        <a class="btn btn-lg btn-primary updateScoreFilts @if ($nID != 490) float-right @endif "
-            href="javascript:;"><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
+        <a class="btn btn-lg btn-primary updateScoreFilts float-right" href="javascript:;"
+            ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
         <div class="mT10"><a id="btnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>
     </div>
@@ -152,7 +151,7 @@
         || (isset($fltCmpl) && $fltCmpl != 243) || (isset($fltCup) && intVal($fltCup) > 0))
         disBlo
     @else disNon @endif ">
-@if ($nID == 490)
+@if ($nID == 946)
     @if (isset($psFiltChks)) <div class="w100 pT20 taL">{!! $psFiltChks !!}</div> @endif
 @else
     <div class="row"><div class="col-2 pT10"> 
@@ -198,7 +197,7 @@
     </div></div>
 @endif
 </div>
-@if ($nID == 490)
+@if ($nID == 946)
     <div class="pT20 pB20">
         <a id="btnFiltsAdv" class="disBlo pull-left" href="javascript:;" style="color: #FFF;">Show More<br />Filters</a>
         <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" style="color: #FFF;">Show Less<br />Filters</a>
@@ -217,7 +216,7 @@
 <script type="text/javascript"> $(document).ready(function() {
     
     $(document).on("click", "#btnFiltsAdv", function() {
-@if ($nID == 490)
+@if ($nID == 946)
         setTimeout(function() { $("#btnFiltsAdvHide").slideDown("fast"); }, 350);
         $("#btnFiltsAdv").slideUp("fast");
         $("#filtsAdv").slideDown("fast");
@@ -243,17 +242,21 @@
             if (currDir == 'asc') baseUrl += '&srta=desc';
             else baseUrl += '&srta=asc';
         }
-	    window.location=baseUrl+gatherFilts();
+        baseUrl += gatherFilts();
+        console.log(baseUrl);
+	    window.location=baseUrl;
 	    return true;
     }
     $(document).on("click", ".sortScoresBtn", function() { applySort($(this).attr("data-sort-type")); });
     
-    @if ($nID != 490)
-        function applyFilts() {
-            window.location=document.getElementById('tblBaseUrlID').value+"&ps={{ $psid }}"+gatherFilts();
-            return true;
-        }
-        $(document).on("click", ".updateScoreFilts", function() { applyFilts(); });
-    @endif
+@if ($nID != 946)
+    function applyFilts() {
+        var newUrl = document.getElementById('tblBaseUrlID').value+"&ps={{ $psid }}"+gatherFilts();
+        console.log(newUrl);
+        window.location=newUrl;
+        return true;
+    }
+    $(document).on("click", ".updateScoreFilts", function() { applyFilts(); });
+@endif
     
 }); </script>

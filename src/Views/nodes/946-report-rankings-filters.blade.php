@@ -69,7 +69,7 @@
 <script type="text/javascript"> $(document).ready(function() {
     
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
-    var spn = '<i class="fa-li fa fa-spinner fa-spin"></i>';
+    var spn = '<i class="fa-li fa fa-spinner fa-spin mL20 mT10"></i>';
     function reloadGuages() {
         if (document.getElementById('psScoreOverall')) document.getElementById('psScoreOverall').innerHTML = spn;
         if (document.getElementById('psScoreFacility')) document.getElementById('psScoreFacility').innerHTML = spn;
@@ -82,13 +82,16 @@
         setTimeout(function() { $("#psScoreProduction").load(""+baseUrl+"&eff=Production"); }, 1600);
         setTimeout(function() { $("#psScoreHvac").load(      ""+baseUrl+"&eff=HVAC"); },       1200);
         setTimeout(function() { $("#psScoreLighting").load(  ""+baseUrl+"&eff=Lighting"); },      1);
+        console.log(baseUrl+"&eff=Overall");
         return true;
     }
     setTimeout(function() { reloadGuages(); }, 300);
     
     $(document).on("click", ".updateScoreFilts", function() { reloadGuages(); });
     
-    @if (!$isPast) setTimeout(function() { $("#futureForm").load("/ajax/future-look?ps={{ $psid }}"); }, 3000); @endif
+@if (!$isPast)
+    setTimeout(function() { $("#futureForm").load("/ajax/future-look?ps={{ $psid }}"); }, 3000);
+@endif
     
 });
 
