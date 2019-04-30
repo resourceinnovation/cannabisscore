@@ -18,7 +18,7 @@
         @if (isset($fltVert) && intVal($fltVert) == 1) CHECKED @endif 
         > <span class="mL5">Vertical Stacking</span></label><br />
 @if ($nID != 490) </div><div class="col-2 pT10"> 
-@else <br /><u class="slGrey fPerc133">Energy Sources</u><br /> @endif
+@else <br /><h5 class="mB0">Energy Sources</h5> @endif
     <label><input type="checkbox" name="fltRenew[]" id="fltRenew1" value="149" autocomplete="off"
         @if (isset($fltRenew) && in_array(149, $fltRenew)) CHECKED @endif 
         > <span class="mL5">Solar PV</span></label><br />

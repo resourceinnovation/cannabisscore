@@ -46,11 +46,16 @@ class CannabisScoreAdminMenu extends AdminMenu
                 ]);
             return $this->addAdmMenuBasics($treeMenu);
         } elseif ($this->currUser->hasRole('partner')) {
-            $treeMenu[] = $this->admMenuLnk('javascript:;', 'PowerScores', '<i class="fa fa-star"></i>', 1, [
-                $this->admMenuLnk('/dash/partner-compare-powerscores',         'Compare All Scores'),
-                $this->admMenuLnk('/dash/partner-compare-powerscore-averages', 'Score Averages'),
-                $this->admMenuLnk('/dash/founders-circle-report',              'Founders Circle'),
-                $this->admMenuLnk('/dash/powerscore-final-report',             'Written Report')
+            $treeMenu[] = $this->admMenuLnk('javascript:;', 'My Scores', '<i class="fa fa-star"></i>', 1, [
+                    $this->admMenuLnk('/dash/partner-compare-powerscores',         'Individual Scores'),
+                    $this->admMenuLnk('/dash/partner-compare-powerscore-averages', 'My Averages'),
+                    $this->admMenuLnk('/dash/founders-circle-report',              'My Analysis')
+                ]);
+            $treeMenu[] = $this->admMenuLnk('javascript:;', 'All PowerScores', '<i class="fa fa-tachometer" aria-hidden="true"></i>', 1, [
+                    $this->admMenuLnk('/dash/partner-compare-powerscores?all=1',         'Compare All Scores'),
+                    $this->admMenuLnk('/dash/partner-compare-powerscore-averages?all=1', 'Score Averages'),
+                    $this->admMenuLnk('/dash/founders-circle-report?all=1',              'Founders Circle'),
+                    $this->admMenuLnk('/dash/powerscore-final-report',                   'Written Report')
                 ]);
         }
         return $treeMenu;

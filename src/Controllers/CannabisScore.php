@@ -60,8 +60,6 @@ class CannabisScore extends ScoreImports
                 ])->render();
         } elseif (in_array($nID, [74, 396])) {
             $ret .= $this->printGramForm($nID, $nIDtxt);
-        } elseif (in_array($nID, [70, 397])) {
-            $ret .= $this->printKwhForm($nID, $nIDtxt);
         } elseif ($nID == 362) {
             $GLOBALS["SL"]->loadStates();
             $this->getStateUtils();
@@ -88,6 +86,8 @@ class CannabisScore extends ScoreImports
             
         } elseif ($nID == 490) {
             $ret .= $this->customPrint490($nID);
+        } elseif ($nID == 946) {
+            $ret .= $this->printPsRankingFilters($nID);
         } elseif ($nID == 860) {
             if (isset($this->sessData->dataSets["PSForCup"])) {
                 $deetVal = '';
@@ -215,7 +215,7 @@ class CannabisScore extends ScoreImports
         return $curr;
     }
     
-    protected function postNodePublicCustom($nID = -3, $tmpSubTier = [])
+    protected function postNodePublicCustom($nID = -3, $nIDtxt = '', $tmpSubTier = [])
     { 
         if (empty($tmpSubTier)) {
             $tmpSubTier = $this->loadNodeSubTier($nID);
@@ -227,20 +227,12 @@ class CannabisScore extends ScoreImports
                 $this->sessData->updateZipInfo($GLOBALS["SL"]->REQ->get('n47fld'), 
                     'PowerScore', 'PsState', 'PsCounty', 'PsAshrae', 'PsCountry');
             }
-        } elseif ($nID == 70) { // dump monthly energy notes
-            $currMonth = (($GLOBALS["SL"]->REQ->has('elecMonth')) ? intVal($GLOBALS["SL"]->REQ->elecMonth) : 1);
-            $powerMonths = $this->sortMonths();
-            foreach ($powerMonths as $i => $row) {
-                $row->PsMonthMonth = $currMonth;
-                $f = 'elec' . (1+$i);
-                $row->PsMonthKWH1  = (($GLOBALS["SL"]->REQ->has($f . 'a')) ? intVal($GLOBALS["SL"]->REQ->get($f . 'a')) 
-                    : null);
-                $row->PsMonthNotes = (($GLOBALS["SL"]->REQ->has($f . 'd')) ? trim($GLOBALS["SL"]->REQ->get($f . 'd')) 
-                    : null);
-                $row->save();
-                $currMonth++;
-                if ($currMonth == 13) $currMonth = 1;
-            }
+        } elseif ($nID == 74) { // dump monthly grams
+            $this->postMonthlies($nIDtxt, 'PsMonthGrams');
+        } elseif ($nID == 70) { // dump monthly energy
+            $this->postMonthlies($nIDtxt, 'PsMonthKWH1');
+        } elseif ($nID == 949) { // dump monthly green waste pounds
+            $this->postMonthlies($nIDtxt, 'PsMonthWasteLbs');
         } elseif ($nID == 57) {
             $foundOther = '';
             for ($i = 0; ($i < 20 && $foundOther == ''); $i++) {
@@ -280,6 +272,31 @@ class CannabisScore extends ScoreImports
         return false; // false to continue standard post processing
     }
     
+    protected function postMonthlies($nIDtxt, $fld2)
+    {
+        $powerMonths = $this->sortMonths();
+        foreach ($powerMonths as $i => $row) {
+            $row->PsMonthMonth = (1+$i);
+            $row->{ $fld2 }  = (($GLOBALS["SL"]->REQ->has('month' . $nIDtxt . 'ly' . (1+$i) . '')) 
+                ? intVal($GLOBALS["SL"]->REQ->get('month' . $nIDtxt . 'ly' . (1+$i) . '')) : null);
+            $row->save();
+        }
+        return true;
+    }
+    
+    public function monthlyCalcPreselections($nID, $nIDtxt = '')
+    {
+        $ret = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $fld = (($nID == 70) ? 'PsMonthKWH1' : (($nID == 74) ? 'PsMonthGrams' : 'PsMonthWasteLbs'));
+        $powerMonths = $this->sortMonths();
+        if ($powerMonths->isNotEmpty()) {
+            foreach ($powerMonths as $i => $row) {
+                $ret[$i] = $row->{ $fld };
+            }
+        }
+        return $ret;
+    }
+    
     public function printGramForm($nID, $nIDtxt)
     {
         $this->v["nID"] = $nID;
@@ -289,16 +306,9 @@ class CannabisScore extends ScoreImports
             $this->v["currSessData"] = $this->sessData->dataSets["PowerScore"][0]->PsGrams;
         }
         $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt . "', 'reqFormFldGreater', 0.00000001);\n";
+        $presel = $this->monthlyCalcPreselections($nID, $nIDtxt);
+        $this->v["gramFormMonths"] = $this->printMonthlyCalculator($nIDtxt, $presel, 'convertGrams();');
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
-    }
-    
-    public function printKwhForm($nID, $nIDtxt)
-    {
-        $this->v["nID"]         = $nID;
-        $this->v["powerScore"]  = $this->sessData->dataSets["PowerScore"][0];
-        $this->v["powerMonths"] = $this->sortMonths();
-        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt . "', 'reqFormFldGreater', 0);\n";
-        return view('vendor.cannabisscore.nodes.70-total-kwh', $this->v)->render();
     }
     
     public function customPrint490($nID)
@@ -334,10 +344,15 @@ class CannabisScore extends ScoreImports
         $this->searcher->v["nID"] = 490;
         $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        $this->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
-            ->render();
-        $this->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render();
         return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
+    }
+    
+    public function printPsRankingFilters()
+    {
+        $this->searcher->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
+            ->render();
+        return '<div id="scoreRankFiltWrap"><h4>Compare to other farms</h4><div class="pT5"></div>' . 
+            view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render() . '</div>';
     }
     
     public function ajaxChecksCustom(Request $request, $type = '')

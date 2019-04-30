@@ -1,12 +1,14 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations.blade.php -->
 @if (!$GLOBALS["SL"]->REQ->has('isPreview'))
 
+<div id="bigScoreWrap">
+
 <div id="efficBlockOver" class="row">
     <div class="col-lg-6 efficHeads">
-        <h1 class="m0 scoreBig">
-        @if ($isPast) PowerScore Report #{{ $psid }} @else PowerScore Estimate #{{ $psid }} @endif
-        </h1>
-        <div class="slGrey">
+        <h2 id="efficBlockOverTitle" class="m0 scoreBig pL20">
+        @if ($isPast) Calculated PowerScore<br />#{{ $psid }} @else PowerScore Estimate<br />#{{ $psid }} @endif
+        </h2>
+        <div class="pL20">
         @if (isset($sessData["PowerScore"][0]->PsCharacterize)) 
             <nobr>{{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) 
                 }}</nobr> —
@@ -31,12 +33,13 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficFacility) && $sessData["PowerScore"][0]->PsEfficFacility > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">Facility Efficiency:</h3></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-lg-4 efficHeads"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                Facility Efficiency</h5></div>
+            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficFacility)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficFacility, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>kWh / sq ft</nobr>
-            </h3></div>
+            </h5></div>
             <div class="col-lg-5 p0" id="psScoreFacility"></div>
         </div>
     </div>
@@ -45,12 +48,13 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficProduction) && $sessData["PowerScore"][0]->PsEfficProduction > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">Production Efficiency:</h3></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                Production Efficiency</h5></div>
+            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficProduction)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficProduction, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>g / kWh</nobr>
-            </h3></div>
+            </h5></div>
             <div class="col-lg-5 p0" id="psScoreProduction"></div>
         </div>
     </div>
@@ -59,13 +63,14 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficHvac) && $sessData["PowerScore"][0]->PsEfficHvac > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">HVAC Efficiency:</h3></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                HVAC Efficiency</h5></div>
+            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficHvac)
                     && $sessData["PowerScore"][0]->PsEfficHvac > 0.000001) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficHvac, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>kWh / sq ft</nobr>
-            </h3></div>
+            </h5></div>
             <div class="col-lg-5 p0" id="psScoreHvac"></div>
         </div>
     </div>
@@ -74,28 +79,25 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads"><h3 class="m0 scoreBig">Lighting Efficiency:</h3></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h3 class="m0 scoreBig">
+            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                Lighting Efficiency
+                @if ($sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
+                    <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"><i class="fa fa-question-circle-o" aria-hidden="true"></i></a>
+                @endif
+                </h5></div>
+            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) 
                     && $sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }}
                 @else 0 @endif &nbsp;&nbsp;<nobr>W / sq ft</nobr>
-            </h3></div>
+            </h5></div>
             <div class="col-lg-5 p0" id="psScoreLighting"></div>
         </div>
-    </div>
-@endif
-
-@if (!$GLOBALS["SL"]->REQ->has('print'))
-    <div class="row">
-        <div class=" @if ($isPast) col-md-8 @else col-md-7 @endif ">
-@endif
-    
-        @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0
-            && $sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
-            <div class="row p0 mB20">
+    @if ($sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
+        <div id="hidivCalcsLgt">
+            <div class="row">
                 <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-4 @else col-md-7 @endif ">
-                <div class="pL10 slGrey fPerc80">
+                <div class="pL10 slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
@@ -104,7 +106,7 @@
                     @endif </div>
                 </div></div>
                 <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-3 @else col-md-5 @endif ">
-                <div class="slGrey fPerc80">
+                <div class="slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
@@ -113,78 +115,131 @@
                     @endif
                 </div></div>
                 @if ($GLOBALS["SL"]->REQ->has('print'))
-                    <div class="col-md-5"><div class="slGrey fPerc80">
+                    <div class="col-md-5"><div class="slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
                     @endif
                     </div></div>
                 @endif
             </div>
-            @if (!$GLOBALS["SL"]->REQ->has('print'))
-                <div class="pL10 slGrey fPerc80">
-                @if (sizeof($printEfficLgt) > 0)
-                    @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
-                @endif
-                </div>
+        @if (!$GLOBALS["SL"]->REQ->has('print'))
+            <div class="pL10 pT15 slGrey">
+            @if (sizeof($printEfficLgt) > 0)
+                @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
             @endif
-        @endif
-        <div class="p10 m5"></div>
-    
-        @if (isset($noprints) && trim($noprints) != '')
-            <p><i>Not enough data provided to calculate {{ $noprints }} efficiency.</i></p>
-        @endif
-        <div id="cmtLnkSpacer"></div>
-        @if ($isPast)
-            @if (!$GLOBALS["SL"]->REQ->has('print'))
-                <p>Come back to check your PowerScore again soon, 
-                because your rank will change as more farms see how they stack up!</p>
-            @endif
-            <p><sup>*</sup> {!! view('vendor.cannabisscore.nodes.490-report-calculations-rank-about')->render() !!}</p>
-            <div class="p10"></div>
-        @endif
-@if (!$GLOBALS["SL"]->REQ->has('print'))
-        </div>
-        <div class=" @if ($isPast) col-md-4 @else col-md-5 @endif ">
-        @if ($isPast)
-            <div id="farmFilts" class="round20 brdDshGry p20 mT20">
-                <h3 class="mT0 mB5"><span class="wht">Compare to other farms</span></h3>
-                {!! $psFilters !!}
             </div>
-        @else
-            <p class="fPerc80"><br /><sup>*</sup>
-            {!! view('vendor.cannabisscore.nodes.490-report-calculations-rank-about')->render() !!}</p>
-            <p class="fPerc80">
-            For future-looking PowerScore estimates, Facility and Production are estimates purely based on
-            the average results of real grow years using similar combinations of technologies and strageties.
-            </p>
         @endif
         </div>
+    @endif
     </div>
 @endif
-@if (!$isPast && !$GLOBALS["SL"]->REQ->has('print'))
-    <div class="bgGry w100 mB20" style="height: 4px;"></div>
-    <h3 class="mT0 mB5"><span class="wht">Test farm design changes</span></h3>
-    <div id="futureForm" class="w100"></div>
+    
+@if (isset($noprints) && trim($noprints) != '')
+    <p><i>Not enough data provided to calculate {{ $noprints }} efficiency.</i></p>
+@endif
+        
+@if (!$GLOBALS["SL"]->REQ->has('print') && !$isPast)
+    <p><br /><sup>*</sup>
+    {!! view('vendor.cannabisscore.nodes.490-report-calculations-rank-about')->render() !!}</p>
+    <p>
+    For future-looking PowerScore estimates, Facility and Production are estimates purely based on
+    the average results of real grow years using similar combinations of technologies and strageties.
+    </p>
 @endif
 
-<div class="p10"></div>
+</div> <!-- end bigScoreWrap -->
 
+<?php $sizeBig = 180; $sizeSmall = 90; ?>
 <style>
+#scoreRankFiltWrap {
+    width: 100%;
+    background: #8dc63f;
+    color: #FFF;
+    padding: 30px;
+}
+#node945 { 
+    margin-top: 8px;
+    padding-left: 13px;
+}
+#node501 {
+    margin-top: -60px;
+    padding-left: 13px;
+}
+
+#hidivBtnFiltsAdv { color: #FFF; }
+
+#bigScoreWrap { margin: 30px 0px 0px 0px; box-shadow: 0px 20px 60px #DEDEDE; border-left: 20px solid #8dc63f; }
 #blockWrap151 { margin-top: 40px; }
-#blockWrap492 .slGrey { color: #B5CE96; }
 #reportTitleWrap { margin: 20px 0px 15px 0px; }
-.efficGuageWrap img, .efficGuageWrap .mpt { height: 45px; margin: -10px 0px -1px 32px; opacity:0.90; filter:alpha(opacity=90); }
-.efficGuageWrapBig img { height: 100px; margin: 2px 0px -13px 80px; }
+
+#guageRowOverall {
+    background: #FFF;
+    border-top: 20px solid #8dc63f;
+    border-bottom: 20px solid #8dc63f;
+    border-right: 20px solid #8dc63f;
+    min-height: 178px;
+}
+.guageWrap, .guageWrapOver {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    margin: 16px 0px -12px 30px;
+}
+.guageImgMeter, .guageWrap .guageImgMeter, .guageWrapOver .guageImgMeter {
+    position: absolute;
+    z-index: 98;
+    top: 0px;
+    left: 0px;
+    height: 180px;
+    width: 180px;
+}
+.guageImgDial, .guageWrap .guageImgDial, .guageWrapOver .guageImgDial {
+    position: absolute;
+    z-index: 99;
+    top: 50%;
+    left: 50%;
+    margin-top: -57px;
+    margin-left: -120px;
+    height: 180px;
+    width: 180px;
+
+    -webkit-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+    -moz-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+    -o-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+    transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+}
+.guageWrap {
+    height: 65px;
+    margin: -8px 0 -20px -23px;
+}
+.guageWrap .guageImgMeter {
+    height: 100px;
+    width: 100px;
+}
+.guageWrap .guageImgDial {
+    margin-top: -31px;
+    margin-left: -81px;
+    height: 100px;
+    width: 100px;
+}
+
 .efficGuageTxt, .efficGuageTxtOver { text-align: left; width: 250px; }
-.efficGuageTxt { margin: -5px 0px 0px -9px; }
+.efficGuageTxt { margin: 12px 0 0 -16px; }
 .efficGuageTxt .slGrey, .efficGuageTxtOver .slGrey { font-size: 12px; line-height: 16px; }
-.scoreBig { color: #FFF; text-shadow: -1px 1px 2px #000; }
-#efficBlockOver { min-height: 100px; margin-top: 30px; }
-.efficBlock { width: 100%; min-height: 54px; padding: 15px 0px 5px 0px; border-top: 1px #DDD solid; }
+#efficBlockOver { background: #8dc63f; color: #FFF; min-height: 178px; }
+#efficBlockOverTitle { margin-top: 20px; }
+#efficBlockOverGuageTitle { margin-top: 15px; }
+.efficBlock { width: 100%; min-height: 75px; padding: 15px 0px 5px 0px; border-top: 1px solid #f1f1f1; }
+.efficHeads { padding: 10px 15px 0px 15px; }
+#hidivCalcsLgt { display: none; padding: 15px 0px 15px 30px; width: 75%; }
+
+#guageOverallTxt { color: #444; }
+
+
 @media screen and (max-width: 1200px) {
-    .efficBlock { min-height: 55px; }
+    .efficBlock { min-height: 75px; }
     #efficBlockOver { min-height: 100px; }
-    .efficGuageWrapBig img { margin: -8px 0px -13px 22px; }
     .efficGuageTxtOver { margin: -8px 0px 0px -30px; }
 }
 @media screen and (max-width: 992px) {
@@ -194,18 +249,13 @@
     .efficHeadScore { padding-left: 30px; }
     .efficGuageTxtOver { width: 365px; margin: 24px 0px 35px -347px; }
     .efficGuageWrapBig { padding-top: 20px; }
-    .efficGuageWrapBig img { height: 120px; margin: -14px 0px 10px 472px; padding-top: 20px; }
-    .efficGuageWrap img { height: 70px; margin: -54px 0px 26px 496px; }
     .efficGuageTxt { margin: -58px 0px 21px 36px; }
-    #farmFilts { width: 90%; margin: -10px 15px 20px 15px; }
     #cmtLnkSpacer { margin-top: -10px; }
 }
 @media screen and (max-width: 768px) {
     .efficBlock { min-height: 84px; }
     #efficBlockOver { min-height: 195px; }
     .efficGuageTxtOver { width: 265px; margin: -115px 0px 35px 15px; }
-    .efficGuageWrapBig img { margin: -5px 0px 10px 325px; }
-    .efficGuageWrap img { margin: -60px 0px 19px 377px; }
     .efficGuageTxt { margin: -84px 0px 21px 265px; }
     .efficGuageTxt h4, #blockWrap492 .efficGuageTxt h4 { font-size: 1.2rem; color: #B5CE96; }
 }
@@ -213,8 +263,6 @@
     .efficBlock { min-height: 148px; }
     #efficBlockOver { min-height: 215px; }
     .efficGuageTxtOver { width: 255px; margin: -165px 0px 0px 15px; }
-    .efficGuageWrapBig img { height: 130px; margin: -15px 0px 50px 305px; }
-    .efficGuageWrap img { height: 85px; margin: -44px 0px 0px 281px; }
     .efficGuageTxt { margin: -35px 0px 15px 15px; }
 }                                              
 @media screen and (max-width: 480px) {
@@ -222,8 +270,6 @@
     #efficBlockOver { min-height: 215px; }
     .efficGuageTxtOver { width: 255px; margin: 0px 0px 0px 15px; }
     .efficGuageWrapBig { text-align: center; }
-    .efficGuageWrapBig img { height: 160px; margin: -30px 0px 0px 0px; }
-    .efficGuageWrap img { height: 70px; margin: -50px 0px 0px 272px; }
     .efficGuageTxt { margin: -15px 0px 40px 15px; }
     #efficBlockOver .efficHeads h2 { font-size: 28px; }
 }

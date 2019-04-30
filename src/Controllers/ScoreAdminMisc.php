@@ -20,7 +20,7 @@ use App\Models\RIIPSCommunications;
 use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
 use App\Models\SLUploads;
-use SurvLoop\Controllers\SurvTrends;
+use SurvLoop\Controllers\Stats\SurvTrends;
 use CannabisScore\Controllers\ScoreCalcs;
 
 class ScoreAdminMisc extends ScoreCalcs
@@ -550,7 +550,9 @@ class ScoreAdminMisc extends ScoreCalcs
         if (isset($this->sessData->dataSets["PSCommunications"])) {
             $comms = $this->sessData->dataSets["PSCommunications"];
             if (sizeof($comms) > 0) {
-                foreach ($comms as $com) $adms[$com->PsComUser] = $this->printUserLnk($com->PsComUser);
+                foreach ($comms as $com) {
+                    $adms[$com->PsComUser] = $this->printUserLnk($com->PsComUser);
+                }
             }
         }
         return view('vendor.cannabisscore.nodes.845-admin-communications-log', [
@@ -558,13 +560,15 @@ class ScoreAdminMisc extends ScoreCalcs
             "ps"    => $this->coreID,
             "comms" => $comms,
             "adms"  => $adms
-            ])->render();
+        ])->render();
     }
     
     protected function admCommsForm(Request $request)
     {
         $this->survLoopInit($request);
-        if (!$this->v["isAdmin"]) return ':-/';
+        if (!$this->v["isAdmin"]) {
+            return ':-/';
+        }
         $this->v["ps"] = 0;
         if ($request->has('ps') && intVal($request->ps) > 0) {
             $this->v["ps"] = intVal($request->ps);

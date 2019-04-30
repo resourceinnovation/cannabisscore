@@ -1,11 +1,10 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/{{ $nID }}-total-grams.blade.php -->
 <div id="node{{ $nID }}" class="nodeWrap">
-<div class="nodeHalfGap"></div>
 <div id="nLabel{{ $nID }}" class="nPrompt"><label for="n{{ $nID }}FldID" class="w100">
-    @if ($nID == 74) Over the 12-month period, how many total grams of cannabis flower and byproduct were produced? 
-    @else Over the 12-month period, how many total grams of cannabis flower and byproduct do you plan to produce?
-    @endif <span class="red">*required</span>
+    <p>Over the <span class="slBlueDark">12-month period</span>, how many total <span class="slBlueDark">grams of cannabis flower and byproduct</span> were produced? 
+    <span class="red">*required</span></p>
 </label></div>
+{!! $gramFormMonths !!}
 <div class="nFld" style="font-size: 20px;">
     <nobr><input type="number" name="n{{ $nID }}fld" id="n{{ $nID }}FldID" autocomplete="off"
         onkeyup="checkMin('{{ $nID }}', 0); convertGrams();" 
@@ -16,8 +15,8 @@
     <nobr><input type="number" name="n{{ $nID }}fldLb" id="n{{ $nID }}FldLbID" autocomplete="off"
         onkeyup="checkMin('{{ $nID }}', 0); 
         document.getElementById('n{{ $nID }}FldID').value=Math.round(this.value*453.592);" 
-        value="" min="0" class="form-control form-control-lg ntrStp slTab slNodeChange disIn mR10 mB5" style="width: 140px;"
-        {!! $GLOBALS["SL"]->tabInd() !!}> pounds</nobr>
+        value="" min="0" class="form-control form-control-lg ntrStp slTab slNodeChange disIn mR10 mB5" 
+        style="width: 140px;" {!! $GLOBALS["SL"]->tabInd() !!}> pounds</nobr>
 </div>
 <style> #nLabel{{ $nID }} label { width: 100%; } </style>
 <div class="nodeHalfGap"></div>

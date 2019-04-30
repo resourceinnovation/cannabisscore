@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores.blade.php -->
-<div class="row" >
-@if ($nID != 490) <div class="col-2"> @else <div class="col-6"> @endif
+
+@if ($nID != 490) <div class="row" ><div class="col-2"> @endif
         <select name="fltFarm" id="filtFarmID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="0"   @if (!isset($fltFarm) || $fltFarm == 0)  SELECTED @endif >All Farm Types</option>
@@ -9,17 +9,19 @@
             <option value="145" @if (isset($fltFarm) && $fltFarm == 145) SELECTED @endif 
                 >Greenhouse/Hybrid/Mixed Light</option>
         </select>
-@if ($nID != 490) </div><div class="col-2"> @endif
+@if ($nID != 490) 
+    </div><div class="col-2">
         <select name="fltClimate" id="filtClimateID" class="form-control ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->climateZoneDrop($fltClimate) !!}
         </select>
-@if ($nID != 490) </div><div class="col-2"> @endif
+    </div><div class="col-2">
+@endif
         <select name="fltState" id="fltStateID" class="form-control ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->stateDrop($fltState, true) !!}
         </select>
-</div><div class=" @if ($nID != 490) col-2 @else col-6 @endif ">
+@if ($nID != 490) </div><div class="col-2"> @endif
         <select name="fltLght" id="fltLghtID" class="form-control ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltLght') 
@@ -130,16 +132,19 @@
                 >{{ $type }} - None</option>
         @endforeach
         </select>
-@if ($nID != 490) </div><div class="col-2"> @else </div></div> @endif
-        <a href="javascript:;" class="btn btn-lg btn-primary updateScoreFilts float-right"
-            ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
-        <div class="mT10"><a id="hidivBtnFiltsAdv" class="hidivBtn" href="javascript:;"
+@if ($nID != 490)
+    </div><div class="col-2"> 
+        <a class="btn btn-lg btn-primary updateScoreFilts @if ($nID != 490) float-right @endif "
+            href="javascript:;"><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
+        <div class="mT10"><a id="btnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>
-@if ($nID != 490) </div></div> @endif
+    </div>
+</div>
+@endif
     <?php /* @if (isset($psid) && $psid > 0)
         <label><input type="checkbox" name="psid" id="psidID" value=""></label>
     @endif */ ?>
-<div id="hidivFiltsAdv" class="
+<div id="filtsAdv" class="
     @if ((isset($fltSize) && intVal($fltSize) > 0) || (isset($fltPerp) && intVal($fltPerp) == 1) 
         || (isset($fltPump) && intVal($fltPump) == 1) || (isset($fltWtrh) && intVal($fltWtrh) == 1) 
         || (isset($fltManu) && intVal($fltManu) == 1) || (isset($fltAuto) && intVal($fltAuto) == 1) 
@@ -148,7 +153,7 @@
         disBlo
     @else disNon @endif ">
 @if ($nID == 490)
-    @if (isset($psFiltChks)) <div class="pT20">{!! $psFiltChks !!}</div> @endif
+    @if (isset($psFiltChks)) <div class="w100 pT20 taL">{!! $psFiltChks !!}</div> @endif
 @else
     <div class="row"><div class="col-2 pT10"> 
         <select name="fltSize" id="fltSizeID" class="form-control ntrStp slTab mT5" autocomplete="off" 
@@ -193,18 +198,47 @@
     </div></div>
 @endif
 </div>
+@if ($nID == 490)
+    <div class="pT20 pB20">
+        <a id="btnFiltsAdv" class="disBlo pull-left" href="javascript:;" style="color: #FFF;">Show More<br />Filters</a>
+        <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" style="color: #FFF;">Show Less<br />Filters</a>
+        <a class="pull-right btn btn-info updateScoreFilts" href="javascript:;">Apply Filters</a><br />
+    </div>
+@endif
 
-<input type="hidden" name="tblBaseUrl" id="tblBaseUrlID" value="/dash/compare-powerscores">
+<input type="hidden" name="tblBaseUrl" id="tblBaseUrlID" 
+    @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+        @if ($GLOBALS["SL"]->REQ->has('all')) value="/dash/partner-compare-powerscores?all=1"
+        @else value="/dash/partner-compare-powerscores?z=z"
+        @endif
+    @else value="/dash/compare-powerscores?z=z"
+    @endif >
+
 <script type="text/javascript"> $(document).ready(function() {
+    
+    $(document).on("click", "#btnFiltsAdv", function() {
+@if ($nID == 490)
+        setTimeout(function() { $("#btnFiltsAdvHide").slideDown("fast"); }, 350);
+        $("#btnFiltsAdv").slideUp("fast");
+        $("#filtsAdv").slideDown("fast");
+@else
+        if (document.getElementById('filtsAdv').style.display != 'block') {
+            $("#filtsAdv").slideDown("fast");
+        } else {
+            $("#filtsAdv").slideUp("fast");
+        }
+@endif
+    });
+    $(document).on("click", "#btnFiltsAdvHide", function() {
+        setTimeout(function() { $("#btnFiltsAdv").slideDown("fast"); }, 350);
+        $("#btnFiltsAdvHide").slideUp("fast");
+        $("#filtsAdv").slideUp("fast");
+    });
     
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
     function applySort(srtType) {
         var currDir = '{{ $sort[1] }}';
-        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-            var baseUrl = '/dash/compare-powerscores?srt='+srtType;
-        @else
-            var baseUrl = '/compare-powerscores?srt='+srtType;
-        @endif
+        var baseUrl = document.getElementById('tblBaseUrlID').value;
         if (srtType == '{{ $sort[0] }}') {
             if (currDir == 'asc') baseUrl += '&srta=desc';
             else baseUrl += '&srta=asc';
@@ -216,13 +250,10 @@
     
     @if ($nID != 490)
         function applyFilts() {
-            @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-                window.location="/dash/compare-powerscores?ps={{ $psid }}"+gatherFilts();
-            @else
-                window.location="/compare-powerscores?ps={{ $psid }}"+gatherFilts();
-            @endif
+            window.location=document.getElementById('tblBaseUrlID').value+"&ps={{ $psid }}"+gatherFilts();
             return true;
         }
         $(document).on("click", ".updateScoreFilts", function() { applyFilts(); });
     @endif
+    
 }); </script>

@@ -2,8 +2,16 @@
 <div class="slCard nodeWrap">
 <div class="row">
     <div class="col-8">
-        <a href="/dash/compare-powerscores"><h1 class="slBlueDark"> 
-        @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h1></a>
+    @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
+        <a href="/dash/compare-powerscores"><h2 class="slBlueDark"> 
+        @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h2></a>
+    @else   
+        @if ($GLOBALS["SL"]->REQ->has('all'))
+            <a href="/dash/partner-compare-powerscores"><h2 class="slBlueDark"> Compare All PowerScores</h2></a>
+        @else
+            <a href="/dash/partner-compare-powerscores?all=1"><h2 class="slBlueDark"> Compare My PowerScores</h2></a>
+        @endif
+    @endif
     </div><div class="col-4 taR"><div class="mTn10 pB10">
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
         @if (!$GLOBALS["SL"]->REQ->has('review'))
@@ -12,6 +20,12 @@
         <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?random=1" target="_blank">Get Random</a>
         <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?srt={{ $sort[0] }}&srta={{ $sort[1] }}{{ 
             $urlFlts }}&excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+    @else
+        @if (!$GLOBALS["SL"]->REQ->has('all'))
+            <a href="/dash/partner-compare-powerscores?all=1" class="pull-right">All PowerScores</a>
+        @else
+            <a href="/dash/partner-compare-powerscores" class="pull-right">My PowerScores</a>
+        @endif
     @endif
     </div></div>
 </div>
@@ -27,6 +41,15 @@
 <div class="slCard nodeWrap">
 <table border=0 class="table w100 bgWht">
 <tr>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Client Name',
+            "srtVal" => 'PsOwnClientUser',
+            "sort"   => $sort
+            ])->render() !!}
+    </th>
+@endif
 <th>
     {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Score ID#',
@@ -83,55 +106,87 @@
         "sort"   => $sort
         ])->render() !!}
 </th>
-<th>
-    @if (!$isExcel) <span class="fPerc80"><span class="mR10"> @endif
-    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-        "eng"    => 'Grams',
-        "srtVal" => 'PsGrams',
-        "sort"   => $sort
-        ])->render() !!}
-    @if (!$isExcel) </span><span class="mR10"> @else </th><th> @endif
-    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-        "eng"    => 'kWh',
-        "srtVal" => 'PsKWH',
-        "sort"   => $sort
-        ])->render() !!}
-    @if (!$isExcel) </span> @else </th><th> @endif
-    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-        "eng"    => 'Sq Ft',
-        "srtVal" => 'PsTotalSize',
-        "sort"   => $sort
-        ])->render() !!}
-    @if (!$isExcel) </span> @endif
-</th>
-<th>
-    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-        "eng"    => 'County State',
-        "srtVal" => 'PsCounty',
-        "sort"   => $sort
-        ])->render() !!}
-    {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-        "eng"    => 'Zip',
-        "srtVal" => 'PsZipCode',
-        "sort"   => $sort
-        ])->render() !!}
-    @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-        <br />{!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Email',
-            "srtVal" => 'PsEmail',
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Grams',
+            "srtVal" => 'PsGrams',
             "sort"   => $sort
             ])->render() !!}
-    @endif
-</th>
+    </th>
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'kWh',
+            "srtVal" => 'PsKWH',
+            "sort"   => $sort
+            ])->render() !!}
+    </th>
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Sq Ft',
+            "srtVal" => 'PsTotalSize',
+            "sort"   => $sort
+            ])->render() !!}
+    </th>
+@else
+    <th>
+        @if (!$isExcel) <span class="fPerc80"><span class="mR10"> @endif
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Grams',
+            "srtVal" => 'PsGrams',
+            "sort"   => $sort
+            ])->render() !!}
+        @if (!$isExcel) </span><span class="mR10"> @else </th><th> @endif
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'kWh',
+            "srtVal" => 'PsKWH',
+            "sort"   => $sort
+            ])->render() !!}
+        @if (!$isExcel) </span> @else </th><th> @endif
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Sq Ft',
+            "srtVal" => 'PsTotalSize',
+            "sort"   => $sort
+            ])->render() !!}
+        @if (!$isExcel) </span> @endif
+    </th>
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'County State',
+            "srtVal" => 'PsCounty',
+            "sort"   => $sort
+            ])->render() !!}
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Zip',
+            "srtVal" => 'PsZipCode',
+            "sort"   => $sort
+            ])->render() !!}
+        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
+            <br />{!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+                "eng"    => 'Email',
+                "srtVal" => 'PsEmail',
+                "sort"   => $sort
+                ])->render() !!}
+        @endif
+    </th>
+@endif
 </tr>
 <tr>
     <th>Averages</th>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <td>&nbsp;</td>
+@endif
     <td>&nbsp;</td>
     <th>{{ round($psAvg->PsEfficOverall) }}%</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficFacility, 3) }}</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficProduction, 3) }}</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficLighting, 3) }}</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficHvac, 3) }}</th>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <th>{{ number_format($psAvg->PsGrams) }} g</th>
+    <th>{{ number_format($psAvg->PsKWH) }} kWh</th>
+    <th>{{ number_format($psAvg->PsTotalSize) }} sq ft</th>
+@else
     @if (!$isExcel) <th colspan=2 ><span class="mR10"><nbor> @else <th> @endif
         {{ number_format($psAvg->PsGrams) }} g
         @if (!$isExcel) </nobr></span><span class="mR10"><nbor> @else </th><th> @endif
@@ -140,13 +195,23 @@
         {{ number_format($psAvg->PsTotalSize) }} sq ft
         @if (!$isExcel) </nbor> @endif
     </th>
+@endif
 </tr>
 
 @if ($allscores && $allscores->isNotEmpty())
     @foreach ($allscores as $i => $ps)
         <tr @if ($i%2 == 0) class="row2" @endif >
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+        <td>
+        @if (!isset($prevClientName) || $prevClientName != $ps->PsOwnClientName)
+            <?php $prevClientName = $ps->PsOwnClientName; ?>
+            <a href="#" target="_blank"><h5>Client #{{ $ps->PsOwnClientName }}</h5></a>
+        @endif
+        </td>
+@endif
         <td><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">
-            @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif</a>
+            @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif
+            <span class="fPerc66">({{ $ps->PsYear }})</span></a>
         @if (!$isExcel && in_array($ps->PsID, $cultClassicIds))
             <div class="mTn5 mBn5 slGrey fPerc66"><i class="fa fa-certificate" aria-hidden="true"></i> CC</div>
         @endif
@@ -189,6 +254,11 @@
                 && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
         </td>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+        <td>{{ $ps->PsGrams }}</td>
+        <td>{{ $ps->PsKWH }}</td>
+        <td>{{ $ps->PsTotalSize }}</td>
+@else
         @if (!$isExcel)
             <td class="fPerc66">
                 @if ($ps->PsGrams > 0)     {{ number_format($ps->PsGrams) }} g<br /> @endif
@@ -212,6 +282,7 @@
                 <td colspan=9 ><div class="mTn15"><i>{!! $ps->PsNotes !!}</i></div></td>
             </tr>
         @endif
+@endif
     @endforeach
 @else
     <tr><td colspan=11 class="slGrey"><i>No PowerScores found.</i></td></tr>

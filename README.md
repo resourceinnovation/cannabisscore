@@ -2,7 +2,7 @@
 # resourceinnovation/cannabisscore
 
 [![Laravel](https://img.shields.io/badge/Laravel-5.8-orange.svg?style=flat-square)](http://laravel.com)
-[![SurvLoop](https://img.shields.io/badge/SurvLoop-0.1-orange.svg?style=flat-square)](https://github.com/wikiworldorder/survloop)
+[![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/wikiworldorder/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis 

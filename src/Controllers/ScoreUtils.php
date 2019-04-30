@@ -297,13 +297,12 @@ class ScoreUtils extends ScorePowerUtilities
                 $new = new RIIPSMonthly;
                 $new->PsMonthPSID  = $this->coreID;
                 $new->PsMonthMonth = $m;
-                $new->PsMonthOrder = $m-1;
                 $new->save();
                 $this->sessData->dataSets["PSMonthly"][] = $new;
             }
         }
         return RIIPSMonthly::where('PsMonthPSID', $this->coreID)
-            ->orderBy('PsMonthOrder', 'asc')
+            ->orderBy('PsMonthMonth', 'asc')
             ->get();
     }
     

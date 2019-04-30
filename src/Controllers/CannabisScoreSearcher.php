@@ -13,6 +13,7 @@ use App\Models\RIIPowerScore;
 use App\Models\RIIPSAreas;
 use App\Models\RIIPSForCup;
 use App\Models\RIIPSRenewables;
+use App\Models\RIIPSOwners;
 use SurvLoop\Controllers\Searcher;
 
 class CannabisScoreSearcher extends Searcher
@@ -50,7 +51,7 @@ class CannabisScoreSearcher extends Searcher
         return $ret;
     }
     
-    public function searchResultsXtra($treeID = -3)
+    public function searchResultsXtra($treeID = 1)
     {
         if ($treeID <= 0) {
             $treeID = $GLOBALS["SL"]->treeID;
@@ -84,6 +85,11 @@ class CannabisScoreSearcher extends Searcher
             ? $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('fltRenew')) : []);
         $this->v["fltCmpl"] = (($GLOBALS["SL"]->REQ->has('fltCmpl')) ? intVal($GLOBALS["SL"]->REQ->get('fltCmpl')):243);
         $this->v["fltCup"] = (($GLOBALS["SL"]->REQ->has('fltCup')) ? intVal($GLOBALS["SL"]->REQ->get('fltCup')) : 0);
+        $this->v["prtnOwn"] = 0;
+        if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"]
+            && !$GLOBALS["SL"]->REQ->has('all')) {
+            $this->v["prtnOwn"] = 1;
+        }
         $this->searchFiltsURLXtra();
         return true;
     }
@@ -178,9 +184,22 @@ class CannabisScoreSearcher extends Searcher
         $this->allPublicCoreIDs = [];
         $list = NULL;
         if ($coreTbl == 'PowerScore') {
-            $list = RIIPowerScore::where('PsStatus', $this->v["defCmplt"])
-                ->orderBy('created_at', 'desc')
-                ->get();
+            if ($this->v["prtnOwn"] == 1) { // partner version filtered for their clients
+                $list = DB::table('RII_PowerScore')
+                    ->join('RII_PSOwners', function ($join) {
+                        $join->on('RII_PowerScore.PsUserID', '=', 'RII_PSOwners.PsOwnClientUser')
+                             ->where('RII_PSOwners.PsOwnPartnerUser', '=', Auth::user()->id)
+                             ->orWhere('RII_PowerScore.PsUserID', '=', Auth::user()->id);
+                    })
+                    ->where('RII_PowerScore.PsStatus', $this->v["defCmplt"])
+                    ->orderBy('RII_PSOwners.PsOwnClientName', 'asc')
+                    ->orderBy('RII_PowerScore.PsID', 'desc')
+                    ->get();
+            } else {
+                $list = RIIPowerScore::where('PsStatus', $this->v["defCmplt"])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }   
         }
         if ($list && $list->isNotEmpty()) {
             foreach ($list as $l) {

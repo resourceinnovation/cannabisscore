@@ -3,19 +3,17 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSMonthly extends Model
+class RIIPSOwners extends Model
 {
-    protected $table      = 'RII_PSMonthly';
-    protected $primaryKey = 'PsMonthID';
+    protected $table      = 'RII_PSOwners';
+    protected $primaryKey = 'PsOwnID';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsMonthPSID', 
-		'PsMonthMonth', 
-		'PsMonthKWH1', 
-		'PsMonthGrams', 
-		'PsMonthWasteLbs', 
-		'PsMonthOrder', 
+        'PsOwnPartnerUser', 
+        'PsOwnClientUser', 
+        'PsOwnType', 
+        'PsOwnClientName'
     ];
     
     // END SurvLoop auto-generated portion of Model
