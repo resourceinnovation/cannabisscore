@@ -3,7 +3,7 @@
     && (!$GLOBALS["SL"]->REQ->has("hidePromos") || intVal($GLOBALS["SL"]->REQ->get("hidePromos")) != 1))
     <div class="row">
         <div class="col-8 pR20 pT20">
-            <h4><i class="fa fa-star" aria-hidden="true"></i> {{ $utilOffer[0] }}
+            <h5><i class="fa fa-star" aria-hidden="true"></i> {{ $utilOffer[0] }}
             may be able to offer help and incentives to make your grow more efficient, lowering your bills.</h4>
         </div><div class="col-4">
             <div class="pT10 pB10">
@@ -15,9 +15,8 @@
     </div>
     <style> #node501 { margin: 40px 0px; } </style>
 @else
-    <h4><i class="fa fa-star" aria-hidden="true"></i> 
-       Your farm may be eligible for upgrade incentives from your utility.
-    </h4>
+    <h5><i class="fa fa-star" aria-hidden="true"></i> 
+       Your farm may be eligible for upgrade incentives from your utility.</h5>
     <p>
         We encourage you to contact your electricity provider to ask about incentives on efficient lighting and HVAC.
     </p>

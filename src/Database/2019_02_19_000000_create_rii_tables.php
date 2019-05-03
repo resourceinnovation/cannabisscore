@@ -36,10 +36,6 @@ class RIICreateTables extends Migration
 			$table->double('PsEfficFacility')->nullable();
 			$table->double('PsEfficProduction')->nullable();
 			$table->double('PsEfficLighting')->nullable();
-			$table->double('PsEfficLightingMother')->nullable();
-			$table->double('PsEfficLightingClone')->nullable();
-			$table->double('PsEfficLightingVeg')->nullable();
-			$table->double('PsEfficLightingFlower')->nullable();
 			$table->double('PsEfficHvac')->nullable();
 			$table->double('PsGrams')->nullable();
 			$table->double('PsKWH')->nullable();

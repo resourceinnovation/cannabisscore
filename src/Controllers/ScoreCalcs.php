@@ -31,19 +31,29 @@ class ScoreCalcs extends ScoreUtils
             $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac       = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting   = 0;
+            $this->sessData->dataSets["PowerScore"][0]->PsEfficWater      = 0;
+            $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste      = 0;
             $row = $this->sessData->dataSets["PowerScore"][0];
             if ($this->v["totFlwrSqFt"] > 0 && (!isset($row->PsTotalSize) || intVal($row->PsTotalSize) == 0)) {
                 $this->sessData->dataSets["PowerScore"][0]->PsTotalSize = $this->v["totFlwrSqFt"];
             }
+            
             if ($row->PsTimeType == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
                 $row = $this->calcFutureYields();
-            } elseif (isset($row->PsKWH) && intVal($row->PsKWH) > 0 
-                && isset($this->v["totFlwrSqFt"]) && intVal($this->v["totFlwrSqFt"]) > 0) {
-                $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility = $row->PsKWH/$this->v["totFlwrSqFt"];
+            } else {
+                if (isset($row->PsKWH) && intVal($row->PsKWH) > 0 && isset($row->PsGrams) && intVal($row->PsGrams) > 0) {
+                    $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = $row->PsGrams/$row->PsKWH;
+                }
+                if (isset($this->v["totFlwrSqFt"]) && intVal($this->v["totFlwrSqFt"]) > 0) {
+                    if (isset($row->PsKWH) && intVal($row->PsKWH) > 0) {
+                        $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility = $row->PsKWH/$this->v["totFlwrSqFt"];
+                    }
+                    if (isset($row->PsGreenWasteLbs) && intVal($row->PsGreenWasteLbs) > 0) {
+                        $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste = $row->PsGreenWasteLbs/$this->v["totFlwrSqFt"];
+                    }
+                }
             }
-            if (isset($row->PsKWH) && intVal($row->PsKWH) > 0 && isset($row->PsGrams) && intVal($row->PsGrams) > 0) {
-                $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = $row->PsGrams/$row->PsKWH;
-            }
+            
             $area = $this->getArea('Flower');
             if ($area && (!isset($area->PsAreaHvacType) || intVal($area->PsAreaHvacType) == 0)
                 && (isset($row->PsIsIntegrated) && intVal($row->PsIsIntegrated) > 0)) {
@@ -64,15 +74,16 @@ class ScoreCalcs extends ScoreUtils
                 $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac 
                     = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
             }
+            
             $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize = 0;
-            $watts = $sqft = [];
+            $sqft = $watts = $wattsHvac = $gal = [];
             if (isset($this->sessData->dataSets["PSAreas"]) && sizeof($this->sessData->dataSets["PSAreas"]) > 0) {
                 foreach ($this->sessData->dataSets["PSAreas"] as $a => $area) {
                     foreach ($this->v["areaTypes"] as $typ => $defID) {
                         if ($area->PsAreaType == $defID && $typ != 'Dry') {
                             $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize += $area->PsAreaSize;
                             $sqft[$typ] = $area->PsAreaSize;
-                            $watts[$typ] = 0;
+                            $watts[$typ] = $wattsHvac[$typ] = $gal[$typ] = 0;
                             if (!isset($area->PsAreaLgtArtif) || intVal($area->PsAreaLgtArtif) == 0) {
                                 $watts[$typ] = 0.0000001;
                             } elseif (isset($this->sessData->dataSets["PSLightTypes"]) 
@@ -90,20 +101,22 @@ class ScoreCalcs extends ScoreUtils
                         }
                     }
                 }
+                
 //echo '#' . $this->sessData->dataSets["PowerScore"][0]->PsID . ' First <pre>'; print_r($watts); print_r($sqft); echo '</pre>';
                 if (isset($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc)) {
                     if ($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc 
                         == $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'With Clones')) {
-                        $watts["Clone"] += $watts["Mother"];
-                        $sqft["Clone"]  += $sqft["Mother"];
+                        $watts["Clone"]     += $watts["Mother"];
+                        $sqft["Clone"]      += $sqft["Mother"];
                         $watts["Mother"] = $sqft["Mother"] = 0;
                     } elseif ($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc 
                         == $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'In Veg Room')) {
-                        $watts["Veg"]   += $watts["Mother"];
-                        $sqft["Veg"]    += $sqft["Mother"];
+                        $watts["Veg"]     += $watts["Mother"];
+                        $sqft["Veg"]      += $sqft["Mother"];
                         $watts["Mother"] = $sqft["Mother"] = 0;
                     }
                 }
+                
                 $hasLights = 0;
                 foreach ($this->sessData->dataSets["PSAreas"] as $a => $area) {
                     foreach ($this->v["areaTypes"] as $typ => $defID) {
@@ -111,17 +124,26 @@ class ScoreCalcs extends ScoreUtils
                             $this->sessData->dataSets["PSAreas"][$a]->PsAreaCalcSize = $sqft[$typ];
                             $this->sessData->dataSets["PSAreas"][$a]->PsAreaCalcWatts = $watts[$typ];
                             $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic = 0;
-                            if ($watts[$typ] > 0) {
-                                $this->sessData->dataSets["PSAreas"][$a]->PsAreaLgtArtif = 1;
-                                if (intVal($sqft[$typ]) > 0) {
+                            if (intVal($sqft[$typ]) > 0) {
+                                $sqftWeight = $sqft[$typ]/$this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize;
+                                if ($watts[$typ] > 0) {
+                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaLgtArtif = 1;
                                     $hasLights++;
                                     $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic 
                                         = $watts[$typ]/$sqft[$typ];
-                                    $this->sessData->dataSets["PowerScore"][0]->{ 'PsEfficLighting' . $typ }
-                                        = $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic;
                                     $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting
-                                        += ($sqft[$typ]/$this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize)
-                                            *$this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic;
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic;
+                                }
+                                if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
+                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic 
+                                        = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType)/$sqft[$typ];
+                                    $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic;
+                                }
+                                if (isset($area->PsAreaGallons) && intVal($area->PsAreaGallons) > 0) {
+                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaWaterEffic = $area->PsAreaGallons/$sqft[$typ];
+                                    $this->sessData->dataSets["PowerScore"][0]->PsEfficWater
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaWaterEffic;
                                 }
                             }
                             $this->sessData->dataSets["PSAreas"][$a]->save();

@@ -115,20 +115,26 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function prepPrintEfficLgt()
     {
+        $this->loadTotFlwrSqFt();
         $this->v["printEfficLgt"] = $sqft = $watt = $lightBreakdown = [];
+        $this->v["printEfficHvac"] = $wattHvac = $hvacBreakdown = [];
+        $this->v["printEfficWtr"] = $gal = $waterBreakdown = [];
         if (isset($this->sessData->dataSets["PSAreas"])) {
             foreach ($this->sessData->dataSets["PSAreas"] as $i => $area) {
                 foreach ($this->v["areaTypes"] as $typ => $defID) {
                     if ($area->PsAreaType == $defID && $typ != 'Dry') {
                         $sqft[$typ] = $area->PsAreaSize;
                         $watt[$typ] = $area->PsAreaTotalLightWatts;
+                        $wattHvac[$typ] = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
+                        $gal[$typ] = $area->PsAreaTotalLightWatts;
                     }
                 }
             }
             foreach ($this->sessData->dataSets["PSAreas"] as $i => $area) {
                 foreach ($this->v["areaTypes"] as $typ => $defID) {
                     if ($area->PsAreaType == $defID && $typ != 'Dry') {
-                        $lightBreakdown[$typ] = '';
+                        $lightBreakdown[$typ] = $hvacBreakdown[$typ] = $waterBreakdown[$typ] = '';
+                        
                         if (isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
                             //  (Clone watts x # of lights x 24 hrs) / Clone sq ft)
                             if (isset($this->sessData->dataSets["PSLightTypes"]) 
@@ -147,7 +153,9 @@ class ScoreUtils extends ScorePowerUtilities
                                     if (in_array($lgt->PsLgTypAreaID, $areaIDs) 
                                         && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0 
                                         && isset($lgt->PsLgTypWattage) && intVal($lgt->PsLgTypWattage) > 0) {
-                                        if ($lightBreakdown[$typ] != '') $lightBreakdown[$typ] .= ' + ';
+                                        if ($lightBreakdown[$typ] != '') {
+                                            $lightBreakdown[$typ] .= ' + ';
+                                        }
                                         $lightBreakdown[$typ] .= '<nobr>( ' . number_format($lgt->PsLgTypCount) 
                                             . ' fixtures x ' . number_format($lgt->PsLgTypWattage) . ' W )</nobr>';
                                     }
@@ -161,10 +169,14 @@ class ScoreUtils extends ScorePowerUtilities
                             if (isset($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc)) {
                                 switch ($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc) {
                                     case $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'With Clones'):
-                                        if (in_array($typ, ['Mother', 'Clone'])) $curr = 'Mother & Clones';
+                                        if (in_array($typ, ['Mother', 'Clone'])) {
+                                            $curr = 'Mother & Clones';
+                                        }
                                         break;
                                     case $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'In Veg Room'):
-                                        if (in_array($typ, ['Mother', 'Veg'])) $curr = 'Mother & Veg';
+                                        if (in_array($typ, ['Mother', 'Veg'])) {
+                                            $curr = 'Mother & Veg';
+                                        }
                                         break;
                                 }
                             }
@@ -178,7 +190,24 @@ class ScoreUtils extends ScorePowerUtilities
                                 "num" => '<nobr>' . $curr . ' ' 
                                     . $GLOBALS["SL"]->sigFigs($area->PsAreaLightingEffic*$perc, 3) . ' W / sq ft</nobr>'
                                 ];
+                            $this->v["printEfficHvac"][] = [
+                                "typ" => $typ,
+                                "eng" => '( (' . $curr . ' <nobr>' . $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType) 
+                                    . ' kWh</nobr> / <nobr>' . number_format($area->PsAreaCalcSize) 
+                                    . ' sq ft )</nobr> <nobr>x ' . round(100*($perc)) . '% grow area</nobr>',
+                                "num" => '<nobr>' . $curr . ' ' 
+                                    . $GLOBALS["SL"]->sigFigs($area->PsAreaHvacEffic*$perc, 3) . ' kWh / sq ft</nobr>'
+                                ];
+                            $this->v["printEfficWtr"][] = [
+                                "typ" => $typ,
+                                "eng" => '( (' . $curr . ' <nobr>' . $area->PsAreaGallons 
+                                    . ' Gallons</nobr> / <nobr>' . number_format($area->PsAreaCalcSize) 
+                                    . ' sq ft )</nobr> <nobr>x ' . round(100*($perc)) . '% grow area</nobr>',
+                                "num" => '<nobr>' . $curr . ' ' 
+                                    . $GLOBALS["SL"]->sigFigs($area->PsAreaWaterEffic*$perc, 3) . ' Gallons / sq ft</nobr>'
+                                ];
                         }
+                        
                     }
                 }
             }
@@ -343,10 +372,13 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function prepFeedbackSkipLnk()
     {
-        $this->v["psOwner"] = ((session()->has('PowerScoreOwner')) ? session()->get('PowerScoreOwner') 
-            : ((isset($this->sessData->dataSets["PsFeedback"]) && isset($this->sessData->dataSets["PsFeedback"][0]) 
-                && isset($this->sessData->dataSets["PsFeedback"][0]->PsfPsID)) 
-                ? $this->sessData->dataSets["PsFeedback"][0]->PsfPsID : -3));
+        $this->v["psOwner"] = -3;
+        if (session()->has('PowerScoreOwner')) {
+            $this->v["psOwner"] = session()->get('PowerScoreOwner');
+        } elseif (isset($this->sessData->dataSets["PsFeedback"]) && isset($this->sessData->dataSets["PsFeedback"][0])
+                && isset($this->sessData->dataSets["PsFeedback"][0]->PsfPsID)) {
+            $this->v["psOwner"] = $this->sessData->dataSets["PsFeedback"][0]->PsfPsID;
+        }
         return true;
     }
     
@@ -440,6 +472,16 @@ class ScoreUtils extends ScorePowerUtilities
             || $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting == 0) {
             $noprints[] = 'lighting';
         }
+        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficWater) 
+            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficWater 
+            || $this->sessData->dataSets["PowerScore"][0]->PsEfficWater == 0) {
+            $noprints[] = 'water';
+        }
+        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficWaste) 
+            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficWaste 
+            || $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste == 0) {
+            $noprints[] = 'waste';
+        }
         if (sizeof($noprints) > 0) {
             foreach ($noprints as $i => $no) {
                 if ($i == 0) {
@@ -517,10 +559,8 @@ class ScoreUtils extends ScorePowerUtilities
             'PsEfficProduction'     => 0,
             'PsEfficLighting'       => 0,
             'PsEfficHvac'           => 0,
-            'PsEfficLightingMother' => 0,
-            'PsEfficLightingClone'  => 0,
-            'PsEfficLightingVeg'    => 0,
-            'PsEfficLightingFlower' => 0
+            'PsEfficWater'          => 0,
+            'PsEfficWaste'          => 0
             ]);
         return true;
     }

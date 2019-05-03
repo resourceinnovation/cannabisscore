@@ -411,11 +411,23 @@ class CannabisScore extends ScoreImports
         return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
     }
     
+    public function printFrameAnimPerc(Request $request, $perc = 0)
+    {
+        $size = 100;
+        if ($request->has('size') && intVal($request->get('size')) > 0) {
+            $size = intVal($request->get('size'));
+        }
+        return view('vendor.cannabisscore.nodes.490-report-calculations-frame-guage', [
+            "perc" => $perc,
+            "size" => $size
+            ])->render();
+    }
+    
     protected function ajaxScorePercentiles()
     {
         if (!$GLOBALS["SL"]->REQ->has('ps') || intVal($GLOBALS["SL"]->REQ->get('ps')) <= 0 
             || !$GLOBALS["SL"]->REQ->has('eff') || !in_array(trim($GLOBALS["SL"]->REQ->get('eff')), 
-                ['Overall', 'Facility', 'Production', 'HVAC', 'Lighting'])) {
+                ['Overall', 'Facility', 'Production', 'HVAC', 'Lighting', 'Water', 'Waste'])) {
             return '';
         }
         $this->initSearcher();
@@ -424,46 +436,80 @@ class CannabisScore extends ScoreImports
         if ($this->searcher->v["powerscore"] && isset($this->searcher->v["powerscore"]->PsID)) {
             $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->PsTimeType 
                 == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-            $currRanks = RIIPSRankings::where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
-                ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
+            $this->searcher->v["currRanks"] = RIIPSRankings::where('PsRnkFilters', $this->searcher->v["urlFlts"])
+                ->where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
                 ->first();
-            if (!$currRanks || !isset($currRanks->PsRnkOverall) || $GLOBALS["SL"]->REQ->has('refresh')) {
+            if ($GLOBALS["SL"]->REQ->has('refresh') || !$this->searcher->v["currRanks"]->PsRnkOverall
+                || !isset($this->searcher->v["currRanks"]->PsRnkOverall->PsRnkOverall)) {
                 if (isset($this->searcher->v["powerscore"]->PsTimeType) 
                     && $this->searcher->v["powerscore"]->PsTimeType 
                         == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
                     $ranks = RIIPSRanks::where('PsRnkFilters', '')
                         ->first();
-                    $currRanks = $this->ajaxScorePercNewRank($ranks);
-                    $this->searcher->v["powerscore"]->PsEfficOverall = $currRanks->PsRnkOverall;
+                    $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
+                    $this->searcher->v["powerscore"]->PsEfficOverall = $this->searcher->v["currRanks"]->PsRnkOverall;
                     $this->searcher->v["powerscore"]->save();
                 } else {
                     $urlFlts = $this->searcher->v["urlFlts"];
                     $this->calcAllScoreRanks();
                     $this->searcher->v["urlFlts"] = $urlFlts;
-                    $currRanks = RIIPSRankings::where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
+                    $this->searcher->v["currRanks"] = RIIPSRankings::where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
                         ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
                         ->first();
-                    if (!$currRanks) {
+                    if (!$this->searcher->v["currRanks"]) {
                         $ranks = RIIPSRanks::where('PsRnkFilters', $this->searcher->v["urlFlts"])
                             ->first();
-                        $currRanks = $this->ajaxScorePercNewRank($ranks);
+                        $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
                     }
                 }
             }
             $this->searcher->v["currGuage"] = 0;
-            $this->searcher->v["hasOverall"] = false;
-            if (isset($currRanks->{ 'PsRnk' . $this->searcher->v["eff"] })) {
-                $this->searcher->v["currGuage"] = round($currRanks->{ 'PsRnk' . $this->searcher->v["eff"] });
-                $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->PsEfficFacility) 
-                    && isset($this->searcher->v["powerscore"]->PsEfficProduction) 
-                    && isset($this->searcher->v["powerscore"]->PsEfficHvac) 
-                    && isset($this->searcher->v["powerscore"]->PsEfficLighting) 
-                    && $this->searcher->v["powerscore"]->PsEfficFacility > 0
-                    && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
-                    && $this->searcher->v["powerscore"]->PsEfficHvac > 0
-                    && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
+            $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->PsEfficFacility) 
+                && isset($this->searcher->v["powerscore"]->PsEfficProduction) 
+                && isset($this->searcher->v["powerscore"]->PsEfficHvac) 
+                && isset($this->searcher->v["powerscore"]->PsEfficLighting) 
+                && $this->searcher->v["powerscore"]->PsEfficFacility > 0
+                && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
+                && $this->searcher->v["powerscore"]->PsEfficHvac > 0
+                && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
+            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle" class="scoreBig slBlueDark"> Overall: '
+                . (($this->searcher->v["currRanks"]->PsRnkOverall > 66) ? 'Leader' 
+                    : (($this->searcher->v["currRanks"]->PsRnkOverall > 33) ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) 
+                . '</div><div class="slGrey">Your farm ' . (($this->searcher->v["isPast"]) ? 'is performing' : 'would perform') 
+                . ' overall in the</div><h2 class="m0 scoreBig">' . round($this->searcher->v["currRanks"]->PsRnkOverall) 
+                . $GLOBALS["SL"]->numSupscript(round($this->searcher->v["currRanks"]->PsRnkOverall)) 
+                . ' percentile</h2><div class="slGrey mB10">within the overall data set of ';
+// number_format($ranksCache->PsRnkTotCnt) }} past growing @if ($ranksCache->PsRnkTotCnt > 1) years @else year @endif of
+            if ($this->searcher->v["fltFarm"] == 0) {
+                $this->searcher->v["withinFilters"] .= 'all farm types';
+            } else {
+                $this->searcher->v["withinFilters"] .= str_replace('/', '/ ', strtolower(
+                    $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $this->searcher->v["fltFarm"]))) . ' farms';
             }
-            return view('vendor.cannabisscore.nodes.490-report-calculations-ajax-graphs', $this->searcher->v)->render();
+            $this->searcher->v["withinFilters"] .= $this->searcher->v["xtraFltsDesc"];
+            if ($this->searcher->v["fltState"] == '' && $this->searcher->v["fltClimate"] == '') {
+                $this->searcher->v["withinFilters"] .= ' in the U.S. and Canada.';
+            } elseif ($this->searcher->v["fltState"] != '') {
+                if ($this->searcher->v["fltState"] == 'US') {
+                    $this->searcher->v["withinFilters"] .= ' in the United States.';
+                } elseif ($this->searcher->v["fltState"] == 'Canada') {
+                    $this->searcher->v["withinFilters"] .= ' in Canada.';
+                } else {
+                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">' 
+                        . $GLOBALS["SL"]->getState($this->searcher->v["fltState"]) . '.';
+                }
+            } else {
+                if ($this->searcher->v["fltClimate"] == 'US') {
+                    $this->searcher->v["withinFilters"] .= ' in the United States.';
+                } elseif ($this->searcher->v["fltClimate"] == 'Canada') {
+                    $this->searcher->v["withinFilters"] .= ' in Canada.';
+                } else {
+                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">ASHRAE Climate Zone ' 
+                        . $this->searcher->v["fltClimate"] . '.';
+                }
+            }
+            $this->searcher->v["withinFilters"] .= '</div>';
+            return view('vendor.cannabisscore.nodes.490-report-calculations-load-all-js', $this->searcher->v)->render();
         }
         return '';
     }

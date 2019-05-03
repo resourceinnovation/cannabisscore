@@ -12,6 +12,18 @@ namespace CannabisScore\Controllers;
 
 class CannabisScoreGlobals
 {
+    public function getAreaTypeFromNick($nick)
+    {
+        switch ($nick) {
+            case 'Mother': return $this->def->getID('PowerScore Growth Stages', 'Mother Plants');
+            case 'Clone':  return $this->def->getID('PowerScore Growth Stages', 'Clone Plants');
+            case 'Veg':    return $this->def->getID('PowerScore Growth Stages', 'Vegetating Plants');
+            case 'Flower': return $this->def->getID('PowerScore Growth Stages', 'Flowering Plants');
+            case 'Dry':    return $this->def->getID('PowerScore Growth Stages', 'Drying/Curing');
+        }
+        return '';
+    }
+    
     public function cnvrtSqFt2Acr($squareFeet = 0)
     {
         return $squareFeet*0.000022956841138659;

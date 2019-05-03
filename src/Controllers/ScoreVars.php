@@ -33,10 +33,10 @@ class ScoreVars extends TreeSurvForm
         if ($GLOBALS["SL"]->treeID == 1) {
             $this->majorSections[] = [45,  'Your Farm',            'active'];
             $this->majorSections[] = [64,  'Growing Environments', 'active'];
-            $this->majorSections[] = [911, 'Lighting',             'active'];
-            $this->majorSections[] = [609, 'HVAC',                 'active'];
+            $this->majorSections[] = [911, 'Lighting & HVAC',      'active'];
             $this->majorSections[] = [65,  'Annual Totals',        'active'];
             $this->majorSections[] = [844, 'Other Techniques',     'active'];
+            //$this->majorSections[] = [609, 'HVAC',                 'active'];
             //$this->majorSections[] = [67,  'Contact',              'active'];
             $this->minorSections = [ [], [], [], [], [], [], [] ];
         }

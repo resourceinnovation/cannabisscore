@@ -10,10 +10,10 @@ class RIIPSOwners extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-        'PsOwnPartnerUser', 
-        'PsOwnClientUser', 
-        'PsOwnType', 
-        'PsOwnClientName'
+		'PsOwnPartnerUser', 
+		'PsOwnClientUser', 
+		'PsOwnType', 
+		'PsOwnClientName', 
     ];
     
     // END SurvLoop auto-generated portion of Model

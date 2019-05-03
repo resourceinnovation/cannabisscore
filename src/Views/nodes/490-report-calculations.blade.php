@@ -1,46 +1,68 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations.blade.php -->
 @if (!$GLOBALS["SL"]->REQ->has('isPreview'))
+<style>
+{!! view('vendor.cannabisscore.nodes.490-report-calculations-css')->render() !!}
+</style>
 
 <div id="bigScoreWrap">
 
 <div id="efficBlockOver" class="row">
-    <div class="col-lg-6 efficHeads">
-        <h2 id="efficBlockOverTitle" class="m0 scoreBig pL20">
-        @if ($isPast) Calculated PowerScore<br />#{{ $psid }} @else PowerScore Estimate<br />#{{ $psid }} @endif
-        </h2>
-        <div class="pL20">
-        @if (isset($sessData["PowerScore"][0]->PsCharacterize)) 
-            <nobr>{{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) 
-                }}</nobr> —
-        @endif
-        <nobr>
-        @if (isset($sessData["PowerScore"][0]->PsZipCode)) 
-            {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipProperty($sessData["PowerScore"][0]->PsZipCode))) }},
-        @endif
-        @if (isset($sessData["PowerScore"][0]->PsState)) 
-            {{ $GLOBALS["SL"]->states->getState($sessData["PowerScore"][0]->PsState) }}
-        @endif
-        </nobr> —
-        @if (isset($sessData["PowerScore"][0]->PsAshrae)) 
-            <nobr> @if ($sessData["PowerScore"][0]->PsAshrae != 'Canada') Climate Zone @endif 
+    <div id="efficBlockOverLeft" class="col-lg-6 col-md-12 efficHeads">
+        <div id="efficBlockOverLeftInner">
+            <h2 id="efficBlockOverTitle" class="m0 scoreBig">
+            @if ($isPast) Calculated PowerScore @else PowerScore Estimate @endif </h2>
+            <h5>@if (isset($sessData["PowerScore"][0]->PsCharacterize))
+                {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) }}
+            @endif #{{ $psid }} </h5>
+            <nobr>
+            @if (isset($sessData["PowerScore"][0]->PsZipCode)) 
+                {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipProperty($sessData["PowerScore"][0]->PsZipCode))) }},
+            @endif
+            @if (isset($sessData["PowerScore"][0]->PsState)) 
+                {{ $GLOBALS["SL"]->states->getState($sessData["PowerScore"][0]->PsState) }}
+            @endif
+            </nobr><br />
+            @if (isset($sessData["PowerScore"][0]->PsAshrae)) 
+                <nobr> @if ($sessData["PowerScore"][0]->PsAshrae != 'Canada') Climate Zone @endif 
                 {{ $sessData["PowerScore"][0]->PsAshrae }}</nobr>
-        @endif
+            @endif
         </div>
     </div>
-    <div class="col-lg-6 p0" id="psScoreOverall"></div>
+    <div class="col-lg-2 col-md-4 col-sm-5" id="psScoreOverall">
+        <iframe id="guageFrameOverall" class="guageFrame" src="" frameborder="0" width="180" height="120" ></iframe>
+    </div>
+    <div class="col-lg-4 col-md-8 col-sm-7" id="psScoreOverTxt"><div id="efficGuageTxtOverall" class="efficGuageTxt"></div></div>
 </div>
 
 @if (isset($sessData["PowerScore"][0]->PsEfficFacility) && $sessData["PowerScore"][0]->PsEfficFacility > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads"><h5 class="m0 scoreBig" style="margin-left: 30px;">
-                Facility Efficiency</h5></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>Facility Efficiency
+                <a id="hidivBtnCalcsFac" class="hidivBtn fPerc66" href="javascript:;"
+                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+            </h5></div>
+            <div class="col-lg-1 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficFacility)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficFacility, 3) }}
-                @else 0 @endif &nbsp;&nbsp;<nobr>kWh / sq ft</nobr>
+                @else 0 @endif
             </h5></div>
-            <div class="col-lg-5 p0" id="psScoreFacility"></div>
+            <div class="col-lg-2 col-md-12 efficHeadLabel"><h5 class="m0 scoreBig">
+                <nobr>kWh / sq ft</nobr>
+            </h5></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreFacility">
+                <iframe id="guageFrameFacility" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-xl-4 col-lg-3 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtFacility" class="efficGuageTxt"></div></div>
+        </div>
+        <div id="hidivCalcsFac">
+        @if (isset($sessData["PowerScore"][0]->PsKWH) && isset($totFlwrSqFt) && $totFlwrSqFt > 0)
+            <div class="pL10 slGrey">
+                = {{ number_format($sessData["PowerScore"][0]->PsKWH) }} Total Annual Kilowatt Hours
+                    &nbsp;&nbsp;/&nbsp;&nbsp;
+                    {{ number_format($totFlwrSqFt) }} Square Feet of Flowering Canopy
+            </div>
+        @endif
         </div>
     </div>
 @endif
@@ -48,14 +70,29 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficProduction) && $sessData["PowerScore"][0]->PsEfficProduction > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
-                Production Efficiency</h5></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>Production Efficiency
+                <a id="hidivBtnCalcsProd" class="hidivBtn fPerc66" href="javascript:;"
+                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+            </h5></div>
+            <div class="col-xl-3 col-lg-2 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficProduction)) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficProduction, 3) }}
-                @else 0 @endif &nbsp;&nbsp;<nobr>g / kWh</nobr>
+                @else 0 @endif <div class="efficLabel"><nobr>g / kWh</nobr></div>
             </h5></div>
-            <div class="col-lg-5 p0" id="psScoreProduction"></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreProduction">
+                <iframe id="guageFrameProduction" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-lg-4 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtProduction" class="efficGuageTxt"></div></div>
+        </div>
+        <div id="hidivCalcsProd">
+        @if (isset($sessData["PowerScore"][0]->PsGrams) && isset($sessData["PowerScore"][0]->PsKWH))
+            <div class="pL10 slGrey">
+                = {{ number_format($sessData["PowerScore"][0]->PsGrams) }} Annual Grams of Flower & Byproduct
+                    &nbsp;&nbsp;/&nbsp;&nbsp;
+                    {{ number_format($sessData["PowerScore"][0]->PsKWH) }} Total Annual Kilowatt Hours
+            </div>
+        @endif
         </div>
     </div>
 @endif
@@ -63,15 +100,42 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficHvac) && $sessData["PowerScore"][0]->PsEfficHvac > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
-                HVAC Efficiency</h5></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>HVAC Efficiency
+                <a id="hidivBtnCalcsHvac" class="hidivBtn fPerc66" href="javascript:;"
+                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+            </h5></div>
+            <div class="col-xl-3 col-lg-2 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficHvac)
                     && $sessData["PowerScore"][0]->PsEfficHvac > 0.000001) 
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficHvac, 3) }}
-                @else 0 @endif &nbsp;&nbsp;<nobr>kWh / sq ft</nobr>
+                @else 0 @endif <div class="efficLabel"><nobr>kWh / sq ft</nobr></div>
             </h5></div>
-            <div class="col-lg-5 p0" id="psScoreHvac"></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreHvac">
+                <iframe id="guageFrameHvac" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-lg-4 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtHvac" class="efficGuageTxt"></div></div>
+        </div>
+        <div id="hidivCalcsHvac">
+            <div class="row">
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
+                    @if (sizeof($printEfficHvac) > 0)
+                        @foreach ($printEfficHvac as $i => $calcRow)
+                            @if ($i == 0) = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
+                            @else + {!! $calcRow["eng"] !!} @if ($i < sizeof($printEfficHvac)-1) <br /> @endif @endif
+                        @endforeach
+                    @endif </div>
+                </div></div>
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
+                @if (sizeof($printEfficHvac) > 0)
+                    @foreach ($printEfficHvac as $i => $calcRow)
+                        @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
+                        @else + {!! $calcRow["num"] !!} @if ($i < sizeof($printEfficHvac)-1) <br /> @endif @endif
+                    @endforeach </div>
+                @endif
+                </div></div>
+            </div>
+            <div class="pT20 fPerc66"><i>&uarr; Proposed formulas for a more accurate HVAC score, to match lighting and water.</i></div>
         </div>
     </div>
 @endif
@@ -79,25 +143,28 @@
 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) && $sessData["PowerScore"][0]->PsEfficLighting > 0)
     <div class="efficBlock">
         <div class="row">
-            <div class="col-lg-4 efficHeads pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
-                Lighting Efficiency
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>Lighting Efficiency
                 @if ($sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
-                    <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"><i class="fa fa-question-circle-o" aria-hidden="true"></i></a>
+                    <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"
+                        ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
                 @endif
                 </h5></div>
-            <div class="col-lg-3 efficHeads efficHeadScore"><h5 class="m0 scoreBig">
+            <div class="col-xl-3 col-lg-2 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
                 @if (isset($sessData["PowerScore"][0]->PsEfficLighting) 
                     && $sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
                     {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficLighting, 3) }}
-                @else 0 @endif &nbsp;&nbsp;<nobr>W / sq ft</nobr>
+                @else 0 @endif <div class="efficLabel"><nobr>W / sq ft</nobr></div>
             </h5></div>
-            <div class="col-lg-5 p0" id="psScoreLighting"></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreLighting">
+                <iframe id="guageFrameLighting" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-lg-4 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtLighting" class="efficGuageTxt"></div></div>
         </div>
     @if ($sessData["PowerScore"][0]->PsEfficLighting > 0.000001)
         <div id="hidivCalcsLgt">
             <div class="row">
-                <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-4 @else col-md-7 @endif ">
-                <div class="pL10 slGrey">
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
@@ -105,8 +172,7 @@
                         @endforeach
                     @endif </div>
                 </div></div>
-                <div class=" @if ($GLOBALS['SL']->REQ->has('print')) col-md-3 @else col-md-5 @endif ">
-                <div class="slGrey">
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow)
                             @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
@@ -115,7 +181,7 @@
                     @endif
                 </div></div>
                 @if ($GLOBALS["SL"]->REQ->has('print'))
-                    <div class="col-md-5"><div class="slGrey">
+                    <div class="col-md-6"><div class="slGrey">
                     @if (sizeof($printEfficLgt) > 0)
                         @foreach ($printEfficLgt as $i => $calcRow) {!! $calcRow["lgt"] !!}<br /> @endforeach
                     @endif
@@ -133,9 +199,81 @@
     @endif
     </div>
 @endif
+
+@if (isset($sessData["PowerScore"][0]->PsEfficWater) && $sessData["PowerScore"][0]->PsEfficWater > 0)
+    <div class="efficBlock">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>Water Efficiency
+                <a id="hidivBtnCalcsWater" class="hidivBtn fPerc66" href="javascript:;"
+                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+            </h5></div>
+            <div class="col-xl-3 col-lg-2 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
+                @if (isset($sessData["PowerScore"][0]->PsEfficWater)
+                    && $sessData["PowerScore"][0]->PsEfficWater > 0.000001) 
+                    {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficWater, 3) }}
+                @else 0 @endif <div class="efficLabel"><nobr>gallons / sq ft</nobr></div>
+            </h5></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreWater">
+                <iframe id="guageFrameWater" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-lg-4 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtWater" class="efficGuageTxt"></div></div>
+        </div>
+        <div id="hidivCalcsWater">
+            <div class="row">
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
+                    @if (sizeof($printEfficWtr) > 0)
+                        @foreach ($printEfficWtr as $i => $calcRow)
+                            @if ($i == 0) = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
+                            @else + {!! $calcRow["eng"] !!} @if ($i < sizeof($printEfficWtr)-1) <br /> @endif @endif
+                        @endforeach
+                    @endif </div>
+                </div></div>
+                <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
+                @if (sizeof($printEfficWtr) > 0)
+                    @foreach ($printEfficWtr as $i => $calcRow)
+                        @if ($i == 0) = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
+                        @else + {!! $calcRow["num"] !!} @if ($i < sizeof($printEfficWtr)-1) <br /> @endif @endif
+                    @endforeach </div>
+                @endif
+                </div></div>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if (isset($sessData["PowerScore"][0]->PsEfficWaste) && $sessData["PowerScore"][0]->PsEfficWaste > 0)
+    <div class="efficBlock">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-12 efficHeadLabel pL20"><h5 class="m0 scoreBig" style="margin-left: 30px;">
+                <nobr>Waste Efficiency
+                <a id="hidivBtnCalcsWaste" class="hidivBtn fPerc66" href="javascript:;"
+                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+            </h5></div>
+            <div class="col-xl-3 col-lg-2 col-md-12 efficHeadScore"><h5 class="m0 scoreBig">
+                @if (isset($sessData["PowerScore"][0]->PsEfficWaste)) 
+                    {{ $GLOBALS["SL"]->sigFigs($sessData["PowerScore"][0]->PsEfficWaste, 3) }}
+                @else 0 @endif <div class="efficLabel"><nobr>g / kWh</nobr></div>
+            </h5></div>
+            <div class="col-lg-2 col-md-12 efficHeadGuage" id="psScoreWaste">
+                <iframe id="guageFrameWaste" class="guageFrame" src="" frameborder="0" width="100" height="70" ></iframe>
+            </div>
+            <div class="col-lg-4 col-md-12 efficHeadGuageLabel"><div id="efficGuageTxtWaste" class="efficGuageTxt"></div></div>
+        </div>
+        <div id="hidivCalcsWaste">
+        @if (isset($sessData["PowerScore"][0]->PsGreenWasteLbs))
+            <div class="pL10 slGrey">
+                = {{ number_format($sessData["PowerScore"][0]->PsGreenWasteLbs) }} Annual Pounds of Green/Plant Waste
+                    &nbsp;&nbsp;/&nbsp;&nbsp;
+                    {{ number_format($totFlwrSqFt) }} Square Feet of Flowering Canopy
+            </div>
+        @endif
+        </div>
+    </div>
+@endif
     
 @if (isset($noprints) && trim($noprints) != '')
-    <p><i>Not enough data provided to calculate {{ $noprints }} efficiency.</i></p>
+    <div style="padding: 0 0 25px 30px;"><i>Not enough data provided to calculate {{ $noprints }} efficiency.</i></div>
 @endif
         
 @if (!$GLOBALS["SL"]->REQ->has('print') && !$isPast)
@@ -148,161 +286,72 @@
 @endif
 
 </div> <!-- end bigScoreWrap -->
+<div id="guageReloader" class="disNon"></div>
 
-<?php $sizeBig = 180; $sizeSmall = 90; ?>
-<style>
-#scoreRankFiltWrap {
-    width: 100%;
-    background: #8dc63f;
-    color: #FFF;
-    padding: 30px;
-}
-#node945 { 
-    margin-top: 8px;
-    padding-left: 13px;
-}
-#node501 {
-    margin-top: -60px;
-    padding-left: 13px;
-}
+<script type="text/javascript">
 
-#hidivBtnFiltsAdv { color: #FFF; }
+var spn = '<i class="fa-li fa fa-spinner fa-spin mL20 mT15"></i>';
+var guageList = new Array();
+guageList[guageList.length] = new Array('Overall',    2800, 0, '');
+guageList[guageList.length] = new Array('Facility',   2400, 0, '');
+guageList[guageList.length] = new Array('Production', 2000, 0, '');
+guageList[guageList.length] = new Array('Hvac',       1600, 0, '');
+guageList[guageList.length] = new Array('Lighting',   1200, 0, '');
+guageList[guageList.length] = new Array('Water',      800,  0, '');
+guageList[guageList.length] = new Array('Waste',      400,  0, '');
+var reloadComplete = false;
+var g = 0;
 
-#bigScoreWrap { margin: 30px 0px 0px 0px; box-shadow: 0px 20px 60px #DEDEDE; border-left: 20px solid #8dc63f; }
-#blockWrap151 { margin-top: 40px; }
-#reportTitleWrap { margin: 20px 0px 15px 0px; }
-
-#guageRowOverall {
-    background: #FFF;
-    border-top: 20px solid #8dc63f;
-    border-bottom: 20px solid #8dc63f;
-    border-right: 20px solid #8dc63f;
-    min-height: 178px;
-}
-.guageWrap, .guageWrapOver {
-    position: relative;
-    width: 100%;
-    height: 120px;
-    overflow: hidden;
-    margin: 16px 0px -12px 30px;
-}
-.guageImgMeter, .guageWrap .guageImgMeter, .guageWrapOver .guageImgMeter {
-    position: absolute;
-    z-index: 98;
-    top: 0px;
-    left: 0px;
-    height: 180px;
-    width: 180px;
-}
-.guageImgDial, .guageWrap .guageImgDial, .guageWrapOver .guageImgDial {
-    position: absolute;
-    z-index: 99;
-    top: 50%;
-    left: 50%;
-    margin-top: -57px;
-    margin-left: -120px;
-    height: 180px;
-    width: 180px;
-
-    -webkit-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-    -moz-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-    -o-transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-    transition: all 2000ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-}
-.guageWrap {
-    height: 65px;
-    margin: -8px 0 -20px -23px;
-}
-.guageWrap .guageImgMeter {
-    height: 100px;
-    width: 100px;
-}
-.guageWrap .guageImgDial {
-    margin-top: -31px;
-    margin-left: -81px;
-    height: 100px;
-    width: 100px;
-}
-
-.efficGuageTxt, .efficGuageTxtOver { text-align: left; width: 250px; }
-.efficGuageTxt { margin: 12px 0 0 -16px; }
-.efficGuageTxt .slGrey, .efficGuageTxtOver .slGrey { font-size: 12px; line-height: 16px; }
-#efficBlockOver { background: #8dc63f; color: #FFF; min-height: 178px; }
-#efficBlockOverTitle { margin-top: 20px; }
-#efficBlockOverGuageTitle { margin-top: 15px; }
-.efficBlock { width: 100%; min-height: 75px; padding: 15px 0px 5px 0px; border-top: 1px solid #f1f1f1; }
-.efficHeads { padding: 10px 15px 0px 15px; }
-#hidivCalcsLgt { display: none; padding: 15px 0px 15px 30px; width: 75%; }
-
-#guageOverallTxt { color: #444; }
-
-
-@media screen and (max-width: 1200px) {
-    .efficBlock { min-height: 75px; }
-    #efficBlockOver { min-height: 100px; }
-    .efficGuageTxtOver { margin: -8px 0px 0px -30px; }
-}
-@media screen and (max-width: 992px) {
-    .efficBlock { min-height: 96px; }
-    #efficBlockOver { min-height: 170px; }
-    .efficHeads { padding-left: 20px; }
-    .efficHeadScore { padding-left: 30px; }
-    .efficGuageTxtOver { width: 365px; margin: 24px 0px 35px -347px; }
-    .efficGuageWrapBig { padding-top: 20px; }
-    .efficGuageTxt { margin: -58px 0px 21px 36px; }
-    #cmtLnkSpacer { margin-top: -10px; }
-}
-@media screen and (max-width: 768px) {
-    .efficBlock { min-height: 84px; }
-    #efficBlockOver { min-height: 195px; }
-    .efficGuageTxtOver { width: 265px; margin: -115px 0px 35px 15px; }
-    .efficGuageTxt { margin: -84px 0px 21px 265px; }
-    .efficGuageTxt h4, #blockWrap492 .efficGuageTxt h4 { font-size: 1.2rem; color: #B5CE96; }
-}
-@media screen and (max-width: 600px) {
-    .efficBlock { min-height: 148px; }
-    #efficBlockOver { min-height: 215px; }
-    .efficGuageTxtOver { width: 255px; margin: -165px 0px 0px 15px; }
-    .efficGuageTxt { margin: -35px 0px 15px 15px; }
-}                                              
-@media screen and (max-width: 480px) {
-    .efficBlock { min-height: 148px; }
-    #efficBlockOver { min-height: 215px; }
-    .efficGuageTxtOver { width: 255px; margin: 0px 0px 0px 15px; }
-    .efficGuageWrapBig { text-align: center; }
-    .efficGuageTxt { margin: -15px 0px 40px 15px; }
-    #efficBlockOver .efficHeads h2 { font-size: 28px; }
-}
-</style>
-<script type="text/javascript"> $(document).ready(function() {
+$(document).ready(function() {
     
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
-    var spn = '<i class="fa-li fa fa-spinner fa-spin"></i>';
+    
+    function guageLoad(g) {
+        var guageUrl = "/frame/animate/guage/"+guageList[g][2]+"";
+        if (guageList[g][0] == 'Overall') guageUrl += "?size=180";
+        if (document.getElementById("guageFrame"+guageList[g][0]+"") && document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
+            document.getElementById("guageFrame"+guageList[g][0]+"").style.display='none';
+            document.getElementById("guageFrame"+guageList[g][0]+"").src=guageUrl;
+            document.getElementById("efficGuageTxt"+guageList[g][0]+"").style.display='none';
+            document.getElementById("efficGuageTxt"+guageList[g][0]+"").innerHTML=guageList[g][3];
+            $("#guageFrame"+guageList[g][0]+"").fadeIn(3000);
+            $("#efficGuageTxt"+guageList[g][0]+"").fadeIn(3000);
+        }
+        return true;
+    }
+    
+    function chkGuageReload(baseUrl) {
+        if (reloadComplete) {
+            for (g = 0; g < guageList.length; g++) {
+                if (document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
+                    document.getElementById("efficGuageTxt"+guageList[g][0]+"").innerHTML = spn;
+                    setTimeout(guageLoad, guageList[g][1], g);
+                }
+            }
+            return true;
+        }
+        setTimeout(function() { chkGuageReload(baseUrl); }, 400);
+        return false;
+    }
+    
     function reloadGuages() {
-        if (document.getElementById('psScoreOverall')) document.getElementById('psScoreOverall').innerHTML = spn;
-        if (document.getElementById('psScoreFacility')) document.getElementById('psScoreFacility').innerHTML = spn;
-        if (document.getElementById('psScoreProduction')) document.getElementById('psScoreProduction').innerHTML = spn;
-        if (document.getElementById('psScoreHvac')) document.getElementById('psScoreHvac').innerHTML = spn;
-        if (document.getElementById('psScoreLighting')) document.getElementById('psScoreLighting').innerHTML = spn;
+        reloadComplete = false;
         var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}"+gatherFilts();
-        setTimeout(function() { $("#psScoreOverall").load(   ""+baseUrl+"&eff=Overall"); },    2400);
-        setTimeout(function() { $("#psScoreFacility").load(  ""+baseUrl+"&eff=Facility"); },   2000);
-        setTimeout(function() { $("#psScoreProduction").load(""+baseUrl+"&eff=Production"); }, 1600);
-        setTimeout(function() { $("#psScoreHvac").load(      ""+baseUrl+"&eff=HVAC"); },       1200);
-        setTimeout(function() { $("#psScoreLighting").load(  ""+baseUrl+"&eff=Lighting"); },      1);
-        console.log(baseUrl+"&eff=Overall");
+        $("#guageReloader").load(""+baseUrl+"&eff=Overall&loadAll=1");
+        setTimeout(function() { chkGuageReload(baseUrl); }, 400);
         return true;
     }
     setTimeout(function() { reloadGuages(); }, 300);
-    
     $(document).on("click", ".updateScoreFilts", function() { reloadGuages(); });
     
-    @if (!$isPast) setTimeout(function() { $("#futureForm").load("/ajax/future-look?ps={{ $psid }}"); }, 3000); @endif
+@if (!$isPast) setTimeout(function() { $("#futureForm").load("/ajax/future-look?ps={{ $psid }}"); }, 3000); @endif
     
 });
 
-@if ($GLOBALS["SL"]->REQ->has('print')) setTimeout("window.print()", 3000); @endif
-
 </script>
+
+@if ($GLOBALS["SL"]->REQ->has('print'))
+    <script type="text/javascript"> setTimeout("window.print()", 3000); </script>
+@endif
 
 @endif

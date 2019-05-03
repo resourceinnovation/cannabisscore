@@ -14,15 +14,16 @@ class RIIPSAreas extends Model
 		'PsAreaType', 
 		'PsAreaHasStage', 
 		'PsAreaSize', 
+		'PsAreaDaysCycle', 
 		'PsAreaLgtSun', 
 		'PsAreaLgtDep', 
 		'PsAreaLgtArtif', 
 		'PsAreaTotalLightWatts', 
 		'PsAreaLightingEffic', 
-		'PsAreaDaysCycle', 
 		'PsAreaVertStack', 
 		'PsAreaHvacType', 
 		'PsAreaHvacOther', 
+		'PsAreaHvacEffic', 
 		'PsAreaCalcWatts', 
 		'PsAreaCalcSize', 
 		'PsAreaLgtPattern', 
@@ -31,6 +32,7 @@ class RIIPSAreas extends Model
 		'PsAreaGallons', 
 		'PsAreaWaterFreq', 
 		'PsAreaWateringMethod', 
+		'PsAreaWaterEffic', 
     ];
     
     // END SurvLoop auto-generated portion of Model

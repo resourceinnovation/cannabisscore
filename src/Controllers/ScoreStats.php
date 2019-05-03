@@ -9,6 +9,7 @@
   */
 namespace CannabisScore\Controllers;
 
+use App\Models\RIIPSAreas;
 use SurvLoop\Controllers\Stats\SurvStatsTbl;
 use SurvLoop\Controllers\Stats\SurvStatTh;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
@@ -195,8 +196,11 @@ class ScoreStats extends SurvStatsGraph
             $this->addRecDat('hvc', $ps->PsEfficHvac,       $ps->PsID);
             $this->addRecDat('lgt', $ps->PsEfficLighting,   $ps->PsID);
             foreach (['Mother', 'Clone', 'Veg', 'Flower'] as $type) {
-                if (isset($ps->{ 'PsEfficLighting' . $type }) && $ps->{ 'PsEfficLighting' . $type } > 0) {
-                    $this->addRecDat('lgt' . substr($type, 0, 1), $ps->{ 'PsEfficLighting' . $type }, $ps->PsID);
+                $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                    ->where('PsAreaType', $GLOBALS["SL"]->getAreaTypeFromNick($type))
+                    ->first();
+                if ($area && isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
+                    $this->addRecDat('lgt' . substr($type, 0, 1), $area->PsAreaLightingEffic, $ps->PsID);
                 }
             }
         }
