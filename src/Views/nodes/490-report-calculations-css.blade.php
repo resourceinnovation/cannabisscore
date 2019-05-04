@@ -81,13 +81,13 @@ iframe.guageFrame {
     padding: 15px 0px 5px 0px;
     border-top: 1px solid #f1f1f1;
 }
-.efficHeadLabel, .efficHeadScore {
+.efficHeadLabel, .efficHeadScore, .efficHeadLabel2 {
     padding: 10px 15px 0px 15px;
 }
 .efficHeadScore {
     text-align: right;
 }
-#hidivCalcsProd, #hidivCalcsFac, #hidivCalcsHvac, #hidivCalcsLgt, #hidivCalcsWater, #hidivCalcsWaste {
+.scoreCalcs {
     display: none;
     padding: 10px 0px 20px 30px;
 }
@@ -119,23 +119,29 @@ iframe.guageFrame {
         min-height: 160px;
     }
     .efficBlock {
-        min-height: 108px;
+        min-height: 95px;
     }
     .efficHeadLabel {
-        margin: -15px 15px 0 228px;
-    }
-    .efficLabel {
-        display: inline;
-        margin-left: 10px;
+        margin: -15px 0px 0px 247px;
     }
     .efficHeadScore {
-        margin: -4px 0 -30px 259px;
+        text-align: left;
+        margin: -7px 0 -30px 277px;
+    }
+    .efficHeadLabel2 {
+        margin: -7px 0 0 367px;
     }
     .efficHeadGuage {
-        margin: 0px 0 0 28px;
+        margin: -34px 0 0 41px;
     }
     .efficHeadGuageLabel {
-        margin: -25px 0 0 259px;
+        margin: -23px 0 -22px 277px;
+    }
+    .efficHeadGuageLabel h5 {
+        font-weight: 300;
+    }
+    .scoreCalcs {
+        padding: 25px 0px 20px 30px;
     }
 }
 @media screen and (max-width: 768px) {
@@ -144,6 +150,9 @@ iframe.guageFrame {
     }
     .efficHeadScore {
         margin-left: 199px;
+    }
+    .efficHeadLabel2 {
+        margin: -7px 0 0 297px;
     }
     .efficHeadGuageLabel {
         margin-left: 199px;
