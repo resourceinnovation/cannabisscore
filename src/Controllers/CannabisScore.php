@@ -115,9 +115,14 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 170) {
             $report = new ScoreListings;
             $ret .= $report->getAllPowerScoresPublic($nID);
-        } elseif ($nID == 799) {
+        } elseif ($nID == 966) {
+            $report = new ScoreListings;
+            $ret .= $report->getPowerScoresOutliers($nID);
+        } elseif ($nID == 964) { // Partner Multi-Site Rankings
             $report = new ScoreListings;
             $GLOBALS["SL"]->x["partnerVersion"] = true;
+            $ret .= $report->getMultiSiteRankings($nID);
+        } elseif ($nID == 799) { // Partner Multi-Site Listings
             $ret .= $report->getAllPowerScoresPublic($nID);
         } elseif ($nID == 773) {
             $report = new ScoreReportAvgs;
@@ -134,6 +139,7 @@ class CannabisScore extends ScoreImports
             $ret .= $report->getPowerScoreFinalReport();
         } elseif ($nID == 853) {
             $this->initSearcher(1);
+            //$this->searcher->v["onlyComplete"] = true;
             $this->searcher->loadAllScoresPublic();
             $report = new ScoreReportFound;
             $ret .= $report->getFoundReport($nID, $this->searcher->v["allscores"]);

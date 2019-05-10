@@ -3,7 +3,7 @@
 <th>Score ID#</th>
 @if (isset($fltCmpl) && $fltCmpl != 243) <th>Status</th> @endif
 <th>Score ID#</th>
-@if ($showFarmNames) <th>Farm Name</th> @endif
+@if (isset($showFarmNames) && $showFarmNames) <th>Farm Name</th> @endif
 <th>Overall</th>
 <th>Facility Score (kWh/SqFt)</th>
 <th>Production Score (g/kWh)</th>
@@ -39,7 +39,7 @@
 <tr>
     <th>Averages</th>
     @if (isset($fltCmpl) && $fltCmpl != 243) <th> </th> @endif
-    @if ($showFarmNames) <th> </th> @endif
+    @if (isset($showFarmNames) && $showFarmNames) <th> </th> @endif
     <th>{{ round($psAvg->PsEfficOverall) }}%</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficFacility, 3) }}</th>
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficProduction, 3) }}</th>
@@ -65,7 +65,7 @@
     @if (isset($fltCmpl) && $fltCmpl != 243)
         <td>{{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}</td>
     @endif
-    @if ($showFarmNames) <td> @if (isset($ps->PsName)) {{ $ps->PsName }} @endif </td> @endif
+    @if (isset($showFarmNames) && $showFarmNames) <td> @if (isset($ps->PsName)) {{ $ps->PsName }} @endif </td> @endif
     <td>{{ round($ps->PsEfficOverall) }}%</td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}</td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}</td>
@@ -134,5 +134,5 @@
     <td>{{ $GLOBALS["SL"]->sysOpts["app-url"] }}/calculated/u-{{ $ps->PsID }}</td>
     </tr>
 @empty
-    <tr><td @if ($showFarmNames) colspan=14 @else colspan=13 @endif ><i>No PowerScores found.</i></td></tr>
+    <tr><td @if (isset($showFarmNames) && $showFarmNames) colspan=14 @else colspan=13 @endif ><i>No PowerScores found.</i></td></tr>
 @endforelse

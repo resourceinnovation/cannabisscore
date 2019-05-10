@@ -23,7 +23,8 @@ class CannabisScoreAdminMenu extends AdminMenu
                 $this->admMenuLnk('/dash/compare-powerscores',  'Raw Score Data', '', 1, [
                     $this->admMenuLnk('/dash/compare-powerscores',              'Compare All Scores'),
                     $this->admMenuLnk('/dash/compare-powerscores?lighting=1',   'Raw Lighting Data'),
-                    $this->admMenuLnk('/dash/cultivation-classic-final-report', 'Cultivation Classic')
+                    $this->admMenuLnk('/dash/cultivation-classic-final-report', 'Cultivation Classic'),
+                    $this->admMenuLnk('/dash/powerscore-outliers',              'Outliers')
                     ]),
                 $this->admMenuLnk('/dash/founders-circle-report', 'Score Analysis', '', 1, [
                     $this->admMenuLnk('/dash/founders-circle-report',      'Founders Circle'),

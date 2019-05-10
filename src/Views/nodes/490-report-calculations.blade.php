@@ -141,7 +141,6 @@
                 @endif
                 </div></div>
             </div>
-            <div class="pT20 fPerc66"><i> These are the proposed formulas for a more accurate HVAC score, to match lighting and water.</i></div>
         </div>
     </div>
 @endif

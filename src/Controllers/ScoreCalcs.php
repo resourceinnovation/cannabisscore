@@ -54,27 +54,6 @@ class ScoreCalcs extends ScoreUtils
                 }
             }
             
-            $area = $this->getArea('Flower');
-            if ($area && (!isset($area->PsAreaHvacType) || intVal($area->PsAreaHvacType) == 0)
-                && (isset($row->PsIsIntegrated) && intVal($row->PsIsIntegrated) > 0)) {
-                $area->PsAreaHvacType  = $row->PsIsIntegrated;
-                $area->PsAreaHvacOther = $row->PsHvacOther;
-                $area->save();
-            }
-            if (!isset($area->PsAreaHvacType) || intVal($area->PsAreaHvacType) == 0) {
-                $area = $this->getArea('Veg');
-                if (!isset($area->PsAreaHvacType) || intVal($area->PsAreaHvacType) == 0) {
-                    $area = $this->getArea('Clone');
-                    if (!isset($area->PsAreaHvacType) || intVal($area->PsAreaHvacType) == 0) {
-                        $area = $this->getArea('Veg');
-                    }
-                }
-            }
-            if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
-                $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac 
-                    = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
-            }
-            
             $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize = 0;
             $sqft = $watts = $wattsHvac = $gal = [];
             if (isset($this->sessData->dataSets["PSAreas"]) && sizeof($this->sessData->dataSets["PSAreas"]) > 0) {
@@ -136,7 +115,7 @@ class ScoreCalcs extends ScoreUtils
                                 }
                                 if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
                                     $this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic 
-                                        = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType)/$sqft[$typ];
+                                        = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
                                     $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac
                                         += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic;
                                 }

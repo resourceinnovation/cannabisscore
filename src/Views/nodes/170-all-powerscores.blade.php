@@ -7,9 +7,11 @@
         @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h2></a>
     @else   
         @if ($GLOBALS["SL"]->REQ->has('all'))
-            <a href="/dash/partner-compare-powerscores"><h2 class="slBlueDark"> Compare All PowerScores</h2></a>
+            <a href="/dash/partner-compare-powerscores"><h2 class="slBlueDark">
+                Compare All PowerScores</h2></a>
         @else
-            <a href="/dash/partner-compare-powerscores?all=1"><h2 class="slBlueDark"> Compare My PowerScores</h2></a>
+            <a href="/dash/partner-compare-powerscores?all=1"><h2 class="slBlueDark">
+                Canna Holdings Inc. PowerScores</h2></a>
         @endif
     @endif
     </div><div class="col-4 taR"><div class="mTn10 pB10">
@@ -36,9 +38,7 @@
 @elseif (isset($psFilter))
     <div class="mB5"><b class="mR20">{{ $allscores->count() }} Found</b> {!! $psFilter !!}</div>
 @endif
-</div>
 
-<div class="slCard nodeWrap">
 <table border=0 class="table w100 bgWht">
 <tr>
 @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
@@ -200,15 +200,25 @@
 
 @if ($allscores && $allscores->isNotEmpty())
     @foreach ($allscores as $i => $ps)
+    
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"] && $i > 26)
+@else
+    
         <tr @if ($i%2 == 0) class="row2" @endif >
-@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
         <td>
+        <a href="#" target="_blank"><h5>{{ 
+            (($i == 0) ? 'Worcester' : (($i == 4) ? 'Portland' : (($i == 7) ? 'Hershey' : (($i == 11) 
+                ? 'Detroit' : (($i == 16) ? 'Mendo' : (($i == 22) ? 'Thomas' : ''))))))
+            }}</h5></a>
+        <?php /*
         @if (!isset($prevClientName) || $prevClientName != $ps->PsOwnClientName)
             <?php $prevClientName = $ps->PsOwnClientName; ?>
             <a href="#" target="_blank"><h5>Client #{{ $ps->PsOwnClientName }}</h5></a>
         @endif
+        */ ?>
         </td>
-@endif
+    @endif
         <td><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">
             @if ($nID == 808) {{ $ps->PsName }} @else #{{ $ps->PsID }} @endif
             <span class="fPerc66">({{ $ps->PsYear }})</span></a>
@@ -254,21 +264,22 @@
                 && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
         </td>
-@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
-        <td>{{ $ps->PsGrams }}</td>
-        <td>{{ $ps->PsKWH }}</td>
-        <td>{{ $ps->PsTotalSize }}</td>
-@else
+    @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+        <td>{{ number_format($ps->PsGrams) }}</td>
+        <td>{{ number_format($ps->PsKWH) }}</td>
+        <td>{{ number_format($ps->PsTotalSize) }}</td>
+    @else
         @if (!$isExcel)
             <td class="fPerc66">
                 @if ($ps->PsGrams > 0)     {{ number_format($ps->PsGrams) }} g<br /> @endif
                 @if ($ps->PsKWH > 0)       {{ number_format($ps->PsKWH) }} kWh<br /> @endif
                 @if ($ps->PsTotalSize > 0) {{ number_format($ps->PsTotalSize) }} sq ft @endif
+            </td>
         @else
-            <td>{{ $ps->PsGrams }}</td>
-            <td>{{ $ps->PsKWH }}</td>
-            <td>{{ $ps->PsTotalSize }}
-        @endif </td>
+            <td>{{ number_format($ps->PsGrams) }}</td>
+            <td>{{ number_format($ps->PsKWH) }}</td>
+            <td>{{ number_format($ps->PsTotalSize) }}</td>
+        @endif 
         <td>{{ $ps->PsCounty }} {{ $ps->PsState }} {{ $ps->PsZipCode }}
         @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
             <a id="hidivBtn{{ $ps->PsID }}Ema" class="hidivBtnSelf disBlo mTn5 fPerc66 slGrey" href="javascript:;">@</a>
@@ -282,7 +293,10 @@
                 <td colspan=9 ><div class="mTn15"><i>{!! $ps->PsNotes !!}</i></div></td>
             </tr>
         @endif
+    @endif
+
 @endif
+
     @endforeach
 @else
     <tr><td colspan=11 class="slGrey"><i>No PowerScores found.</i></td></tr>

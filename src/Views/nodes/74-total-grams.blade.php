@@ -1,7 +1,8 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/{{ $nID }}-total-grams.blade.php -->
 <div id="node{{ $nID }}" class="nodeWrap">
 <div id="nLabel{{ $nID }}" class="nPrompt"><label for="n{{ $nID }}FldID" class="w100">
-    <p>Over the <span class="slBlueDark">12-month period</span>, how many total <span class="slBlueDark">grams of cannabis flower and byproduct</span> were produced? 
+    <p>Over the <span class="slBlueDark">12-month period</span>, how many total 
+    <span class="slBlueDark">grams of dried cannabis flower and byproduct</span> were produced? 
     <span class="red">*required</span></p>
 </label></div>
 {!! $gramFormMonths !!}

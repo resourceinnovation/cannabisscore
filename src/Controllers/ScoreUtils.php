@@ -193,8 +193,7 @@ class ScoreUtils extends ScorePowerUtilities
                             $this->v["printEfficHvac"][] = [
                                 "typ" => $typ,
                                 "eng" => '( (' . $curr . ' <nobr>' . $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType) 
-                                    . ' kWh</nobr> / <nobr>' . number_format($area->PsAreaCalcSize) 
-                                    . ' sq ft )</nobr> <nobr>x ' . round(100*($perc)) . '% grow area</nobr>',
+                                    . ' kWh / sq ft</nobr> )</nobr> <nobr>x ' . round(100*($perc)) . '% grow area</nobr>',
                                 "num" => '<nobr>' . $curr . ' ' 
                                     . $GLOBALS["SL"]->sigFigs($area->PsAreaHvacEffic*$perc, 3) . ' kWh / sq ft</nobr>'
                                 ];

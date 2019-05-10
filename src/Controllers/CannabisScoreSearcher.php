@@ -287,7 +287,7 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         if ($this->v["fltSize"] > 0) {
-            $range = $this->getSizeDefRange($this->v["fltSize"]);
+            $range = $GLOBALS["CUST"]->getSizeDefRange($this->v["fltSize"]);
             $chk = RIIPSAreas::where('PsAreaType', $this->v["areaTypes"]["Flower"])
                 ->where('PsAreaSize', '>=', $range[0])
                 ->where('PsAreaSize', '<', $range[1])
@@ -443,7 +443,7 @@ class CannabisScoreSearcher extends Searcher
         if (isset($dataSets["PSAreas"]) && sizeof($dataSets["PSAreas"]) > 0) {
             foreach ($dataSets["PSAreas"] as $a) {
                 if ($a->PsAreaType == $this->v["areaTypes"]["Flower"]) {
-                    return $this->getSizeDefID($a->PsAreaSize);
+                    return $GLOBALS["CUST"]->getSizeDefID($a->PsAreaSize);
                 }
             }
         }
@@ -467,6 +467,8 @@ class CannabisScoreSearcher extends Searcher
             foreach ($this->v["avgFlds"] as $fld) {
                 $this->v["psAvg"]->{ $fld } = $this->v["psAvg"]->{ $fld }/sizeof($this->v["allscores"]);
             }
+            $this->v["psAvg"]->PsEfficFacility = $this->v["psAvg"]->PsKWH/$this->v["psAvg"]->PsTotalSize;
+            $this->v["psAvg"]->PsEfficProduction = $this->v["psAvg"]->PsGrams/$this->v["psAvg"]->PsKWH;
         }
         return $this->v["psAvg"];
     }
@@ -491,34 +493,6 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         return true;
-    }
-    
-    public function getSizeDefRange($defID)
-    {
-        if ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '<5,000 sf')) {
-            return [0, 5000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf')) {
-            return [5000, 10000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf')) {
-            return [10000, 50000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf')) {
-            return [50000, 1000000000];
-        }
-        return [0, 1000000000];
-    }
-    
-    public function getSizeDefID($size)
-    {
-        if ($size < 5000) {
-            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '<5,000 sf');
-        } elseif ($size <= 5000 && $size < 10000) {
-            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf');
-        } elseif ($size <= 10000 && $size < 50000) {
-            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf');
-        } elseif ($size >= 50000) {
-            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf');
-        }
-        return 0;
     }
     
     

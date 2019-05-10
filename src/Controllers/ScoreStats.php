@@ -197,7 +197,7 @@ class ScoreStats extends SurvStatsGraph
             $this->addRecDat('lgt', $ps->PsEfficLighting,   $ps->PsID);
             foreach (['Mother', 'Clone', 'Veg', 'Flower'] as $type) {
                 $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', $GLOBALS["SL"]->getAreaTypeFromNick($type))
+                    ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
                     ->first();
                 if ($area && isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
                     $this->addRecDat('lgt' . substr($type, 0, 1), $area->PsAreaLightingEffic, $ps->PsID);

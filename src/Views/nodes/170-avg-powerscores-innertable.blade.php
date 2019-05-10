@@ -40,14 +40,14 @@
             <th>{{ $GLOBALS["SL"]->getState($state) }}</th>
             <td class="brdRgt">@if ($avgs["ovr"][0] > 0) {{ round($avgs["ovr"][1]/$avgs["ovr"][0]) }}%
                 @endif </td>
-            @if ($avgs["fac"][0] > 0) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["fac"][1]/$avgs["fac"][0], 3) }}</td>
-            @else <td> </td> @endif
-            @if ($avgs["pro"][0] > 0) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["pro"][1]/$avgs["pro"][0], 3) }}</td>
-            @else <td> </td> @endif
-            @if ($avgs["lgt"][0] > 0) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }}</td>
-            @else <td> </td> @endif
-            @if ($avgs["hvc"][0] > 0) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["hvc"][1]/$avgs["hvc"][0], 3) }}</td>
-            @else <td> </td> @endif
+            @if ($avgs["fac"][0] > 0.000001) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["fac"][1]/$avgs["fac"][0], 3) }}</td>
+            @else <td>0</td> @endif
+            @if ($avgs["pro"][0] > 0.000001) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["pro"][1]/$avgs["pro"][0], 3) }}</td>
+            @else <td>0</td> @endif
+            @if ($avgs["lgt"][0] > 0.000001) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }}</td>
+            @else <td>0</td> @endif
+            @if ($avgs["hvc"][0] > 0.000001) <td>{{ $GLOBALS["SL"]->sigFigs($avgs["hvc"][1]/$avgs["hvc"][0], 3) }}</td>
+            @else <td>0</td> @endif
             <td class="slGrey brdLft">{{ number_format($avgs["tot"]) }}</td>
         </tr>
     @endif

@@ -15,11 +15,11 @@ class CannabisScoreGlobals
     public function getAreaTypeFromNick($nick)
     {
         switch ($nick) {
-            case 'Mother': return $this->def->getID('PowerScore Growth Stages', 'Mother Plants');
-            case 'Clone':  return $this->def->getID('PowerScore Growth Stages', 'Clone Plants');
-            case 'Veg':    return $this->def->getID('PowerScore Growth Stages', 'Vegetating Plants');
-            case 'Flower': return $this->def->getID('PowerScore Growth Stages', 'Flowering Plants');
-            case 'Dry':    return $this->def->getID('PowerScore Growth Stages', 'Drying/Curing');
+            case 'Mother': return $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants');
+            case 'Clone':  return $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants');
+            case 'Veg':    return $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants');
+            case 'Flower': return $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants');
+            case 'Dry':    return $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing');
         }
         return '';
     }
@@ -166,8 +166,42 @@ class CannabisScoreGlobals
             $ret[$k] = [ 0 => 0, 162 => 0, 161 => 0, 160 => 0, 237 => 0, 163 => 0 ];
         }
         $ret2 = [];
-        foreach ([ 0, 144, 145, 143 ] as $k) $ret2[$k] = $ret;
+        foreach ([ 0, 144, 145, 143 ] as $k) {
+            $ret2[$k] = $ret;
+        }
         return $ret2;
     }
+    
+    
+    public function getSizeDefRange($defID)
+    {
+        if ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '<5,000 sf')) {
+            return [0, 5000];
+        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf')) {
+            return [5000, 10000];
+        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf')) {
+            return [10000, 50000];
+        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf')) {
+            return [50000, 1000000000];
+        }
+        return [0, 1000000000];
+    }
+    
+    public function getSizeDefID($size)
+    {
+        $size = intVal($size);
+        if ($size < 5000) {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '<5,000 sf');
+        } elseif ($size >= 5000 && $size < 10000) {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf');
+        } elseif ($size >= 10000 && $size < 50000) {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf');
+        } else {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf');
+        }
+        return 0;
+    }
+    
+    
     
 }
