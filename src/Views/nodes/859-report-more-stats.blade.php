@@ -3,7 +3,7 @@
 <!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
     ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
 <div class="slCard nodeWrap">
-<h1 class="slBlueDark">More Live Statistics</h1>
+<h2 class="slBlueDark">More Live Statistics</h2>
 <p>
 &darr; <a href="#sqft" class="mL5 mR5">Sqaure Footage</a> - 
 <a href="#prod" class="mL5 mR5">Production Types</a> - 
@@ -17,7 +17,7 @@
 
 <div class="nodeAnchor"><a name="sqft"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">1. Square Footage by Growth Stage</h2>
+<h3 class="slBlueDark">1. Square Footage by Growth Stage</h3>
 <table border=0 class="table table-striped w100">
 {!! $statSqft->tblHeaderRow('area') !!}
 {!! $statSqft->tblFltRowsCalc('area', 'farm', 'sqft', 'avg') !!}
@@ -33,7 +33,7 @@
 
 <div class="nodeAnchor"><a name="prod"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">2. Stats & Techniques by Production Types</h2>
+<h3 class="slBlueDark">2. Stats & Techniques by Production Types</h3>
 <table border=0 class="table table-striped w100">
 {!! $statMisc->tblHeaderRow('farm') !!}
 {!! $statMisc->tblAvgTotScale('farm', 'g', 0.002204623, 'Pounds') !!}
@@ -88,14 +88,14 @@
 
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">5. Lighting Adoption: All Farms</h2>
-{!! $statLgts->pieTblPercHas('area', 'lgty') !!}
-{!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', 'Lighting Adoption: ') !!}
+<?php /* <h3 class="slBlueDark">5. Lighting Adoption: All Farms</h3>
+{!! $statLgts->pieTblPercHas('area', 'lgty') !!} */ ?>
+{!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', '5. Lighting Adoption: ') !!}
 </div>
 
 <div class="nodeAnchor"><a name="sqftFixture"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">6. Square Feet per Lighting Fixture</h2>
+<h3 class="slBlueDark">6. Square Feet per Lighting Fixture</h3>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
 {!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'sqft', 'lgtfx', 'Square Feet per Fixture') !!}
@@ -110,7 +110,7 @@
 
 <div class="nodeAnchor"><a name="hvac"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">7. HVAC Adoption: All Farms</h2>
+<h3 class="slBlueDark">7. HVAC Adoption</h3>
 <ul>
 <li><b>System A</b> - Conventional Air Conditioning with Supplemental Portable Dehumidification Units 
     <span class="slGrey">(est. 115 kWh/SqFt)</span></li>
@@ -123,13 +123,13 @@
 <li><b>System E</b> - Chilled Water Dehumidification System</li>
 <li><b>System F</b> - Greenhouse HVAC Systems</li>
 </ul>
-{!! $statHvac->pieTblPercHas('area', 'hvac') !!}
-{!! $statHvac->pieTblBlksPercHas('area', 'hvac', 'farm', 'Lighting Adoption: ') !!}
+<?php /* {!! $statHvac->pieTblPercHas('area', 'hvac') !!} */ ?>
+{!! $statHvac->pieTblBlksPercHas('area', 'hvac', 'farm', 'HVAC Adoption: ') !!}
 </div>
 
 <div class="nodeAnchor"><a name="sources"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">8. On-Site Energy Sources</h2>
+<h3 class="slBlueDark">8. On-Site Energy Sources</h3>
 <div class="row">
     <div class="col-6">Indoor ({{ $enrgys["cmpl"][144][0] }}) {!! $enrgys["pie"][144] !!}</div>
     <div class="col-6">Greenhouse/Mixed ({{ $enrgys["cmpl"][145][0] }}) {!! $enrgys["pie"][145] !!}</div>

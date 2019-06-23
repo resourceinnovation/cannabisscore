@@ -1,6 +1,6 @@
 <?php
 /**
-  * CannabisScore extends ScoreImports extends ScoreAdminMisc extends ScoreReports extends ScoreListings
+  * CannabisScore extends ScoreImports extends ScoreAdminMisc extends ScoreReports extends ScoreReports
   * extends ScoreCalcs extends ScoreUtils extends ScorePowerUtilities extends ScoreLightModels 
   * extends ScoreVars extends TreeSurvForm. This class contains the majority of 
   * SurvLoop functions which are overwritten, and delegates most of the work.
@@ -29,7 +29,8 @@ use App\Models\RIICompetitors;
 use App\Models\RIIPSLicenses;
 use CannabisScore\Controllers\ScoreReportFound;
 use CannabisScore\Controllers\ScoreReportAvgs;
-use CannabisScore\Controllers\ScoreListings;
+use CannabisScore\Controllers\ScoreReportLightingManu;
+use CannabisScore\Controllers\ScoreReports;
 use CannabisScore\Controllers\ScoreImports;
 
 class CannabisScore extends ScoreImports
@@ -110,16 +111,16 @@ class CannabisScore extends ScoreImports
             
         // PowerScore Reporting
         } elseif ($nID == 744) {
-            $report = new ScoreListings;
+            $report = new ScoreReports;
             $ret .= $report->getCultClassicReport();
         } elseif ($nID == 170) {
-            $report = new ScoreListings;
+            $report = new ScoreReports;
             $ret .= $report->getAllPowerScoresPublic($nID);
         } elseif ($nID == 966) {
-            $report = new ScoreListings;
+            $report = new ScoreReports;
             $ret .= $report->getPowerScoresOutliers($nID);
         } elseif ($nID == 964) { // Partner Multi-Site Rankings
-            $report = new ScoreListings;
+            $report = new ScoreReports;
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getMultiSiteRankings($nID);
         } elseif ($nID == 799) { // Partner Multi-Site Listings
@@ -134,6 +135,10 @@ class CannabisScore extends ScoreImports
             $report = new ScoreReportAvgs;
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getAllPowerScoreAvgsPublic();
+        } elseif ($nID == 979) {
+            $report = new ScoreReportLightingManu;
+            $GLOBALS["SL"]->x["partnerVersion"] = true;
+            $ret .= $report->printCompareLightManu();
         } elseif ($nID == 797) {
             $report = new ScoreReportAvgs;
             $ret .= $report->getPowerScoreFinalReport();
@@ -149,6 +154,10 @@ class CannabisScore extends ScoreImports
             $ret .= $this->adminSearchResults();
         } elseif ($nID == 726) {
             $ret .= $this->printDashSessGraph();
+        } elseif ($nID == 976) {
+            $report = new ScoreReports;
+            $ret .= $report->printBasicStats($nID);
+
             
         // Admin Tools
         } elseif ($nID == 914) {
@@ -169,6 +178,10 @@ class CannabisScore extends ScoreImports
             $ret .= $this->reportInSurveyFeedback();
         } elseif ($nID == 808) {
             $ret .= $this->runNwpccImport();
+        } elseif ($nID == 968) {
+            return view('vendor.cannabisscore.nodes.968-lighting-manufacturers-comparison', [
+                "nID" => $nID
+            ])->render();
             
         // Misc
         } elseif ($nID == 843) {
@@ -360,7 +373,7 @@ class CannabisScore extends ScoreImports
         $this->searcher->v["nID"] = $nID;
         $this->searcher->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
             ->render();
-        return '<div id="scoreRankFiltWrap"><h4>Compare to other farms</h4><div class="pT5"></div>' . 
+        return '<div id="scoreRankFiltWrap"><h5 class="mT0">Compare to other farms</h5><div class="pT5"></div>' . 
             view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render() . '</div>';
     }
     
@@ -413,8 +426,10 @@ class CannabisScore extends ScoreImports
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
         $this->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
             ->render();
-        $this->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render();
-        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
+        $this->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)
+            ->render();
+        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)
+            ->render();
     }
     
     public function printFrameAnimPerc(Request $request, $perc = 0)
@@ -427,6 +442,28 @@ class CannabisScore extends ScoreImports
             "perc" => $perc,
             "size" => $size
             ])->render();
+    }
+    
+    public function printFrameAnimPercMeter(Request $request, $perc = 0, $row = 0)
+    {
+        $width = 190;
+        if ($request->has('width') && intVal($request->get('width')) > 0) {
+            $width = intVal($request->get('width'));
+        }
+        $height = 30;
+        if ($request->has('height') && intVal($request->get('height')) > 0) {
+            $height = intVal($request->get('height'));
+        }
+        $bg = '#ebeee7';
+        if ($request->has('bg') && intVal($request->get('bg')) > 0) {
+            $bg = trim($request->get('bg'));
+        }
+        return view('vendor.cannabisscore.nodes.490-report-calculations-frame-meter', [
+            "perc"   => $perc,
+            "width"  => round($width),
+            "height" => round($height),
+            "bg"     => $bg
+        ])->render();
     }
     
     protected function ajaxScorePercentiles()
@@ -478,14 +515,14 @@ class CannabisScore extends ScoreImports
                 && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
                 && $this->searcher->v["powerscore"]->PsEfficHvac > 0
                 && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
-            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle" class="scoreBig slBlueDark"> Overall: '
-                . (($this->searcher->v["currRanks"]->PsRnkOverall > 66) ? 'Leader' 
-                    : (($this->searcher->v["currRanks"]->PsRnkOverall > 33) ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) 
-                . '</div><div class="slGrey">Your farm ' . (($this->searcher->v["isPast"]) ? 'is performing' : 'would perform') 
-                . ' overall in the</div><h2 class="m0 scoreBig">' . round($this->searcher->v["currRanks"]->PsRnkOverall) 
+            $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' . round($this->searcher->v["currRanks"]->PsRnkOverall) 
                 . $GLOBALS["SL"]->numSupscript(round($this->searcher->v["currRanks"]->PsRnkOverall)) 
-                . ' percentile</h2><div class="slGrey mB10">within the overall data set of ';
+                . '</h1><b>percentile</b></center>';
 // number_format($ranksCache->PsRnkTotCnt) }} past growing @if ($ranksCache->PsRnkTotCnt > 1) years @else year @endif of
+            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle"><h5>Overall: '
+                . (($this->searcher->v["currRanks"]->PsRnkOverall > 66) ? 'Leader' 
+                    : (($this->searcher->v["currRanks"]->PsRnkOverall > 33) ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) . '</h5></div><div class="efficGuageTxtOverall4">'
+                . 'Your farm\'s overall performance within the data set of ';
             if ($this->searcher->v["fltFarm"] == 0) {
                 $this->searcher->v["withinFilters"] .= 'all farm types';
             } else {
@@ -494,28 +531,29 @@ class CannabisScore extends ScoreImports
             }
             $this->searcher->v["withinFilters"] .= $this->searcher->v["xtraFltsDesc"];
             if ($this->searcher->v["fltState"] == '' && $this->searcher->v["fltClimate"] == '') {
-                $this->searcher->v["withinFilters"] .= ' in the U.S. and Canada.';
+                $this->searcher->v["withinFilters"] .= ' in the U.S. and Canada:';
             } elseif ($this->searcher->v["fltState"] != '') {
                 if ($this->searcher->v["fltState"] == 'US') {
                     $this->searcher->v["withinFilters"] .= ' in the United States.';
                 } elseif ($this->searcher->v["fltState"] == 'Canada') {
-                    $this->searcher->v["withinFilters"] .= ' in Canada.';
+                    $this->searcher->v["withinFilters"] .= ' in Canada:';
                 } else {
                     $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">' 
-                        . $GLOBALS["SL"]->getState($this->searcher->v["fltState"]) . '.';
+                        . $GLOBALS["SL"]->getState($this->searcher->v["fltState"]) . ':';
                 }
             } else {
                 if ($this->searcher->v["fltClimate"] == 'US') {
                     $this->searcher->v["withinFilters"] .= ' in the United States.';
                 } elseif ($this->searcher->v["fltClimate"] == 'Canada') {
-                    $this->searcher->v["withinFilters"] .= ' in Canada.';
+                    $this->searcher->v["withinFilters"] .= ' in Canada:.';
                 } else {
                     $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">ASHRAE Climate Zone ' 
-                        . $this->searcher->v["fltClimate"] . '.';
+                        . $this->searcher->v["fltClimate"] . ':';
                 }
             }
             $this->searcher->v["withinFilters"] .= '</div>';
-            return view('vendor.cannabisscore.nodes.490-report-calculations-load-all-js', $this->searcher->v)->render();
+            return view('vendor.cannabisscore.nodes.490-report-calculations-load-all-js', $this->searcher->v)
+                ->render();
         }
         return '';
     }

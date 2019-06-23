@@ -149,6 +149,8 @@ class ScoreStats extends SurvStatsGraph
                 } elseif ($filt["abr"] == 'vert') {
                     if (isset($ps->PsVerticalStack)) {
                         $this->addRecFilt('vert', intVal($ps->PsVerticalStack), $ps->PsID);
+                    } else {
+                        $this->addRecFilt('vert', 0, $ps->PsID);
                     }
                 } elseif ($filt["abr"] == 'cups') {
                     if (sizeof($psTags) > 0) {
@@ -199,8 +201,10 @@ class ScoreStats extends SurvStatsGraph
                 $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
                     ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
                     ->first();
-                if ($area && isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
-                    $this->addRecDat('lgt' . substr($type, 0, 1), $area->PsAreaLightingEffic, $ps->PsID);
+                if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
+                    if (isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
+                        $this->addRecDat('lgt' . substr($type, 0, 1), $area->PsAreaLightingEffic, $ps->PsID);
+                    }
                 }
             }
         }
@@ -214,7 +218,8 @@ class ScoreStats extends SurvStatsGraph
         foreach ($this->filts[$fLet]["val"] as $v => $val) {
             $lab = $this->filts[$fLet]["vlu"][$v];
             if (trim($lnk) != '') {
-                $lab = '<a href="' . str_replace('[[val]]', $val, $lnk) . '" target="_blank">' . $lab . '</a>';
+                $lab = '<a href="' . str_replace('[[val]]', $val, $lnk) 
+                    . '" target="_blank">' . $lab . '</a>';
             }
             $tbl->addHeaderCol($lab, $this->getDatCnt($fLet . $val));
         }
@@ -227,7 +232,9 @@ class ScoreStats extends SurvStatsGraph
             }
         }
         $tbl->rows[0][1] = new SurvStatTh('Averages', $this->getDatCntForDatLet('1', 'a'));
-        return view('vendor.cannabisscore.inc-score-avgs-report-table', [ "tbl" => $tbl ])->render();
+        return view('vendor.cannabisscore.inc-score-avgs-report-table', [
+            "tbl" => $tbl
+        ])->render();
     }
     
     public function printScoreAvgsTbl2($lnk = '', $only = [])
@@ -249,7 +256,9 @@ class ScoreStats extends SurvStatsGraph
             }
         }
         $tbl->rows[0][1] = new SurvStatTh('Averages', $this->getDatCntForDatLet('1', 'a'));
-        return view('vendor.cannabisscore.inc-score-avgs-report-table', [ "tbl" => $tbl ])->render();
+        return view('vendor.cannabisscore.inc-score-avgs-report-table', [
+            "tbl" => $tbl
+        ])->render();
     }
     
     protected function loadLgts($area)
@@ -270,7 +279,7 @@ class ScoreStats extends SurvStatsGraph
             203 => '<a href="/dash/compare-powerscores?fltFarm=144&fltLght=' . $area . '-203" target="_blank">'
                 . 'LED</a>',
             2   => 'No Lights'
-            ];
+        ];
         return true;
     }
     

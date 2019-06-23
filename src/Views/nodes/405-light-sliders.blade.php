@@ -2,7 +2,7 @@
 <div id="node405" class="nodeWrap">
 <div class="nodeHalfGap"></div>
 <div id="nLabel405" class="nPrompt"><label for="n405FldID" class="w100">
-    During each phase, what <span class="slBlueDark">percentage of light used is artificial?</span>
+    During each phase, what <span class="txtInfo">percentage of light used is artificial?</span>
     <div id="nLabel405notes" class="subNote"><p>
         Enter the percentage number, or drag the sliders. 
         If grown completely from seed, check boxes for no mothers and no clones.

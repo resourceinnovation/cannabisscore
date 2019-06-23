@@ -18,36 +18,54 @@ Small subscript counts are the number of powerscores upon which each calculated 
 </div>
 
 <div class="nodeAnchor"><a name="flowerarea"></a></div>
-<div class="slCard nodeWrap">
-<h2 class="slBlueDark">1. Indoor Scores by Area of Flowering Canopy</h2>
-<p>Indoor cultivation Electricity Intensity (kWh/sf of flowering canopy) by area of flowering canopy</p>
-<?php $statScorSize->addCurrFilt('farm', 144); ?>
-{!! $statScorSize->printScoreAvgsTbl('size') !!}
-<?php $statScorSize->resetRecFilt(); ?>
-</div>
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+    <div class="slCard nodeWrap">
+    <h2 class="slBlueDark">@if ($typeID == 144) 1a. @elseif ($typeID == 145) 1b. @else 1c. @endif {{ $typeName }} Scores by Area of Flowering Canopy</h2>
+    <p>{{ $typeName }} cultivation Electricity Intensity (kWh/sf of flowering canopy) by area of flowering canopy</p>
+    <?php $scoreSets["statScorSize" . $typeID]->addCurrFilt('farm', $typeID); ?>
+    {!! $scoreSets["statScorSize" . $typeID]->printScoreAvgsTbl('size') !!}
+    <?php $scoreSets["statScorSize" . $typeID]->resetRecFilt(); ?>
+    </div>
+@endforeach
 
 <div class="nodeAnchor"><a name="auto"></a></div>
 <div class="slCard nodeWrap">
 <h2 class="slBlueDark">2. Indoor Scores by Use of Automation</h2>
 <p>These farms responded to using manual and/or automated environmental controls.</p>
-<?php $statScorAuto->addCurrFilt('farm', 144); ?>
-{!! $statScorAuto->printScoreAvgsTbl('auto') !!}
-<?php $statScorAuto->resetRecFilt(); ?>
+<?php $scoreSets["statScorAuto"]->addCurrFilt('farm', 144); ?>
+{!! $scoreSets["statScorAuto"]->printScoreAvgsTbl('auto') !!}
+<?php $scoreSets["statScorAuto"]->resetRecFilt(); ?>
 </div>
 
 <div class="nodeAnchor"><a name="vertical"></a></div>
 <div class="slCard nodeWrap">
 <h2 class="slBlueDark">3. Effect of Indoor Vertical Stacking</h2>
-<?php $statScorVert->addCurrFilt('farm', 144); ?>
-{!! $statScorVert->printScoreAvgsTbl('vert') !!}
-<?php $statScorVert->resetRecFilt(); ?>
+<?php $scoreSets["statScorVert"]->addCurrFilt('farm', 144); ?>
+{!! $scoreSets["statScorVert"]->printScoreAvgsTbl('vert') !!}
+
+<p>The experimental 'Production Density' calculation divides the Production Sub-Score by the average total square feet of flowering canopy (for each farm).</p>
+<table border=0 class="table table-striped w100">
+    <tr><td></td><th>Average</th><th>Without Vertical Stacking</th><th>With Vertical Stacking</th></tr>
+    <tr>
+        <th>Production Density (g/kWh/SqFt)</th>
+        <td>{{ $GLOBALS["SL"]->sigFigs($vertDense[2], 3) }}</td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($vertDense[0][0], 3) }}</td>
+        <td>{{ $GLOBALS["SL"]->sigFigs($vertDense[1][0], 3) }}</td>
+    </tr>
+</table>
+<?php /*
+<table border=0 class="table table-striped w100">
+    {!! $scoreSets["statScorVert"]->tblFltRowsCalc('vert', 'farm', 'prodens', 'avg') !!}
+</table>
+*/ ?>
+<?php $scoreSets["statScorVert"]->resetRecFilt(); ?>
 </div>
 
 <div class="nodeAnchor"><a name="environments"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
     <div class="slCard nodeWrap">
     <h2 class="slBlueDark">
-        @if ($typeID == 144) 4. @elseif ($typeID == 145) 5. @else 6. @endif {{ $typeName }} Growing Environments
+        @if ($typeID == 144) 4a. @elseif ($typeID == 145) 4b. @else 4c. @endif {{ $typeName }} Growing Environments
     </h2>
     <p><span class="slGrey">Commercial/Warehouse, House/Garage, Barn, Greenhouse, Outdoor, Other</span></p>
     <div class="row mB10">
@@ -76,24 +94,30 @@ Small subscript counts are the number of powerscores upon which each calculated 
 @endforeach
 
 <div class="nodeAnchor"><a name="hvac"></a></div>
-<div class="slCard nodeWrap">
-<h2 class="slBlueDark">7. Indoor Scores by Type of Flowering HVAC</h2>
-{!! $statScorHvcF->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm=144&fltHvac=162-[[val]]') !!}
-</div>
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+    <div class="slCard nodeWrap">
+    <h2 class="slBlueDark">@if ($typeID == 144) 5a. @elseif ($typeID == 145) 5b. @else 5c. @endif {{ $typeName }} Scores by Type of Flowering HVAC</h2>
+    {!! $scoreSets["statScorHvcF" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=162-[[val]]') !!}
+    </div>
+@endforeach
 
-<div class="slCard nodeWrap">
-<h2 class="slBlueDark">8. Indoor Scores by Type of Vegetative HVAC</h2>
-{!! $statScorHvcV->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm=144&fltHvac=161-[[val]]') !!}
-</div>
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+    <div class="slCard nodeWrap">
+    <h2 class="slBlueDark">@if ($typeID == 144) 6a. @elseif ($typeID == 145) 6b. @else 6c. @endif {{ $typeName }} Scores by Type of Vegetative HVAC</h2>
+    {!! $scoreSets["statScorHvcV" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=161-[[val]]') !!}
+    </div>
+@endforeach
 
-<div class="slCard nodeWrap">
-<h2 class="slBlueDark">9. Indoor Scores by Type of Cloning/Mother HVAC</h2>
-{!! $statScorHvcC->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm=144&fltHvac=160-[[val]]') !!}
-</div>
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+    <div class="slCard nodeWrap">
+    <h2 class="slBlueDark">@if ($typeID == 144) 7a. @elseif ($typeID == 145) 7b. @else 7c. @endif {{ $typeName }} Scores by Type of Cloning/Mother HVAC</h2>
+    {!! $scoreSets["statScorHvcC" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=160-[[val]]') !!}
+    </div>
+@endforeach
 
 <div class="nodeAnchor"><a name="leads"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">10. Leads</h2>
+<h2 class="slBlueDark">8. Leads</h2>
 <table border=0 class="table table-striped w100">
 {!! $statLeads->tblHeaderRow('farm', '/dash/compare-powerscores?fltFarm=[[val]]') !!}
 {!! $statLeads->tblPercHasDat('farm', ['nonfarm', 'upgrade', 'incent', 'contact']) !!}

@@ -26,7 +26,33 @@ class ScoreCalcs extends ScoreUtils
         $this->loadTotFlwrSqFt();
         if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0])
             && (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficFacility) 
-                || $GLOBALS["SL"]->REQ->has('refresh') || $GLOBALS["SL"]->REQ->has('recalc'))) {
+            || $GLOBALS["SL"]->REQ->has('refresh') || $GLOBALS["SL"]->REQ->has('recalc'))) {
+            
+            // First, Determine Farm Type
+            $prevFarmType = $this->sessData->dataSets["PowerScore"][0]->PsCharacterize;
+            if (intVal($this->getAreaFld('Flower', 'PsAreaLgtSun')) != 1) {
+                $this->sessData->dataSets["PowerScore"][0]->PsCharacterize = $this->frmTypIn;
+            } else { // Uses the Sun during Flowering Stage
+                $areaFlwrID   = $this->getAreaFld('Flower', 'PsAreaID');
+                $flwrOutdoor = $flwrGrnhse = false;
+                $areaFlwrBlds = $this->sessData->getChildRows('Areas', $areaFlwrID, 'AreaBlds');
+                if (sizeof($areaFlwrBlds) > 0) {
+                    foreach ($areaFlwrBlds as $bld) {
+                        if ($bld->PsArBldType == $GLOBALS["SL"]->def->getID('PowerScore Building Types', 'Outdoor')) {
+                            $flwrOutdoor = true;
+                        } elseif ($bld->PsArBldType == $GLOBALS["SL"]->def->getID('PowerScore Building Types', 'Greenhouse')) {
+                            $flwrGrnhse = true;
+                        }
+                    }
+                }
+                if ($flwrGrnhse || in_array($prevFarmType, [$this->frmTypIn, $this->frmTypGrn])) {
+                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize = $this->frmTypGrn;
+                } else {
+                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize = $this->frmTypOut;
+                }
+            }
+            
+            // Next, Recalculate Raw Efficiency Numbers
             $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility   = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac       = 0;
@@ -134,6 +160,14 @@ class ScoreCalcs extends ScoreUtils
                 }
             }
             $this->sessData->dataSets["PowerScore"][0]->save();
+        }
+        return true;
+    }
+    
+    protected function calcFarmType()
+    {
+        if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0]->PsID)) {
+            
         }
         return true;
     }

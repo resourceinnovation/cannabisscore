@@ -20,6 +20,10 @@ use SurvLoop\Controllers\Tree\TreeSurvForm;
 
 class ScoreVars extends TreeSurvForm
 {
+    protected $frmTypOut = 0;
+    protected $frmTypIn  = 0;
+    protected $frmTypGrn = 0;
+    
     // Initializing a bunch of things which are not [yet] automatically determined by the software
     protected function initExtra(Request $request)
     {
@@ -27,22 +31,32 @@ class ScoreVars extends TreeSurvForm
         foreach ($lookups->v as $var => $val) {
             $this->v[$var] = $val;
         }
+        $this->frmTypOut = $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Outdoor');
+        $this->frmTypIn  = $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Indoor');
+        $this->frmTypGrn = $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Greenhouse/Hybrid/Mixed Light');
             
         // Establishing Main Navigation Organization, with Node ID# and Section Titles
         $this->majorSections = [];
         if ($GLOBALS["SL"]->treeID == 1) {
-            $this->majorSections[] = [45,  'Your Farm',            'active'];
-            $this->majorSections[] = [64,  'Growing Environments', 'active'];
-            $this->majorSections[] = [911, 'Lighting & HVAC',      'active'];
-            $this->majorSections[] = [65,  'Annual Totals',        'active'];
-            $this->majorSections[] = [844, 'Other Techniques',     'active'];
-            //$this->majorSections[] = [609, 'HVAC',                 'active'];
-            //$this->majorSections[] = [67,  'Contact',              'active'];
+            $this->majorSections[] = [971, 'Your Farm',        'active'];
+            $this->majorSections[] = [911, 'Lighting & HVAC',  'active'];
+            $this->majorSections[] = [969, 'Annual Totals',    'active'];
+            $this->majorSections[] = [844, 'Other Techniques', 'active'];
+            $this->majorSections[] = [972, 'Water',            'active'];
+            $this->majorSections[] = [970, 'Waste',            'active'];
             $this->minorSections = [ [], [], [], [], [], [], [] ];
         }
         
         //$GLOBALS["SL"]->addTopNavItem('Calculate PowerScore', '/start/calculator');
         return true;
+    }
+    
+    protected function autoLabelClass($nIDtxt = '')
+    {
+        if ($GLOBALS["SL"]->treeID == 1) {
+            return 'txtInfo';
+        }
+        return 'slBlueDark';
     }
     
     protected function getAreaAbbr($typeDefID)
@@ -63,7 +77,7 @@ class ScoreVars extends TreeSurvForm
                 ->where('PsStatus', '=', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
                 ->update([ 'PsStatus' => $this->v["defCmplt"] ]);
             $chk = RIIPowerScore::where('PsZipCode', 'NOT LIKE', '')
-                ->whereNull('PsAshrae')
+                ->whereNull('PsClimateLabel')
                 ->get();
             if ($chk->isNotEmpty()) {
                 $GLOBALS["SL"]->loadStates();
@@ -76,6 +90,7 @@ class ScoreVars extends TreeSurvForm
                             $score->PsCounty = $zipRow->ZipCounty;
                         }
                     }
+                    $score->PsClimateLabel = $GLOBALS["SL"]->states->getAshraeZoneLabel($score->PsAshrae);
                     $score->save();
                 }
             }

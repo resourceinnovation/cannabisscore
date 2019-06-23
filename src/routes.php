@@ -13,7 +13,8 @@
 
 Route::group(['middleware' => ['web']], function () {
     
-    Route::get( '/frame/animate/guage/{percent}', 'CannabisScore\Controllers\CannabisScore@printFrameAnimPerc');
+    Route::get( '/frame/animate/guage/{percent}',       'CannabisScore\Controllers\CannabisScore@printFrameAnimPerc');
+    Route::get( '/frame/animate/meter/{percent}/{row}', 'CannabisScore\Controllers\CannabisScore@printFrameAnimPercMeter');
     
 });    
 

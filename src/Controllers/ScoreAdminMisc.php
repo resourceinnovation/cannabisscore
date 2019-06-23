@@ -198,7 +198,7 @@ class ScoreAdminMisc extends ScoreCalcs
     protected function getEmailsList()
     {
         $this->v["sendResults"] = '';
-        $this->v["emailList"] = [];
+        $this->v["emailList"] = [ 'Newsletter' => [] ];
         $this->v["scoreLists"] = [ 'all' => [], 'blw' => [], 'avg' => [], 'abv' => [], 'inc' => [] ];
         $this->v["wchLst"] = 'all';
         if ($GLOBALS["SL"]->REQ->has('wchLst') 
@@ -236,11 +236,20 @@ class ScoreAdminMisc extends ScoreCalcs
         if ($chk->isNotEmpty()) {
             foreach ($chk as $row) {
                 if (isset($row->PsEmail) && trim($row->PsEmail) != '') {
-                    if (!isset($this->v["emailList"][$row->PsState])) $this->v["emailList"][$row->PsState] = [];
+                    if (!isset($this->v["emailList"][$row->PsState])) {
+                        $this->v["emailList"][$row->PsState] = [];
+                    }
+                    if (isset($row->PsNewsletter) && intVal($row->PsNewsletter) == 1 
+                        && !in_array(trim($row->PsEmail), $this->v["emailList"]["Newsletter"])) {
+                        $this->v["emailList"]["Newsletter"][] = trim($row->PsEmail);
+                    }
+
                     $found = false;
                     if (sizeof($this->v["scoreLists"]["all"]) > 0) {
                         foreach ($this->v["scoreLists"]["all"] as $i => $infChk) {
-                            if (strtolower($infChk["email"]) == strtolower($row->PsEmail)) $found = true;
+                            if (strtolower($infChk["email"]) == strtolower($row->PsEmail)) {
+                                $found = true;
+                            }
                         }
                     }
                     if (!$found) {
@@ -253,7 +262,7 @@ class ScoreAdminMisc extends ScoreCalcs
                             "farm"  => $row->PsName, 
                             "score" => $row->PsEfficOverSimilar,
                             "sent"  => false
-                            ];
+                        ];
                         $this->v["scoreLists"]["all"][] = $infArr;
                         if ($row->PsStatus != $this->v["defCmplt"] || !isset($row->PsEfficFacility) 
                             || !isset($row->PsEfficProduction) || !isset($row->PsEfficHvac) 

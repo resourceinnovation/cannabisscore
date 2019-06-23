@@ -24,17 +24,31 @@ class ScoreReportFound extends ScoreReportStats
     {
         $this->prepStatFilts();
         $this->statScoreSets = [
-            ['statScorSize', 'size'],
-            ['statScorAuto', 'auto'],
-            ['statScorVert', 'vert'],
-            ['statScorHvcF', 'hvac'],
-            ['statScorHvcV', 'hvac'],
-            ['statScorHvcC', 'hvac']
-            ];
+            ['statScorSize144', 'size'],
+            ['statScorSize145', 'size'],
+            ['statScorSize143', 'size'],
+            ['statScorAuto',    'auto'],
+            ['statScorVert',    'vert'],
+            ['statScorHvcF144', 'hvac'],
+            ['statScorHvcF145', 'hvac'],
+            ['statScorHvcF143', 'hvac'],
+            ['statScorHvcV144', 'hvac'],
+            ['statScorHvcV145', 'hvac'],
+            ['statScorHvcV143', 'hvac'],
+            ['statScorHvcC144', 'hvac'],
+            ['statScorHvcC145', 'hvac'],
+            ['statScorHvcC143', 'hvac']
+        ];
         foreach ($this->statScoreSets as $set) {
-            $this->v[$set[0]] = new ScoreStats([$set[1]]);
-            $this->v[$set[0]]->loadMap();
+            $this->v["scoreSets"][$set[0]] = new ScoreStats([$set[1]]);
+            $this->v["scoreSets"][$set[0]]->loadMap();
         }
+        $this->v["vertDense"] = [
+            [ 0, [] ],
+            [ 0, [] ],
+            0
+        ];
+
         $this->v["bldDats"] = [];
         $this->v["statEnv"] = new ScoreStatEnvs;
         $this->v["statEnv"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]);
@@ -64,30 +78,53 @@ class ScoreReportFound extends ScoreReportStats
                     ->where('PsAreaType', '>', 0)
                     ->get();
                 if ($areas->isNotEmpty()) {
+                    $this->v["scoreSets"]["statScorSize" . $ps->PsCharacterize]
+                        ->applyScoreFilts($ps, $this->getFlowerSize($areas));
                     if ($ps->PsCharacterize == 144) {
-                        $this->v["statScorSize"]->applyScoreFilts($ps, $this->getFlowerSize($areas));
-                        $this->v["statScorAuto"]->applyScoreFilts($ps, $this->getFlowerSize($areas));
-                        $this->v["statScorVert"]->applyScoreFilts($ps, $this->getFlowerSize($areas));
+                        $this->v["scoreSets"]["statScorAuto"]
+                            ->applyScoreFilts($ps, $this->getFlowerSize($areas));
+                        $this->v["scoreSets"]["statScorVert"]
+                            ->applyScoreFilts($ps, $this->getFlowerSize($areas));
                     }
                     foreach ($areas as $area) {
                         $areaType = $this->motherToClone($area->PsAreaType);
                         $this->v["statEnv"]->addDataEnvs($ps, $areaType, $area->PsAreaID);
-                        if ($ps->PsCharacterize == 144) {
-                            if ($this->v["areaTypes"]["Flower"] == $area->PsAreaType) {
-                                $this->v["statScorHvcF"]->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                            } else if ($this->v["areaTypes"]["Veg"] == $area->PsAreaType) {
-                                $this->v["statScorHvcV"]->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                            } else if ($this->v["areaTypes"]["Clone"] == $area->PsAreaType) {
-                                $this->v["statScorHvcC"]->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
+                        if ($this->v["areaTypes"]["Flower"] == $area->PsAreaType) {
+                            $this->v["scoreSets"]["statScorHvcF" . $ps->PsCharacterize]
+                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
+                        } else if ($this->v["areaTypes"]["Veg"] == $area->PsAreaType) {
+                            $this->v["scoreSets"]["statScorHvcV" . $ps->PsCharacterize]
+                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
+                        } else if ($this->v["areaTypes"]["Clone"] == $area->PsAreaType) {
+                            $this->v["scoreSets"]["statScorHvcC" . $ps->PsCharacterize]
+                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
+                        }
+                    }
+                    foreach ($this->statScoreSets as $set) {
+                        if (in_array($set[0], ['statScorAuto', 'statScorVert'])) {
+                            if ($ps->PsCharacterize == 144) {
+                                $this->v["scoreSets"][$set[0]]->addScoreData($ps);
+                                $this->v["scoreSets"][$set[0]]->resetRecFilt();
                             }
+                        } elseif (intVal(substr($set[0], strlen($set[0])-3)) == $ps->PsCharacterize) {
+                            $this->v["scoreSets"][$set[0]]->addScoreData($ps);
+                            $this->v["scoreSets"][$set[0]]->resetRecFilt();
                         }
                     }
-                    if ($ps->PsCharacterize == 144) {
-                        foreach ($this->statScoreSets as $set) {
-                            $this->v[$set[0]]->addScoreData($ps);
-                            $this->v[$set[0]]->resetRecFilt();
+
+                    if ($ps->PsCharacterize == 144 && isset($ps->PsEfficProduction) && $ps->PsEfficProduction > 0) {
+                        $vert = 0;
+                        if (isset($ps->PsVerticalStack)) {
+                            $vert = intVal($ps->PsVerticalStack);
+                        }
+                        $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                            ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
+                            ->first();
+                        if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
+                            $this->v["vertDense"][$vert][1][] = $ps->PsEfficProduction/$area->PsAreaSize;
                         }
                     }
+
                     $this->v["statLeads"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
                     $this->v["statLeads"]->addRecDat('count', 1, $ps->PsID);
                     if (isset($ps->PsEnergyNonFarm) && intVal($ps->PsEnergyNonFarm) == 1) {
@@ -109,14 +146,27 @@ class ScoreReportFound extends ScoreReportStats
         }
         unset($allScores);
         foreach ($this->statScoreSets as $set) {
-            $this->v[$set[0]]->calcStats();
+            $this->v["scoreSets"][$set[0]]->calcStats();
         }
-        $this->v["statScorHvcF"]->addCurrFilt('farm', 144);
-        $this->v["statScorHvcV"]->addCurrFilt('farm', 144);
-        $this->v["statScorHvcC"]->addCurrFilt('farm', 144);
+        //$this->v["scoreSets"]["statScorHvcF"]->addCurrFilt('farm', 144);
+        //$this->v["scoreSets"]["statScorHvcV"]->addCurrFilt('farm', 144);
+        //$this->v["scoreSets"]["statScorHvcC"]->addCurrFilt('farm', 144);
         $this->v["statLeads"]->calcStats();
         $this->v["statEnv"]->calcStats();
         $this->v["statEnv"]->calcBlds();
+
+        foreach ([0, 1] as $vert) {
+            if (sizeof($this->v["vertDense"][$vert][1]) > 0) {
+                foreach ($this->v["vertDense"][$vert][1] as $val) {
+                    $this->v["vertDense"][$vert][0] += $val;
+                    $this->v["vertDense"][2] += $val;
+                }
+                $this->v["vertDense"][$vert][0] = $this->v["vertDense"][$vert][0]/sizeof($this->v["vertDense"][$vert][1]);
+            }
+        }
+        $this->v["vertDense"][2] = $this->v["vertDense"][2]
+            /(sizeof($this->v["vertDense"][0][1])+sizeof($this->v["vertDense"][1][1]));
+
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.853-founders-circle-report', $this->v)->render();
     }

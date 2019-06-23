@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores.blade.php -->
-@if ($nID != 946) <div class="row" ><div class="col-2"> @endif
-        <select name="fltFarm" id="filtFarmID" class="form-control ntrStp slTab mT5" autocomplete="off" 
+    <div class="row" ><div class="col-2">
+        <select name="fltFarm" id="filtFarmID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="0"   @if (!isset($fltFarm) || $fltFarm == 0)  SELECTED @endif >All Farm Types</option>
             <option value="143" @if (isset($fltFarm) && $fltFarm == 143) SELECTED @endif >Outdoor</option>
@@ -14,14 +14,14 @@
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->climateZoneDrop($fltClimate) !!}
         </select>
-    </div><div class="col-2">
 @endif
-        <select name="fltState" id="fltStateID" class="form-control ntrStp slTab mT5" 
+    </div><div class="col-2">
+        <select name="fltState" id="fltStateID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" 
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
             {!! $GLOBALS["SL"]->states->stateDrop($fltState, true) !!}
         </select>
-@if ($nID != 946) </div><div class="col-2"> @endif
-        <select name="fltLght" id="fltLghtID" class="form-control ntrStp slTab mT5" autocomplete="off" 
+    </div><div class="col-2">
+        <select name="fltLght" id="fltLghtID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltLght') 
                 || trim($GLOBALS["SL"]->REQ->get('fltLght')) == '') SELECTED @endif 
@@ -72,8 +72,8 @@
                 >{{ $type }} - LED</option>
         @endforeach
         </select>
-@if ($nID != 946) </div><div class="col-2"> @endif
-        <select name="fltHvac" id="fltHvacID" class="form-control ntrStp slTab mT5" autocomplete="off" 
+    </div><div class="col-2">
+        <select name="fltHvac" id="fltHvacID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltHvac') 
                 || trim($GLOBALS["SL"]->REQ->get('fltHvac')) == '') SELECTED @endif 
@@ -137,9 +137,12 @@
             ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
         <div class="mT10"><a id="btnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>
+@else
+    </div><div class="col-2"> 
+        <a class="btn btn-sm btn-primary updateScoreFilts mT5" href="javascript:;">Apply Filters</a>
+@endif
     </div>
 </div>
-@endif
     <?php /* @if (isset($psid) && $psid > 0)
         <label><input type="checkbox" name="psid" id="psidID" value=""></label>
     @endif */ ?>
@@ -197,7 +200,7 @@
     </div></div>
 @endif
 </div>
-@if ($nID == 946)
+@if ($nID != 946)
     <div class="pT20 pB20">
         <a id="btnFiltsAdv" class="disBlo pull-left" href="javascript:;" style="color: #FFF;">Show More<br />Filters</a>
         <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" style="color: #FFF;">Show Less<br />Filters</a>

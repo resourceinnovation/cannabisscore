@@ -4,7 +4,7 @@
 <div class="nodeHalfGap"></div>
 <div id="nLabel398" class="nPrompt">
     <label for="n398FldID" class="w100">
-        Average <span class="slBlueDark">square footage of flowering canopy</span> under production throughout the 
+        Average <span class="txtInfo">square footage of flowering canopy</span> under production throughout the 
         12-month reporting period aligned with your utility bill submissions:
         <span class="red">*required</span>
     </label>

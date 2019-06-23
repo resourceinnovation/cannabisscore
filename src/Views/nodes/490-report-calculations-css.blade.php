@@ -1,11 +1,109 @@
 /* generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations-css.blade.php */
 
-#scoreRankFiltWrap {
-    width: 100%;
-    background: #8dc63f;
-    color: #FFF;
-    padding: 30px;
+
+#efficScoreMainTitle {
+    margin: 50px 0px 20px -15px;
+    color: #726658;
 }
+
+#scoreCalcsWrapLeft {
+    background: #f5f5f3;
+    padding: 0px;
+    z-index: 10;
+}
+table.tableScore tr, table.tableScore tr td {
+    border: 0px none;
+}
+table tr#scoreRowFac, table tr#scoreRowHvac, table tr#scoreRowWater {
+    background: #ebeee7;
+}
+table tr#scoreRowProd, table tr#scoreRowLight, table tr#scoreRowWaste {
+    background: #f5f5f3;
+}
+table tr.scoreRowHeader {
+    background: #FFF;
+}
+table tr.scoreRowHeader h5 {
+    margin: 10px 0px 10px -10px;
+}
+
+.efficBlock {
+    color: #636564;
+    font-size: 110%;
+}
+.efficHeadLabel {
+    padding: 15px 0px 15px 30px;
+}
+.efficHeadScore {
+    padding: 15px 15px;
+}
+.efficHeadGuage {
+    padding-top: 13px;
+}
+.efficHeadGuageLabel {
+    padding: 15px 15px 15px 30px;
+}
+
+#psScoreOverall {
+    background: #FFF;
+    box-shadow: 0px 10px 15px #DEDEDE;
+    position: relative;
+    z-index: 1;
+}
+
+
+.scoreCalcs {
+    display: none;
+    padding: 10px 0px 20px 30px;
+}
+
+#efficGuageTxtOverall {
+    margin: 0 0 15px 0;
+}
+#efficBlockOverGuageTitle {
+    margin: 15px 15px 5px 0px;
+    color: #726658;
+}
+#efficGuageTxtOverall2 h1 {
+    color: #9AC356;
+    font-size: 3rem;
+    margin: 0px 0px -5px 0px;
+}
+#efficGuageTxtOverall2 b {
+    color: #726658;
+    font-size: 1.13rem;
+}
+#efficGuageTxtOverall3, #efficGuageTxtOverall4 {
+    font-size: 80%;
+}
+
+#scoreRankFiltWrap {
+    background: #01743d;
+    color: #FFF;
+    padding: 20px 30px 30px 30px;
+    margin: 0px -15px;
+    position: relative;
+    z-index: 10;
+}
+
+
+@media screen and (max-width: 1200px) {
+    #treeWrap492 { max-width: 96% }
+    .efficHeadScore { padding-left: 30px; }
+
+}
+@media screen and (max-width: 992px) {
+    #efficGuageTxtOverall2, #efficGuageTxtOverall3, #efficGuageTxtOverall4 { font-size: 100%; }
+    #efficGuageTxtOverall3 { margin-top: 25px; margin-bottom: 15px; }
+}
+@media screen and (max-width: 768px) {
+    .efficHeadGuage { padding: 0px 0px 10px 30px; }
+    .efficHeadGuageLabel { padding: 0px 0px 0px 30px; }
+}
+
+
+<?php /* 
+
 #node945 { 
     margin-top: 8px;
     padding-left: 13px;
@@ -54,12 +152,6 @@ iframe.guageFrame {
     color: #FFF;
     min-height: 141px;
 }
-#efficBlockOverLeftInner {
-    margin: -15px 0 0 30px;
-}
-#efficGuageTxtOverall {
-    padding: 0 0 0 30px;
-}
 
 .efficGuageTxt {
     display: block;
@@ -68,12 +160,6 @@ iframe.guageFrame {
 .efficGuageTxt .slGrey, .efficGuageTxtOver .slGrey {
     font-size: 12px;
     line-height: 16px;
-}
-#efficBlockOverTitle {
-    margin-top: 20px;
-}
-#efficBlockOverGuageTitle {
-    margin-top: 15px;
 }
 .efficBlock {
     width: 100%;
@@ -86,10 +172,6 @@ iframe.guageFrame {
 }
 .efficHeadScore {
     text-align: right;
-}
-.scoreCalcs {
-    display: none;
-    padding: 10px 0px 20px 30px;
 }
 
 .efficLabel {
@@ -172,3 +254,5 @@ iframe.guageFrame {
 @media screen and (max-width: 480px) {
 
 }
+
+*/ ?>

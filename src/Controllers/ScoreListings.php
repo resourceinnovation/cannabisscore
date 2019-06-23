@@ -20,12 +20,13 @@ use CannabisScore\Controllers\CannabisScoreSearcher;
 
 class ScoreListings
 {
-    private $v        = [];
-    private $searcher = null;
+    protected $v        = [];
+    protected $searcher = null;
     
     public function __construct()
     {
         $this->v["defCmplt"] = 243;
+        $this->v["defArch"]  = 364;
         $this->searcher = new CannabisScoreSearcher;
     }
     

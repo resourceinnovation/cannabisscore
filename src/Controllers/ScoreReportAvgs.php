@@ -126,7 +126,6 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->v["statLgts"] = new SurvStatsGraph;
         $this->v["statLgts"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
         $this->v["statLgts"]->addFilt('area', 'Growth Stage', $this->v["sfAreasGrow"][0], $this->v["sfAreasGrow"][1]); // stat filter b
-        
         $this->v["statLgts"]->addFilt('lgty', 'Lights Types', $this->lgts[0], $this->lgts[1]); // stat filter c
         $this->v["statLgts"]->addDataType('sqft', 'Square Feet', 'sqft'); // stat var a
         $this->v["statLgts"]->addDataType('sun', 'Sunlight');             // stat var b
@@ -161,7 +160,7 @@ class ScoreReportAvgs extends ScoreReportStats
             "extra" => [ 0 => 0, 1 => [] ],
             "data"  => [],
             "pie"   => []
-            ];
+        ];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
             $this->v["enrgys"]["cmpl"][$type->DefID] = [ 0 => 0 ];
             $this->v["enrgys"]["extra"][$type->DefID] = [ 0 => 0 ];
@@ -245,7 +244,7 @@ class ScoreReportAvgs extends ScoreReportStats
                                 $hvac = $area->PsAreaHvacType;
                             }
                             $this->v["statHvac"]->addRecFilt('area', $area->PsAreaType, $ps->PsID);
-                            $this->v["statHvac"]->addRecFilt('hvac', $area->PsAreaHvacType, $aID);
+                            $this->v["statHvac"]->addRecFilt('hvac', $hvac, $aID);
                             $this->v["statHvac"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
                             $this->v["statHvac"]->addRecDat('kWh/sqft', $GLOBALS["CUST"]->getHvacEffic($hvac), $aID);
                             $this->v["statHvac"]->delRecFilt('hvac');
@@ -279,13 +278,17 @@ class ScoreReportAvgs extends ScoreReportStats
                                         $this->v["statLgts"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
                                         $this->v["statLgts"]->addRecDat('lgtfx', $lgt->PsLgTypCount, $lgt->PsLgTypID);
                                         $foundLights = true;
-                                        if (in_array($lgt->PsLgTypLight, [168, 169, 170, 171])) $foundHID = true;
-                                        if (in_array($lgt->PsLgTypLight, [165, 203])) $foundLED = true;
+                                        if (in_array($lgt->PsLgTypLight, [168, 169, 170, 171])) {
+                                            $foundHID = true;
+                                        }
+                                        if (in_array($lgt->PsLgTypLight, [165, 203])) {
+                                            $foundLED = true;
+                                        }
                                         $fixtureCnt += $lgt->PsLgTypCount;
                                     }
                                 }
                             }
-                            if (!$foundLights) {
+                            if (!$foundLights) { // && intVal($area->PsAreaLgtArtif) == 0
                                 $this->v["statLgts"]->addRecFilt('lgty', 2, $aID); // no lights status
                                 $this->v["statLgts"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
                                 $this->v["statLgts"]->addRecDat('lgtfx', 0, $aID);

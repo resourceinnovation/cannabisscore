@@ -233,7 +233,7 @@ class ScoreUtils extends ScorePowerUtilities
                 if (isset($itemRow->PsLgTypWattage) && trim($itemRow->PsLgTypWattage) != '') {
                     $lgtDesc .= number_format($itemRow->PsLgTypWattage) . 'W each';
                 }
-                $lgtDesc .= '</h3>';
+                $lgtDesc .= '</h4>';
                 if (isset($itemRow->PsLgTypLight) && intVal($itemRow->PsLgTypLight) > 0) {
                     $lgtDesc .= $GLOBALS["SL"]->def->getVal('PowerScore Light Types', $itemRow->PsLgTypLight);
                     if ((isset($itemRow->PsLgTypMake) && trim($itemRow->PsLgTypMake) != '') 
@@ -250,7 +250,7 @@ class ScoreUtils extends ScorePowerUtilities
                 if (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '') {
                     $lgtDesc .= $itemRow->PsLgTypModel;
                 }
-                $lgtDesc .= '<h3 class="disNon">';
+                $lgtDesc .= '<h4 class="disNon">';
                 return $lgtDesc;
             }
         }

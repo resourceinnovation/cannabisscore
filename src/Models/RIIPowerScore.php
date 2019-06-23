@@ -16,6 +16,7 @@ class RIIPowerScore extends Model
 		'PsYear', 
 		'PsPrivacy', 
 		'PsZipCode', 
+		'PsClimateLabel',
 		'PsCounty', 
 		'PsState', 
 		'PsCountry', 
