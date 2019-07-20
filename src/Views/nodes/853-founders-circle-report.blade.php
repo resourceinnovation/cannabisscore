@@ -12,7 +12,6 @@ Small subscript counts are the number of powerscores upon which each calculated 
 <a href="#auto" class="mL5 mR5">Automation</a> - 
 <a href="#vertical" class="mL5 mR5">Vertical Stacking</a>
 <a href="#enviornments" class="mL5 mR5">Environments</a> - 
-<a href="#hvac" class="mL5 mR5">HVAC</a> - 
 <a href="#leads" class="mL5 mR5">Leads</a>
 </p>
 </div>
@@ -93,31 +92,9 @@ Small subscript counts are the number of powerscores upon which each calculated 
     </div>
 @endforeach
 
-<div class="nodeAnchor"><a name="hvac"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
-    <div class="slCard nodeWrap">
-    <h2 class="slBlueDark">@if ($typeID == 144) 5a. @elseif ($typeID == 145) 5b. @else 5c. @endif {{ $typeName }} Scores by Type of Flowering HVAC</h2>
-    {!! $scoreSets["statScorHvcF" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=162-[[val]]') !!}
-    </div>
-@endforeach
-
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
-    <div class="slCard nodeWrap">
-    <h2 class="slBlueDark">@if ($typeID == 144) 6a. @elseif ($typeID == 145) 6b. @else 6c. @endif {{ $typeName }} Scores by Type of Vegetative HVAC</h2>
-    {!! $scoreSets["statScorHvcV" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=161-[[val]]') !!}
-    </div>
-@endforeach
-
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
-    <div class="slCard nodeWrap">
-    <h2 class="slBlueDark">@if ($typeID == 144) 7a. @elseif ($typeID == 145) 7b. @else 7c. @endif {{ $typeName }} Scores by Type of Cloning/Mother HVAC</h2>
-    {!! $scoreSets["statScorHvcC" . $typeID]->printScoreAvgsTbl('hvac', '/dash/compare-powerscores?fltFarm={{ $typeID }}&fltHvac=160-[[val]]') !!}
-    </div>
-@endforeach
-
 <div class="nodeAnchor"><a name="leads"></a></div>
 <div class="slCard nodeWrap">
-<h2 class="slBlueDark">8. Leads</h2>
+<h2 class="slBlueDark">5. Leads</h2>
 <table border=0 class="table table-striped w100">
 {!! $statLeads->tblHeaderRow('farm', '/dash/compare-powerscores?fltFarm=[[val]]') !!}
 {!! $statLeads->tblPercHasDat('farm', ['nonfarm', 'upgrade', 'incent', 'contact']) !!}

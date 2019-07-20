@@ -302,10 +302,23 @@ class CannabisScoreSearcher extends Searcher
                 }
             }
         }
-        if ($this->v["fltState"] != '') {
+        $state = '';
+        if (isset($this->searchFilts["stateClim"]) && trim($this->searchFilts["stateClim"]) != '') {
+            $zones = $GLOBALS["SL"]->states->getAshraeGroupZones($this->searchFilts["stateClim"]);
+            if (sizeof($zones) > 0) {
+                $eval .= "->whereIn('PsAshrae', ['" . implode("', '", $zones) . "'])";
+            } else { // is state
+                $state = trim($this->searchFilts["stateClim"]);
+            }
+        } elseif (isset($this->searchFilts["state"]) && trim($this->searchFilts["state"]) != '') {
+            $state = $this->searchFilts["state"];
+        } elseif ($this->v["fltState"] != '') {
+            $state = $this->v["fltState"];
+        }
+        if ($state != '') {
             $GLOBALS["SL"]->loadStates();
             $eval .= "->whereIn('PsState', [ '" . implode("', '", 
-                $GLOBALS["SL"]->states->getStateWhereIn($this->v["fltState"])) . "' ])";
+                $GLOBALS["SL"]->states->getStateWhereIn($state)) . "' ])";
         }
         if ($this->v["fltClimate"] != '') {
             if ($this->v["fltClimate"] == 'US') {
@@ -314,6 +327,7 @@ class CannabisScoreSearcher extends Searcher
                 $eval .= "->where('PsAshrae', '" . $this->v["fltClimate"] . "')";
             }
         }
+
         if ($this->v["fltFarm"] > 0) {
             $eval .= "->where('PsCharacterize', " . $this->v["fltFarm"] . ")";
         }
@@ -322,17 +336,21 @@ class CannabisScoreSearcher extends Searcher
         }
         foreach ($psidLgtARS as $flt => $list) {
             if ($this->v[$flt][1] > 0) {
-                $eval .= "->whereIn('PsID', [" . ((sizeof($list) > 0) ? implode(', ', $list) : 0) . "])";
+                $eval .= "->whereIn('PsID', [" . ((sizeof($list) > 0) 
+                    ? implode(', ', $list) : 0) . "])";
             }
         }
         if ($this->v["fltLght"][1] > 0) {
-            $eval .= "->whereIn('PsID', [" . ((sizeof($psidLghts) > 0) ? implode(', ', $psidLghts) : 0) . "])";
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidLghts) > 0) 
+                ? implode(', ', $psidLghts) : 0) . "])";
         }
         if ($this->v["fltHvac"][1] > 0) {
-            $eval .= "->whereIn('PsID', [" . ((sizeof($psidHvac) > 0) ? implode(', ', $psidHvac) : 0) . "])";
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidHvac) > 0) 
+                ? implode(', ', $psidHvac) : 0) . "])";
         }
         if ($this->v["fltSize"] > 0) {
-            $eval .= "->whereIn('PsID', [" . ((sizeof($psidSize) > 0) ? implode(', ', $psidSize) : 0) . "])";
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidSize) > 0) 
+                ? implode(', ', $psidSize) : 0) . "])";
         }
         if ($this->v["fltPerp"] > 0) {
             $eval .= "->where('PsHarvestBatch', 1)";
@@ -356,10 +374,12 @@ class CannabisScoreSearcher extends Searcher
             $eval .= "->where('PsVerticalStack', 1)";
         }
         if (sizeof($this->v["fltRenew"]) > 0) {
-            $eval .= "->whereIn('PsID', [" . ((sizeof($psidRenew) > 0) ? implode(', ', $psidRenew) : 0) . "])";
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidRenew) > 0) 
+                ? implode(', ', $psidRenew) : 0) . "])";
         }
         if ($this->v["fltCup"] > 0) {
-            $eval .= "->whereIn('PsID', [" . ((sizeof($psidCups) > 0) ? implode(', ', $psidCups) : 0) . "])";
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidCups) > 0) 
+                ? implode(', ', $psidCups) : 0) . "])";
         }
         return $eval;
     }
@@ -372,7 +392,7 @@ class CannabisScoreSearcher extends Searcher
                 . "->where('PsEfficLighting', '>', 0)->where('PsEfficHvac', '>', 0)" : "")
             . "->orderBy('" . $this->v["sort"][0] . "', '" . $this->v["sort"][1] . "')->get();";
         eval($eval);
-//echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br />';
+//echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br />'; exit;
         return true;
     }
     
@@ -421,14 +441,16 @@ class CannabisScoreSearcher extends Searcher
                 if (isset($area->PsAreaHasStage) && intVal($area->PsAreaHasStage) == 1
                     && $area->PsAreaType != $this->v["areaTypes"]["Dry"]) {
                     if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
-                        $this->v["futureFlts"][] = '&fltHvac=' . $area->PsAreaType . '-' . $area->PsAreaHvacType;
+                        $this->v["futureFlts"][] = '&fltHvac=' . $area->PsAreaType 
+                            . '-' . $area->PsAreaHvacType;
                     }
                     if (isset($dataSets["PSLightTypes"]) 
                         && sizeof($dataSets["PSLightTypes"]) > 0) {
                         foreach ($dataSets["PSLightTypes"] as $lgt) {
                             if ($lgt->PsLgTypAreaID == $area->PsAreaID && isset($lgt->PsLgTypLight) 
                                 && intVal($lgt->PsLgTypLight) > 0) {
-                                $this->v["futureFlts"][] = '&fltLght=' . $area->PsAreaType . '-' . $lgt->PsLgTypLight;
+                                $this->v["futureFlts"][] = '&fltLght=' . $area->PsAreaType 
+                                    . '-' . $lgt->PsLgTypLight;
                             }
                         }
                     }
@@ -452,8 +474,16 @@ class CannabisScoreSearcher extends Searcher
     
     public function getAllscoresAvgFlds()
     {
-        $this->v["avgFlds"] = ['PsEfficOverall', 'PsEfficFacility', 'PsEfficProduction', 'PsEfficLighting', 
-            'PsEfficHvac', 'PsGrams', 'PsKWH', 'PsTotalSize'];
+        $this->v["avgFlds"] = [
+            'PsEfficOverall',
+            'PsEfficFacility',
+            'PsEfficProduction',
+            'PsEfficLighting', 
+            'PsEfficHvac',
+            'PsGrams',
+            'PsKWH',
+            'PsTotalSize'
+        ];
         $this->v["psAvg"] = new RIIPowerScore;
         foreach ($this->v["avgFlds"] as $fld) {
             $this->v["psAvg"]->{ $fld } = 0;
@@ -465,10 +495,13 @@ class CannabisScoreSearcher extends Searcher
                 }
             }
             foreach ($this->v["avgFlds"] as $fld) {
-                $this->v["psAvg"]->{ $fld } = $this->v["psAvg"]->{ $fld }/sizeof($this->v["allscores"]);
+                $this->v["psAvg"]->{ $fld } 
+                    = $this->v["psAvg"]->{ $fld }/sizeof($this->v["allscores"]);
             }
-            $this->v["psAvg"]->PsEfficFacility = $this->v["psAvg"]->PsKWH/$this->v["psAvg"]->PsTotalSize;
-            $this->v["psAvg"]->PsEfficProduction = $this->v["psAvg"]->PsGrams/$this->v["psAvg"]->PsKWH;
+            //$this->v["psAvg"]->PsEfficFacility 
+            //    = $this->v["psAvg"]->PsKWH/$this->v["psAvg"]->PsTotalSize;
+            //$this->v["psAvg"]->PsEfficProduction 
+            //    = $this->v["psAvg"]->PsGrams/$this->v["psAvg"]->PsKWH;
         }
         return $this->v["psAvg"];
     }

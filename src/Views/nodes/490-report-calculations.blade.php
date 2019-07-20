@@ -323,9 +323,6 @@
 
 <script type="text/javascript">
     
-setTimeout("document.getElementById('col944').className = 'col-xl-4 col-lg-6 col-md-8'", 100);
-setTimeout("document.getElementById('col943').className = 'col-xl-8 col-lg-6 col-md-4'", 100);
-
 var spn = '<i class="fa-li fa fa-spinner fa-spin mL20 mT15"></i>';
 var guageList = new Array();
 guageList[guageList.length] = new Array('Overall',    2800, 0, '', '', '');

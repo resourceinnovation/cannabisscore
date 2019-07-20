@@ -29,6 +29,8 @@ use App\Models\RIICompetitors;
 use App\Models\RIIPSLicenses;
 use CannabisScore\Controllers\ScoreReportFound;
 use CannabisScore\Controllers\ScoreReportAvgs;
+use CannabisScore\Controllers\ScoreReportHvac;
+use CannabisScore\Controllers\ScoreReportLighting;
 use CannabisScore\Controllers\ScoreReportLightingManu;
 use CannabisScore\Controllers\ScoreReports;
 use CannabisScore\Controllers\ScoreImports;
@@ -144,7 +146,6 @@ class CannabisScore extends ScoreImports
             $ret .= $report->getPowerScoreFinalReport();
         } elseif ($nID == 853) {
             $this->initSearcher(1);
-            //$this->searcher->v["onlyComplete"] = true;
             $this->searcher->loadAllScoresPublic();
             $report = new ScoreReportFound;
             $ret .= $report->getFoundReport($nID, $this->searcher->v["allscores"]);
@@ -157,6 +158,12 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 976) {
             $report = new ScoreReports;
             $ret .= $report->printBasicStats($nID);
+        } elseif ($nID == 981) {
+            $report = new ScoreReportHvac;
+            $ret .= $report->getHvacReport($nID);
+        } elseif ($nID == 983) {
+            $report = new ScoreReportLighting;
+            $ret .= $report->getLightingReport($nID);
 
             
         // Admin Tools
@@ -407,7 +414,7 @@ class CannabisScore extends ScoreImports
                 return view('vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', [
                     "msg"  => '<i class="slGrey">Recalculating Sub-Scores...',
                     "psid" => $this->v["ajax-psid"]
-                    ])->render();
+                ])->render();
             }
             return '<b>Error 420: PowerScore Not Found</b>';
         }
@@ -700,6 +707,7 @@ class CannabisScore extends ScoreImports
         } elseif (in_array($condition, [
                 '#IndoorFlower5Ksf', 
                 '#IndoorFlower10Ksf', 
+                '#IndoorFlower30Ksf', 
                 '#IndoorFlower50Ksf', 
                 '#IndoorFlowerOver50Ksf'
                 ])) {
@@ -709,10 +717,11 @@ class CannabisScore extends ScoreImports
                 return 0;
             }
             switch ($condition) {
-                case '#IndoorFlower5Ksf':      return ($area->PsAreaSize < 5000); break;
-                case '#IndoorFlower10Ksf':     return ($area->PsAreaSize <= 5000 && $area->PsAreaSize < 1000); break;
-                case '#IndoorFlower50Ksf':     return ($area->PsAreaSize <= 10000 && $area->PsAreaSize < 50000); break;
-                case '#IndoorFlowerOver50Ksf': return ($area->PsAreaSize >= 50000); break;
+                case '#IndoorFlower5Ksf':      return ($area->PsAreaSize < 5000);
+                case '#IndoorFlower10Ksf':     return ($area->PsAreaSize <= 5000 && $area->PsAreaSize < 10000);
+                case '#IndoorFlower30Ksf':     return ($area->PsAreaSize <= 10000 && $area->PsAreaSize < 30000);
+                case '#IndoorFlower50Ksf':     return ($area->PsAreaSize <= 30000 && $area->PsAreaSize < 50000);
+                case '#IndoorFlowerOver50Ksf': return ($area->PsAreaSize >= 50000);
             }
             return 0;
             

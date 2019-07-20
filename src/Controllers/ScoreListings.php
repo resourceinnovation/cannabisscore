@@ -59,16 +59,17 @@ class ScoreListings
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $ps) {
                 $this->searcher->v["allmores"][$ps->PsID] = [ "areaIDs" => [] ];
-                $this->searcher->v["allmores"][$ps->PsID]["areas"] = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->get();
+                $this->searcher->v["allmores"][$ps->PsID]["areas"] 
+                    = RIIPSAreas::where('PsAreaPSID', $ps->PsID)->get();
                 if ($this->searcher->v["allmores"][$ps->PsID]["areas"]->isNotEmpty()) {
                     foreach ($this->searcher->v["allmores"][$ps->PsID]["areas"] as $area) {
                         $this->searcher->v["allmores"][$ps->PsID]["areaIDs"][] = $area->PsAreaID;
                     }
                 }
-                $this->searcher->v["allmores"][$ps->PsID]["lights"] = RIIPSLightTypes::whereIn('PsLgTypAreaID', 
-                    $this->searcher->v["allmores"][$ps->PsID]["areaIDs"])
-                    ->get();
+                $this->searcher->v["allmores"][$ps->PsID]["lights"] 
+                    = RIIPSLightTypes::whereIn('PsLgTypAreaID', 
+                        $this->searcher->v["allmores"][$ps->PsID]["areaIDs"])
+                        ->get();
             }
             if ($GLOBALS["SL"]->REQ->has('lighting') 
                 && $this->searcher->v["allmores"][$ps->PsID]["lights"]->isNotEmpty()) {
@@ -105,15 +106,18 @@ class ScoreListings
         if ($GLOBALS["SL"]->REQ->has('excel')) {
             $this->v["showFarmNames"] = $GLOBALS["SL"]->REQ->has('farmNames');
             if ($GLOBALS["SL"]->REQ->has('lighting')) {
-                $innerTable = view('vendor.cannabisscore.nodes.170-all-powerscores-lighting', $this->searcher->v)->render();
+                $innerTable = view('vendor.cannabisscore.nodes.170-all-powerscores-lighting', 
+                    $this->searcher->v)->render();
             } else {
-                $innerTable = view('vendor.cannabisscore.nodes.170-all-powerscores-excel', $this->searcher->v)->render();
+                $innerTable = view('vendor.cannabisscore.nodes.170-all-powerscores-excel', 
+                    $this->searcher->v)->render();
             }
             $exportFile = 'Compare All';
             if ($this->searcher->v["fltFarm"] == 0) {
                 $exportFile .= ' Farms';
             } else {
-                $exportFile .= ' ' . $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $this->searcher->v["fltFarm"]);
+                $exportFile .= ' ' . $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
+                    $this->searcher->v["fltFarm"]);
             }
             if ($this->searcher->v["fltClimate"] != '') {
                 $exportFile .= ' Climate Zone ' . $this->searcher->v["fltClimate"];
@@ -268,7 +272,7 @@ class ScoreListings
                 "name" => ((isset($ps->PsName)) ? trim($ps->PsName) : ''),
                 "ps"   => $ps,
                 "srch" => []
-                ];
+            ];
         }
         return true;
     }

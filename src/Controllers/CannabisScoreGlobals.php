@@ -179,8 +179,10 @@ class CannabisScoreGlobals
             return [0, 5000];
         } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf')) {
             return [5000, 10000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf')) {
-            return [10000, 50000];
+        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-30,000 sf')) {
+            return [10000, 30000];
+        } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '30,000-50,000 sf')) {
+            return [30000, 50000];
         } elseif ($defID == $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf')) {
             return [50000, 1000000000];
         }
@@ -194,8 +196,10 @@ class CannabisScoreGlobals
             return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '<5,000 sf');
         } elseif ($size >= 5000 && $size < 10000) {
             return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '5,000-10,000 sf');
-        } elseif ($size >= 10000 && $size < 50000) {
-            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-50,000 sf');
+        } elseif ($size >= 10000 && $size < 30000) {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '10,000-30,000 sf');
+        } elseif ($size >= 30000 && $size < 50000) {
+            return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '30,000-50,000 sf');
         } else {
             return $GLOBALS["SL"]->def->getID('Indoor Size Groups', '50,000+ sf');
         }

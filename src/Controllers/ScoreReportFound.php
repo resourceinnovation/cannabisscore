@@ -28,16 +28,7 @@ class ScoreReportFound extends ScoreReportStats
             ['statScorSize145', 'size'],
             ['statScorSize143', 'size'],
             ['statScorAuto',    'auto'],
-            ['statScorVert',    'vert'],
-            ['statScorHvcF144', 'hvac'],
-            ['statScorHvcF145', 'hvac'],
-            ['statScorHvcF143', 'hvac'],
-            ['statScorHvcV144', 'hvac'],
-            ['statScorHvcV145', 'hvac'],
-            ['statScorHvcV143', 'hvac'],
-            ['statScorHvcC144', 'hvac'],
-            ['statScorHvcC145', 'hvac'],
-            ['statScorHvcC143', 'hvac']
+            ['statScorVert',    'vert']
         ];
         foreach ($this->statScoreSets as $set) {
             $this->v["scoreSets"][$set[0]] = new ScoreStats([$set[1]]);
@@ -89,16 +80,6 @@ class ScoreReportFound extends ScoreReportStats
                     foreach ($areas as $area) {
                         $areaType = $this->motherToClone($area->PsAreaType);
                         $this->v["statEnv"]->addDataEnvs($ps, $areaType, $area->PsAreaID);
-                        if ($this->v["areaTypes"]["Flower"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcF" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                        } else if ($this->v["areaTypes"]["Veg"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcV" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                        } else if ($this->v["areaTypes"]["Clone"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcC" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                        }
                     }
                     foreach ($this->statScoreSets as $set) {
                         if (in_array($set[0], ['statScorAuto', 'statScorVert'])) {
@@ -148,9 +129,6 @@ class ScoreReportFound extends ScoreReportStats
         foreach ($this->statScoreSets as $set) {
             $this->v["scoreSets"][$set[0]]->calcStats();
         }
-        //$this->v["scoreSets"]["statScorHvcF"]->addCurrFilt('farm', 144);
-        //$this->v["scoreSets"]["statScorHvcV"]->addCurrFilt('farm', 144);
-        //$this->v["scoreSets"]["statScorHvcC"]->addCurrFilt('farm', 144);
         $this->v["statLeads"]->calcStats();
         $this->v["statEnv"]->calcStats();
         $this->v["statEnv"]->calcBlds();

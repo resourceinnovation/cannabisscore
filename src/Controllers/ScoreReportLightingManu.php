@@ -19,14 +19,14 @@ class ScoreReportLightingManu extends ScoreListings
 {
     public function printCompareLightManu($nID = -3)
     {
-        //  prod, fac, hvac, light, water, waste
+        //  prod, fac, hvac, light, water, waste // number of records analyzed
         $this->v["dataLegend"] = [
-            ['Facility Efficiency',   'kWh / sq ft'],
-            ['Production Efficiency', 'g / kWh'],
-            ['HVAC Efficiency',       'kWh / sq ft'],
-            ['Lighting Efficiency',   'W / sq ft'],
-            ['Water Efficiency',      'gallons / sq ft'],
-            ['Waste Efficiency',      'g / kWh']
+            ['Facility Efficiency',   'kWh / sq ft',     95, 0],
+            ['Production Efficiency', 'g / kWh',         94, 0],
+            ['HVAC Efficiency',       'kWh / sq ft',     68, 0],
+            ['Lighting Efficiency',   'W / sq ft',       68, 0],
+            ['Water Efficiency',      'gallons / sq ft', 24, 0],
+            ['Waste Efficiency',      'g / kWh',         25, 0]
         ];
         $this->v["competitionData"] = [
             ['Your Customers', [ // in order of legend array
@@ -61,7 +61,14 @@ class ScoreReportLightingManu extends ScoreListings
             ],
         ];
         $this->v["competitionGraphs"] = [];
-
+        foreach ($this->v["dataLegend"] as $i => $leg) {
+            foreach ($this->v["competitionData"] as $dat) {
+                if ($this->v["dataLegend"][$i][3] < $dat[1][0][$i]) {
+                    $this->v["dataLegend"][$i][3] = $dat[1][0][$i];
+                }
+            }
+            $this->v["dataLegend"][$i][3] = ceil($this->v["dataLegend"][$i][3]);
+        }
 
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.979-compare-lighting-manufacturers', $this->v)->render();

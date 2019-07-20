@@ -126,7 +126,7 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->v["statLgts"] = new SurvStatsGraph;
         $this->v["statLgts"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
         $this->v["statLgts"]->addFilt('area', 'Growth Stage', $this->v["sfAreasGrow"][0], $this->v["sfAreasGrow"][1]); // stat filter b
-        $this->v["statLgts"]->addFilt('lgty', 'Lights Types', $this->lgts[0], $this->lgts[1]); // stat filter c
+        $this->v["statLgts"]->addFilt('lgty', 'Lights Types', $this->v["sfLgts"][0], $this->v["sfLgts"][1]); // stat filter c
         $this->v["statLgts"]->addDataType('sqft', 'Square Feet', 'sqft'); // stat var a
         $this->v["statLgts"]->addDataType('sun', 'Sunlight');             // stat var b
         $this->v["statLgts"]->addDataType('dep', 'Light deprivation');    // stat var c

@@ -189,7 +189,7 @@ class ScoreAdminMisc extends ScoreCalcs
         if ($GLOBALS["SL"]->REQ->has('refresh')) {
             return $this->calcAllScoreRanks();
         } elseif ($GLOBALS["SL"]->REQ->has('recalc')) {
-            return $this->recalcAllSubScores();
+            return $this->recalc2AllSubScores();
         } else {
             return view('vendor.cannabisscore.nodes.740-trouble-shooting', $this->v)->render();
         }

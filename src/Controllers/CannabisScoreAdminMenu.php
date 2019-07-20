@@ -28,11 +28,13 @@ class CannabisScoreAdminMenu extends AdminMenu
                     $this->admMenuLnk('/dash/powerscore-outliers',              'Outliers')
                     ]),
                 $this->admMenuLnk('/dash/founders-circle-report', 'Score Analysis', '', 1, [
-                    $this->admMenuLnk('/dash/founders-circle-report',      'Founders Circle'),
-                    $this->admMenuLnk('/dash/compare-powerscore-averages', 'Score Averages'),
-                    $this->admMenuLnk('/dash/more-power-statistics',       'More Statistics'),
-                    $this->admMenuLnk('/dash/basic-power-stats',           'Basic Stats'),
-                    $this->admMenuLnk('/dash/powerscore-final-report',     'Written Report')
+                    $this->admMenuLnk('/dash/founders-circle-report',       'Founders Circle'),
+                    $this->admMenuLnk('/dash/compare-powerscore-averages',  'Score Averages'),
+                    $this->admMenuLnk('/dash/average-powerscores-lighting', 'Lighting'),
+                    $this->admMenuLnk('/dash/average-powerscores-hvac',     'HVAC'),
+                    $this->admMenuLnk('/dash/more-power-statistics',        'More Statistics'),
+                    $this->admMenuLnk('/dash/basic-power-stats',            'Basic Stats'),
+                    $this->admMenuLnk('/dash/powerscore-final-report',      'Written Report')
                     ]),
                 $this->admMenuLnk('/dash/process-uploads', 'Process Uploads', '', 1, []),
                 $this->admMenuLnk('/dash/manage-manufacturers', 'Manufacturers', '', 1, [

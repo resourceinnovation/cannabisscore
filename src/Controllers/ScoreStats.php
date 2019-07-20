@@ -21,7 +21,7 @@ class ScoreStats extends SurvStatsGraph
         ['<a href="/dash/compare-powerscores?fltFarm=144" target="_blank">Indoor',
             '<a href="/dash/compare-powerscores?fltFarm=145" target="_blank">Greenhouse/Mixed</a>',
             '<a href="/dash/compare-powerscores?fltFarm=143" target="_blank">Outdoor</a>']
-        ];
+    ];
     
     public $sfSizes = [
         [375, 376, 377, 378],
@@ -29,31 +29,31 @@ class ScoreStats extends SurvStatsGraph
             '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=376" target="_blank">5,000-10,000 sf</a>',
             '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=377" target="_blank">10,000-50,000 sf</a>',
             '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=378" target="_blank">50,000+ sf</a>']
-        ];
+    ];
     
     public $sfAuto = [
         [1, 2, 3],
         ['Automatic Controls', 'Manual Controls',
             '<a href="/dash/compare-powerscores?fltFarm=144&fltAuto=1&fltManu=1" target="_blank">Using Both</a>']
-        ];
+    ];
     
     public $sfVert = [
         [0, 1],
         ['Without Vertical Stacking',
             '<a href="/dash/compare-powerscores?fltFarm=144&fltVert=1" target="_blank">With Vertical Stacking</a>']
-        ];
+    ];
     
     public $sfHvacs = [
         [247, 248, 249, 250, 356, 357, 251, 360],
         ['System A', 'System B', 'System C', 'System D', 'System E', 'System F', 'Other System', 'None']
-        ];
+    ];
     
     public $sfCups = [
         [230, 231, 369],
         ['<a href="/dash/compare-powerscores?fltCup=230" target="_blank">Cultivation Classic</a>',
             '<a href="/dash/compare-powerscores?fltCup=231" target="_blank">Emerald Cup Regenerative Award</a>',
             '<a href="/dash/compare-powerscores?fltCup=369" target="_blank">NWPCC</a>']
-        ];
+    ];
     
     public $sfLgts = [];
     
@@ -86,13 +86,15 @@ class ScoreStats extends SurvStatsGraph
                     $this->addFilt('hvac', 'HVAC System Type', $this->sfHvacs[0], $this->sfHvacs[1]);
                 } elseif ($f == 'cups') {
                     $this->addFilt('cups', 'Data Sets', $this->sfCups[0], $this->sfCups[1]);
-                } elseif (in_array($f, ['flw-lgty', 'veg-lgty', 'cln-lgty'])) {
+                } elseif (in_array($f, ['flw-lgty', 'veg-lgty', 'cln-lgty', 'mth-lgty'])) {
                     if ($f == 'flw-lgty') {
                         $this->loadLgts(162);
                     } elseif ($f == 'veg-lgty') {
                         $this->loadLgts(161);
                     } elseif ($f == 'cln-lgty') {
                         $this->loadLgts(160);
+                    } elseif ($f == 'mth-lgty') {
+                        $this->loadLgts(237);
                     }
                     foreach ($this->sfLgts as $val => $name) {
                         $this->addFilt('lgt' . $val, $name, [0, 1], ['No', 'Yes']);
@@ -130,11 +132,14 @@ class ScoreStats extends SurvStatsGraph
                             $size = 375;
                         } elseif ($size >= 5000 && $size < 10000) {
                             $size = 376;
-                        } elseif ($size >= 10000 && $size < 50000) {
+                        } elseif ($size >= 10000 && $size < 30000) {
+                            $size = 431;
+                        } elseif ($size >= 30000 && $size < 50000) {
                             $size = 377;
                         } elseif ($size >= 50000) {
                             $size = 378;
                         }
+//echo '<br /><br /><br />applyScoreFilts(' . $ps->PsID . ', size: ' . $size . '<br />';
                         $this->addRecFilt('size', $size, $ps->PsID);
                     }
                 } elseif ($filt["abr"] == 'auto') {
@@ -203,7 +208,8 @@ class ScoreStats extends SurvStatsGraph
                     ->first();
                 if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
                     if (isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
-                        $this->addRecDat('lgt' . substr($type, 0, 1), $area->PsAreaLightingEffic, $ps->PsID);
+                        $this->addRecDat('lgt' . substr($type, 0, 1), 
+                            $area->PsAreaLightingEffic, $ps->PsID);
                     }
                 }
             }
@@ -215,6 +221,7 @@ class ScoreStats extends SurvStatsGraph
     {
         $fLet = $this->fAbr($fltAbbr);
         $tbl = new SurvStatsTbl('', [0, 3], [1]);
+if (!isset($this->filts[$fLet])) { echo 'fltAbbr: ' . $fltAbbr; exit; }
         foreach ($this->filts[$fLet]["val"] as $v => $val) {
             $lab = $this->filts[$fLet]["vlu"][$v];
             if (trim($lnk) != '') {

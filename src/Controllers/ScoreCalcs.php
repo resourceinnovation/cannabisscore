@@ -303,7 +303,7 @@ class ScoreCalcs extends ScoreUtils
         return $this->sessData->dataSets["PowerScore"][0];
     }
     
-    protected function recalcAllSubScores()
+    protected function recalc2AllSubScores()
     {
 ///////////////// One Time
         if ($GLOBALS["SL"]->REQ->has('recalc2')) {
@@ -323,17 +323,34 @@ class ScoreCalcs extends ScoreUtils
         }
 /////////////////
         
+        $hasMore = false;
+        $doneIDs = [];
+        if ($GLOBALS["SL"]->REQ->has('doneIDs') && trim($GLOBALS["SL"]->REQ->get('doneIDs')) != '') {
+            $doneIDs = $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('doneIDs'));
+        }
         $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, $this->dbID, 1);
         $GLOBALS["SL"]->x["pageView"] = $GLOBALS["SL"]->x["dataPerms"] = 'public';
         $this->loadCustLoop($GLOBALS["SL"]->REQ, 1);
         $all = RIIPowerScore::select('PsID')
-            ->where('PsStatus', 'NOT LIKE', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
+            ->where('PsStatus', 'NOT LIKE', 
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
+            ->whereNotIn('PsID', $doneIDs)
             ->get();
         if ($all->isNotEmpty()) {
-            foreach ($all as $ps) {
-                $this->custReport->loadAllSessData('PowerScore', $ps->PsID);
-                $this->custReport->calcCurrSubScores();
+            foreach ($all as $i => $ps) {
+                if ($i < 30) {
+                    $this->custReport->loadAllSessData('PowerScore', $ps->PsID);
+                    $this->custReport->calcCurrSubScores();
+                    $doneIDs[] = $ps->PsID;
+                } else {
+                    $hasMore = true;
+                }
             }
+        }
+        if ($hasMore) {
+            return '<br /><br />Recalculating... <script type="text/javascript"> '
+                . 'setTimeout("window.location=\'?recalc=1&doneIDs=' . implode(',', $doneIDs)
+                . '\'", 1000); </script><style> #nodeSubBtns { display: none; } </style>';
         }
         return '<br /><br />Recalculations Complete<br /><a href="/dash/powerscore-software-troubleshooting">Back</a>'
             . '<br /><style> #nodeSubBtns { display: none; } </style>';
