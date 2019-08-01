@@ -99,4 +99,14 @@ class ScoreReportStats
         return true;
     }
     
+    protected function initClimateFilts()
+    {
+        $GLOBALS["SL"]->loadStates();
+        $this->initSearcher();
+        $this->v["fltStateClim"] = ((isset($this->searcher->searchFilts["fltStateClim"]))
+            ? trim($this->searcher->searchFilts["fltStateClim"]) : '');
+        $this->prepStatFilts();
+        return true;
+    }
+    
 }

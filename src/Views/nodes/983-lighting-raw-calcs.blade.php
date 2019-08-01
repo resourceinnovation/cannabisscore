@@ -6,13 +6,13 @@
     <h1 class="slBlueDark">Lighting: Raw Calculations</h1>
     Only showing PowerScores with Lighting Sub-Scores greater than zero.
     Found {{ number_format($totCnt) }}
-    <a href="?rawCalcs=1&stateClim={{ $filtStateClim }}">Lighting Report</a>
-    <select name="stateClim" id="stateClimID" class="form-control mB20" style="width: 300px;"
-        onChange="window.location='?stateClim='+this.value;">
-        <option value="" @if (trim($filtStateClim) == '') SELECTED @endif
+    <a href="?rawCalcs=1&fltStateClim={{ $fltStateClim }}">Lighting Report</a>
+    <select name="fltStateClim" id="fltStateClimID" class="form-control mB20" style="width: 300px;"
+        onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+        <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
             >All Climates and States</option>
         <option disabled ></option>
-        {!! $GLOBALS["SL"]->states->stateClimateDrop($filtStateClim) !!}
+        {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
     </select>
 @if (sizeof($tbl) > 0)
     <table class="table table-striped">
@@ -60,9 +60,6 @@
 @endif
 </div>
 
-<script type="text/javascript">
-closeAdmMenuOnLoad = true;
-</script>
 <style>
 body { overflow-x: visible; }
 </style>

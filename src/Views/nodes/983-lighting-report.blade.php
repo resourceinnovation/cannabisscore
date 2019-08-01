@@ -13,16 +13,16 @@
             upon which each calculated average is based.<br />
             Only showing PowerScores with Lighting Sub-Scores greater than zero.
             Found {{ number_format($totCnt) }}
-            <a href="?rawCalcs=1&stateClim=">Raw Caclulations</a>
+            <a href="?rawCalcs=1&fltStateClim=">Raw Caclulations</a>
             </p>
         </div>
         <div class="col-4 taR">
-            <select name="stateClim" id="stateClimID" class="form-control"
-                onChange="window.location='?stateClim='+this.value;">
-                <option value="" @if (trim($filtStateClim) == '') SELECTED @endif
+            <select name="fltStateClim" id="fltStateClimID" class="form-control"
+                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
                     >All Climates and States</option>
                 <option disabled ></option>
-                {!! $GLOBALS["SL"]->states->stateClimateDrop($filtStateClim) !!}
+                {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
             </select>
         </div>
     </div>

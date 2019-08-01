@@ -5,8 +5,8 @@ function gatherFilts() {
     if (document.getElementById("filtFarmID")) {
         baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }
-    if (document.getElementById("fltStateID") && document.getElementById("fltStateID").value.trim() != '') {
-        baseUrl += "&fltState="+document.getElementById("fltStateID").value.trim();
+    if (document.getElementById("fltStateClimID") && document.getElementById("fltStateClimID").value.trim() != '') {
+        baseUrl += "&fltStateClim="+document.getElementById("fltStateClimID").value.trim();
     }
     if (document.getElementById("filtClimateID") && document.getElementById("filtClimateID").value.trim() != '') {
         baseUrl += "&fltClimate="+document.getElementById("filtClimateID").value.trim();

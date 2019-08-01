@@ -217,11 +217,14 @@ class ScoreStats extends SurvStatsGraph
         return true;
     }
     
-    public function printScoreAvgsTbl($fltAbbr = '', $lnk = '')
+    public function printScoreAvgsTblPrep($fltAbbr = '', $lnk = '')
     {
         $fLet = $this->fAbr($fltAbbr);
         $tbl = new SurvStatsTbl('', [0, 3], [1]);
-if (!isset($this->filts[$fLet])) { echo 'fltAbbr: ' . $fltAbbr; exit; }
+        if (!isset($this->filts[$fLet])) {
+            echo 'error in printScoreAvgsTbl(' . $fltAbbr;
+            exit;
+        }
         foreach ($this->filts[$fLet]["val"] as $v => $val) {
             $lab = $this->filts[$fLet]["vlu"][$v];
             if (trim($lnk) != '') {
@@ -239,8 +242,20 @@ if (!isset($this->filts[$fLet])) { echo 'fltAbbr: ' . $fltAbbr; exit; }
             }
         }
         $tbl->rows[0][1] = new SurvStatTh('Averages', $this->getDatCntForDatLet('1', 'a'));
+        return $tbl;
+    }
+    
+    public function printScoreAvgsTbl($fltAbbr = '', $lnk = '')
+    {
         return view('vendor.cannabisscore.inc-score-avgs-report-table', [
-            "tbl" => $tbl
+            "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk)
+        ])->render();
+    }
+    
+    public function printScoreAvgsExcel($fltAbbr = '', $lnk = '')
+    {
+        return view('vendor.cannabisscore.inc-score-avgs-report-excel', [
+            "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk)
         ])->render();
     }
     

@@ -23,11 +23,7 @@ class ScoreReportLighting extends ScoreReportStats
     
     public function getLightingReport($nID)
     {
-        $GLOBALS["SL"]->loadStates();
-        $this->initSearcher();
-        $this->v["filtStateClim"] = ((isset($this->searcher->searchFilts["stateClim"]))
-            ? trim($this->searcher->searchFilts["stateClim"]) : '');
-        $this->prepStatFilts();
+        $this->initClimateFilts();
 
         if ($GLOBALS["SL"]->REQ->has('rawCalcs')) {
             return $this->printLightingRawCalcs($nID);

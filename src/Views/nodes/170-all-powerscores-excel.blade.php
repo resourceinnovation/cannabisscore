@@ -2,7 +2,6 @@
 <tr>
 <th>Score ID#</th>
 @if (isset($fltCmpl) && $fltCmpl != 243) <th>Status</th> @endif
-<th>Score ID#</th>
 @if (isset($showFarmNames) && $showFarmNames) <th>Farm Name</th> @endif
 <th>Overall</th>
 <th>Facility Score (kWh/SqFt)</th>
@@ -36,6 +35,7 @@
 <th>Email</th>
 <th>Url</th>
 </tr>
+
 <tr>
     <th>Averages</th>
     @if (isset($fltCmpl) && $fltCmpl != 243) <th> </th> @endif
@@ -59,6 +59,7 @@
     @endforeach
     <th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th>
 </tr>
+
 @forelse ($allscores as $i => $ps)
     <tr>
     <td>#{{ $ps->PsID }}</td>

@@ -526,9 +526,9 @@ class ScoreAdminMisc extends ScoreCalcs
     {
         $this->v["isDash"] = true;
         $grapher = new SurvTrends('' . rand(1000000, 10000000) . '');
-        $grapher->addDataLineType('complete', 'Complete', '', '#116D38', '#116D38');
-        $grapher->addDataLineType('archived', 'Archived', '', '#70A787', '#70A787');
-        $grapher->addDataLineType('incomplete', 'Incomplete', '', '#FDD471', '#FDD471');
+        $grapher->addDataLineType('complete', 'Complete', '', '#8DC63F', '#8DC63F');
+        $grapher->addDataLineType('archived', 'Archived', '', '#726659', '#726659');
+        $grapher->addDataLineType('incomplete', 'Incomplete', '', '#F07B3A', '#F07B3A');
         $recentAttempts = RIIPowerScore::whereNotNull('PsZipCode')
             ->where('PsZipCode', 'NOT LIKE', '')
             ->where('created_at', '>=', $grapher->getPastStartDate() . ' 00:00:00')
@@ -549,8 +549,8 @@ class ScoreAdminMisc extends ScoreCalcs
                 }
             }
         }
-        return '<h2 class="slBlueDark">Recent PowerScore Submission Attempts</h2>' . $grapher->printDailyGraph()
-            . '<style> #mainBody { background: #E7F0EB; } </style>';
+        return '<h5 class="slBlueDark">Recent PowerScore Submission Attempts</h5>'
+            . $grapher->printDailyGraph();
     }
     
     protected function printAdminPsComms()

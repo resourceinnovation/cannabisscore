@@ -8,19 +8,17 @@
             <option value="145" @if (isset($fltFarm) && $fltFarm == 145) SELECTED @endif 
                 >Greenhouse/Hybrid/Mixed Light</option>
         </select>
-@if ($nID != 946) 
+@if ($nID != 946)
     </div><div class="col-2">
-        <select name="fltClimate" id="filtClimateID" class="form-control ntrStp slTab mT5" 
+        <select name="fltStateClim" id="fltStateClimID" class="form-control ntrStp slTab mT5"
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
-            {!! $GLOBALS["SL"]->states->climateZoneDrop($fltClimate) !!}
+            <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
+                >All Climates and States</option>
+            <option disabled ></option>
+            {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
         </select>
 @endif
-    </div><div class="col-2">
-        <select name="fltState" id="fltStateID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" 
-            autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
-            {!! $GLOBALS["SL"]->states->stateDrop($fltState, true) !!}
-        </select>
-    </div><div class="col-2">
+    </div><div class="col-3">
         <select name="fltLght" id="fltLghtID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltLght') 
@@ -72,7 +70,7 @@
                 >{{ $type }} - LED</option>
         @endforeach
         </select>
-    </div><div class="col-2">
+    </div><div class="col-3">
         <select name="fltHvac" id="fltHvacID" class="form-control @if ($nID == 946) form-control-sm @endif ntrStp slTab mT5" autocomplete="off" 
             {!! $GLOBALS["SL"]->tabInd() !!} >
             <option value="" @if (!$GLOBALS["SL"]->REQ->has('fltHvac') 
@@ -138,7 +136,7 @@
         <div class="mT10"><a id="btnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>
 @else
-    </div><div class="col-2"> 
+    </div><div class="col-2">
         <a class="btn btn-sm btn-primary updateScoreFilts mT5" href="javascript:;">Apply Filters</a>
 @endif
     </div>

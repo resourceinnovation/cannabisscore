@@ -22,11 +22,7 @@ class ScoreReportHvac extends ScoreReportStats
     
     public function getHvacReport($nID)
     {
-        $GLOBALS["SL"]->loadStates();
-        $this->initSearcher();
-        $this->v["filtStateClim"] = ((isset($this->searcher->searchFilts["stateClim"]))
-            ? trim($this->searcher->searchFilts["stateClim"]) : '');
-        $this->prepStatFilts();
+        $this->initClimateFilts();
 
         $this->statScoreSets = [
             ['statScorHvcF144', 'hvac'],
@@ -120,6 +116,15 @@ class ScoreReportHvac extends ScoreReportStats
         //$this->v["scoreSets"]["statScorHvcF"]->addCurrFilt('farm', 144);
         //$this->v["scoreSets"]["statScorHvcV"]->addCurrFilt('farm', 144);
         //$this->v["scoreSets"]["statScorHvcC"]->addCurrFilt('farm', 144);
+
+        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view('vendor.cannabisscore.nodes.981-hvac-report-excel', $this->v)->render();
+            $filename = 'PowerScore_Averages-HVAC' . ((trim($this->v["fltStateClim"]) != '') 
+                ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')
+                . '-' . date("ymd") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
+            exit;
+        }
 
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.981-hvac-report', $this->v)->render();

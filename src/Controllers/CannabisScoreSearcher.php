@@ -56,14 +56,21 @@ class CannabisScoreSearcher extends Searcher
         if ($treeID <= 0) {
             $treeID = $GLOBALS["SL"]->treeID;
         }
-        $this->v["eff"] = (($GLOBALS["SL"]->REQ->has('eff')) ? trim($GLOBALS["SL"]->REQ->get('eff')) : 'Overall');
-        $this->v["psid"] = (($GLOBALS["SL"]->REQ->has('ps')) ? intVal($GLOBALS["SL"]->REQ->get('ps')) : 0);
+        $this->v["eff"] = (($GLOBALS["SL"]->REQ->has('eff')) 
+            ? trim($GLOBALS["SL"]->REQ->get('eff')) : 'Overall');
+        $this->v["psid"] = (($GLOBALS["SL"]->REQ->has('ps')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('ps')) : 0);
         $this->v["powerscore"] = RIIPowerScore::find($this->v["psid"]);
-        $this->v["fltFarm"] = (($GLOBALS["SL"]->REQ->has('fltFarm')) ? intVal($GLOBALS["SL"]->REQ->get('fltFarm')) : 0);
-        $this->v["fltFut"] = (($GLOBALS["SL"]->REQ->has('fltFut')) ? intVal($GLOBALS["SL"]->REQ->get('fltFut')) : 0);
-        $this->v["fltState"] = (($GLOBALS["SL"]->REQ->has('fltState')) ? trim($GLOBALS["SL"]->REQ->get('fltState')):'');
+        $this->v["fltFarm"] = (($GLOBALS["SL"]->REQ->has('fltFarm')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltFarm')) : 0);
+        $this->v["fltFut"] = (($GLOBALS["SL"]->REQ->has('fltFut')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltFut')) : 0);
+        $this->v["fltState"] = (($GLOBALS["SL"]->REQ->has('fltState')) 
+            ? trim($GLOBALS["SL"]->REQ->get('fltState')) : '');
         $this->v["fltClimate"] = (($GLOBALS["SL"]->REQ->has('fltClimate')) 
             ? trim($GLOBALS["SL"]->REQ->get('fltClimate')) : '');
+        $this->v["fltStateClim"] = (($GLOBALS["SL"]->REQ->has('fltStateClim')) 
+            ? trim($GLOBALS["SL"]->REQ->get('fltStateClim')) : '');
         $this->v["fltLgtArt"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
             ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtArt')) : [ 0, 0 ]);
         $this->v["fltLgtDep"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
@@ -74,17 +81,26 @@ class CannabisScoreSearcher extends Searcher
             ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLght')) : [ 0, 0 ]);
         $this->v["fltHvac"] = (($GLOBALS["SL"]->REQ->has('fltHvac')) 
             ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltHvac')) : [ 0, 0 ]);
-        $this->v["fltSize"] = (($GLOBALS["SL"]->REQ->has('fltSize')) ? intVal($GLOBALS["SL"]->REQ->get('fltSize')) : 0);
-        $this->v["fltPerp"] = (($GLOBALS["SL"]->REQ->has('fltPerp')) ? intVal($GLOBALS["SL"]->REQ->get('fltPerp')) : 0);
-        $this->v["fltPump"] = (($GLOBALS["SL"]->REQ->has('fltPump')) ? intVal($GLOBALS["SL"]->REQ->get('fltPump')) : 0);
-        $this->v["fltWtrh"] = (($GLOBALS["SL"]->REQ->has('fltWtrh')) ? intVal($GLOBALS["SL"]->REQ->get('fltWtrh')) : 0);
-        $this->v["fltManu"] = (($GLOBALS["SL"]->REQ->has('fltManu')) ? intVal($GLOBALS["SL"]->REQ->get('fltManu')) : 0);
-        $this->v["fltAuto"] = (($GLOBALS["SL"]->REQ->has('fltAuto')) ? intVal($GLOBALS["SL"]->REQ->get('fltAuto')) : 0);
-        $this->v["fltVert"] = (($GLOBALS["SL"]->REQ->has('fltVert')) ? intVal($GLOBALS["SL"]->REQ->get('fltVert')) : 0);
+        $this->v["fltSize"] = (($GLOBALS["SL"]->REQ->has('fltSize')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltSize')) : 0);
+        $this->v["fltPerp"] = (($GLOBALS["SL"]->REQ->has('fltPerp')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltPerp')) : 0);
+        $this->v["fltPump"] = (($GLOBALS["SL"]->REQ->has('fltPump')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltPump')) : 0);
+        $this->v["fltWtrh"] = (($GLOBALS["SL"]->REQ->has('fltWtrh')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltWtrh')) : 0);
+        $this->v["fltManu"] = (($GLOBALS["SL"]->REQ->has('fltManu')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltManu')) : 0);
+        $this->v["fltAuto"] = (($GLOBALS["SL"]->REQ->has('fltAuto')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltAuto')) : 0);
+        $this->v["fltVert"] = (($GLOBALS["SL"]->REQ->has('fltVert')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltVert')) : 0);
         $this->v["fltRenew"] = (($GLOBALS["SL"]->REQ->has('fltRenew')) 
             ? $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('fltRenew')) : []);
-        $this->v["fltCmpl"] = (($GLOBALS["SL"]->REQ->has('fltCmpl')) ? intVal($GLOBALS["SL"]->REQ->get('fltCmpl')):243);
-        $this->v["fltCup"] = (($GLOBALS["SL"]->REQ->has('fltCup')) ? intVal($GLOBALS["SL"]->REQ->get('fltCup')) : 0);
+        $this->v["fltCmpl"] = (($GLOBALS["SL"]->REQ->has('fltCmpl')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltCmpl')):243);
+        $this->v["fltCup"] = (($GLOBALS["SL"]->REQ->has('fltCup')) 
+            ? intVal($GLOBALS["SL"]->REQ->get('fltCup')) : 0);
         $this->v["prtnOwn"] = 0;
         if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"]
             && !$GLOBALS["SL"]->REQ->has('all')) {
@@ -120,6 +136,9 @@ class CannabisScoreSearcher extends Searcher
         }
         if ($this->v["fltClimate"] != '') {
             $this->v["urlFlts"] .= '&fltClimate=' . $this->v["fltClimate"];
+        }
+        if ($this->v["fltStateClim"] != '') {
+            $this->v["urlFlts"] .= '&fltStateClim=' . $this->v["fltStateClim"];
         }
         if ($this->v["fltLght"][1] > 0) {
             $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltLght"][0] > 0) 
@@ -303,12 +322,12 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         $state = '';
-        if (isset($this->searchFilts["stateClim"]) && trim($this->searchFilts["stateClim"]) != '') {
-            $zones = $GLOBALS["SL"]->states->getAshraeGroupZones($this->searchFilts["stateClim"]);
+        if (isset($this->searchFilts["fltStateClim"]) && trim($this->searchFilts["fltStateClim"]) != '') {
+            $zones = $GLOBALS["SL"]->states->getAshraeGroupZones($this->searchFilts["fltStateClim"]);
             if (sizeof($zones) > 0) {
                 $eval .= "->whereIn('PsAshrae', ['" . implode("', '", $zones) . "'])";
             } else { // is state
-                $state = trim($this->searchFilts["stateClim"]);
+                $state = trim($this->searchFilts["fltStateClim"]);
             }
         } elseif (isset($this->searchFilts["state"]) && trim($this->searchFilts["state"]) != '') {
             $state = $this->searchFilts["state"];
@@ -400,7 +419,7 @@ class CannabisScoreSearcher extends Searcher
     {
         $this->v["futureFlts"] = [];
         $this->v["futureFlts"][] = '&fltFarm=' . $dataSets["PowerScore"][0]->PsCharacterize;
-        $this->v["futureFlts"][] = '&fltState=' . $dataSets["PowerScore"][0]->PsState;
+        //$this->v["futureFlts"][] = '&fltState=' . $dataSets["PowerScore"][0]->PsState;
         $this->v["futureFlts"][] = '&fltClimate=' . $dataSets["PowerScore"][0]->PsAshrae;
         $size = $this->getFlowerSizeDefID($dataSets);
         if ($size > 0) {

@@ -25,24 +25,33 @@ class ScoreReportAvgs extends ScoreReportStats
 {
     public function getAllPowerScoreAvgsPublic()
     {
+        $this->initClimateFilts();
         $this->calcAllPowerScoreAvgs();
         $this->v["psTechs"] = $GLOBALS["CUST"]->psTechs();
-        if ($GLOBALS["SL"]->REQ->has('excel')) {
-            $innerTable = view('vendor.cannabisscore.nodes.170-avg-powerscores-innertable', $this->v)->render();
-            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, 'PowerScore_Averages-' . date("Y-m-d") . '.xls');
+        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view('vendor.cannabisscore.nodes.773-powerscore-avgs-excel', $this->v)->render();
+            $filename = 'PowerScore_Averages' . ((trim($this->v["fltStateClim"]) != '') 
+                ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')
+                . '-' . date("ymd") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
+            exit;
         }
         return view('vendor.cannabisscore.nodes.773-powerscore-avgs', $this->v)->render();
     }
     
     public function getMorePowerStats()
     {
-        $this->initSearcher();
-        $this->prepStatFilts();
+        $this->initClimateFilts();
         $this->calcMorePowerStats();
+        /*
         if ($GLOBALS["SL"]->REQ->has('excel')) {
             $innerTable = view('vendor.cannabisscore.nodes.170-avg-powerscores-innertable', $this->v)->render();
-            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, 'PowerScore_Averages-' . date("Y-m-d") . '.xls');
+            $GLOBALS["SL"]->exportExcelOldSchool(
+                $innerTable, 
+                'PowerScore_Averages-' . date("Y-m-d") . '.xls'
+            );
         }
+        */
         return view('vendor.cannabisscore.nodes.859-report-more-stats', $this->v)->render();
     }
     
@@ -57,14 +66,14 @@ class ScoreReportAvgs extends ScoreReportStats
     
     protected function calcAllPowerScoreAvgs()
     {
-        $this->initSearcher();
-        $this->prepStatFilts();
+        $this->initClimateFilts();
         if ($this->searcher->v["allscores"]->isEmpty()) {
             return false;
         }
         $psTags = [];
         foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-            $psTags[$ps->PsID] = $this->loadPsTags($ps, RIIPSAreas::where('PsAreaPSID', $ps->PsID)->get());
+            $psTags[$ps->PsID] 
+                = $this->loadPsTags($ps, RIIPSAreas::where('PsAreaPSID', $ps->PsID)->get());
         }
         $this->v["scoreSets"] = [
             ['farm',     'PowerScore Averages by Type of Farm'],
@@ -92,6 +101,7 @@ class ScoreReportAvgs extends ScoreReportStats
             } else {
                 $this->v["scoreSets"][$i][2] = $tmp->printScoreAvgsTbl2();
             }
+            $this->v["scoreSets"][$i][3] = $tmp;
             unset($tmp);
         }
         return true;

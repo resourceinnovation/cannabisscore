@@ -1,22 +1,40 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/859-report-more-stats.blade.php -->
 
-<!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
-    ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
-<div class="slCard nodeWrap">
-<h2 class="slBlueDark">More Live Statistics</h2>
-<p>
-&darr; <a href="#sqft" class="mL5 mR5">Sqaure Footage</a> - 
-<a href="#prod" class="mL5 mR5">Production Types</a> - 
-<a href="#techniques" class="mL5 mR5">Technique Adoption</a>
-<a href="#lighting" class="mL5 mR5">Lighting kWh</a> - 
-<a href="#lightAdopt" class="mL5 mR5">Lighting Adoption</a> - 
-<a href="#sqftFixture" class="mL5 mR5">Sqft/Fixture</a> - 
-<a href="#hvac" class="mL5 mR5">HVAC Adoption</a>
-</p>
+<div class="slCard greenline nodeWrap">
+    <?php /*
+    <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
+        @if (trim($fltStateClim) != '') href="?excel=1&fltStateClim={{ $fltStateClim }}"
+        @else href="?excel=1"
+        @endif
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+    */ ?>
+    <h1 class="slBlueDark">More Live Statistics</h1>
+    <div class="row">
+        <div class="col-8">
+            <p>
+            &darr; <a href="#sqft" class="mL5 mR5">Sqaure Footage</a> - 
+            <a href="#prod" class="mL5 mR5">Production Types</a> - 
+            <a href="#techniques" class="mL5 mR5">Technique Adoption</a>
+            <a href="#lighting" class="mL5 mR5">Lighting kWh</a> - 
+            <a href="#lightAdopt" class="mL5 mR5">Lighting Adoption</a> - 
+            <a href="#sqftFixture" class="mL5 mR5">Sqft/Fixture</a> - 
+            <a href="#hvac" class="mL5 mR5">HVAC Adoption</a>
+            </p>
+        </div>
+        <div class="col-4">
+            <select name="fltStateClim" id="fltStateClimID" class="form-control form-control-lg"
+                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
+                    >All Climates and States</option>
+                <option disabled ></option>
+                {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
+            </select>
+        </div>
+    </div>
 </div>
 
 <div class="nodeAnchor"><a name="sqft"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">1. Square Footage by Growth Stage</h3>
 <table border=0 class="table table-striped w100">
 {!! $statSqft->tblHeaderRow('area') !!}
@@ -32,7 +50,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="prod"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">2. Stats & Techniques by Production Types</h3>
 <table border=0 class="table table-striped w100">
 {!! $statMisc->tblHeaderRow('farm') !!}
@@ -58,7 +76,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="lighting"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h1 class="slBlueDark">3. Lighting Techniques By Growth Stage</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -66,7 +84,7 @@
 </table>
 </div>
 
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h1 class="slBlueDark">4. Lighting Kilowatt Hours (kWh)</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -87,14 +105,14 @@
 </div>
 
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <?php /* <h3 class="slBlueDark">5. Lighting Adoption: All Farms</h3>
 {!! $statLgts->pieTblPercHas('area', 'lgty') !!} */ ?>
 {!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', '5. Lighting Adoption: ') !!}
 </div>
 
 <div class="nodeAnchor"><a name="sqftFixture"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">6. Square Feet per Lighting Fixture</h3>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -109,7 +127,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="hvac"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">7. HVAC Adoption</h3>
 <ul>
 <li><b>System A</b> - Conventional Air Conditioning with Supplemental Portable Dehumidification Units 
@@ -128,7 +146,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="sources"></a></div>
-<div class="slCard nodeWrap">
+<div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">8. On-Site Energy Sources</h3>
 <div class="row">
     <div class="col-6">Indoor ({{ $enrgys["cmpl"][144][0] }}) {!! $enrgys["pie"][144] !!}</div>

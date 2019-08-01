@@ -153,7 +153,7 @@ class CannabisScore extends ScoreImports
             $ret .= $this->checkBadRecs();
         } elseif ($nID == 786) {
             $ret .= $this->adminSearchResults();
-        } elseif ($nID == 726) {
+        } elseif (in_array($nID, [726, 990])) {
             $ret .= $this->printDashSessGraph();
         } elseif ($nID == 976) {
             $report = new ScoreReports;
