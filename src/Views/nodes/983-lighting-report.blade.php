@@ -1,8 +1,10 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/983-lighting-report.blade.php -->
 
-<!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
-    ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
 <div class="slCard greenline nodeWrap">
+    <input type="hidden" name="toExcel" id="toExcelID" value="0" >
+    <!--- <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
+        href="javascript:;" onClick="return loadExcel();"
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
     <h1 class="slBlueDark">Lighting Report</h1>
     <div class="row">
         <div class="col-8">
@@ -10,20 +12,40 @@
             Many columns are clickable to load the report listing all 
             individual reports matching the filter (when possible).
             Small subscript counts are the number of powerscores 
-            upon which each calculated average is based.<br />
-            Only showing PowerScores with Lighting Sub-Scores greater than zero.
-            Found {{ number_format($totCnt) }}
-            <a href="?rawCalcs=1&fltStateClim=">Raw Caclulations</a>
+            upon which each calculated average is based.
+            This report only shows PowerScores with Lighting Sub-Scores greater than zero
+            (AKA use any artifical lighting).
+            Submissions can throw a lighting error for each stage which uses artificial lighting,
+            but does not have fixture and wattage counts for that stage.
+            <nobr><a href="javascript:;" onClick="return loadRawCalcs();">Raw Caclulations</a></nobr>
+            <input type="hidden" name="rawCalcs" id="rawCalcsID"
+                @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
+                @else value="0" @endif >
+            <br /><b>Found {{ number_format($totCnt) }}</b>
             </p>
         </div>
-        <div class="col-4 taR">
+        <div class="col-4">
             <select name="fltStateClim" id="fltStateClimID" class="form-control"
-                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+                onChange="return gatherFilts();" autocomplete="off">
                 <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
                     >All Climates and States</option>
                 <option disabled ></option>
                 {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
             </select>
+            <label class="disBlo mT10">
+                <input type="checkbox" autocomplete="off" class="mR5"
+                    name="fltNoNWPCC" id="fltNoNWPCCID" value="1" onClick="return gatherFilts();"
+                    @if ($GLOBALS["SL"]->REQ->has('fltNoNWPCC') 
+                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) CHECKED @endif
+                    > Exclude NWPCC Imports
+            </label>
+            <label class="disBlo mT10">
+                <input type="checkbox" autocomplete="off" class="mR5"
+                    name="fltNoLgtError" id="fltNoLgtErrorID" value="1" onClick="return gatherFilts();"
+                    @if ($GLOBALS["SL"]->REQ->has('fltNoLgtError') 
+                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) CHECKED @endif
+                    > Exclude Lighting Errors
+            </label>
         </div>
     </div>
 </div>
@@ -79,6 +101,48 @@
     !!}
     </div>
 @endforeach
+
+<script type="text/javascript">
+
+function loadExcel() {
+    if (document.getElementById("toExcelID")) {
+        document.getElementById("toExcelID").value = 1;
+        gatherFilts();
+    }
+    return false;
+}
+function loadRawCalcs() {
+    if (document.getElementById("rawCalcsID")) {
+        document.getElementById("rawCalcsID").value = 1;
+        gatherFilts();
+    }
+    return false;
+}
+function gatherFilts() {
+    var baseUrl = "?filt=1";
+    if (document.getElementById("toExcelID") && parseInt(document.getElementById("toExcelID").value) == 1) {
+        baseUrl = "?excel=1";
+    } else if (document.getElementById("rawCalcsID") && parseInt(document.getElementById("rawCalcsID").value) == 1) {
+        baseUrl = "?rawCalcs=1";
+    }
+    if (document.getElementById("fltStateClimID") && document.getElementById("fltStateClimID").value.trim() != '') {
+        baseUrl += "&fltStateClim="+document.getElementById("fltStateClimID").value.trim();
+    }
+    if (document.getElementById("fltNoNWPCCID") && document.getElementById("fltNoNWPCCID").checked) {
+        baseUrl += "&fltNoNWPCC=1";
+    }
+    if (document.getElementById("fltNoLgtErrorID") && document.getElementById("fltNoLgtErrorID").checked) {
+        baseUrl += "&fltNoLgtError=1";
+    }
+    window.location = baseUrl;
+    return false;
+}
+
+
+
+
+</script>
+
 
 <?php /*
 @foreach ($sfFarms[0] as $i => $farmDef)

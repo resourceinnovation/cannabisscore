@@ -59,6 +59,7 @@ class ScoreCalcs extends ScoreUtils
             $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting   = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficWater      = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste      = 0;
+            $this->sessData->dataSets["PowerScore"][0]->PsLightingError   = 0;
             $row = $this->sessData->dataSets["PowerScore"][0];
             if ($this->v["totFlwrSqFt"] > 0 && (!isset($row->PsTotalSize) || intVal($row->PsTotalSize) == 0)) {
                 $this->sessData->dataSets["PowerScore"][0]->PsTotalSize = $this->v["totFlwrSqFt"];
@@ -67,15 +68,18 @@ class ScoreCalcs extends ScoreUtils
             if ($row->PsTimeType == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
                 $row = $this->calcFutureYields();
             } else {
-                if (isset($row->PsKWH) && intVal($row->PsKWH) > 0 && isset($row->PsGrams) && intVal($row->PsGrams) > 0) {
+                if (isset($row->PsKWH) && intVal($row->PsKWH) > 0
+                    && isset($row->PsGrams) && intVal($row->PsGrams) > 0) {
                     $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = $row->PsGrams/$row->PsKWH;
                 }
                 if (isset($this->v["totFlwrSqFt"]) && intVal($this->v["totFlwrSqFt"]) > 0) {
                     if (isset($row->PsKWH) && intVal($row->PsKWH) > 0) {
-                        $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility = $row->PsKWH/$this->v["totFlwrSqFt"];
+                        $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility 
+                            = $row->PsKWH/$this->v["totFlwrSqFt"];
                     }
                     if (isset($row->PsGreenWasteLbs) && intVal($row->PsGreenWasteLbs) > 0) {
-                        $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste = $row->PsGreenWasteLbs/$this->v["totFlwrSqFt"];
+                        $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste 
+                            = $row->PsGreenWasteLbs/$this->v["totFlwrSqFt"];
                     }
                 }
             }
@@ -91,15 +95,20 @@ class ScoreCalcs extends ScoreUtils
                             $watts[$typ] = $wattsHvac[$typ] = $gal[$typ] = 0;
                             if (!isset($area->PsAreaLgtArtif) || intVal($area->PsAreaLgtArtif) == 0) {
                                 $watts[$typ] = 0.0000001;
-                            } elseif (isset($this->sessData->dataSets["PSLightTypes"]) 
-                                && sizeof($this->sessData->dataSets["PSLightTypes"]) > 0) {
-                                foreach ($this->sessData->dataSets["PSLightTypes"] as $lgt) {
-                                    if ($lgt->PsLgTypAreaID == $area->getKey() 
-                                        && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0 
-                                        && isset($lgt->PsLgTypWattage) && intVal($lgt->PsLgTypWattage) > 0) {
-                                        $watts[$typ] += ($lgt->PsLgTypCount*$lgt->PsLgTypWattage);
+                            } else {
+                                if (isset($this->sessData->dataSets["PSLightTypes"]) 
+                                    && sizeof($this->sessData->dataSets["PSLightTypes"]) > 0) {
+                                    foreach ($this->sessData->dataSets["PSLightTypes"] as $lgt) {
+                                        if ($lgt->PsLgTypAreaID == $area->getKey() 
+                                            && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0 
+                                            && isset($lgt->PsLgTypWattage) && intVal($lgt->PsLgTypWattage) > 0) {
+                                            $watts[$typ] += ($lgt->PsLgTypCount*$lgt->PsLgTypWattage);
 //echo $typ . '<sup>' . $area->getKey() . '</sup> => ' . $watts[$typ] . ' (' . $lgt->PsLgTypCount . ' * ' . $lgt->PsLgTypWattage . ')<sup>' . $lgt->getKey() . '</sup> / ' . $area->PsAreaSize . '<br />';
+                                        }
                                     }
+                                }
+                                if ($watts[$typ] <= 0 && $typ != 'Mother') { // give Mothers a pass for now
+                                    $this->sessData->dataSets["PowerScore"][0]->PsLightingError++;
                                 }
                             }
                             $this->sessData->dataSets["PSAreas"][$a]->PsAreaTotalLightWatts = $watts[$typ];
@@ -306,6 +315,7 @@ class ScoreCalcs extends ScoreUtils
     protected function recalc2AllSubScores()
     {
 ///////////////// One Time
+/*
         if ($GLOBALS["SL"]->REQ->has('recalc2')) {
             $chk = SLNodeSaves::where('NodeSaveTblFld', 'PSAreas:PsAreaSize')
                 ->orderBy('created_at', 'asc')
@@ -321,11 +331,13 @@ class ScoreCalcs extends ScoreUtils
             }
             exit;
         }
+*/
 /////////////////
         
         $hasMore = false;
         $doneIDs = [];
-        if ($GLOBALS["SL"]->REQ->has('doneIDs') && trim($GLOBALS["SL"]->REQ->get('doneIDs')) != '') {
+        if ($GLOBALS["SL"]->REQ->has('doneIDs') 
+            && trim($GLOBALS["SL"]->REQ->get('doneIDs')) != '') {
             $doneIDs = $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('doneIDs'));
         }
         $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, $this->dbID, 1);
@@ -364,7 +376,8 @@ class ScoreCalcs extends ScoreUtils
         $GLOBALS["CUST"]->chkScoreFiltCombs();
         $nextFlt = '';
         $freshDone = $cnt = -1;
-        $curr = (($GLOBALS["SL"]->REQ->has('currFlt')) ? $GLOBALS["SL"]->REQ->get('currFlt') : '');
+        $curr = (($GLOBALS["SL"]->REQ->has('currFlt')) 
+            ? $GLOBALS["SL"]->REQ->get('currFlt') : '');
         foreach ($GLOBALS["CUST"]->v["fltComb"] as $flt => $opts) {
             if ($curr == '') {
                 $curr = $flt;
@@ -385,14 +398,15 @@ class ScoreCalcs extends ScoreUtils
                 }
             }
         }
-        $msg = '<i class="slGrey">Recalculating ' . (1+$freshDone) . '/' . sizeof($GLOBALS["CUST"]->v["fltComb"]) . '...</i>';
+        $msg = '<i class="slGrey">Recalculating ' . (1+$freshDone) . '/'
+            . sizeof($GLOBALS["CUST"]->v["fltComb"]) . '...</i>';
         if ($redir == 'report-ajax') {
             if ($nextFlt != '') {
                 return view('vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', [
                     "msg"     => $msg,
                     "nextFlt" => $nextFlt,
                     "psid"    => $this->v["ajax-psid"]
-                    ])->render();
+                ])->render();
             }
             return $msg . '<script type="text/javascript"> setTimeout("window.location=\'/calculated/read-'
                 . $this->v["ajax-psid"] . '\'", 1000); </script>';

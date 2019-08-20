@@ -71,6 +71,10 @@ class CannabisScoreSearcher extends Searcher
             ? trim($GLOBALS["SL"]->REQ->get('fltClimate')) : '');
         $this->v["fltStateClim"] = (($GLOBALS["SL"]->REQ->has('fltStateClim')) 
             ? trim($GLOBALS["SL"]->REQ->get('fltStateClim')) : '');
+        $this->v["fltNoNWPCC"] = (($GLOBALS["SL"]->REQ->has('fltNoNWPCC')) 
+            ? trim($GLOBALS["SL"]->REQ->get('fltNoNWPCC')) : '');
+        $this->v["fltNoLgtError"] = (($GLOBALS["SL"]->REQ->has('fltNoLgtError')) 
+            ? trim($GLOBALS["SL"]->REQ->get('fltNoLgtError')) : '');
         $this->v["fltLgtArt"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
             ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtArt')) : [ 0, 0 ]);
         $this->v["fltLgtDep"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
@@ -139,6 +143,12 @@ class CannabisScoreSearcher extends Searcher
         }
         if ($this->v["fltStateClim"] != '') {
             $this->v["urlFlts"] .= '&fltStateClim=' . $this->v["fltStateClim"];
+        }
+        if ($this->v["fltNoNWPCC"] != '') {
+            $this->v["urlFlts"] .= '&fltNoNWPCC=' . $this->v["fltNoNWPCC"];
+        }
+        if ($this->v["fltNoLgtError"] != '') {
+            $this->v["urlFlts"] .= '&fltNoLgtError=' . $this->v["fltNoLgtError"];
         }
         if ($this->v["fltLght"][1] > 0) {
             $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltLght"][0] > 0) 
@@ -322,8 +332,10 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         $state = '';
-        if (isset($this->searchFilts["fltStateClim"]) && trim($this->searchFilts["fltStateClim"]) != '') {
-            $zones = $GLOBALS["SL"]->states->getAshraeGroupZones($this->searchFilts["fltStateClim"]);
+        if (isset($this->searchFilts["fltStateClim"]) 
+            && trim($this->searchFilts["fltStateClim"]) != '') {
+            $zones = $GLOBALS["SL"]->states->getAshraeGroupZones(
+                $this->searchFilts["fltStateClim"]);
             if (sizeof($zones) > 0) {
                 $eval .= "->whereIn('PsAshrae', ['" . implode("', '", $zones) . "'])";
             } else { // is state
@@ -374,9 +386,6 @@ class CannabisScoreSearcher extends Searcher
         if ($this->v["fltPerp"] > 0) {
             $eval .= "->where('PsHarvestBatch', 1)";
         }
-        if ($this->v["fltPerp"] > 0) {
-            $eval .= "->where('PsHarvestBatch', 1)";
-        }
         if ($this->v["fltPump"] > 0) {
             $eval .= "->where('PsHasWaterPump', 1)";
         }
@@ -399,6 +408,14 @@ class CannabisScoreSearcher extends Searcher
         if ($this->v["fltCup"] > 0) {
             $eval .= "->whereIn('PsID', [" . ((sizeof($psidCups) > 0) 
                 ? implode(', ', $psidCups) : 0) . "])";
+        }
+        if (isset($this->v["fltNoNWPCC"]) 
+            && trim($this->v["fltNoNWPCC"]) != '') {
+            $eval .= "->where('PsName', 'NOT LIKE', 'NWPCC%')";
+        }
+        if (isset($this->v["fltNoLgtError"]) 
+            && trim($this->v["fltNoLgtError"]) != '') {
+            $eval .= "->where('PsLightingError', 0)";
         }
         return $eval;
     }

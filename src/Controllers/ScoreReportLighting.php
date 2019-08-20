@@ -102,6 +102,12 @@ class ScoreReportLighting extends ScoreReportStats
             $this->v["scoreSets"][$set[0]]->calcStats();
         }
 
+        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view('vendor.cannabisscore.nodes.983-lighting-report-excel', $this->v)->render();
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $this->getExportFilename() . '.xls');
+            exit;
+        }
+
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view('vendor.cannabisscore.nodes.983-lighting-report', $this->v)->render();
     }
@@ -116,10 +122,16 @@ class ScoreReportLighting extends ScoreReportStats
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
                 $row = [
-                    '<a href="/calculated/u-' . $ps->PsID . '" target="_blank">#' . $ps->PsID . '</a>',
+                    '<a href="/calculated/u-' . $ps->PsID . '" target="_blank">#'
+                        . $ps->PsID . '</a>',
                     $ps->PsState,
-                    $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize),
-                    round($ps->PsEfficOverSimilar) . $GLOBALS["SL"]->numSupscript(round($ps->PsEfficOverSimilar)),
+                    str_replace('Greenhouse/Hybrid/Mixed Light', 'Greenhouse', 
+                        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
+                        $ps->PsCharacterize)),
+                    (($ps->PsLightingError > 0) ? '<span class="red">' . $ps->PsLightingError . '</span>'
+                            : '<span class="slGrey">-</span>'),
+                    round($ps->PsEfficOverSimilar) 
+                        . $GLOBALS["SL"]->numSupscript(round($ps->PsEfficOverSimilar)),
                     (($ps->PsEfficLighting > 0.00001) 
                         ? '<nobr>' . number_format($ps->PsEfficLighting)
                         . ' <span class="slGrey fPerc66">W/SqFt</span></nobr>' : $blank)
@@ -154,7 +166,8 @@ class ScoreReportLighting extends ScoreReportStats
                                         . number_format($lgt->PsLgTypWattage) 
                                         . '<span class="slGrey fPerc66">W</span> ' 
                                         . ((intVal($lgt->PsLgTypLight) > 0) 
-                                            ? $GLOBALS["SL"]->def->getVal('PowerScore Light Types', $lgt->PsLgTypLight) 
+                                            ? $GLOBALS["SL"]->def->getVal('PowerScore Light Types', 
+                                                $lgt->PsLgTypLight) 
                                             : '') . '</nobr>';
                                 }
                             }
@@ -197,7 +210,25 @@ class ScoreReportLighting extends ScoreReportStats
             }
         }
 
+        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view('vendor.cannabisscore.nodes.983-lighting-raw-calcs-excel', $this->v)->render();
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $this->getExportFilename('_Raw') . '.xls');
+            exit;
+        }
+
         return view('vendor.cannabisscore.nodes.983-lighting-raw-calcs', $this->v)->render();
+    }
+
+    protected function getExportFilename($extra = '')
+    {
+        return 'PowerScore_Averages-Lighting' . $extra
+            . ((trim($this->v["fltStateClim"]) != '') 
+                ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')
+            . ((isset($this->searcher->v["fltNoNWPCC"]) && trim($this->searcher->v["fltNoNWPCC"]) != '')
+                ? '-No_NWPCC' : '')
+            . ((isset($this->searcher->v["fltNoLgtError"]) && trim($this->searcher->v["fltNoLgtError"]) != '')
+                ? '-No_Obvious_Lighting_Errors' : '')
+            . '-' . date("ymd");
     }
 
 

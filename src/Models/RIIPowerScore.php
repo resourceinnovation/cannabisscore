@@ -69,6 +69,7 @@ class RIIPowerScore extends Model
 		'PsEfficWater', 
 		'PsEfficWaste', 
 		'PsComplianceWasteTrack', 
+		'PsLightingError',
     ];
     
     // END SurvLoop auto-generated portion of Model

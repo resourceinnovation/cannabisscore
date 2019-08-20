@@ -1,19 +1,48 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/983-lighting-report.blade.php -->
 
-<!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
-    ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
 <div class="slCard greenline nodeWrap">
+    <input type="hidden" name="toExcel" id="toExcelID" value="0" >
+    <!--- <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
+        href="javascript:;" onClick="return loadExcel();"
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
     <h1 class="slBlueDark">Lighting: Raw Calculations</h1>
-    Only showing PowerScores with Lighting Sub-Scores greater than zero.
-    Found {{ number_format($totCnt) }}
-    <a href="?rawCalcs=1&fltStateClim={{ $fltStateClim }}">Lighting Report</a>
-    <select name="fltStateClim" id="fltStateClimID" class="form-control mB20" style="width: 300px;"
-        onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
-        <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
-            >All Climates and States</option>
-        <option disabled ></option>
-        {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
-    </select>
+    <div class="row" style="max-width: 720px;">
+        <div class="col-8">
+            <p>
+            Only showing PowerScores with Lighting Sub-Scores greater than zero. 
+            Submissions can throw a lighting error for each stage which uses artificial lighting,
+            but does not have fixture and wattage counts for that stage.
+            <nobr><a href="javascript:;" onClick="return loadFullReport();">Lighting Report</a></nobr>
+            <input type="hidden" name="rawCalcs" id="rawCalcsID"
+                @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
+                @else value="0" @endif >
+            <br /><b>Found {{ number_format($totCnt) }}</b>
+            </p>
+        </div>
+        <div class="col-4">
+            <select name="fltStateClim" id="fltStateClimID" class="form-control" style="width: 300px;"
+                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
+                    >All Climates and States</option>
+                <option disabled ></option>
+                {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
+            </select>
+            <label class="disBlo mT10">
+                <input type="checkbox" autocomplete="off" class="mR5"
+                    name="fltNoNWPCC" id="fltNoNWPCCID" value="1" onClick="return gatherFilts();"
+                    @if ($GLOBALS["SL"]->REQ->has('fltNoNWPCC') 
+                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) CHECKED @endif
+                    > Exclude NWPCC Imports
+            </label>
+            <label class="disBlo mT10">
+                <input type="checkbox" autocomplete="off" class="mR5"
+                    name="fltNoLgtError" id="fltNoLgtErrorID" value="1" onClick="return gatherFilts();"
+                    @if ($GLOBALS["SL"]->REQ->has('fltNoLgtError') 
+                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) CHECKED @endif
+                    > Exclude Lighting Errors
+            </label>
+        </div>
+    </div>
 @if (sizeof($tbl) > 0)
     <table class="table table-striped">
     @foreach ($tbl as $r => $row)
@@ -23,6 +52,9 @@
                 <th>ID#</th>
                 <th>State</th>
                 <th>Type</th>
+            @if (!$GLOBALS["SL"]->REQ->has('fltNoLgtError'))
+                <th>Lighting Stage Errors</th>
+            @endif
                 <th class="brdLft">Overall Similar Percentile</th>
                 <th>Lighting Efficiency <nobr>Sub-Score</nobr></th>
                 <th class="brdLft">Flower Weighted</th>
@@ -49,9 +81,11 @@
             @endif
             <tr>
             @foreach ($row as $c => $col)
-                <?php $cls = ((in_array($c, [3, 5, 9, 13, 17, 22, 27, 32, 39])) ? 'class="brdLft"' : ''); ?>
-                @if ($c == 0) <th {!! $cls !!} >{!! $col !!}</th>
-                @else <td {!! $cls !!} >{!! $col !!}</td> @endif
+                @if ($c != 3 || !$GLOBALS["SL"]->REQ->has('fltNoLgtError'))
+                    <?php $cls = ((in_array($c, [4, 6, 10, 14, 18, 23, 28, 33, 40])) ? 'class="brdLft"' : ''); ?>
+                    @if ($c == 0) <th {!! $cls !!} >{!! $col !!}</th>
+                    @else <td {!! $cls !!} >{!! $col !!}</td> @endif
+                @endif
             @endforeach
             </tr>
         @endif
@@ -63,3 +97,41 @@
 <style>
 body { overflow-x: visible; }
 </style>
+
+<script type="text/javascript">
+
+function loadExcel() {
+    if (document.getElementById("toExcelID")) {
+        document.getElementById("toExcelID").value = 1;
+        gatherFilts();
+    }
+    return false;
+}
+function loadFullReport() {
+    if (document.getElementById("rawCalcsID")) {
+        document.getElementById("rawCalcsID").value = 0;
+        gatherFilts();
+    }
+    return false;
+}
+function gatherFilts() {
+    var baseUrl = "?filt=1";
+    if (document.getElementById("toExcelID") && parseInt(document.getElementById("toExcelID").value) == 1) {
+        baseUrl = "?excel=1";
+    } else if (document.getElementById("rawCalcsID") && parseInt(document.getElementById("rawCalcsID").value) == 1) {
+        baseUrl = "?rawCalcs=1";
+    }
+    if (document.getElementById("fltStateClimID") && document.getElementById("fltStateClimID").value.trim() != '') {
+        baseUrl += "&fltStateClim="+document.getElementById("fltStateClimID").value.trim();
+    }
+    if (document.getElementById("fltNoNWPCCID") && document.getElementById("fltNoNWPCCID").checked) {
+        baseUrl += "&fltNoNWPCC=1";
+    }
+    if (document.getElementById("fltNoLgtErrorID") && document.getElementById("fltNoLgtErrorID").checked) {
+        baseUrl += "&fltNoLgtError=1";
+    }
+    window.location = baseUrl;
+    return false;
+}
+
+</script>
