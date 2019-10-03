@@ -47,15 +47,21 @@ class ScoreReportHvac extends ScoreReportStats
                 foreach ($this->v["sfAreasGrow"][0] as $i => $areaDef) {
                     $this->v["hvacSqft"][$farmDef][$areaDef] = [ 0, 0, [] ];
                     foreach ($this->v["sfHvac"][0] as $i => $hvacDef) {
-                        $this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef] = [ 0, [] ];
+                        $this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef] = [
+                            0, 
+                            [] 
+                        ];
                     }
                 }
             }
         }
 
+        $this->v["totCnt"] = 0;
         $this->initSearcher(1);
-        $this->searcher->loadAllScoresPublic();
+        $this->searcher->loadAllScoresPublic("->where('PsEfficHvac', '>', 0.00001)"
+            . "->where('PsEfficHvacStatus', '=', " . $this->v["psComplete"] . ")");
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
+            $this->v["totCnt"] = $this->searcher->v["allscores"]->count();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
                 $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
                     ->where('PsAreaType', '>', 0)
@@ -73,15 +79,20 @@ class ScoreReportHvac extends ScoreReportStats
                             $this->v["scoreSets"]["statScorHvcC" . $ps->PsCharacterize]
                                 ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
                         }
-                        if ($ps->PsCharacterize != 143 && isset($area->PsAreaHvacType) && isset($area->PsAreaSize)
-                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][$area->PsAreaType])
-                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][$area->PsAreaType][2][$area->PsAreaHvacType])) {
-                            $this->v["hvacSqft"][$ps->PsCharacterize][$area->PsAreaType][2][$area->PsAreaHvacType][1][] 
+                        if ($ps->PsCharacterize != 143 && isset($area->PsAreaHvacType) 
+                            && isset($area->PsAreaSize)
+                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][
+                                $area->PsAreaType])
+                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][
+                                $area->PsAreaType][2][$area->PsAreaHvacType])) {
+                            $this->v["hvacSqft"][$ps->PsCharacterize][
+                                $area->PsAreaType][2][$area->PsAreaHvacType][1][] 
                                 = $area->PsAreaSize;
                         }
                     }
                     foreach ($this->statScoreSets as $set) {
-                        if (intVal(substr($set[0], strlen($set[0])-3)) == $ps->PsCharacterize) {
+                        if (intVal(substr($set[0], strlen($set[0])-3)) 
+                            == $ps->PsCharacterize) {
                             $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                             $this->v["scoreSets"][$set[0]]->resetRecFilt();
                         }
@@ -93,17 +104,22 @@ class ScoreReportHvac extends ScoreReportStats
                 if ($this->v["sfFarms"][1][$i] != 'Outdoor') {
                     foreach ($this->v["sfAreasGrow"][0] as $i => $areaDef) {
                         foreach ($this->v["sfHvac"][0] as $i => $hvacDef) {
-                            if (sizeof($this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef][1]) > 0) {
+                            if (sizeof($this->v["hvacSqft"][
+                                $farmDef][$areaDef][2][$hvacDef][1]) > 0) {
                                 $this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef][0] 
-                                    = $GLOBALS["SL"]->arrAvg($this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef][1]);
+                                    = $GLOBALS["SL"]->arrAvg($this->v["hvacSqft"][
+                                        $farmDef][$areaDef][2][$hvacDef][1]);
                                 $this->v["hvacSqft"][$farmDef][$areaDef][0]
-                                    += array_sum($this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef][1]);
+                                    += array_sum($this->v["hvacSqft"][
+                                        $farmDef][$areaDef][2][$hvacDef][1]);
                                 $this->v["hvacSqft"][$farmDef][$areaDef][1]
-                                    += count($this->v["hvacSqft"][$farmDef][$areaDef][2][$hvacDef][1]);
+                                    += count($this->v["hvacSqft"][
+                                        $farmDef][$areaDef][2][$hvacDef][1]);
                             }
                         }
                         if ($this->v["hvacSqft"][$farmDef][$areaDef][1] > 0) {
-                            $this->v["hvacSqft"][$farmDef][$areaDef][0] /= $this->v["hvacSqft"][$farmDef][$areaDef][1];
+                            $this->v["hvacSqft"][$farmDef][$areaDef][0] 
+                                /= $this->v["hvacSqft"][$farmDef][$areaDef][1];
                         }
                     }
                 }

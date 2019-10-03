@@ -17,7 +17,9 @@ function updateRanks() {
         @if ($eff != 'Overall')
             guageList[{{ $i }}][3] = '';
         @else
-            guageList[{{ $i }}][3] = {!! json_encode("We did not have enough information to calculate this farm's Overall PowerScore " . $withinFilters) !!};
+            guageList[{{ $i }}][3] = {!! json_encode(
+                "We did not have enough information to calculate this farm's Overall PowerScore "
+                . $withinFilters) !!};
         @endif
         @if (in_array($eff, ['Overall', 'Production', 'Lighting', 'Waste']))
             guageList[{{ $i }}][5] = 'f5f5f3';

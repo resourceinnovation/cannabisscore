@@ -42,7 +42,7 @@ class CannabisScore extends ScoreImports
         return view('vendor.cannabisscore.powerscore-report-preview', [
             "uID"      => $this->v["uID"],
             "sessData" => $this->sessData->dataSets
-            ])->render();
+        ])->render();
     }
     
     protected function customNodePrint($nID = -3, $tmpSubTier = [], $nIDtxt = '', $nSffx = '', $currVisib = 1)
@@ -58,29 +58,41 @@ class CannabisScore extends ScoreImports
                 . "else setTimeout(\"tryRadioCustom()\", 500); return !0 \n } \n"
                 . "setTimeout(\"tryRadioCustom()\", 100); \n";
         } elseif ($nID == 393) {
-            $GLOBALS["SL"]->pageAJAX .= view('vendor.cannabisscore.nodes.393-area-lighting-ajax', [
+            $GLOBALS["SL"]->pageAJAX .= view(
+                'vendor.cannabisscore.nodes.393-area-lighting-ajax', [
                 "areas" => $this->sessData->getLoopRowIDs('Growth Stages')
-                ])->render();
+            ])->render();
         } elseif (in_array($nID, [74, 396])) {
             $ret .= $this->printGramForm($nID, $nIDtxt);
         } elseif ($nID == 362) {
             $GLOBALS["SL"]->loadStates();
             $this->getStateUtils();
-            $ret .= view('vendor.cannabisscore.nodes.362-utilities-by-state', $this->v)->render();
+            $ret .= view(
+                'vendor.cannabisscore.nodes.362-utilities-by-state', 
+                $this->v
+            )->render();
         } elseif ($nID == 502) {
             $this->chkUtilityOffers();
-            $ret .= view('vendor.cannabisscore.nodes.502-utility-offers', $this->v)->render();
+            $ret .= view(
+                'vendor.cannabisscore.nodes.502-utility-offers', 
+                $this->v
+            )->render();
         } elseif (in_array($nID, [177, 457, 465, 471])) {
             return $this->printReportBlds($nID);
         } elseif (in_array($nID, [209, 432, 440, 448])) {
             return $this->printReportLgts($nID);
         } elseif ($nID == 536) {
             $this->prepFeedbackSkipBtn();
-            $GLOBALS["SL"]->pageJAVA .= view('vendor.cannabisscore.nodes.536-feedback-skip-button-java', $this->v)
-                ->render();
+            $GLOBALS["SL"]->pageJAVA .= view(
+                'vendor.cannabisscore.nodes.536-feedback-skip-button-java', 
+                $this->v
+            )->render();
         } elseif ($nID == 548) {
             $this->prepFeedbackSkipLnk();
-            $ret .= view('vendor.cannabisscore.nodes.548-powerscore-feedback-score-link', $this->v)->render();
+            $ret .= view(
+                'vendor.cannabisscore.nodes.548-powerscore-feedback-score-link', 
+                $this->v
+            )->render();
         } elseif ($nID == 148) { // this should be built-in
             $this->sessData->dataSets["PowerScore"][0]->PsStatus = $this->v["defCmplt"];
             $this->sessData->dataSets["PowerScore"][0]->save();
@@ -89,6 +101,11 @@ class CannabisScore extends ScoreImports
             
         } elseif ($nID == 490) {
             $ret .= $this->customPrint490($nID);
+        } elseif ($nID == 1008) {
+            $ret .= view(
+                'vendor.cannabisscore.nodes.1008-powerscore-calculations-mockup', 
+                $this->v
+            )->render();
         } elseif ($nID == 946) {
             $ret .= $this->printPsRankingFilters($nID);
         } elseif ($nID == 860) {
@@ -97,7 +114,10 @@ class CannabisScore extends ScoreImports
                 foreach ($this->sessData->dataSets["PSForCup"] as $i => $cup) {
                     if (isset($cup->PsCupCupID) && intVal($cup->PsCupCupID) > 0) {
                         $deetVal .= (($i > 0) ? ', ' : '') 
-                            . $GLOBALS["SL"]->def->getVal('PowerScore Competitions', $cup->PsCupCupID);
+                            . $GLOBALS["SL"]->def->getVal(
+                                'PowerScore Competitions', 
+                                $cup->PsCupCupID
+                            );
                     }
                 }
                 return ['Competition', $deetVal, $nID];
@@ -109,7 +129,10 @@ class CannabisScore extends ScoreImports
             }
         } elseif ($nID == 508) {
             $this->prepUtilityRefTitle();
-            $ret .= view('vendor.cannabisscore.nodes.508-utility-referral-title', $this->v)->render();
+            $ret .= view(
+                'vendor.cannabisscore.nodes.508-utility-referral-title', 
+                $this->v
+            )->render();
             
         // PowerScore Reporting
         } elseif ($nID == 744) {
@@ -126,6 +149,8 @@ class CannabisScore extends ScoreImports
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getMultiSiteRankings($nID);
         } elseif ($nID == 799) { // Partner Multi-Site Listings
+            $report = new ScoreReports;
+            $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getAllPowerScoresPublic($nID);
         } elseif ($nID == 773) {
             $report = new ScoreReportAvgs;
@@ -164,7 +189,10 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 983) {
             $report = new ScoreReportLighting;
             $ret .= $report->getLightingReport($nID);
-
+        } elseif ($nID == 855) {
+            $report = new ScoreReportLighting;
+            $ret .= $report->printLightingRawCalcs($nID);
+            
             
         // Admin Tools
         } elseif ($nID == 914) {
@@ -204,7 +232,8 @@ class CannabisScore extends ScoreImports
                 && isset($this->sessData->dataSets["PowerScore"][0]->PsTimeType)
                 && $this->sessData->dataSets["PowerScore"][0]->PsTimeType 
                     == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
-                $str = str_replace('Does your', 'Will your', str_replace('does your', 'will your', $str));
+                $str = str_replace('Does your', 'Will your', 
+                    str_replace('does your', 'will your', $str));
                 $str = str_replace('do you ', 'will you ', $str);
             }
         }
@@ -281,8 +310,10 @@ class CannabisScore extends ScoreImports
                 foreach ($this->sessData->dataSets["PSRenewables"] as $ind => $row) {
                     if (isset($row->PsRnwRenewable) && $row->PsRnwRenewable == $sourceID) {
                         $this->sessData->dataSets["PSRenewables"][$ind]->update([
-                            'PsRnwLoadPercent' => (($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')) 
-                                ? intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) : 0)
+                            'PsRnwLoadPercent' 
+                                => (($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')) 
+                                    ? intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) 
+                                    : 0)
                             ]);
                     }
                 }
@@ -303,8 +334,9 @@ class CannabisScore extends ScoreImports
         $powerMonths = $this->sortMonths();
         foreach ($powerMonths as $i => $row) {
             $row->PsMonthMonth = (1+$i);
-            $row->{ $fld2 }  = (($GLOBALS["SL"]->REQ->has('month' . $nIDtxt . 'ly' . (1+$i) . '')) 
-                ? intVal($GLOBALS["SL"]->REQ->get('month' . $nIDtxt . 'ly' . (1+$i) . '')) : null);
+            $fldName = 'month' . $nIDtxt . 'ly' . $row->PsMonthMonth;
+            $row->{ $fld2 }  = (($GLOBALS["SL"]->REQ->has($fldName)) 
+                ? intVal($GLOBALS["SL"]->REQ->get($fldName)) : null);
             $row->save();
         }
         return true;
@@ -313,7 +345,8 @@ class CannabisScore extends ScoreImports
     public function monthlyCalcPreselections($nID, $nIDtxt = '')
     {
         $ret = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        $fld = (($nID == 70) ? 'PsMonthKWH1' : (($nID == 74) ? 'PsMonthGrams' : 'PsMonthWasteLbs'));
+        $fld = (($nID == 70) ? 'PsMonthKWH1' 
+            : (($nID == 74) ? 'PsMonthGrams' : 'PsMonthWasteLbs'));
         $powerMonths = $this->sortMonths();
         if ($powerMonths->isNotEmpty()) {
             foreach ($powerMonths as $i => $row) {
@@ -327,13 +360,20 @@ class CannabisScore extends ScoreImports
     {
         $this->v["nID"] = $nID;
         $this->v["currSessData"] = 0;
-        if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0])
+        if (isset($this->sessData->dataSets["PowerScore"]) 
+            && isset($this->sessData->dataSets["PowerScore"][0])
             && isset($this->sessData->dataSets["PowerScore"][0]->PsGrams)) {
-            $this->v["currSessData"] = $this->sessData->dataSets["PowerScore"][0]->PsGrams;
+            $this->v["currSessData"] = $this->sessData
+                ->dataSets["PowerScore"][0]->PsGrams;
         }
-        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt . "', 'reqFormFldGreater', 0.00000001);\n";
+        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt 
+            . "', 'reqFormFldGreater', 0.00000001);\n";
         $presel = $this->monthlyCalcPreselections($nID, $nIDtxt);
-        $this->v["gramFormMonths"] = $this->printMonthlyCalculator($nIDtxt, $presel, 'convertGrams();');
+        $this->v["gramFormMonths"] = $this->printMonthlyCalculator(
+            $nIDtxt, 
+            $presel, 
+            'convertGrams();'
+        );
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
     }
     
@@ -356,7 +396,8 @@ class CannabisScore extends ScoreImports
     
     public function printReport490()
     {
-        if ($GLOBALS["SL"]->REQ->has('step') && $GLOBALS["SL"]->REQ->has('postAction')
+        if ($GLOBALS["SL"]->REQ->has('step') 
+            && $GLOBALS["SL"]->REQ->has('postAction')
             && trim($GLOBALS["SL"]->REQ->get('postAction')) != '') {
             return $this->redir($GLOBALS["SL"]->REQ->get('postAction'), true);
         }
@@ -364,13 +405,15 @@ class CannabisScore extends ScoreImports
         $this->searcher->getSearchFilts();
         $this->getAllReportCalcs();
         if (!$GLOBALS["SL"]->REQ->has('fltFarm')) {
-            $this->searcher->v["fltFarm"] = $this->sessData->dataSets["PowerScore"][0]->PsCharacterize;
+            $this->searcher->v["fltFarm"] = $this->sessData
+                ->dataSets["PowerScore"][0]->PsCharacterize;
             $this->searcher->searchFiltsURLXtra();
         }
         $this->searcher->v["nID"] = 490;
         $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)->render();
+        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)
+            ->render();
     }
     
     public function printPsRankingFilters($nID)
@@ -380,8 +423,10 @@ class CannabisScore extends ScoreImports
         $this->searcher->v["nID"] = $nID;
         $this->searcher->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
             ->render();
-        return '<div id="scoreRankFiltWrap"><h5 class="mT0">Compare to other farms</h5><div class="pT5"></div>' . 
-            view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render() . '</div>';
+        return '<div id="scoreRankFiltWrap"><h5 class="mT0">Compare to other farms</h5><div class="pT5"></div>' . view(
+                'vendor.cannabisscore.inc-filter-powerscores', 
+                $this->searcher->v
+            )->render() . '</div>';
     }
     
     public function ajaxChecksCustom(Request $request, $type = '')
@@ -404,17 +449,22 @@ class CannabisScore extends ScoreImports
     
     protected function ajaxReportRefresh(Request $request)
     {
-        $this->v["ajax-psid"] = (($GLOBALS["SL"]->REQ->has('psid') && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) 
+        $this->v["ajax-psid"] = (($GLOBALS["SL"]->REQ->has('psid') 
+            && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) 
             ? intVal($GLOBALS["SL"]->REQ->get('psid')) : -3);
         if (!$request->has('refresh') || intVal($request->get('refresh')) == 1) {
             $this->sessData->loadData('PowerScore', $this->v["ajax-psid"]);
-            if (isset($this->sessData->dataSets["PowerScore"]) && sizeof($this->sessData->dataSets["PowerScore"]) > 0
+            if (isset($this->sessData->dataSets["PowerScore"]) 
+                && sizeof($this->sessData->dataSets["PowerScore"]) > 0
                 && isset($this->sessData->dataSets["PowerScore"][0]->PsEmail)) {
                 $this->calcCurrSubScores();
-                return view('vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', [
-                    "msg"  => '<i class="slGrey">Recalculating Sub-Scores...',
-                    "psid" => $this->v["ajax-psid"]
-                ])->render();
+                return view(
+                    'vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', 
+                    [
+                        "msg"  => '<i class="slGrey">Recalculating Sub-Scores...',
+                        "psid" => $this->v["ajax-psid"]
+                    ]
+                )->render();
             }
             return '<b>Error 420: PowerScore Not Found</b>';
         }
@@ -431,12 +481,18 @@ class CannabisScore extends ScoreImports
         $this->loadAreaLgtTypes();
         $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        $this->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
-            ->render();
-        $this->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)
-            ->render();
-        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)
-            ->render();
+        $this->v["psFiltChks"] = view(
+            'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
+            $this->searcher->v
+        )->render();
+        $this->v["psFilters"] = view(
+            'vendor.cannabisscore.inc-filter-powerscores', 
+            $this->searcher->v
+        )->render();
+        return view(
+            'vendor.cannabisscore.nodes.490-report-calculations', 
+            $this->v
+        )->render();
     }
     
     public function printFrameAnimPerc(Request $request, $perc = 0)
@@ -448,7 +504,7 @@ class CannabisScore extends ScoreImports
         return view('vendor.cannabisscore.nodes.490-report-calculations-frame-guage', [
             "perc" => $perc,
             "size" => $size
-            ])->render();
+        ])->render();
     }
     
     public function printFrameAnimPercMeter(Request $request, $perc = 0, $row = 0)
@@ -475,21 +531,36 @@ class CannabisScore extends ScoreImports
     
     protected function ajaxScorePercentiles()
     {
-        if (!$GLOBALS["SL"]->REQ->has('ps') || intVal($GLOBALS["SL"]->REQ->get('ps')) <= 0 
-            || !$GLOBALS["SL"]->REQ->has('eff') || !in_array(trim($GLOBALS["SL"]->REQ->get('eff')), 
-                ['Overall', 'Facility', 'Production', 'HVAC', 'Lighting', 'Water', 'Waste'])) {
+        $effTypes = [
+            'Overall', 
+            'Facility', 
+            'Production', 
+            'HVAC', 
+            'Lighting', 
+            'Water', 
+            'Waste'
+        ];
+        if (!$GLOBALS["SL"]->REQ->has('ps') 
+            || intVal($GLOBALS["SL"]->REQ->get('ps')) <= 0 
+            || !$GLOBALS["SL"]->REQ->has('eff') 
+            || !in_array(trim($GLOBALS["SL"]->REQ->get('eff')), $effTypes)) {
             return '';
         }
         $this->initSearcher();
         $this->searcher->searchResultsXtra(1);
         $this->searcher->searchFiltsURLXtra();
-        if ($this->searcher->v["powerscore"] && isset($this->searcher->v["powerscore"]->PsID)) {
+        if ($this->searcher->v["powerscore"] 
+            && isset($this->searcher->v["powerscore"]->PsID)) {
             $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->PsTimeType 
                 == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-            $this->searcher->v["currRanks"] = RIIPSRankings::where('PsRnkFilters', $this->searcher->v["urlFlts"])
+            $this->searcher->v["currRanks"] = RIIPSRankings::where(
+                    'PsRnkFilters', 
+                    $this->searcher->v["urlFlts"]
+                )
                 ->where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
                 ->first();
-            if ($GLOBALS["SL"]->REQ->has('refresh') || !$this->searcher->v["currRanks"]->PsRnkOverall
+            if ($GLOBALS["SL"]->REQ->has('refresh') 
+                || !$this->searcher->v["currRanks"]->PsRnkOverall
                 || !isset($this->searcher->v["currRanks"]->PsRnkOverall->PsRnkOverall)) {
                 if (isset($this->searcher->v["powerscore"]->PsTimeType) 
                     && $this->searcher->v["powerscore"]->PsTimeType 
@@ -497,18 +568,24 @@ class CannabisScore extends ScoreImports
                     $ranks = RIIPSRanks::where('PsRnkFilters', '')
                         ->first();
                     $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
-                    $this->searcher->v["powerscore"]->PsEfficOverall = $this->searcher->v["currRanks"]->PsRnkOverall;
+                    $this->searcher->v["powerscore"]->PsEfficOverall = $this->searcher
+                        ->v["currRanks"]->PsRnkOverall;
                     $this->searcher->v["powerscore"]->save();
                 } else {
                     $urlFlts = $this->searcher->v["urlFlts"];
-                    $this->calcAllScoreRanks();
+                    //$this->calcAllScoreRanks();
                     $this->searcher->v["urlFlts"] = $urlFlts;
-                    $this->searcher->v["currRanks"] = RIIPSRankings::where('PsRnkPSID', $this->searcher->v["powerscore"]->PsID)
+                    $this->searcher->v["currRanks"] = RIIPSRankings::where(
+                            'PsRnkPSID', 
+                            $this->searcher->v["powerscore"]->PsID
+                        )
                         ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
                         ->first();
                     if (!$this->searcher->v["currRanks"]) {
-                        $ranks = RIIPSRanks::where('PsRnkFilters', $this->searcher->v["urlFlts"])
-                            ->first();
+                        $ranks = RIIPSRanks::where(
+                            'PsRnkFilters', 
+                            $this->searcher->v["urlFlts"]
+                        )->first();
                         $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
                     }
                 }
@@ -519,25 +596,30 @@ class CannabisScore extends ScoreImports
                 && isset($this->searcher->v["powerscore"]->PsEfficHvac) 
                 && isset($this->searcher->v["powerscore"]->PsEfficLighting) 
                 && $this->searcher->v["powerscore"]->PsEfficFacility > 0
-                && $this->searcher->v["powerscore"]->PsEfficProduction > 0 
-                && $this->searcher->v["powerscore"]->PsEfficHvac > 0
-                && $this->searcher->v["powerscore"]->PsEfficLighting > 0);
-            $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' . round($this->searcher->v["currRanks"]->PsRnkOverall) 
-                . $GLOBALS["SL"]->numSupscript(round($this->searcher->v["currRanks"]->PsRnkOverall)) 
+                && $this->searcher->v["powerscore"]->PsEfficProduction > 0);
+            $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' 
+                . round($this->searcher->v["currRanks"]->PsRnkOverall) 
+                . $GLOBALS["SL"]->numSupscript(round($this->searcher
+                    ->v["currRanks"]->PsRnkOverall)) 
                 . '</h1><b>percentile</b></center>';
 // number_format($ranksCache->PsRnkTotCnt) }} past growing @if ($ranksCache->PsRnkTotCnt > 1) years @else year @endif of
-            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle"><h5>Overall: '
+            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle">' 
+                . '<h5>Overall: '
                 . (($this->searcher->v["currRanks"]->PsRnkOverall > 66) ? 'Leader' 
-                    : (($this->searcher->v["currRanks"]->PsRnkOverall > 33) ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) . '</h5></div><div class="efficGuageTxtOverall4">'
+                    : (($this->searcher->v["currRanks"]->PsRnkOverall > 33) 
+                        ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) 
+                . '</h5></div><div class="efficGuageTxtOverall4">'
                 . 'Your farm\'s overall performance within the data set of ';
             if ($this->searcher->v["fltFarm"] == 0) {
                 $this->searcher->v["withinFilters"] .= 'all farm types';
             } else {
-                $this->searcher->v["withinFilters"] .= str_replace('/', '/ ', strtolower(
-                    $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $this->searcher->v["fltFarm"]))) . ' farms';
+                $farmType = $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $this->searcher->v["fltFarm"]);
+                $farmType = str_replace('Greenhouse/Hybrid/Mixed Light', 'Greenhouse/ Hybrid', $farmType);
+                $this->searcher->v["withinFilters"] .= strtolower($farmType) . ' farms';
             }
             $this->searcher->v["withinFilters"] .= $this->searcher->v["xtraFltsDesc"];
-            if ($this->searcher->v["fltState"] == '' && $this->searcher->v["fltClimate"] == '') {
+            if ($this->searcher->v["fltState"] == '' 
+                && $this->searcher->v["fltClimate"] == '') {
                 $this->searcher->v["withinFilters"] .= ' in the U.S. and Canada:';
             } elseif ($this->searcher->v["fltState"] != '') {
                 if ($this->searcher->v["fltState"] == 'US') {
@@ -554,13 +636,15 @@ class CannabisScore extends ScoreImports
                 } elseif ($this->searcher->v["fltClimate"] == 'Canada') {
                     $this->searcher->v["withinFilters"] .= ' in Canada:.';
                 } else {
-                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">ASHRAE Climate Zone ' 
-                        . $this->searcher->v["fltClimate"] . ':';
+                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">'
+                        . 'ASHRAE Climate Zone ' . $this->searcher->v["fltClimate"] . ':';
                 }
             }
             $this->searcher->v["withinFilters"] .= '</div>';
-            return view('vendor.cannabisscore.nodes.490-report-calculations-load-all-js', $this->searcher->v)
-                ->render();
+            return view(
+                'vendor.cannabisscore.nodes.490-report-calculations-load-all-js', 
+                $this->searcher->v
+            )->render();
         }
         return '';
     }
@@ -572,17 +656,29 @@ class CannabisScore extends ScoreImports
         $currRanks->PsRnkPSID = $this->searcher->v["powerscore"]->PsID;
         if ($ranks && isset($ranks->PsRnkFacility)) {
             $currRanks->PsRnkFacility = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->PsRnkFacility, $this->searcher->v["powerscore"]->PsEfficFacility);
+                $ranks->PsRnkFacility, 
+                $this->searcher->v["powerscore"]->PsEfficFacility
+            );
             $currRanks->PsRnkProduction = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->PsRnkProduction, $this->searcher->v["powerscore"]->PsEfficProduction, true);
+                $ranks->PsRnkProduction, 
+                $this->searcher->v["powerscore"]->PsEfficProduction, 
+                true
+            );
             $currRanks->PsRnkLighting = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->PsRnkLighting, $this->searcher->v["powerscore"]->PsEfficLighting);
+                $ranks->PsRnkLighting, 
+                $this->searcher->v["powerscore"]->PsEfficLighting
+            );
             $currRanks->PsRnkHVAC = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->PsRnkHVAC, $this->searcher->v["powerscore"]->PsEfficHvac);
-            $currRanks->PsRnkOverallAvg = ($currRanks->PsRnkFacility+$currRanks->PsRnkProduction
-                +$currRanks->PsRnkLighting+$currRanks->PsRnkHVAC)/4;
+                $ranks->PsRnkHVAC, 
+                $this->searcher->v["powerscore"]->PsEfficHvac
+            );
+            $currRanks->PsRnkOverallAvg = ($currRanks->PsRnkFacility
+                +$currRanks->PsRnkProduction+$currRanks->PsRnkLighting
+                +$currRanks->PsRnkHVAC)/4;
             $currRanks->PsRnkOverall = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->PsRnkOverallAvg, $currRanks->PsRnkOverallAvg);
+                $ranks->PsRnkOverallAvg, 
+                $currRanks->PsRnkOverallAvg
+            );
             $currRanks->save();
         }
         return $currRanks;
@@ -612,10 +708,12 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 57) {
             if (isset($this->sessData->dataSets["PowerScore"][0]->PsSourceUtilityOther)
                 && trim($this->sessData->dataSets["PowerScore"][0]->PsSourceUtilityOther) != '') {
-                $GLOBALS["SL"]->pageJAVA .= 'function fillUtilOther() { for (var i=0; i<20; i++) { '
+                $GLOBALS["SL"]->pageJAVA .= 'function fillUtilOther() { '
+                    . 'for (var i=0; i<20; i++) { '
                     . 'if (document.getElementById("n57fldOtherID"+i+"")) {'
                         . 'document.getElementById("n57fldOtherID"+i+"").value="'
-                        . str_replace('"', '\\"', $this->sessData->dataSets["PowerScore"][0]->PsSourceUtilityOther)
+                        . str_replace('"', '\\"', $this->sessData
+                            ->dataSets["PowerScore"][0]->PsSourceUtilityOther)
                     . '"; } } return true; } setTimeout("fillUtilOther()", 10);';
             }
         } elseif (in_array($nID, [59, 80, 61, 60, 81])) {
@@ -625,7 +723,9 @@ class CannabisScore extends ScoreImports
                 foreach ($this->sessData->dataSets["PSRenewables"] as $ind => $row) {
                     if (isset($row->PsRnwRenewable) && $row->PsRnwRenewable == $sourceID) {
                         $perc = 0;
-                        if (isset($row->PsRnwLoadPercent)) $perc = intVal($row->PsRnwLoadPercent);
+                        if (isset($row->PsRnwLoadPercent)) {
+                            $perc = intVal($row->PsRnwLoadPercent);
+                        }
                         return [$perc];
                     }
                 }
@@ -667,8 +767,10 @@ class CannabisScore extends ScoreImports
         } elseif ($condition == '#FlowerArtificialLight') {
             return $this->runCondArtifArea('Flower');
         } elseif ($condition == '#HasArtificialLight') { // could be replaced by OR functionality
-            if ($this->runCondArtifArea('Mother') == 1 || $this->runCondArtifArea('Clone') == 1
-                || $this->runCondArtifArea('Veg') == 1 || $this->runCondArtifArea('Flower') == 1) {
+            if ($this->runCondArtifArea('Mother') == 1 
+                || $this->runCondArtifArea('Clone') == 1
+                || $this->runCondArtifArea('Veg') == 1 
+                || $this->runCondArtifArea('Flower') == 1) {
                 return 1;
             }
             return 0;
@@ -693,7 +795,8 @@ class CannabisScore extends ScoreImports
             if (!isset($area) || !isset($area->PsAreaHasStage)) return 0;
             return intVal($area->PsAreaLgtSun);
         } elseif ($condition == '#SunlightVegOrFlower') { // could be replaced by OR functionality
-            if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0])) {
+            if (isset($this->sessData->dataSets["PowerScore"]) 
+                && isset($this->sessData->dataSets["PowerScore"][0])) {
                 if (isset($this->sessData->dataSets["PowerScore"][0]->PsVegSun)
                     && intVal($this->sessData->dataSets["PowerScore"][0]->PsVegSun) == 1) {
                     return 1;
@@ -712,16 +815,21 @@ class CannabisScore extends ScoreImports
                 '#IndoorFlowerOver50Ksf'
                 ])) {
             $area = $this->getArea('Flower');
-            if (!isset($area) || !isset($area->PsAreaHasStage) || !isset($area->PsAreaSize)
-                || intVal($area->PsAreaSize) == 0) {
+            if (!isset($area) || !isset($area->PsAreaHasStage) 
+                || !isset($area->PsAreaSize) || intVal($area->PsAreaSize) == 0) {
                 return 0;
             }
             switch ($condition) {
-                case '#IndoorFlower5Ksf':      return ($area->PsAreaSize < 5000);
-                case '#IndoorFlower10Ksf':     return ($area->PsAreaSize <= 5000 && $area->PsAreaSize < 10000);
-                case '#IndoorFlower30Ksf':     return ($area->PsAreaSize <= 10000 && $area->PsAreaSize < 30000);
-                case '#IndoorFlower50Ksf':     return ($area->PsAreaSize <= 30000 && $area->PsAreaSize < 50000);
-                case '#IndoorFlowerOver50Ksf': return ($area->PsAreaSize >= 50000);
+                case '#IndoorFlower5Ksf':
+                    return ($area->PsAreaSize < 5000);
+                case '#IndoorFlower10Ksf':
+                    return ($area->PsAreaSize <= 5000 && $area->PsAreaSize < 10000);
+                case '#IndoorFlower30Ksf':
+                    return ($area->PsAreaSize <= 10000 && $area->PsAreaSize < 30000);
+                case '#IndoorFlower50Ksf':
+                    return ($area->PsAreaSize <= 30000 && $area->PsAreaSize < 50000);
+                case '#IndoorFlowerOver50Ksf': 
+                    return ($area->PsAreaSize >= 50000);
             }
             return 0;
             
@@ -795,9 +903,11 @@ class CannabisScore extends ScoreImports
                 switch ($dy) {
                     case '[{ PowerScore }]': 
                     case '[{ PowerScore Percentile }]': 
-                        $swap = round($this->sessData->dataSets["PowerScore"][0]->PsEfficOverall) 
+                        $swap = round($this->sessData->dataSets["PowerScore"][0]
+                                ->PsEfficOverall) 
                             . $GLOBALS["SL"]->numSupscript(
-                                round($this->sessData->dataSets["PowerScore"][0]->PsEfficOverall)) . ' percentile';
+                                round($this->sessData->dataSets["PowerScore"][0]
+                                    ->PsEfficOverall)) . ' percentile';
                         break;
                     case '[{ Production Score }]':
                         $swap = $GLOBALS["CUST"]->cnvrtLbs2Grm(
@@ -810,22 +920,27 @@ class CannabisScore extends ScoreImports
                         $swap = $chk->count();
                         break;
                     case '[{ PowerScore Report Link Similar }]':
-                        $swap = $GLOBALS["SL"]->sysOpts["app-url"] . '/calculated/read-' . $this->coreID . '?fltFarm='
+                        $swap = $GLOBALS["SL"]->sysOpts["app-url"] 
+                            . '/calculated/read-' . $this->coreID . '?fltFarm='
                             . $this->sessData->dataSets["PowerScore"][0]->PsCharacterize;
                         $swap = '<a href="' . $swap . '" target="_blank">' . $swap . '</a>';
                         break;
                     case '[{ PowerScore Similar }]':
                         $swap = round($rankSim->PsRnkOverall)
-                            . $GLOBALS["SL"]->numSupscript(round($rankSim->PsRnkOverall)) . ' percentile';
+                            . $GLOBALS["SL"]->numSupscript(round($rankSim->PsRnkOverall)) 
+                            . ' percentile';
                         break;
                     case '[{ PowerScore Dashboard Similar }]':
                         $swap = view('vendor.cannabisscore.nodes.490-report-calculations-preview', [
                             "ps"       => $this->sessData->dataSets["PowerScore"][0],
                             "rank"     => $rankSim,
                             "filtDesc" => str_replace('/', '/ ', strtolower(
-                                $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
-                                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize)))
-                            ])->render();
+                                $GLOBALS["SL"]->def->getVal(
+                                    'PowerScore Farm Types', 
+                                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize
+                                )
+                            ))
+                        ])->render();
                         break;
                     case '[{ Zip Code }]': 
                         if (isset($this->sessData->dataSets["PowerScore"][0]->PsZipCode)) {
@@ -836,15 +951,25 @@ class CannabisScore extends ScoreImports
                         if (isset($this->sessData->dataSets["PowerScore"][0]->PsName)) {
                             $swap = $this->sessData->dataSets["PowerScore"][0]->PsName;
                         } elseif (isset($this->sessData->dataSets["PowerScore"][0]->PsEmail)) {
-                            $chkEma = User::where('email', $this->sessData->dataSets["PowerScore"][0]->PsEmail)
-                                ->first();
-                            if ($chkEma && isset($chkEma->name) && trim($chkEma->name) != '') $swap = $chkEma->name;
+                            $chkEma = User::where(
+                                    'email', 
+                                    $this->sessData->dataSets["PowerScore"][0]->PsEmail
+                                )->first();
+                            if ($chkEma && isset($chkEma->name) && trim($chkEma->name) != '') {
+                                $swap = $chkEma->name;
+                            }
                         }
-                        if (in_array(trim($swap), ['', $dy])) $swap = 'Resource Innovator';
+                        if (in_array(trim($swap), ['', $dy])) {
+                            $swap = 'Resource Innovator';
+                        }
                         break;
                     case '[{ Farm Type }]': 
-                        $swap = str_replace('/', '/ ', strtolower($GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
-                            $this->sessData->dataSets["PowerScore"][0]->PsCharacterize)));
+                        $swap = str_replace('/', '/ ', strtolower(
+                            $GLOBALS["SL"]->def->getVal(
+                                'PowerScore Farm Types', 
+                                $this->sessData->dataSets["PowerScore"][0]->PsCharacterize
+                            )
+                        ));
                         break;
                 }
                 $emailBody = str_replace($dy, $swap, $emailBody);
@@ -855,10 +980,13 @@ class CannabisScore extends ScoreImports
     
     protected function prepFeedbackSkipBtn()
     {
-        $this->v["psOwner"] = (($GLOBALS["SL"]->REQ->has('psid') && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) 
+        $this->v["psOwner"] = (($GLOBALS["SL"]->REQ->has('psid') 
+            && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) 
             ? intVal($GLOBALS["SL"]->REQ->get('psid')) 
-            : ((session()->has('PowerScoreOwner')) ? intVal(session()->get('PowerScoreOwner')) : -3));
-        if (intVal($this->v["psOwner"]) > 0 && isset($this->sessData->dataSets["PsFeedback"])
+            : ((session()->has('PowerScoreOwner')) 
+                ? intVal(session()->get('PowerScoreOwner')) : -3));
+        if (intVal($this->v["psOwner"]) > 0 
+            && isset($this->sessData->dataSets["PsFeedback"])
             && isset($this->sessData->dataSets["PsFeedback"][0])) {
             $this->sessData->dataSets["PsFeedback"][0]->PsfPsID = $this->v["psOwner"];
             $this->sessData->dataSets["PsFeedback"][0]->save();
@@ -868,12 +996,16 @@ class CannabisScore extends ScoreImports
     
     protected function prepUtilityRefTitle()
     {
-        if (isset($this->sessData->dataSets["PsReferral"]) && sizeof($this->sessData->dataSets["PsReferral"]) > 0) {
-            if ($GLOBALS["SL"]->REQ->has('u') && intVal($GLOBALS["SL"]->REQ->get('u')) > 0) {
-                $this->sessData->dataSets["PsReferral"][0]->PsRefUtility = intVal($GLOBALS["SL"]->REQ->get('u'));
+        if (isset($this->sessData->dataSets["PsReferral"]) 
+            && sizeof($this->sessData->dataSets["PsReferral"]) > 0) {
+            if ($GLOBALS["SL"]->REQ->has('u') 
+                && intVal($GLOBALS["SL"]->REQ->get('u')) > 0) {
+                $this->sessData->dataSets["PsReferral"][0]
+                    ->PsRefUtility = intVal($GLOBALS["SL"]->REQ->get('u'));
                 $this->sessData->dataSets["PsReferral"][0]->save();
             }
-            if ($GLOBALS["SL"]->REQ->has('s') && intVal($GLOBALS["SL"]->REQ->get('s')) > 0) {
+            if ($GLOBALS["SL"]->REQ->has('s') 
+                && intVal($GLOBALS["SL"]->REQ->get('s')) > 0) {
                 $scoreID = intVal($GLOBALS["SL"]->REQ->get('s'));
                 $this->sessData->dataSets["PsReferral"][0]->PsRefPowerScore = $scoreID;
                 $this->sessData->loadData('PowerScore', $scoreID);
@@ -881,11 +1013,13 @@ class CannabisScore extends ScoreImports
                     && sizeof($this->sessData->dataSets["PowerScore"]) > 0
                     && isset($this->sessData->dataSets["PowerScore"][0]->PsEmail)) {
                     $powerscoreOwner = false;
-                    if ($this->v["uID"] == $this->sessData->dataSets["PowerScore"][0]->PsUserID) {
+                    if ($this->v["uID"] 
+                        == $this->sessData->dataSets["PowerScore"][0]->PsUserID) {
                         $powerscoreOwner = true;
                     }
                     if (session()->has('PowerScoreOwner' . $scoreID) 
-                        && intVal(session()->get('PowerScoreOwner' . $scoreID)) == $scoreID) {
+                        && intVal(session()->get('PowerScoreOwner' . $scoreID)) 
+                        == $scoreID) {
                         $powerscoreOwner = true;
                     }
                     if ($powerscoreOwner) {

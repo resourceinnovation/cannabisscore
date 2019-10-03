@@ -4,24 +4,32 @@
     <div class="col-8">
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
         <a href="/dash/compare-powerscores"><h2 class="slBlueDark"> 
-        @if ($nID == 808) NWPCC Data Import @else Compare All PowerScores @endif </h2></a>
+        @if ($nID == 808) NWPCC Data Import 
+        @else Compare All PowerScores 
+        @endif </h2></a>
     @else   
         @if ($GLOBALS["SL"]->REQ->has('all'))
-            <a href="/dash/partner-compare-powerscores"><h2 class="slBlueDark">
-                Compare All PowerScores</h2></a>
+            <a href="/dash/partner-compare-powerscores"
+                ><h2 class="slBlueDark">Compare All PowerScores</h2></a>
         @else
-            <a href="/dash/partner-compare-powerscores?all=1"><h2 class="slBlueDark">
-                Canna Holdings Inc. PowerScores</h2></a>
+            <a href="/dash/partner-compare-powerscores?all=1"
+                ><h2 class="slBlueDark">Canna Holdings Inc. PowerScores</h2></a>
         @endif
     @endif
     </div><div class="col-4 taR"><div class="mTn10 pB10">
     @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
         @if (!$GLOBALS["SL"]->REQ->has('review'))
-            <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?review=1">Under Review</a>
-        @else <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores">All Complete</a> @endif
-        <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?random=1" target="_blank">Get Random</a>
-        <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?srt={{ $sort[0] }}&srta={{ $sort[1] }}{{ 
-            $urlFlts }}&excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+            <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?review=1"
+            >Under Review</a>
+        @else 
+            <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores"
+            >All Complete</a>
+        @endif
+        <a class="btn btn-secondary mT20 mR5" href="/dash/compare-powerscores?random=1" 
+            target="_blank">Get Random</a>
+        <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?srt={{ $sort[0] 
+            }}&srta={{ $sort[1] }}{{ $urlFlts }}&excel=1"
+            ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
     @else
         @if (!$GLOBALS["SL"]->REQ->has('all'))
             <a href="/dash/partner-compare-powerscores?all=1" class="pull-right">All PowerScores</a>
@@ -34,7 +42,6 @@
 @if (isset($psFilters))
     @if (!$GLOBALS["SL"]->REQ->has('review')) <div class="round20 row2 mB20 p15">{!! $psFilters !!}</div>
     @else <div></div> @endif
-    <div class="mTn15"><b>{{ $allscores->count() }} Found</b></div>
 @elseif (isset($psFilter))
     <div class="mB5"><b class="mR20">{{ $allscores->count() }} Found</b> {!! $psFilter !!}</div>
 @endif
@@ -171,6 +178,27 @@
     </th>
 @endif
 </tr>
+
+<tr>
+    <th><b>{{ number_format($allscores->count()) }} Found</b></th>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <td>&nbsp;</td>
+@endif
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td class="slGrey">{{ number_format($psCnt->PsEfficFacility) }}</td>
+    <td class="slGrey">{{ number_format($psCnt->PsEfficProduction) }}</td>
+    <td class="slGrey">{{ number_format($psCnt->PsEfficLighting) }}</td>
+    <td class="slGrey">{{ number_format($psCnt->PsEfficHvac) }}</td>
+@if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
+    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+@else
+    @if (!$isExcel) <td colspan=2 >&nbsp;</td>
+    @else <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    @endif
+@endif
+</tr>
+
 <tr>
     <th>Averages</th>
 @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
@@ -188,12 +216,12 @@
     <th>{{ number_format($psAvg->PsTotalSize) }} sq ft</th>
 @else
     @if (!$isExcel) <th colspan=2 ><span class="mR10"><nbor> @else <th> @endif
-        {{ number_format($psAvg->PsGrams) }} g
-        @if (!$isExcel) </nobr></span><span class="mR10"><nbor> @else </th><th> @endif
-        {{ number_format($psAvg->PsKWH) }} kWh
-        @if (!$isExcel) </nbor></span><nbor> @else </th><th> @endif
-        {{ number_format($psAvg->PsTotalSize) }} sq ft
-        @if (!$isExcel) </nbor> @endif
+    {{ number_format($psAvg->PsGrams) }} g
+    @if (!$isExcel) </nobr></span><span class="mR10"><nbor> @else </th><th> @endif
+    {{ number_format($psAvg->PsKWH) }} kWh
+    @if (!$isExcel) </nbor></span><nbor> @else </th><th> @endif
+    {{ number_format($psAvg->PsTotalSize) }} sq ft
+    @if (!$isExcel) </nbor> @endif
     </th>
 @endif
 </tr>
@@ -244,26 +272,38 @@
                 && isset($allranks[$ps->PsID]->PsRnkOverallAvg)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkOverallAvg) }}%</div> @endif
         </td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
+        <td> @if (isset($ps->PsEfficFacilityStatus) && intVal($ps->PsEfficFacilityStatus) == $defCmplt)
+            @if ($ps->PsEfficFacility < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
+            @endif
             @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
                 && isset($allranks[$ps->PsID]->PsRnkFacility)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkFacility) }}%</div> @endif
-        </td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
+        @endif </td>
+        <td> @if (isset($ps->PsEfficProductionStatus) && intVal($ps->PsEfficProductionStatus) == $defCmplt)
+            @if ($ps->PsEfficProduction < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
+            @endif
             @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
                 && isset($allranks[$ps->PsID]->PsRnkProduction)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkProduction) }}%</div> @endif
-        </td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
-            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
-                && isset($allranks[$ps->PsID]->PsRnkHVAC)) <div class="slGrey fPerc66">{{ 
-                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkHVAC) }}%</div> @endif
-        </td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
+        @endif </td>
+        <td> @if (isset($ps->PsEfficLightingStatus) && intVal($ps->PsEfficLightingStatus) == $defCmplt)
+            @if ($ps->PsEfficLighting < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
+            @endif
             @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
                 && isset($allranks[$ps->PsID]->PsRnkLighting)) <div class="slGrey fPerc66">{{ 
                 $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkLighting) }}%</div> @endif
-        </td>
+        @endif </td>
+        <td> @if (isset($ps->PsEfficHvacStatus) && intVal($ps->PsEfficHvacStatus) == $defCmplt)
+            @if ($ps->PsEfficHvac < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
+            @endif
+            @if (!$isExcel && isset($allranks) && isset($allranks[$ps->PsID]) 
+                && isset($allranks[$ps->PsID]->PsRnkHVAC)) <div class="slGrey fPerc66">{{ 
+                $GLOBALS["SL"]->sigFigs($allranks[$ps->PsID]->PsRnkHVAC) }}%</div> @endif
+        @endif </td>
     @if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"])
         <td>{{ number_format($ps->PsGrams) }}</td>
         <td>{{ number_format($ps->PsKWH) }}</td>
@@ -303,5 +343,9 @@
 @endif
 </table>
 </div>
+
+@if ($nID == 170) 
+    <style> #updateScoreFiltsBtn2, #updateScoreFiltsBtn3 { display: none; } </style>
+@endif
 
 @if (isset($reportExtras)) <div class="slCard nodeWrap">{!! $reportExtras !!}</div> @endif

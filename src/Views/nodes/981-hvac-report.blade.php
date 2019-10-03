@@ -11,8 +11,10 @@
         <div class="col-8">
             <p>
             Many columns are clickable to load the report listing all individual reports  
-            matching the filter (when possible). Small subscript counts are the number
-            of powerscores upon which each calculated average is based. 
+            matching the filter (when possible). Small subscript counts are the number 
+            of growing areas (reported in powerscores) upon which 
+            each calculated average is based.
+            <br /><b>Found {{ number_format($totCnt) }} PowerScores</b>
             </p>
         </div>
         <div class="col-4">

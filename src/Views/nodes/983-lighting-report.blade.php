@@ -11,17 +11,15 @@
             <p>
             Many columns are clickable to load the report listing all 
             individual reports matching the filter (when possible).
-            Small subscript counts are the number of powerscores 
-            upon which each calculated average is based.
+            Small subscript counts are the number of growing areas (reported in
+            powerscores) upon which each calculated average is based.
             This report only shows PowerScores with Lighting Sub-Scores greater than zero
-            (AKA use any artifical lighting).
-            Submissions can throw a lighting error for each stage which uses artificial lighting,
-            but does not have fixture and wattage counts for that stage.
-            <nobr><a href="javascript:;" onClick="return loadRawCalcs();">Raw Caclulations</a></nobr>
+            (AKA use any artifical lighting), and have not been archived.
+            <!--- <nobr><a href="javascript:;" onClick="return loadRawCalcs();">Raw Caclulations</a></nobr> --->
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
                 @else value="0" @endif >
-            <br /><b>Found {{ number_format($totCnt) }}</b>
+            <br /><b>Found {{ number_format($totCnt) }} PowerScores</b>
             </p>
         </div>
         <div class="col-4">
@@ -39,6 +37,7 @@
                         && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) CHECKED @endif
                     > Exclude NWPCC Imports
             </label>
+            <!---
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
                     name="fltNoLgtError" id="fltNoLgtErrorID" value="1" onClick="return gatherFilts();"
@@ -46,6 +45,7 @@
                         && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) CHECKED @endif
                     > Exclude Lighting Errors
             </label>
+            --->
         </div>
     </div>
 </div>

@@ -2,8 +2,8 @@
 /**
   * CannabisScoreSearcher extends the SurvLoop Searcher for some hard-coded overrides.
   *
-  * Open Police Complaints
-  * @package  flexyourrights/openpolice
+  * Cannabis PowerScore, by the Resource Innovation Institute
+  * @package  resourceinnovation/cannabis
   * @author  Morgan Lesko <wikiworldorder@protonmail.com>
   * @since 0.0
   */
@@ -21,26 +21,27 @@ class CannabisScoreSearcher extends Searcher
     public function initExtra()
     {
         $this->v["defCmplt"] = 243;
+        $this->v["defArch"]  = 364;
         $this->v["areaTypes"] = [
             'Mother' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'),
             'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants'),
             'Veg'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'),
             'Dry'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing')
-            ];
+        ];
         $this->v["areaTypesFilt"] = [
             'Flower' => $this->v["areaTypes"]["Flower"],
             'Veg'    => $this->v["areaTypes"]["Veg"],
             'Clone'  => $this->v["areaTypes"]["Clone"],
             'Mother' => $this->v["areaTypes"]["Mother"]
-            ];
+        ];
         return true;
     }
     
     protected function getArchivedCoreIDs($coreTbl = '')
     {
         $ret = [];
-        $chk = RIIPowerScore::where('PsStatus', $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived'))
+        $chk = RIIPowerScore::where('PsStatus', $this->v["defArch"])
             ->select('PsID')
             ->get();
         if ($chk->isNotEmpty()) {
@@ -119,7 +120,8 @@ class CannabisScoreSearcher extends Searcher
         $this->v["sort"] = [ 'PsID', 'desc' ];
         if ($GLOBALS["SL"]->REQ->has('srt') && trim($GLOBALS["SL"]->REQ->get('srt')) != '') {
             $this->v["sort"][0] = $GLOBALS["SL"]->REQ->get('srt');
-            if ($GLOBALS["SL"]->REQ->has('srta') && in_array(trim($GLOBALS["SL"]->REQ->get('srta')), ['asc', 'desc'])) {
+            if ($GLOBALS["SL"]->REQ->has('srta') 
+                && in_array(trim($GLOBALS["SL"]->REQ->get('srta')), ['asc', 'desc'])) {
                 $this->v["sort"][1] = $GLOBALS["SL"]->REQ->get('srta');
             }
         }
@@ -200,7 +202,8 @@ class CannabisScoreSearcher extends Searcher
             $this->v["urlFlts"] .= '&fltRenew=' . implode(',', $this->v["fltRenew"]);
         }
         if ($this->v["xtraFltsDesc"] != '') {
-            $this->v["xtraFltsDesc"] = ' using <span class="wht">' . substr($this->v["xtraFltsDesc"], 2) . '</span>';
+            $this->v["xtraFltsDesc"] = ' using <span class="wht">' 
+                . substr($this->v["xtraFltsDesc"], 2) . '</span>';
         }
         return '';
     }
@@ -243,17 +246,22 @@ class CannabisScoreSearcher extends Searcher
         if (!isset($this->v["fltCmpl"])) {
             $this->searchResultsXtra();
         }
-        $eval = "whereIn('PsStatus', [" . (($this->v["fltCmpl"] == 0) ? (($this->v["isAdmin"]) ? "242, 243, 364" : 243)
+        $eval = "whereIn('PsStatus', [" . (($this->v["fltCmpl"] == 0) 
+            ? (($this->v["isAdmin"]) ? "242, 243, 364" : 243)
             : $this->v["fltCmpl"]) . "])->where('PsTimeType', " 
             . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")";
         $psidLgtARS = $psidLghts = $psidHvac = $psidRenew = $psidSize = $psidCups = [];
         foreach (["fltLgtArt", "fltLgtDep", "fltLgtSun"] as $flt) {
             $psidLgtARS[$flt] = [];
             if (isset($this->v[$flt][1])) {                 
-                eval("\$chk = " . $GLOBALS["SL"]->modelPath('PSAreas') . "::where('" . (($flt == "fltLgtArt") 
-                    ? 'PsAreaLgtArtif' : (($flt == "fltLgtDep") ? 'PsAreaLgtDep' : 'PsAreaLgtSun'))
-                    . "', " . $this->v[$flt][1] . ")" . (($this->v[$flt][0] > 0) ? "->where('PsAreaType', " 
-                    . $this->v[$flt][0] . ")" : "") . "->where('PsAreaPSID', '>', 0)->select('PsAreaPSID')->get();");
+                eval("\$chk = " . $GLOBALS["SL"]->modelPath('PSAreas') 
+                    . "::where('" . (($flt == "fltLgtArt") ? 'PsAreaLgtArtif' 
+                        : (($flt == "fltLgtDep") ? 'PsAreaLgtDep' : 'PsAreaLgtSun'))
+                    . "', " . $this->v[$flt][1] . ")" . (($this->v[$flt][0] > 0) 
+                        ? "->where('PsAreaType', " . $this->v[$flt][0] . ")" : "")
+                    . "->where('PsAreaPSID', '>', 0)"
+                    . "->select('PsAreaPSID')"
+                    . "->get();");
                 if ($chk->isNotEmpty()) {
                     foreach ($chk as $ps) {
                         if (!in_array($ps->PsAreaPSID, $psidLgtARS[$flt])) {
@@ -267,8 +275,11 @@ class CannabisScoreSearcher extends Searcher
             eval("\$chk = DB::table('RII_PSAreas')->join('RII_PSLightTypes', function (\$join) {
                     \$join->on('RII_PSAreas.PsAreaID', '=', 'RII_PSLightTypes.PsLgTypAreaID')
                         ->where('RII_PSLightTypes.PsLgTypLight', " . $this->v["fltLght"][1] . ");
-                })" . (($this->v["fltLght"][0] > 0) ? "->where('PsAreaType', " . $this->v["fltLght"][0] . ")" : "")
-                . "->where('RII_PSAreas.PsAreaPSID', '>', 0)->select('RII_PSAreas.PsAreaPSID')->get();");
+                })" . (($this->v["fltLght"][0] > 0) 
+                    ? "->where('PsAreaType', " . $this->v["fltLght"][0] . ")" : "")
+                . "->where('RII_PSAreas.PsAreaPSID', '>', 0)"
+                . "->select('RII_PSAreas.PsAreaPSID')"
+                . "->get();");
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $ps) {
                     if (!in_array($ps->PsAreaPSID, $psidLghts)) {
@@ -279,8 +290,10 @@ class CannabisScoreSearcher extends Searcher
         }
         if ($this->v["fltHvac"][1] > 0) {                       
             eval("\$chk = " . $GLOBALS["SL"]->modelPath('PSAreas') . "::where('PsAreaHvacType', " 
-                . $this->v["fltHvac"][1] . ")" . (($this->v["fltHvac"][0] > 0) ? "->where('PsAreaType', " 
-                . $this->v["fltHvac"][0] . ")" : "") . "->where('PsAreaPSID', '>', 0)->select('PsAreaPSID')->get();");
+                . $this->v["fltHvac"][1] . ")" . (($this->v["fltHvac"][0] > 0) 
+                    ? "->where('PsAreaType', " . $this->v["fltHvac"][0] . ")" 
+                    : "")
+                . "->where('PsAreaPSID', '>', 0)->select('PsAreaPSID')->get();");
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $ps) {
                     if (!in_array($ps->PsAreaPSID, $psidHvac)) {
@@ -341,7 +354,8 @@ class CannabisScoreSearcher extends Searcher
             } else { // is state
                 $state = trim($this->searchFilts["fltStateClim"]);
             }
-        } elseif (isset($this->searchFilts["state"]) && trim($this->searchFilts["state"]) != '') {
+        } elseif (isset($this->searchFilts["state"]) 
+            && trim($this->searchFilts["state"]) != '') {
             $state = $this->searchFilts["state"];
         } elseif ($this->v["fltState"] != '') {
             $state = $this->v["fltState"];
@@ -424,8 +438,9 @@ class CannabisScoreSearcher extends Searcher
     {
         $eval = "\$this->v['allscores'] = " . $GLOBALS["SL"]->modelPath('PowerScore') . "::" 
             . $this->filterAllPowerScoresPublic() . $xtra
-            . (($this->v["fltCmpl"] == 243) ? "->where('PsEfficFacility', '>', 0)->where('PsEfficProduction', '>', 0)"
-                . "->where('PsEfficLighting', '>', 0)->where('PsEfficHvac', '>', 0)" : "")
+            . (($this->v["fltCmpl"] == 243) 
+                ? "->where('PsEfficFacility', '>', 0)->where('PsEfficProduction', '>', 0)"
+                : "")
             . "->orderBy('" . $this->v["sort"][0] . "', '" . $this->v["sort"][1] . "')->get();";
         eval($eval);
 //echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br />'; exit;
@@ -521,18 +536,25 @@ class CannabisScoreSearcher extends Searcher
             'PsTotalSize'
         ];
         $this->v["psAvg"] = new RIIPowerScore;
+        $this->v["psCnt"] = new RIIPowerScore;
         foreach ($this->v["avgFlds"] as $fld) {
-            $this->v["psAvg"]->{ $fld } = 0;
+            $this->v["psAvg"]->{ $fld } = $this->v["psCnt"]->{ $fld } = 0;
         }
         if ($this->v["allscores"] && $this->v["allscores"]->isNotEmpty()) {
             foreach ($this->v["allscores"] as $i => $ps) {
                 foreach ($this->v["avgFlds"] as $fld) {
-                    $this->v["psAvg"]->{ $fld } += (1*$ps->{ $fld });
+                    if (strpos($fld, 'PsEffic') === false || (isset($ps->{ $fld . 'Status' })
+                        && intVal($ps->{ $fld . 'Status' }) == $this->v["defCmplt"])) {
+                        $this->v["psAvg"]->{ $fld } += (1*$ps->{ $fld });
+                        $this->v["psCnt"]->{ $fld }++;
+                    }
                 }
             }
             foreach ($this->v["avgFlds"] as $fld) {
-                $this->v["psAvg"]->{ $fld } 
-                    = $this->v["psAvg"]->{ $fld }/sizeof($this->v["allscores"]);
+                if ($this->v["psCnt"]->{ $fld } > 0) {
+                    $this->v["psAvg"]->{ $fld } 
+                        = $this->v["psAvg"]->{ $fld }/$this->v["psCnt"]->{ $fld };
+                }
             }
             //$this->v["psAvg"]->PsEfficFacility 
             //    = $this->v["psAvg"]->PsKWH/$this->v["psAvg"]->PsTotalSize;
@@ -545,16 +567,16 @@ class CannabisScoreSearcher extends Searcher
     public function loadCupScoreIDs()
     {
         $this->v["cultClassicIds"] = $this->v["emeraldIds"] = [];
-        $chk = RIIPSForCup::where('PsCupCupID', 
-                $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic'))
+        $cupDef = $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic');
+        $chk = RIIPSForCup::where('PsCupCupID', $cupDef)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {
                 $this->v["cultClassicIds"][] = $c->PsCupPSID;
             }
         }
-        $chk = RIIPSForCup::where('PsCupCupID', 
-                $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Emerald Cup Regenerative Award'))
+        $cupDef = $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Emerald Cup Regenerative Award');
+        $chk = RIIPSForCup::where('PsCupCupID', $cupDef)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {

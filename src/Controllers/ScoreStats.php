@@ -24,23 +24,31 @@ class ScoreStats extends SurvStatsGraph
     ];
     
     public $sfSizes = [
-        [375, 376, 377, 378],
-        ['<a href="/dash/compare-powerscores?fltFarm=144&fltSize=375" target="_blank">&lt;5,000 sf</a>',
+        [375, 376, 431, 377, 378],
+        [
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=375" target="_blank">&lt;5,000 sf</a>',
             '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=376" target="_blank">5,000-10,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=377" target="_blank">10,000-50,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=378" target="_blank">50,000+ sf</a>']
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=431" target="_blank">10,000-30,000 sf</a>',
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=377" target="_blank">30,000-50,000 sf</a>',
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=378" target="_blank">50,000+ sf</a>'
+        ]
     ];
     
     public $sfAuto = [
         [1, 2, 3],
-        ['Automatic Controls', 'Manual Controls',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltAuto=1&fltManu=1" target="_blank">Using Both</a>']
+        [
+            'Automatic Controls', 
+            'Manual Controls',
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltAuto=1&fltManu=1" target="_blank">Using Both</a>'
+        ]
     ];
     
     public $sfVert = [
         [0, 1],
-        ['Without Vertical Stacking',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltVert=1" target="_blank">With Vertical Stacking</a>']
+        [
+            'Without Vertical Stacking',
+            '<a href="/dash/compare-powerscores?fltFarm=144&fltVert=1" target="_blank">With Vertical Stacking</a>'
+        ]
     ];
     
     public $sfHvacs = [
@@ -50,15 +58,18 @@ class ScoreStats extends SurvStatsGraph
     
     public $sfCups = [
         [230, 231, 369],
-        ['<a href="/dash/compare-powerscores?fltCup=230" target="_blank">Cultivation Classic</a>',
+        [
+            '<a href="/dash/compare-powerscores?fltCup=230" target="_blank">Cultivation Classic</a>',
             '<a href="/dash/compare-powerscores?fltCup=231" target="_blank">Emerald Cup Regenerative Award</a>',
-            '<a href="/dash/compare-powerscores?fltCup=369" target="_blank">NWPCC</a>']
+            '<a href="/dash/compare-powerscores?fltCup=369" target="_blank">NWPCC</a>'
+        ]
     ];
     
     public $sfLgts = [];
     
     function __construct($filts = ['farm'])
     {
+        $this->v["psComplete"] = 243;
         $this->v["filts"] = $filts;
         $this->addDataType('fac',  '<nobr>Facility <sup class="slBlueDark">kWh/SqFt</sup></nobr>'); // stat var 'a'
         $this->addDataType('pro',  '<nobr>Production <sup class="slBlueDark">g/kWh</sup></nobr>');  // stat var 'b'
@@ -109,8 +120,8 @@ class ScoreStats extends SurvStatsGraph
                     foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $def) {
                         if (($f == 'pow1' && in_array($def->DefID, [149, 159, 151, 150, 158])) 
                             || ($f != 'pow1' && !in_array($def->DefID, [149, 159, 151, 150, 158]))) {
-                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' . $def->DefID . '" target="_blank">'
-                                . $def->DefValue . '</a>';
+                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' . $def->DefID 
+                                . '" target="_blank">' . $def->DefValue . '</a>';
                             $this->addFilt('powr' . $def->DefID, $lab, [0, 1], ['No', 'Yes']);
                         }
                     }
@@ -128,19 +139,19 @@ class ScoreStats extends SurvStatsGraph
                     $this->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
                 } elseif ($filt["abr"] == 'size') {
                     if ($size > 0) {
+                        $sizeDef = 0;
                         if ($size < 5000) {
-                            $size = 375;
+                            $sizeDef = 375;
                         } elseif ($size >= 5000 && $size < 10000) {
-                            $size = 376;
+                            $sizeDef = 376;
                         } elseif ($size >= 10000 && $size < 30000) {
-                            $size = 431;
+                            $sizeDef = 431;
                         } elseif ($size >= 30000 && $size < 50000) {
-                            $size = 377;
+                            $sizeDef = 377;
                         } elseif ($size >= 50000) {
-                            $size = 378;
+                            $sizeDef = 378;
                         }
-//echo '<br /><br /><br />applyScoreFilts(' . $ps->PsID . ', size: ' . $size . '<br />';
-                        $this->addRecFilt('size', $size, $ps->PsID);
+                        $this->addRecFilt('size', $sizeDef, $ps->PsID);
                     }
                 } elseif ($filt["abr"] == 'auto') {
                     if (isset($ps->PsControls) && intVal($ps->PsControls) == 1 
@@ -198,18 +209,29 @@ class ScoreStats extends SurvStatsGraph
     public function addScoreData($ps = null, $area = null)
     {
         if ($ps && isset($ps->PsID)) {
-            $this->addRecDat('fac', $ps->PsEfficFacility,   $ps->PsID);
-            $this->addRecDat('pro', $ps->PsEfficProduction, $ps->PsID);
-            $this->addRecDat('hvc', $ps->PsEfficHvac,       $ps->PsID);
-            $this->addRecDat('lgt', $ps->PsEfficLighting,   $ps->PsID);
-            foreach (['Mother', 'Clone', 'Veg', 'Flower'] as $type) {
-                $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
-                    ->first();
-                if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
-                    if (isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
-                        $this->addRecDat('lgt' . substr($type, 0, 1), 
-                            $area->PsAreaLightingEffic, $ps->PsID);
+            $dataPoints = [
+                ['fac', 'Facility'],
+                ['pro', 'Production'],
+                ['hvc', 'Hvac'],
+                ['lgt', 'Lighting']
+            ];
+            foreach ($dataPoints as $type) {
+                if (isset($ps->{ 'PsEffic' . $type[1] . 'Status' })
+                    && intVal($ps->{ 'PsEffic' . $type[1] . 'Status' }) == $this->v["psComplete"]) {
+                    $this->addRecDat($type[0], $ps->{ 'PsEffic' . $type[1] }, $ps->PsID);
+                }
+            }
+            if (isset($ps->PsEfficLightingStatus)
+                && intVal($ps->PsEfficLightingStatus) == $this->v["psComplete"]) {
+                foreach (['Mother', 'Clone', 'Veg', 'Flower'] as $type) {
+                    $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                        ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
+                        ->first();
+                    if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
+                        if (isset($area->PsAreaLightingEffic) && $area->PsAreaLightingEffic > 0) {
+                            $this->addRecDat('lgt' . substr($type, 0, 1), 
+                                $area->PsAreaLightingEffic, $ps->PsID);
+                        }
                     }
                 }
             }

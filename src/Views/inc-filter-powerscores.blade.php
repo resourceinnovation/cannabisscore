@@ -131,13 +131,15 @@
         </select>
 @if ($nID != 946)
     </div><div class="col-2"> 
-        <a class="btn btn-lg btn-primary updateScoreFilts float-right" href="javascript:;"
+        <a id="updateScoreFiltsBtn" href="javascript:;"
+            class="btn btn-lg btn-primary updateScoreFilts float-right" 
             ><i class="fa fa-filter mR5" aria-hidden="true"></i> Filter</a>
         <div class="mT10"><a id="btnFiltsAdv" class="hidivBtn" href="javascript:;"
             ><i class="fa fa-cogs"></i></a></div>
 @else
     </div><div class="col-2">
-        <a class="btn btn-sm btn-primary updateScoreFilts mT5" href="javascript:;">Apply Filters</a>
+        <a id="updateScoreFiltsBtn2" href="javascript:;"
+            class="btn btn-sm btn-primary updateScoreFilts mT5">Apply Filters</a>
 @endif
     </div>
 </div>
@@ -164,8 +166,10 @@
                 >&lt; 5,000 square feet</option>
             <option value="376" @if (isset($fltSize) && $fltSize == 376) SELECTED @endif 
                 >5,000-10,000 sf</option>
+            <option value="431" @if (isset($fltSize) && $fltSize == 431) SELECTED @endif 
+                >10,000-30,000 sf</option>
             <option value="377" @if (isset($fltSize) && $fltSize == 377) SELECTED @endif 
-                >10,000-50,000 sf</option>
+                >30,000-50,000 sf</option>
             <option value="378" @if (isset($fltSize) && $fltSize == 378) SELECTED @endif 
                 >50,000+ sf</option>
         </select>
@@ -198,11 +202,14 @@
     </div></div>
 @endif
 </div>
-@if ($nID != 946)
+@if (!in_array($nID, [170, 946]))
     <div class="pT20 pB20">
-        <a id="btnFiltsAdv" class="disBlo pull-left" href="javascript:;" style="color: #FFF;">Show More<br />Filters</a>
-        <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" style="color: #FFF;">Show Less<br />Filters</a>
-        <a class="pull-right btn btn-info updateScoreFilts" href="javascript:;">Apply Filters</a><br />
+        <a id="btnFiltsAdv" class="disBlo pull-left" href="javascript:;" 
+            style="color: #FFF;">Show More<br />Filters</a>
+        <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" 
+            style="color: #FFF;">Show Less<br />Filters</a>
+        <a id="updateScoreFiltsBtn3" href="javascript:;"
+            class="pull-right btn btn-info updateScoreFilts" >Apply Filters</a><br />
     </div>
 @endif
 

@@ -12,6 +12,7 @@ class RIIPowerScore extends Model
     [    
 		'PsUserID', 
 		'PsStatus', 
+		'PsIsPro',
 		'PsTimeType', 
 		'PsYear', 
 		'PsPrivacy', 
@@ -30,6 +31,16 @@ class RIIPowerScore extends Model
 		'PsEfficProduction', 
 		'PsEfficLighting', 
 		'PsEfficHvac', 
+		'PsEfficCarbon', 
+		'PsEfficWater', 
+		'PsEfficWaste', 
+		'PsEfficFacilityStatus', 
+		'PsEfficProductionStatus', 
+		'PsEfficLightingStatus', 
+		'PsEfficHvacStatus', 
+		'PsEfficCarbonStatus', 
+		'PsEfficWaterStatus', 
+		'PsEfficWasteStatus', 
 		'PsGrams', 
 		'PsKWH', 
 		'PsTotalSize', 
@@ -66,10 +77,10 @@ class RIIPowerScore extends Model
 		'PsWaterInnovation', 
 		'PsGreenWasteLbs', 
 		'PsGreenWasteMixed', 
-		'PsEfficWater', 
-		'PsEfficWaste', 
 		'PsComplianceWasteTrack', 
 		'PsLightingError',
+		'PsCrop',
+		'PsCropOther',
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -1,6 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/502-utility-offers.blade.php -->
 @if (isset($utilOffer) && isset($utilOffer[0]) && trim($utilOffer[0]) != '' 
-    && (!$GLOBALS["SL"]->REQ->has("hidePromos") || intVal($GLOBALS["SL"]->REQ->get("hidePromos")) != 1))
+    && (!$GLOBALS["SL"]->REQ->has("hidePromos") 
+    || intVal($GLOBALS["SL"]->REQ->get("hidePromos")) != 1))
     <div class="row">
         <div class="col-8 pR20 pT20">
             <h5><i class="fa fa-star" aria-hidden="true"></i> {{ $utilOffer[0] }}

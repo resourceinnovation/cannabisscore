@@ -27,7 +27,8 @@ class ScoreAdminMisc extends ScoreCalcs
 {
     protected function getTroubleshoot()
     {
-        $this->v["lgtChk"] = $this->v["lgtAvg"] = $this->v["hvcChk"] = $this->v["hvcAvg"] = [ 0, 0, 0, 0 ];
+        $this->v["lgtChk"] = $this->v["lgtAvg"] = $this->v["hvcChk"] 
+            = $this->v["hvcAvg"] = [ 0, 0, 0, 0 ];
         $this->v["allScoreIDs"] = RIIPowerScore::where('PsStatus', $this->v["defCmplt"])
             ->where('PsCharacterize', 144)
             ->select('PsID', 'PsName', 'PsEfficLighting', 'PsEfficHvac')
@@ -537,13 +538,13 @@ class ScoreAdminMisc extends ScoreCalcs
         if ($recentAttempts->isNotEmpty()) {
             foreach ($recentAttempts as $i => $rec) {
                 switch ($rec->PsStatus) {
-                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'):
+                    case $this->statusIncomplete:
                         $grapher->addDayTally('incomplete', $rec->created_at);
                         break;
-                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'):
+                    case $this->statusComplete:
                         $grapher->addDayTally('complete', $rec->created_at);
                         break;
-                    case $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived'):
+                    case $this->statusArchive:
                         $grapher->addDayTally('archived', $rec->created_at);
                         break;
                 }

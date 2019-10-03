@@ -24,7 +24,8 @@ class ScoreCalcs extends ScoreUtils
     protected function calcCurrSubScores()
     {
         $this->loadTotFlwrSqFt();
-        if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0])
+        if (isset($this->sessData->dataSets["PowerScore"]) 
+            && isset($this->sessData->dataSets["PowerScore"][0])
             && (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficFacility) 
             || $GLOBALS["SL"]->REQ->has('refresh') || $GLOBALS["SL"]->REQ->has('recalc'))) {
             
@@ -38,17 +39,22 @@ class ScoreCalcs extends ScoreUtils
                 $areaFlwrBlds = $this->sessData->getChildRows('Areas', $areaFlwrID, 'AreaBlds');
                 if (sizeof($areaFlwrBlds) > 0) {
                     foreach ($areaFlwrBlds as $bld) {
-                        if ($bld->PsArBldType == $GLOBALS["SL"]->def->getID('PowerScore Building Types', 'Outdoor')) {
+                        if ($bld->PsArBldType == $GLOBALS["SL"]->def
+                            ->getID('PowerScore Building Types', 'Outdoor')) {
                             $flwrOutdoor = true;
-                        } elseif ($bld->PsArBldType == $GLOBALS["SL"]->def->getID('PowerScore Building Types', 'Greenhouse')) {
+                        } elseif ($bld->PsArBldType == $GLOBALS["SL"]->def
+                            ->getID('PowerScore Building Types', 'Greenhouse')) {
                             $flwrGrnhse = true;
                         }
                     }
                 }
-                if ($flwrGrnhse || in_array($prevFarmType, [$this->frmTypIn, $this->frmTypGrn])) {
-                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize = $this->frmTypGrn;
+                if ($flwrGrnhse 
+                    || in_array($prevFarmType, [$this->frmTypIn, $this->frmTypGrn])) {
+                    $this->sessData->dataSets["PowerScore"][0]
+                        ->PsCharacterize = $this->frmTypGrn;
                 } else {
-                    $this->sessData->dataSets["PowerScore"][0]->PsCharacterize = $this->frmTypOut;
+                    $this->sessData->dataSets["PowerScore"][0]
+                        ->PsCharacterize = $this->frmTypOut;
                 }
             }
             
@@ -57,76 +63,105 @@ class ScoreCalcs extends ScoreUtils
             $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac       = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting   = 0;
+            $this->sessData->dataSets["PowerScore"][0]->PsEfficCarbon     = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficWater      = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste      = 0;
             $this->sessData->dataSets["PowerScore"][0]->PsLightingError   = 0;
+            if ($GLOBALS["SL"]->REQ->has('fixLightingErrors')) {
+                $this->sessData->dataSets["PowerScore"][0]
+                    ->PsEfficLightingStatus = $this->statusComplete;
+            }
             $row = $this->sessData->dataSets["PowerScore"][0];
-            if ($this->v["totFlwrSqFt"] > 0 && (!isset($row->PsTotalSize) || intVal($row->PsTotalSize) == 0)) {
-                $this->sessData->dataSets["PowerScore"][0]->PsTotalSize = $this->v["totFlwrSqFt"];
+            if ($this->v["totFlwrSqFt"] > 0 
+                && (!isset($row->PsTotalSize) || intVal($row->PsTotalSize) == 0)) {
+                $this->sessData->dataSets["PowerScore"][0]
+                    ->PsTotalSize = $this->v["totFlwrSqFt"];
             }
             
-            if ($row->PsTimeType == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
+            if ($row->PsTimeType == $GLOBALS["SL"]->def
+                ->getID('PowerScore Submission Type', 'Future')) {
                 $row = $this->calcFutureYields();
             } else {
                 if (isset($row->PsKWH) && intVal($row->PsKWH) > 0
                     && isset($row->PsGrams) && intVal($row->PsGrams) > 0) {
-                    $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction = $row->PsGrams/$row->PsKWH;
+                    $this->sessData->dataSets["PowerScore"][0]
+                        ->PsEfficProduction = $row->PsGrams/$row->PsKWH;
                 }
                 if (isset($this->v["totFlwrSqFt"]) && intVal($this->v["totFlwrSqFt"]) > 0) {
                     if (isset($row->PsKWH) && intVal($row->PsKWH) > 0) {
-                        $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility 
-                            = $row->PsKWH/$this->v["totFlwrSqFt"];
+                        $this->sessData->dataSets["PowerScore"][0]
+                            ->PsEfficFacility = $row->PsKWH/$this->v["totFlwrSqFt"];
                     }
                     if (isset($row->PsGreenWasteLbs) && intVal($row->PsGreenWasteLbs) > 0) {
-                        $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste 
-                            = $row->PsGreenWasteLbs/$this->v["totFlwrSqFt"];
+                        $this->sessData->dataSets["PowerScore"][0]
+                            ->PsEfficWaste = $row->PsGreenWasteLbs/$this->v["totFlwrSqFt"];
                     }
                 }
             }
             
             $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize = 0;
             $sqft = $watts = $wattsHvac = $gal = [];
-            if (isset($this->sessData->dataSets["PSAreas"]) && sizeof($this->sessData->dataSets["PSAreas"]) > 0) {
+            if (isset($this->sessData->dataSets["PSAreas"]) 
+                && sizeof($this->sessData->dataSets["PSAreas"]) > 0) {
                 foreach ($this->sessData->dataSets["PSAreas"] as $a => $area) {
                     foreach ($this->v["areaTypes"] as $typ => $defID) {
                         if ($area->PsAreaType == $defID && $typ != 'Dry') {
-                            $this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize += $area->PsAreaSize;
+                            $this->sessData->dataSets["PowerScore"][0]
+                                ->PsTotalCanopySize += $area->PsAreaSize;
                             $sqft[$typ] = $area->PsAreaSize;
-                            $watts[$typ] = $wattsHvac[$typ] = $gal[$typ] = 0;
-                            if (!isset($area->PsAreaLgtArtif) || intVal($area->PsAreaLgtArtif) == 0) {
+                            $watts[$typ] = $wattsHvac[$typ] = $gal[$typ] = $fixCnt = 0;
+                            if (!isset($area->PsAreaLgtArtif) 
+                                || intVal($area->PsAreaLgtArtif) == 0) {
                                 $watts[$typ] = 0.0000001;
                             } else {
                                 if (isset($this->sessData->dataSets["PSLightTypes"]) 
                                     && sizeof($this->sessData->dataSets["PSLightTypes"]) > 0) {
                                     foreach ($this->sessData->dataSets["PSLightTypes"] as $lgt) {
                                         if ($lgt->PsLgTypAreaID == $area->getKey() 
-                                            && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0 
-                                            && isset($lgt->PsLgTypWattage) && intVal($lgt->PsLgTypWattage) > 0) {
-                                            $watts[$typ] += ($lgt->PsLgTypCount*$lgt->PsLgTypWattage);
-//echo $typ . '<sup>' . $area->getKey() . '</sup> => ' . $watts[$typ] . ' (' . $lgt->PsLgTypCount . ' * ' . $lgt->PsLgTypWattage . ')<sup>' . $lgt->getKey() . '</sup> / ' . $area->PsAreaSize . '<br />';
+                                            && isset($lgt->PsLgTypCount) 
+                                            && intVal($lgt->PsLgTypCount) > 0 
+                                            && isset($lgt->PsLgTypWattage) 
+                                            && intVal($lgt->PsLgTypWattage) > 0) {
+                                            $watts[$typ] += ($lgt->PsLgTypCount
+                                                *$lgt->PsLgTypWattage);
+                                            $fixCnt += $lgt->PsLgTypCount;
                                         }
                                     }
                                 }
-                                if ($watts[$typ] <= 0 && $typ != 'Mother') { // give Mothers a pass for now
-                                    $this->sessData->dataSets["PowerScore"][0]->PsLightingError++;
+                                if ($watts[$typ] <= 0 && !in_array($typ, ['Mother', 'Clone'])) {
+                                    // give Mothers & Clones a pass for now
+                                    $this->addLightingError($typ);
                                 }
                             }
-                            $this->sessData->dataSets["PSAreas"][$a]->PsAreaTotalLightWatts = $watts[$typ];
+                            $this->sessData->dataSets["PSAreas"][$a]
+                                ->PsAreaTotalLightWatts = $watts[$typ];
+                            $this->sessData->dataSets["PSAreas"][$a]->PsAreaSqFtPerFix2 
+                                = (($fixCnt > 0) ? $sqft[$typ]/$fixCnt : 0);
+                            if (isset($area->PsAreaLgtFixSize1) 
+                                && intVal($area->PsAreaLgtFixSize1) > 0
+                                && isset($area->PsAreaLgtFixSize2) 
+                                && intVal($area->PsAreaLgtFixSize2) > 0) {
+                                $this->sessData->dataSets["PSAreas"][$a]->PsAreaSqFtPerFix1
+                                    = intVal($area->PsAreaLgtFixSize1)
+                                        *intVal($area->PsAreaLgtFixSize2);
+                            }
+                            $this->sessData->dataSets["PSAreas"][$a]->save();
                         }
                     }
                 }
                 
-//echo '#' . $this->sessData->dataSets["PowerScore"][0]->PsID . ' First <pre>'; print_r($watts); print_r($sqft); echo '</pre>';
                 if (isset($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc)) {
                     if ($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc 
-                        == $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'With Clones')) {
-                        $watts["Clone"]     += $watts["Mother"];
-                        $sqft["Clone"]      += $sqft["Mother"];
+                        == $GLOBALS["SL"]->def
+                        ->getID('PowerScore Mother Location', 'With Clones')) {
+                        $watts["Clone"] += $watts["Mother"];
+                        $sqft["Clone"]  += $sqft["Mother"];
                         $watts["Mother"] = $sqft["Mother"] = 0;
                     } elseif ($this->sessData->dataSets["PowerScore"][0]->PsMotherLoc 
-                        == $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'In Veg Room')) {
-                        $watts["Veg"]     += $watts["Mother"];
-                        $sqft["Veg"]      += $sqft["Mother"];
+                        == $GLOBALS["SL"]->def
+                        ->getID('PowerScore Mother Location', 'In Veg Room')) {
+                        $watts["Veg"]   += $watts["Mother"];
+                        $sqft["Veg"]    += $sqft["Mother"];
                         $watts["Mother"] = $sqft["Mother"] = 0;
                     }
                 }
@@ -135,29 +170,40 @@ class ScoreCalcs extends ScoreUtils
                 foreach ($this->sessData->dataSets["PSAreas"] as $a => $area) {
                     foreach ($this->v["areaTypes"] as $typ => $defID) {
                         if ($area->PsAreaType == $defID && $typ != 'Dry') {
-                            $this->sessData->dataSets["PSAreas"][$a]->PsAreaCalcSize = $sqft[$typ];
-                            $this->sessData->dataSets["PSAreas"][$a]->PsAreaCalcWatts = $watts[$typ];
-                            $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic = 0;
+                            $this->sessData->dataSets["PSAreas"][$a]
+                                ->PsAreaCalcSize = $sqft[$typ];
+                            $this->sessData->dataSets["PSAreas"][$a]
+                                ->PsAreaCalcWatts = $watts[$typ];
+                            $this->sessData->dataSets["PSAreas"][$a]
+                                ->PsAreaLightingEffic = 0;
                             if (intVal($sqft[$typ]) > 0) {
-                                $sqftWeight = $sqft[$typ]/$this->sessData->dataSets["PowerScore"][0]->PsTotalCanopySize;
+                                $sqftWeight = $sqft[$typ]/$this->sessData
+                                    ->dataSets["PowerScore"][0]->PsTotalCanopySize;
                                 if ($watts[$typ] > 0) {
-                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaLgtArtif = 1;
+                                    $this->sessData->dataSets["PSAreas"][$a]
+                                        ->PsAreaLgtArtif = 1;
                                     $hasLights++;
-                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic 
-                                        = $watts[$typ]/$sqft[$typ];
+                                    $this->sessData->dataSets["PSAreas"][$a]
+                                        ->PsAreaLightingEffic = $watts[$typ]/$sqft[$typ];
                                     $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting
-                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaLightingEffic;
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]
+                                            ->PsAreaLightingEffic;
                                 }
-                                if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
+                                if (isset($area->PsAreaHvacType) 
+                                    && intVal($area->PsAreaHvacType) > 0) {
                                     $this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic 
                                         = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
                                     $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac
-                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaHvacEffic;
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]
+                                            ->PsAreaHvacEffic;
                                 }
-                                if (isset($area->PsAreaGallons) && intVal($area->PsAreaGallons) > 0) {
-                                    $this->sessData->dataSets["PSAreas"][$a]->PsAreaWaterEffic = $area->PsAreaGallons/$sqft[$typ];
+                                if (isset($area->PsAreaGallons) 
+                                    && intVal($area->PsAreaGallons) > 0) {
+                                    $this->sessData->dataSets["PSAreas"][$a]
+                                        ->PsAreaWaterEffic = $area->PsAreaGallons/$sqft[$typ];
                                     $this->sessData->dataSets["PowerScore"][0]->PsEfficWater
-                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]->PsAreaWaterEffic;
+                                        += $sqftWeight*$this->sessData->dataSets["PSAreas"][$a]
+                                            ->PsAreaWaterEffic;
                                 }
                             }
                             $this->sessData->dataSets["PSAreas"][$a]->save();
@@ -173,9 +219,20 @@ class ScoreCalcs extends ScoreUtils
         return true;
     }
     
+    protected function addLightingError($typ)
+    {
+        $this->sessData->dataSets["PowerScore"][0]->PsLightingError++;
+        if ($GLOBALS["SL"]->REQ->has('fixLightingErrors')) {
+            $this->sessData->dataSets["PowerScore"][0]
+                ->PsEfficLightingStatus = $this->statusArchive;
+        }
+        return true;
+    }
+    
     protected function calcFarmType()
     {
-        if (isset($this->sessData->dataSets["PowerScore"]) && isset($this->sessData->dataSets["PowerScore"][0]->PsID)) {
+        if (isset($this->sessData->dataSets["PowerScore"]) 
+            && isset($this->sessData->dataSets["PowerScore"][0]->PsID)) {
             
         }
         return true;
@@ -193,7 +250,8 @@ class ScoreCalcs extends ScoreUtils
             return $this->v["ranksCache"];
         } */
         $eval = "\$allscores = " . $GLOBALS["SL"]->modelPath('PowerScore') . "::" 
-            . $this->searcher->filterAllPowerScoresPublic() . "->where('PsEfficFacility', '>', 0)"
+            . $this->searcher->filterAllPowerScoresPublic() 
+            . "->where('PsEfficFacility', '>', 0)"
             . "->where('PsEfficProduction', '>', 0)->where('PsEfficLighting', '>', 0)"
             . "->where('PsEfficHvac', '>', 0)->get();";
 //echo str_replace("\$allscores = App\Models\RIIPowerScore", "", str_replace("where('PsEfficFacility', '>', 0)->where('PsEfficProduction', '>', 0)->where('PsEfficLighting', '>', 0)->where('PsEfficHvac', '>', 0)->get();", "", $eval)) . '<br /><br />'; return '';
@@ -201,8 +259,18 @@ class ScoreCalcs extends ScoreUtils
         $this->v["ranksCache"]->PsRnkTotCnt = $allscores->count();
 //return '';
         $r = [];
-        $l = [ "over" => [], "oraw" => [], "faci" => [], "prod" => [], "ligh" => [], "hvac" => [] ];
-        $avg = [ "kwh" => 0, "g" => 0 ];
+        $l = [
+            "over" => [], 
+            "oraw" => [], 
+            "faci" => [], 
+            "prod" => [], 
+            "ligh" => [], 
+            "hvac" => []
+        ];
+        $avg = [
+            "kwh" => 0,
+            "g" => 0
+        ];
         if ($allscores->isNotEmpty()) {
             foreach ($allscores as $i => $ps) {
                 $sqft = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
@@ -223,28 +291,45 @@ class ScoreCalcs extends ScoreUtils
             sort($l["ligh"], SORT_NUMERIC);
             sort($l["hvac"], SORT_NUMERIC);
             foreach ($allscores as $i => $ps) {
-                $r[$ps->PsID] = [ "over" => 0, "oraw" => 0, "faci" => 0, "prod" => 0, "ligh" => 0, "hvac" => 0 ];
-                $r[$ps->PsID]["faci"] = $GLOBALS["SL"]->getArrPercentile($l["faci"], $ps->PsEfficFacility);
-                $r[$ps->PsID]["prod"] = $GLOBALS["SL"]->getArrPercentile($l["prod"], $ps->PsEfficProduction, true);
-                $r[$ps->PsID]["ligh"] = $GLOBALS["SL"]->getArrPercentile($l["ligh"], $ps->PsEfficLighting);
-                $r[$ps->PsID]["hvac"] = $GLOBALS["SL"]->getArrPercentile($l["hvac"], $ps->PsEfficHvac);
-                $r[$ps->PsID]["oraw"] = ($r[$ps->PsID]["faci"]+$r[$ps->PsID]["prod"]+$r[$ps->PsID]["ligh"]
-                    +$r[$ps->PsID]["hvac"])/4;
+                $r[$ps->PsID] = [
+                    "over" => 0,
+                    "oraw" => 0,
+                    "faci" => 0,
+                    "prod" => 0,
+                    "ligh" => 0,
+                    "hvac" => 0
+                ];
+                $r[$ps->PsID]["faci"] = $GLOBALS["SL"]
+                    ->getArrPercentile($l["faci"], $ps->PsEfficFacility);
+                $r[$ps->PsID]["prod"] = $GLOBALS["SL"]
+                    ->getArrPercentile($l["prod"], $ps->PsEfficProduction, true);
+                $r[$ps->PsID]["ligh"] = $GLOBALS["SL"]
+                    ->getArrPercentile($l["ligh"], $ps->PsEfficLighting);
+                $r[$ps->PsID]["hvac"] = $GLOBALS["SL"]
+                    ->getArrPercentile($l["hvac"], $ps->PsEfficHvac);
+                $r[$ps->PsID]["oraw"] = ($r[$ps->PsID]["faci"]+$r[$ps->PsID]["prod"]
+                    +$r[$ps->PsID]["ligh"]+$r[$ps->PsID]["hvac"])/4;
                 $l["oraw"][] = $r[$ps->PsID]["oraw"];
             }
             
             sort($l["oraw"], SORT_NUMERIC);
             foreach ($allscores as $i => $ps) {
-                $r[$ps->PsID]["over"] = $GLOBALS["SL"]->getArrPercentile($l["oraw"], $r[$ps->PsID]["oraw"], true);
+                $r[$ps->PsID]["over"] = $GLOBALS["SL"]
+                    ->getArrPercentile($l["oraw"], $r[$ps->PsID]["oraw"], true);
             }
             
             // Now store calculated ranks for individual scores...
             foreach ($allscores as $i => $ps) {
                 if (in_array(trim($this->searcher->v["urlFlts"]), ['', '&fltFarm=0'])) {
-                    RIIPowerScore::find($ps->PsID)->update([ 'PsEfficOverall' => $r[$ps->PsID]["over"] ]);
+                    RIIPowerScore::find($ps->PsID)->update([
+                        'PsEfficOverall' => $r[$ps->PsID]["over"]
+                    ]);
                 }
-                if (trim($this->searcher->v["urlFlts"]) == '&fltFarm=' . $ps->PsCharacterize) {
-                    RIIPowerScore::find($ps->PsID)->update([ 'PsEfficOverSimilar' => $r[$ps->PsID]["over"] ]);
+                if (trim($this->searcher->v["urlFlts"]) 
+                    == '&fltFarm=' . $ps->PsCharacterize) {
+                    RIIPowerScore::find($ps->PsID)->update([
+                        'PsEfficOverSimilar' => $r[$ps->PsID]["over"]
+                    ]);
                 }
                 $tmp = RIIPSRankings::where('PsRnkPSID', $ps->PsID)
                     ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
@@ -274,8 +359,10 @@ class ScoreCalcs extends ScoreUtils
         $this->v["ranksCache"]->PsRnkLighting   = implode(',', $l["ligh"]);
         $this->v["ranksCache"]->PsRnkHVAC       = implode(',', $l["hvac"]);
         if ($this->v["ranksCache"]->PsRnkTotCnt > 0) {
-            $this->v["ranksCache"]->PsRnkAvgSqftKwh = $avg["kwh"]/$this->v["ranksCache"]->PsRnkTotCnt;
-            $this->v["ranksCache"]->PsRnkAvgSqftGrm = $avg["g"]/$this->v["ranksCache"]->PsRnkTotCnt;
+            $this->v["ranksCache"]->PsRnkAvgSqftKwh 
+                = $avg["kwh"]/$this->v["ranksCache"]->PsRnkTotCnt;
+            $this->v["ranksCache"]->PsRnkAvgSqftGrm 
+                = $avg["g"]/$this->v["ranksCache"]->PsRnkTotCnt;
         }
         $this->v["ranksCache"]->save();
         return $this->v["ranksCache"];
@@ -302,11 +389,14 @@ class ScoreCalcs extends ScoreUtils
             }
         }
         if (sizeof($matches["flt"]) > 0) {
-            $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility = $matches["kwh"]/sizeof($matches["flt"]);
-            $this->sessData->dataSets["PowerScore"][0]->PsKWH 
-                = $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility*$this->v["totFlwrSqFt"];
-            $this->sessData->dataSets["PowerScore"][0]->PsGrams 
-                = ($matches["grm"]/sizeof($matches["flt"]))*$this->v["totFlwrSqFt"];
+            $this->sessData->dataSets["PowerScore"][0]
+                ->PsEfficFacility = $matches["kwh"]/sizeof($matches["flt"]);
+            $this->sessData->dataSets["PowerScore"][0]
+                ->PsKWH = $this->sessData->dataSets["PowerScore"][0]
+                    ->PsEfficFacility*$this->v["totFlwrSqFt"];
+            $this->sessData->dataSets["PowerScore"][0]
+                ->PsGrams = ($matches["grm"]/sizeof($matches["flt"]))
+                    *$this->v["totFlwrSqFt"];
             $this->sessData->dataSets["PowerScore"][0]->save();
         }
         return $this->sessData->dataSets["PowerScore"][0];
@@ -344,8 +434,7 @@ class ScoreCalcs extends ScoreUtils
         $GLOBALS["SL"]->x["pageView"] = $GLOBALS["SL"]->x["dataPerms"] = 'public';
         $this->loadCustLoop($GLOBALS["SL"]->REQ, 1);
         $all = RIIPowerScore::select('PsID')
-            ->where('PsStatus', 'NOT LIKE', 
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
+            ->where('PsStatus', 'NOT LIKE', $this->statusIncomplete)
             ->whereNotIn('PsID', $doneIDs)
             ->get();
         if ($all->isNotEmpty()) {
@@ -361,10 +450,13 @@ class ScoreCalcs extends ScoreUtils
         }
         if ($hasMore) {
             return '<br /><br />Recalculating... <script type="text/javascript"> '
-                . 'setTimeout("window.location=\'?recalc=1&doneIDs=' . implode(',', $doneIDs)
-                . '\'", 1000); </script><style> #nodeSubBtns { display: none; } </style>';
+                . 'setTimeout("window.location=\'?recalc=1' 
+                . (($GLOBALS["SL"]->REQ->has('fixLightingErrors')) ? '&fixLightingErrors=1' : '')
+                . '&doneIDs=' . implode(',', $doneIDs) . '\'", 1000); </script>'
+                . '<style> #nodeSubBtns { display: none; } </style>';
         }
-        return '<br /><br />Recalculations Complete<br /><a href="/dash/powerscore-software-troubleshooting">Back</a>'
+        return '<br /><br />Recalculations Complete<br />'
+            . '<a href="/dash/powerscore-software-troubleshooting">Back</a>'
             . '<br /><style> #nodeSubBtns { display: none; } </style>';
     }
     
@@ -402,20 +494,25 @@ class ScoreCalcs extends ScoreUtils
             . sizeof($GLOBALS["CUST"]->v["fltComb"]) . '...</i>';
         if ($redir == 'report-ajax') {
             if ($nextFlt != '') {
-                return view('vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', [
+                return view('vendor.cannabisscore.nodes.'
+                    . '490-report-calculations-top-refresh-mid', [
                     "msg"     => $msg,
                     "nextFlt" => $nextFlt,
                     "psid"    => $this->v["ajax-psid"]
                 ])->render();
             }
-            return $msg . '<script type="text/javascript"> setTimeout("window.location=\'/calculated/read-'
+            return $msg . '<script type="text/javascript"> '
+                . 'setTimeout("window.location=\'/calculated/read-'
                 . $this->v["ajax-psid"] . '\'", 1000); </script>';
         }
         if ($nextFlt != '') {
-            return $msg . '<script type="text/javascript"> setTimeout("window.location=\'/dash/powerscore-software'
-                . '-troubleshooting?refresh=1&currFlt=' . $nextFlt . '\'", 1000); </script>';
+            return $msg . '<script type="text/javascript"> '
+                . 'setTimeout("window.location=\'/dash/powerscore-software'
+                . '-troubleshooting?refresh=1&currFlt=' . $nextFlt 
+                . '\'", 1000); </script>';
         }
-        return '<br /><br />Recalculations Complete!<br /><a href="/dash/powerscore-software-troubleshooting">Back</a>'
+        return '<br /><br />Recalculations Complete!<br />'
+            . '<a href="/dash/powerscore-software-troubleshooting">Back</a>'
             . '<br /><style> #nodeSubBtns { display: none; } </style>';
     }
     
@@ -423,57 +520,79 @@ class ScoreCalcs extends ScoreUtils
     {
         $this->v["allRnks"] = [];
         $eval = "\$allscores = " . $GLOBALS["SL"]->modelPath('PowerScore') 
-            . "::" . $this->filterAllPowerScoresPublic() . "->where('PsTimeType', "
-            . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")->where('PsEfficFacility', '>', 0)"
-            . "->where('PsEfficProduction', '>', 0)->where('PsEfficHvac', '>', 0)->where('PsEfficLighting', '>', 0)"
-            . "->select('PsID', 'PsEfficOverall', 'PsEfficFacility', 'PsEfficProduction', 'PsEfficHvac', "
-            . "'PsEfficLighting')->get();";
+            . "::" . $this->filterAllPowerScoresPublic() 
+            . "->where('PsTimeType', " . $GLOBALS["SL"]->def
+                ->getID('PowerScore Submission Type', 'Past') . ")"
+            . "->where('PsEfficFacility', '>', 0)"
+            . "->where('PsEfficProduction', '>', 0)"
+            . "->where('PsEfficHvac', '>', 0)->where('PsEfficLighting', '>', 0)"
+            . "->select('PsID', 'PsEfficOverall', 'PsEfficFacility', "
+            . "'PsEfficProduction', 'PsEfficHvac', 'PsEfficLighting')"
+            . "->get();";
         eval($eval);
         if ($allscores->isNotEmpty()) {
             foreach ($allscores as $s) {
-                $efficPercs = [ // current PowerScore is "better" than X others, and "worse" than Y others
+            // current PowerScore is "better" than X others, and "worse" than Y others
+                $efficPercs = [
                     "Facility"   => [ "better" => 0, "worse" => 0 ], 
                     "Production" => [ "better" => 0, "worse" => 0 ], 
                     "HVAC"       => [ "better" => 0, "worse" => 0 ], 
-                    "Lighting"   => [ "better" => 0, "worse" => 0 ]
-                    ];
+                    "Lighting"   => [ "better" => 0, "worse" => 0 ],
+                    "Carbon"     => [ "better" => 0, "worse" => 0 ], 
+                    "Water"      => [ "better" => 0, "worse" => 0 ], 
+                    "Waste"      => [ "better" => 0, "worse" => 0 ]
+                ];
                 foreach ($allscores as $s2) {
-                    $efficPercs["Facility"][($s->PsEfficFacility <= $s2->PsEfficFacility) ? "better" : "worse"]++;
-                    $efficPercs["Production"][($s->PsEfficProduction >= $s2->PsEfficProduction) ? "better" : "worse"]++;
-                    $efficPercs["HVAC"][($s->PsEfficHvac <= $s2->PsEfficHvac) ? "better" : "worse"]++;
-                    $efficPercs["Lighting"][($s->PsEfficLighting <= $s2->PsEfficLighting) ? "better" : "worse"]++;
+                    $efficPercs["Facility"][($s->PsEfficFacility <= $s2->PsEfficFacility) 
+                        ? "better" : "worse"]++;
+                    $efficPercs["Production"][($s->PsEfficProduction >= $s2->PsEfficProduction) 
+                        ? "better" : "worse"]++;
+                    $efficPercs["HVAC"][($s->PsEfficHvac <= $s2->PsEfficHvac) 
+                        ? "better" : "worse"]++;
+                    $efficPercs["Lighting"][($s->PsEfficLighting <= $s2->PsEfficLighting) 
+                        ? "better" : "worse"]++;
                 }
                 $this->v["allRnks"][$s->PsID] = RIIPSRankings::where('PsRnkPSID', $s->PsID)
                     ->where('PsRnkFilters', $this->searcher->v["urlFlts"])
                     ->first();
-                if (!$this->v["allRnks"][$s->PsID] || !isset($this->v["allRnks"][$s->PsID]->PsRnkID)) {
+                if (!$this->v["allRnks"][$s->PsID] 
+                    || !isset($this->v["allRnks"][$s->PsID]->PsRnkID)) {
                     $this->v["allRnks"][$s->PsID] = new RIIPSRankings;
-                    $this->v["allRnks"][$s->PsID]->PsRnkPSID    = $s->PsID;
-                    $this->v["allRnks"][$s->PsID]->PsRnkFilters = $this->searcher->v["urlFlts"];
-                    $this->v["allRnks"][$s->PsID]->PsRnkTotCnt  = $allscores->count();
+                    $this->v["allRnks"][$s->PsID]
+                        ->PsRnkPSID = $s->PsID;
+                    $this->v["allRnks"][$s->PsID]
+                        ->PsRnkFilters = $this->searcher->v["urlFlts"];
+                    $this->v["allRnks"][$s->PsID]
+                        ->PsRnkTotCnt = $allscores->count();
                 }
                 $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg = 0;
                 foreach ($efficPercs as $type => $percs) {
                     $this->v["allRnks"][$s->PsID]->{ 'PsRnk' . $type } 
-                        = 100*($percs["better"]/$this->v["allRnks"][$s->PsID]->PsRnkTotCnt);
-                    $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg += $this->v["allRnks"][$s->PsID]->{ 'PsRnk' . $type};
+                        = 100*($percs["better"]
+                            /$this->v["allRnks"][$s->PsID]->PsRnkTotCnt);
+                    $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg 
+                        += $this->v["allRnks"][$s->PsID]->{ 'PsRnk' . $type};
                 }
-                $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg = $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg/4;
+                $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg 
+                    = $this->v["allRnks"][$s->PsID]->PsRnkOverallAvg/4;
                 $this->v["allRnks"][$s->PsID]->save();
             }
             foreach ($allscores as $s) {
                 $efficPercs = [ "better" => 0, "worse" => 0 ];
                 foreach ($allscores as $s2) {
                     $efficPercs[($this->v["allRnks"][$s->PsID]->PsRnkOverallAvg 
-                        >= $this->v["allRnks"][$s2->PsID]->PsRnkOverallAvg) ? "better" : "worse"]++;
+                        >= $this->v["allRnks"][$s2->PsID]->PsRnkOverallAvg) 
+                        ? "better" : "worse"]++;
                 }
                 $this->v["allRnks"][$s->PsID]->PsRnkOverall 
-                    = 100*($efficPercs["better"]/$this->v["allRnks"][$s->PsID]->PsRnkTotCnt);
+                    = 100*($efficPercs["better"]
+                        /$this->v["allRnks"][$s->PsID]->PsRnkTotCnt);
                 $this->v["allRnks"][$s->PsID]->save();
                 if ($this->searcher->v["urlFlts"] == '') {
                     $s->PsEfficOverall = $this->v["allRnks"][$s->PsID]->PsRnkOverall;
                     $s->save();
-                } elseif ($this->searcher->v["urlFlts"] == ('&fltFarm=' . $s->PsCharacterize)) {
+                } elseif ($this->searcher->v["urlFlts"] 
+                    == ('&fltFarm=' . $s->PsCharacterize)) {
                     $s->PsEfficOverSimilar = $this->v["allRnks"][$s->PsID]->PsRnkOverall;
                     $s->save();
                 }
@@ -491,7 +610,8 @@ class ScoreCalcs extends ScoreUtils
         $this->v["sessData"] = $this->sessData->dataSets;
         if (isset($this->sessData->dataSets["PowerScore"])) {
             $this->v["psid"] = $this->sessData->dataSets["PowerScore"][0]->getKey();
-            $this->v["hasRefresh"] = (($GLOBALS["SL"]->REQ->has('refresh')) ? '&refresh=1' : '')
+            $this->v["hasRefresh"] 
+                = (($GLOBALS["SL"]->REQ->has('refresh')) ? '&refresh=1' : '')
                 . (($GLOBALS["SL"]->REQ->has('print')) ? '&print=1' : '');
             $GLOBALS["SL"]->loadStates();
             return true;

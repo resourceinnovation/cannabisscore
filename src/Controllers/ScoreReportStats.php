@@ -28,6 +28,9 @@ class ScoreReportStats
         foreach ($lookups->v as $var => $val) {
             $this->v[$var] = $val;
         }
+        $this->v["psComplete"] = 243;
+            //[242, 243, 364],
+            //['Incomplete', 'Complete', 'Archived']
         $this->v["sfFarms"] = [
             [144, 145, 143],
             ['Indoor', 'Greenhouse/Mixed', 'Outdoor']

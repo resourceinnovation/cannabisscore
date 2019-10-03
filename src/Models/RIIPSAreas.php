@@ -33,6 +33,11 @@ class RIIPSAreas extends Model
 		'PsAreaWaterFreq', 
 		'PsAreaWateringMethod', 
 		'PsAreaWaterEffic', 
+        'PsAreaSqFtPerFix1', 
+        'PsAreaSqFtPerFix2', 
+        'PsAreaCommissioning', 
+        'PsAreaTemperature', 
+        'PsAreaHumidity', 
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -9,14 +9,13 @@
     <div class="row" style="max-width: 720px;">
         <div class="col-8">
             <p>
-            Only showing PowerScores with Lighting Sub-Scores greater than zero. 
-            Submissions can throw a lighting error for each stage which uses artificial lighting,
-            but does not have fixture and wattage counts for that stage.
-            <nobr><a href="javascript:;" onClick="return loadFullReport();">Lighting Report</a></nobr>
+            Only showing PowerScores with Lighting Sub-Scores greater than zero, 
+            and not archived.
+            <!--- <nobr><a href="javascript:;" onClick="return loadFullReport();">Lighting Report</a></nobr> --->
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
                 @else value="0" @endif >
-            <br /><b>Found {{ number_format($totCnt) }}</b>
+            <br /><b>Found {{ number_format($totCnt) }} PowerScores</b>
             </p>
         </div>
         <div class="col-4">
@@ -75,14 +74,19 @@
                     @if ($a == 3) <th>Mother Location</th> @endif
                     <th>{{ $sfAreasGrow[1][$a] }} Size</th>
                     <th>{{ $sfAreasGrow[1][$a] }} Watts</th>
-                    <th>{{ $sfAreasGrow[1][$a] }} Desc</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} <nobr>Sq Ft</nobr> / Fixture</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} System #1</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} System #2</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} System #3</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} System #4</th>
                 @endforeach
                 </tr>
             @endif
             <tr>
             @foreach ($row as $c => $col)
                 @if ($c != 3 || !$GLOBALS["SL"]->REQ->has('fltNoLgtError'))
-                    <?php $cls = ((in_array($c, [4, 6, 10, 14, 18, 23, 28, 33, 40])) ? 'class="brdLft"' : ''); ?>
+                    <?php $cls = ((in_array($c, [4, 6, 10, 14, 18, 27, 36, 45, 56])) 
+                        ? 'class="brdLft"' : ''); ?>
                     @if ($c == 0) <th {!! $cls !!} >{!! $col !!}</th>
                     @else <td {!! $cls !!} >{!! $col !!}</td> @endif
                 @endif
@@ -99,7 +103,6 @@ body { overflow-x: visible; }
 </style>
 
 <script type="text/javascript">
-
 function loadExcel() {
     if (document.getElementById("toExcelID")) {
         document.getElementById("toExcelID").value = 1;
