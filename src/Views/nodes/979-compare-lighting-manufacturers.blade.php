@@ -3,13 +3,16 @@
 <div id="node979" class="nodeWrap">
 
 <div class="slCard greenline">
+    <a class="btn btn-secondary btn-sm pull-right"
+        href="#raw">&darr; Raw Data</a>
     <h3 class="slBlueDark">
         Competitive Performance <nobr>Dashboard for</nobr>
         <nobr>{{ $lightManuName }}</nobr>
     </h3>
     <div class="row">
         <div class="col-4">
-            <select name="growthStage" class="form-control">
+            <select name="growthStage" class="form-control" autocomplete="off"
+                onChange="alert('Coming Soon!');">
                 <option value="" SELECTED >Using your lights during any stage</option>
                 <option value="flower" >Using your lights for flowering</option>
                 <option value="veg" >Using your lights for vegetative</option>
@@ -18,7 +21,18 @@
             </select>
         </div>
         <div class="col-4">
-            <select name="climateZone" class="form-control">
+            <select name="fltFarm" id="filtFarmID" autocomplete="off" 
+                class="form-control" 
+                onChange="alert('Coming Soon!');">
+                <option value="0" SELECTED >All farm types</option>
+                <option value="143">Outdoor</option>
+                <option value="144">Indoor</option>
+                <option value="145">Greenhouse/Hybrid/Mixed Light</option>
+            </select>
+        </div>
+        <div class="col-4">
+            <select name="climateZone" class="form-control" autocomplete="off"
+                onChange="alert('Coming Soon!');">
                 <option value="" SELECTED >All climate zones</option>
                 <option value="" >Hot-Humid</option>
                 <option value="" >Mixed-Humid</option>
@@ -27,13 +41,10 @@
                 <option value="" >Subarctic</option>
             </select>
         </div>
-        <div class="col-4 taR">
-            <a href="#raw" class="btn btn-secondary btn-sm pull-right"
-                >&darr; Raw Data</a>
-        </div>
     </div>
 </div>
 <div class="mB10">&nbsp;</div>
+
 
 <div class="row">
     <div class="col-md-6">
@@ -49,7 +60,6 @@
     @endforeach
     </div>
 </div>
-
 
 <div class="nodeAnchor"><a name="raw"></a></div>
 <p>&nbsp;</p>
@@ -96,13 +106,14 @@
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ $lgtCompetData->dataLines[1]->scores[$l] }} 
+                    <p><nobr>{{ $GLOBALS["SL"]->sigFigs(
+                        $lgtCompetData->dataLines[1]->scores[$l], 3) }} 
                     <span class="fPerc66 slGrey">{{ $leg[2] }}</span></nobr></p>
                 @endforeach
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ $leg[3] }} 
+                    <p><nobr>{{ round($leg[3]) }} 
                     <span class="fPerc66 slGrey">scores compared</span></nobr></p>
                 @endforeach
                 </div>
@@ -117,24 +128,31 @@
     @if ($d > 1)
     <div class="col-md-4">
         <div class="slCard greenline">
-            <div style="min-height: 84px;"><h5>{{ $dat->title }}</h5></div>
+            <div style="min-height: 84px;">
+                <h5>{{ $dat->title }}</h5>
+            </div>
             <div class="row">
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ str_replace('Efficiency', '', $leg[1]) }}</nobr></p>
+                    <p><nobr>
+                        {{ str_replace('Efficiency', '', $leg[1]) }}
+                    </nobr></p>
                 @endforeach
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ $dat->scores[$l] }} 
-                        <span class="fPerc66 slGrey">{{ $leg[2] }}</span></nobr></p>
+                    <p><nobr>{{ $GLOBALS["SL"]->sigFigs(
+                            $dat->scores[$l], 3) }} 
+                        <span class="fPerc66 slGrey">{{ $leg[2] }}</span>
+                    </nobr></p>
                 @endforeach
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ $dat->ranks[$l] }} 
+                    <p><nobr>{{ round($dat->ranks[$l]) }} 
                       {!! $GLOBALS["SL"]->numSupscript(round($dat->ranks[$l])) !!}
-                      <span class="fPerc66 slGrey">percentile</span></nobr></p>
+                      <span class="fPerc66 slGrey">percentile</span>
+                    </nobr></p>
                 @endforeach
                 </div>
             </div>
@@ -150,7 +168,8 @@
     <p><b>Your Individual PowerScore Records:</b><br />
     @forelse ($yourPsIDs as $l => $psid) 
         @if ($l > 0) , @endif
-        <a href="/calculated/read-{{ $psid }}" target="_blank">#{{ $psid }}</a>
+        <a href="/calculated/read-{{ $psid }}" 
+            target="_blank">#{{ $psid }}</a>
     @empty
     @endforelse
     </p>

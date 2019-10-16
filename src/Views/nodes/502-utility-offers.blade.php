@@ -14,13 +14,11 @@
             </div>
         </div>
     </div>
-    <style> #node501 { margin: 40px 0px; } </style>
 @else
     <h5><i class="fa fa-star" aria-hidden="true"></i> 
        Your farm may be eligible for upgrade incentives from your utility.</h5>
     <p>
         We encourage you to contact your electricity provider to ask about incentives on efficient lighting and HVAC.
     </p>
-    <br /><br />
-    <style> #node501 { margin: 40px 0px; } </style>
 @endif
+<style> #node501 { margin-top: 40px; } </style>

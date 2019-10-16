@@ -81,6 +81,7 @@ class RIIPowerScore extends Model
 		'PsLightingError',
 		'PsCrop',
 		'PsCropOther',
+		'PsOnsiteType',
     ];
     
     // END SurvLoop auto-generated portion of Model

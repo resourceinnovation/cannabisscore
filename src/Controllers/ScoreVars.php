@@ -131,7 +131,8 @@ class ScoreVars extends TreeSurvForm
                 || intVal($coreRec->PsSubmissionProgress) <= 0) {
                 return true;
             }
-            if (!isset($coreRec->PsZipCode) || trim($coreRec->PsZipCode) == '') {
+            if (!isset($coreRec->PsZipCode) 
+                || trim($coreRec->PsZipCode) == '') {
                 return true;
             }
         }
@@ -153,7 +154,7 @@ class ScoreVars extends TreeSurvForm
     public function tblsInPackage()
     {
         if ($this->dbID == 1) {
-            return ['PSUtilities', 'PSUtiliZips'];
+            return [ 'PSUtilities', 'PSUtiliZips' ];
         }
         return [];
     }
@@ -179,7 +180,10 @@ class ScoreVars extends TreeSurvForm
     {
         $area = $this->sessData->getRowById('PSAreas', $areaID);
         if ($area && isset($area->PsAreaType)) {
-            return $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $area->PsAreaType);
+            return $GLOBALS["SL"]->def->getVal(
+                'PowerScore Growth Stages', 
+                $area->PsAreaType
+            );
         }
         return '';
     }

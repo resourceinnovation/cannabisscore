@@ -27,7 +27,8 @@ class ScoreUtils extends ScorePowerUtilities
     public function multiRecordCheckIntro($cnt = 1)
     {
         return '<p>&nbsp;</p><h4>You Have ' 
-            . (($cnt == 1) ? 'An Unfinished PowerScore' : 'Unfinished PowerScores')
+            . (($cnt == 1) ? 'An Unfinished PowerScore' 
+                : 'Unfinished PowerScores')
             . '</h4>';
     }
     
@@ -39,24 +40,28 @@ class ScoreUtils extends ScorePowerUtilities
     public function multiRecordCheckRowSummary($coreRecord)
     {
         return '<div class="mT5 mB5 slGrey">Last Edited: ' 
-            . date('n/j/y, g:ia', strtotime($coreRecord[1]->updated_at)) 
+            . date('n/j/y, g:ia', 
+                strtotime($coreRecord[1]->updated_at)) 
             . '<br />Percent Complete: ' 
-            . $this->rawOrderPercent($coreRecord[1]->PsSubmissionProgress) 
+            . $this->rawOrderPercent(
+                $coreRecord[1]->PsSubmissionProgress) 
             . '%</div>';
     }
     
     protected function checkScore()
     {
-    	if (isset($this->sessData->dataSets["PowerScore"]) 
-    		&& isset($this->sessData->dataSets["PowerScore"][0]->PsZipCode)) {
-			$this->sessData->updateZipInfo(
-                $this->sessData->dataSets["PowerScore"][0]->PsZipCode, 
-				'PowerScore', 
-                'PsState', 
-                'PsCounty', 
-                'PsAshrae', 
-                'PsCountry'
-            );
+    	if (isset($this->sessData->dataSets["PowerScore"])) {
+            $ps = $this->sessData->dataSets["PowerScore"][0];
+    		if (isset($ps->PsZipCode)) {
+    			$this->sessData->updateZipInfo(
+                    $ps->PsZipCode, 
+    				'PowerScore', 
+                    'PsState', 
+                    'PsCounty', 
+                    'PsAshrae', 
+                    'PsCountry'
+                );
+            }
 		}
 		return true;
 	}

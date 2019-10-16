@@ -2,20 +2,20 @@
 
 <div class="slCard greenline nodeWrap">
     <input type="hidden" name="toExcel" id="toExcelID" value="0" >
-    <!--- <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
+    <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         href="javascript:;" onClick="return loadExcel();"
-        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
     <h1 class="slBlueDark">Lighting Report</h1>
     <div class="row">
         <div class="col-8">
             <p>
             Many columns are clickable to load the report listing all 
             individual reports matching the filter (when possible).
-            Small subscript counts are the number of growing areas (reported in
-            powerscores) upon which each calculated average is based.
-            This report only shows PowerScores with Lighting Sub-Scores greater than zero
-            (AKA use any artifical lighting), and have not been archived.
-            <!--- <nobr><a href="javascript:;" onClick="return loadRawCalcs();">Raw Caclulations</a></nobr> --->
+            Small subscript counts are the number of growing areas 
+            (reported in powerscores) upon which each calculated 
+            average is based. This report only shows PowerScores 
+            with Lighting Sub-Scores greater than zero (AKA use 
+            any artifical lighting), and have not been archived.
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
                 @else value="0" @endif >
@@ -32,17 +32,21 @@
             </select>
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
-                    name="fltNoNWPCC" id="fltNoNWPCCID" value="1" onClick="return gatherFilts();"
+                    name="fltNoNWPCC" id="fltNoNWPCCID" 
+                    value="1" onClick="return gatherFilts();"
                     @if ($GLOBALS["SL"]->REQ->has('fltNoNWPCC') 
-                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) CHECKED @endif
+                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) 
+                        CHECKED @endif
                     > Exclude NWPCC Imports
             </label>
             <!---
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
-                    name="fltNoLgtError" id="fltNoLgtErrorID" value="1" onClick="return gatherFilts();"
+                    name="fltNoLgtError" id="fltNoLgtErrorID" 
+                    value="1" onClick="return gatherFilts();"
                     @if ($GLOBALS["SL"]->REQ->has('fltNoLgtError') 
-                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) CHECKED @endif
+                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) 
+                        CHECKED @endif
                     > Exclude Lighting Errors
             </label>
             --->
@@ -51,54 +55,73 @@
 </div>
 
 <div class="nodeAnchor"><a name="flowers"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] as $typeID => $typeName)
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
+    as $typeID => $typeName)
     <div class="slCard greenline nodeWrap">
     <h3>
-        @if ($typeID == 144) 1a. @else 1b. @endif {{ $typeName }}
+        @if ($typeID == 144) 1a. 
+        @else 1b. 
+        @endif {{ $typeName }}
         Scores by Type of Flowering Lighting
     </h3>
     {!! $scoreSets["statScorLgtF" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' . $typeID . '&fltLighting=162-[[val]]')
-    !!}
+        '/dash/compare-powerscores?fltFarm=' 
+            . $typeID . '&fltLighting=162-[[val]]'
+    ) !!}
     </div>
 @endforeach
 
 <div class="nodeAnchor"><a name="veg"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] as $typeID => $typeName)
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
+    as $typeID => $typeName)
     <div class="slCard greenline nodeWrap">
     <h3>
-        @if ($typeID == 144) 2a. @elseif ($typeID == 145) 2b. @else 2c. @endif {{ $typeName }}
+        @if ($typeID == 144) 2a. 
+        @elseif ($typeID == 145) 2b. 
+        @else 2c. 
+        @endif {{ $typeName }}
         Scores by Type of Vegetative Lighting
     </h3>
     {!! $scoreSets["statScorLgtV" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' . $typeID . '&fltLighting=161-[[val]]')
-    !!}
+        '/dash/compare-powerscores?fltFarm=' 
+            . $typeID . '&fltLighting=161-[[val]]'
+    ) !!}
     </div>
 @endforeach
 
 <div class="nodeAnchor"><a name="clones"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
+    as $typeID => $typeName)
     <div class="slCard greenline nodeWrap">
     <h3>
-        @if ($typeID == 144) 3a. @elseif ($typeID == 145) 3b. @else 3c. @endif {{ $typeName }}
+        @if ($typeID == 144) 3a. 
+        @elseif ($typeID == 145) 3b. 
+        @else 3c. 
+        @endif {{ $typeName }}
         Scores by Type of Clone Lighting
     </h3>
     {!! $scoreSets["statScorLgtC" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' . $typeID . '&fltLighting=160-[[val]]')
-    !!}
+        '/dash/compare-powerscores?fltFarm=' 
+            . $typeID . '&fltLighting=160-[[val]]'
+    ) !!}
     </div>
 @endforeach
 
 <div class="nodeAnchor"><a name="mothers"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] as $typeID => $typeName)
+@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
+    as $typeID => $typeName)
     <div class="slCard greenline nodeWrap">
     <h3>
-        @if ($typeID == 144) 4a. @elseif ($typeID == 145) 4b. @else 4c. @endif {{ $typeName }}
+        @if ($typeID == 144) 4a. 
+        @elseif ($typeID == 145) 4b. 
+        @else 4c. 
+        @endif {{ $typeName }}
         Scores by Type of Mother Lighting
     </h3>
     {!! $scoreSets["statScorLgtM" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' . $typeID . '&fltLighting=237-[[val]]')
-    !!}
+        '/dash/compare-powerscores?fltFarm=' 
+            . $typeID . '&fltLighting=237-[[val]]'
+    ) !!}
     </div>
 @endforeach
 
@@ -121,7 +144,7 @@ function loadRawCalcs() {
 function gatherFilts() {
     var baseUrl = "?filt=1";
     if (document.getElementById("toExcelID") && parseInt(document.getElementById("toExcelID").value) == 1) {
-        baseUrl = "?excel=1";
+        baseUrl = "?excel=1&refresh=1";
     } else if (document.getElementById("rawCalcsID") && parseInt(document.getElementById("rawCalcsID").value) == 1) {
         baseUrl = "?rawCalcs=1";
     }

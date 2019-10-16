@@ -34,7 +34,8 @@ class ScoreListings
         $this->v["frmTypIn"]  = $GLOBALS["SL"]->def
             ->getID('PowerScore Farm Types', 'Indoor');
         $this->v["frmTypGrn"] = $GLOBALS["SL"]->def
-            ->getID('PowerScore Farm Types', 'Greenhouse/Hybrid/Mixed Light');
+            ->getID('PowerScore Farm Types', 
+                'Greenhouse/Hybrid/Mixed Light');
 
         $this->searcher = new CannabisScoreSearcher;
     }
@@ -43,7 +44,8 @@ class ScoreListings
     {
         if ($GLOBALS["SL"]->REQ->has('random') 
             && intVal($GLOBALS["SL"]->REQ->get('random')) == 1) {
-            $randScore = RIIPowerScore::where('PsStatus', $this->v["defCmplt"])
+            $randScore = RIIPowerScore::where('PsStatus', 
+                $this->v["defCmplt"])
                 ->where('PsEfficFacility', '>', 0)
                 ->where('PsEfficProduction', '>', 0)
                 ->inRandomOrder()
@@ -73,7 +75,9 @@ class ScoreListings
         ];
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $ps) {
-                $this->searcher->v["allmores"][$ps->PsID] = [ "areaIDs" => [] ];
+                $this->searcher->v["allmores"][$ps->PsID] = [
+                    "areaIDs" => [] 
+                ];
                 $this->searcher->v["allmores"][$ps->PsID]["areas"] 
                     = RIIPSAreas::where('PsAreaPSID', $ps->PsID)->get();
                 if ($this->searcher->v["allmores"][$ps->PsID]["areas"]->isNotEmpty()) {

@@ -10,7 +10,15 @@ class RIIManufacturers extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'ManuName', 
+        'ManuName', 
+        'ManuCntFlower', 
+        'ManuCntVeg', 
+        'ManuCntClone', 
+        'ManuCntMother', 
+        'ManuIDsFlower', 
+        'ManuIDsVeg', 
+        'ManuIDsClone', 
+        'ManuIDsMother', 
     ];
     
     // END SurvLoop auto-generated portion of Model

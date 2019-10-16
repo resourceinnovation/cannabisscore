@@ -52,56 +52,71 @@ class ScoreReportLighting extends ScoreReportStats
         foreach ($this->v["sfFarms"][0] as $i => $farmDef) {
             $this->v["lgtSqft"][$farmDef] = [];
             foreach ($this->v["sfAreasGrow"][0] as $i => $areaDef) {
-                $this->v["lgtSqft"][$farmDef][$areaDef] = [ 0, 0, [] ];
+                $this->v["lgtSqft"][$farmDef][$areaDef] = [
+                    0, 
+                    0, 
+                    [] 
+                ];
                 foreach ($this->v["sfLgts"][0] as $i => $lgtDef) {
-                    $this->v["lgtSqft"][$farmDef][$areaDef][2][$lgtDef] = [ 0, [] ];
+                    $this->v["lgtSqft"][$farmDef][$areaDef][2][$lgtDef] = [
+                        0, 
+                        [] 
+                    ];
                 }
             }
         }
 
         $this->initSearcher(1);
-        $this->searcher->loadAllScoresPublic(
-            "->where('PsEfficLighting', '>', 0.00001)"
+        $qry = "->where('PsEfficLighting', '>', 0.000001)"
             . "->where('PsEfficLightingStatus', '=', " 
-                . $this->v["psComplete"] . ")"
-        );
+            . $this->v["psComplete"] . ")";
+        $this->searcher->loadAllScoresPublic($qry);
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
                 $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', '>', 0)
-                    ->where('PsAreaType', 'NOT LIKE', 163)
+                    ->whereIn('PsAreaType', [
+                        $this->v["areaTypes"]["Flower"],
+                        $this->v["areaTypes"]["Veg"],
+                        $this->v["areaTypes"]["Clone"],
+                        $this->v["areaTypes"]["Mother"]
+                    ])
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        $setFlt = "";
-                        if ($this->v["areaTypes"]["Flower"] == $area->PsAreaType) {
-                            $set = "statScorLgtF" . $ps->PsCharacterize;
-                        } elseif ($this->v["areaTypes"]["Veg"] == $area->PsAreaType) {
-                            $set = "statScorLgtV" . $ps->PsCharacterize;
-                        } elseif ($this->v["areaTypes"]["Clone"] == $area->PsAreaType) {
-                            $set = "statScorLgtC" . $ps->PsCharacterize;
-                        } elseif ($this->v["areaTypes"]["Mother"] == $area->PsAreaType) {
-                            $set = "statScorLgtM" . $ps->PsCharacterize;
+                        $set = "statScorLgt";
+                        switch ($area->PsAreaType) {
+                            case $this->v["areaTypes"]["Flower"]:
+                                $set .= "F"; break;
+                            case $this->v["areaTypes"]["Veg"]:
+                                $set .= "V"; break;
+                            case $this->v["areaTypes"]["Clone"]:
+                                $set .= "C"; break;
+                            case $this->v["areaTypes"]["Mother"]:
+                                $set .= "M"; break;
                         }
-                        $lgts = RIIPSLightTypes::where('PsLgTypAreaID', $area->PsAreaID)
-                            ->get();
-                        if ($lgts->isNotEmpty()) {
-                            foreach ($lgts as $lgt) {
-                                if (isset($lgt->PsLgTypLight) 
-                                    && intVal($lgt->PsLgTypLight) > 0
-                                    && isset($lgt->PsLgTypCount) 
-                                    && intVal($lgt->PsLgTypCount) > 0) {
-                                    $this->v["scoreSets"][$set]->addRecFilt(
-                                        'lgt' . $lgt->PsLgTypLight, 
-                                        1, 
-                                        $ps->PsID
-                                    );
+                        $set .= $ps->PsCharacterize;
+                        if (isset($this->v["scoreSets"][$set])) {
+                            $lgts = RIIPSLightTypes::where(
+                                'PsLgTypAreaID', $area->PsAreaID)
+                                ->get();
+                            if ($lgts->isNotEmpty()) {
+                                foreach ($lgts as $lgt) {
+                                    if (isset($lgt->PsLgTypLight) 
+                                        && intVal($lgt->PsLgTypLight) > 0
+                                        && isset($lgt->PsLgTypCount) 
+                                        && intVal($lgt->PsLgTypCount) > 0) {
+                                        $this->v["scoreSets"][$set]->addRecFilt(
+                                            'lgt' . $lgt->PsLgTypLight, 
+                                            1, 
+                                            $ps->PsID
+                                        );
+                                    }
                                 }
                             }
+                            $this->v["scoreSets"][$set]->addScoreData($ps);
+                            $this->v["scoreSets"][$set]->resetRecFilt();
                         }
-                        $this->v["scoreSets"][$set]->addScoreData($ps);
-                        $this->v["scoreSets"][$set]->resetRecFilt();
                     }
                 }
                 unset($areas);
@@ -113,26 +128,36 @@ class ScoreReportLighting extends ScoreReportStats
         }
 
         if ($GLOBALS["SL"]->REQ->has('excel') 
-            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            && intVal($GLOBALS["SL"]->REQ->excel) == 1) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.983-lighting-report-excel', 
                 $this->v
             )->render();
-            $excelFile = $this->getExportFilename() . '.xls';
-            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $excelFile);
+            $excelFile = $this->getExportFilename() 
+                . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool(
+                $innerTable, 
+                $excelFile
+            );
             exit;
         }
 
         $GLOBALS["SL"]->x["needsCharts"] = true;
-        return view('vendor.cannabisscore.nodes.983-lighting-report', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.983-lighting-report', 
+            $this->v
+        )->render();
     }
 
     public function printLightingRawCalcs($nID)
     {
         $this->initClimateFilts();
         $this->initSearcher(1); 
-        $this->searcher->loadAllScoresPublic("->where('PsEfficLighting', '>', 0.00001)"
-            . "->where('PsEfficLightingStatus', '=', " . $this->v["psComplete"] . ")");
+        $this->searcher->loadAllScoresPublic(
+            "->where('PsEfficLighting', '>', 0.00001)"
+            . "->where('PsEfficLightingStatus', '=', " 
+            . $this->v["psComplete"] . ")"
+        );
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         $blank = '<span class="slGrey">-</span>';
         if ($this->searcher->v["allscores"]->isNotEmpty()) {

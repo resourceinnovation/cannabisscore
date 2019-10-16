@@ -590,27 +590,136 @@ class ScoreAdminMisc extends ScoreCalcs
                 $com->save();
                 return $this->redir('/calculated/read-' . $this->v["ps"], true);
             }
-            return view('vendor.cannabisscore.nodes.845-admin-communications-log-form', $this->v)->render();
+            return view(
+                'vendor.cannabisscore.nodes.845-admin-communications-log-form', 
+                $this->v
+            )->render();
         }
         return '';
     }
     
+    /**
+     * Print admin overview tools to manage lighting manufacturers.
+     *
+     * @param int $nID
+     * @return string
+     */
     protected function printMgmtManufacturers($nID = -3)
     {
-        return view('vendor.cannabisscore.nodes.914-manage-manufacturers', [
-            "manus" => RIIManufacturers::orderBy('ManuName', 'asc')->get()            
-            ])->render();
+        $this->v["manus"] = RIIManufacturers::orderBy('ManuName', 'asc')
+            ->get();
+        $this->cntManufacturerAdoption();
+        return view(
+            'vendor.cannabisscore.nodes.914-manage-manufacturers', 
+            $this->v
+        )->render();
     }
     
+    /**
+     * Update manufacturer counts for how many rooms 
+     * in the official data set use their lights.
+     *
+     * @return boolean
+     */
+    protected function cntManufacturerAdoption()
+    {
+        $this->v["errorNotes"] = '';
+        if ($this->v["manus"]->isNotEmpty()) {
+            foreach ($this->v["manus"] as $m => $manu) {
+                $this->v["manus"][$m]->ManuCntFlower 
+                    = $this->v["manus"][$m]->ManuCntVeg
+                    = $this->v["manus"][$m]->ManuCntClone
+                    = $this->v["manus"][$m]->ManuCntMother = 0;
+            }
+            $areaIDs = $areaIDsDone = [];
+            $chk = RIIPSAreas::whereIn('PsAreaPSID', function($query){
+                $query->select('PsID')
+                ->from(with(new RIIPowerScore)->getTable())
+                ->where('PsStatus', 243)
+                ->where('PsEfficLightingStatus', 243);
+            })->select('PsAreaID')->get();
+            if ($chk->isNotEmpty()) {
+                foreach ($chk as $area) {
+                    $areaIDs[] = $area->PsAreaID;
+                }
+            }
+            $lgts = DB::table('RII_PSLightTypes')
+                ->join('RII_PSAreas', 'RII_PSAreas.PsAreaID', 
+                    '=', 'RII_PSLightTypes.PsLgTypAreaID')
+                ->where('RII_PSLightTypes.PsLgTypMake', 'NOT LIKE', '')
+                ->whereNotNull('RII_PSLightTypes.PsLgTypMake')
+                ->whereIn('RII_PSLightTypes.PsLgTypAreaID', $areaIDs)
+                ->select(
+                    'RII_PSLightTypes.PsLgTypMake', 
+                    'RII_PSAreas.PsAreaType', 
+                    'RII_PSAreas.PsAreaPSID'
+                )
+                ->get();
+            foreach ($this->v["manus"] as $m => $manu) {
+                if ($lgts->isNotEmpty()) {
+                    $this->cntManufacturerAdoptionOne($m, $lgts);
+                }
+                $this->v["manus"][$m]->save();
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Count how many rooms in the official 
+     * use this manufacturer's lights.
+     *
+     * @param  int $m
+     * @param  array $lgts
+     * @return boolean
+     */
+    protected function cntManufacturerAdoptionOne($m, $lgts)
+    {
+        $found = [
+            'Flower' => [],
+            'Veg'    => [],
+            'Clone'  => [],
+            'Mother' => []
+        ];
+        foreach($lgts as $lgt) {
+            $nick = $this->getStageNick($lgt->PsAreaType);
+            $pos = stripos(
+                ' ' . $lgt->PsLgTypMake . ' ', 
+                ' ' . $this->v["manus"][$m]->ManuName . ' '
+            );
+            if ($pos !== false
+                && !in_array($lgt->PsAreaPSID, $found[$nick])) {
+                $found[$nick][] = $lgt->PsAreaPSID;
+            }
+        }
+        $stages = ['Flower', 'Veg', 'Clone', 'Mother'];
+        foreach ($stages as $nick) {
+            $this->v["manus"][$m]->{ 'ManuCnt' . $nick } 
+                += sizeof($found[$nick]);
+            $this->v["manus"][$m]->{ 'ManuIDs' . $nick } 
+                = ',' . implode(',', $found[$nick]) . ',';
+        }
+        return true;
+    }
+    
+    /**
+     * Admins can add manufacturers to the database.
+     *
+     * @param  int $nID
+     * @return boolean
+     */
     protected function addManufacturers($nID = -3)
     {
-        if ($GLOBALS["SL"]->REQ->has('addManu') && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
-            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addManu'));
+        if ($GLOBALS["SL"]->REQ->has('addManu') 
+            && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
+            $lines = $GLOBALS["SL"]->mexplode("\n", 
+                $GLOBALS["SL"]->REQ->get('addManu'));
             if (sizeof($lines) > 0) {
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
                     if ($line != '') {
-                        $chk = RIIManufacturers::where('ManuName', 'LIKE', $line)
+                        $chk = RIIManufacturers::where(
+                                'ManuName', 'LIKE', $line)
                             ->first();
                         if (!$chk || !isset($chk->ManuID)) {
                             $chk = new RIIManufacturers;
@@ -624,17 +733,34 @@ class ScoreAdminMisc extends ScoreCalcs
         return true;
     }
     
+    /**
+     * List lighting models by manufacturer.
+     *
+     * @param  int $nID
+     * @return boolean
+     */
     protected function printMgmtLightModels($nID = -3)
     {
         $this->loadManufactIDs();
         $this->v["models"] = $this->getAllLightModels();
-        return view('vendor.cannabisscore.nodes.917-manage-lighting-models', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.917-manage-lighting-models', 
+            $this->v
+        )->render();
     }
     
+    /**
+     * Admins can add lighting models to the database.
+     *
+     * @param  int $nID
+     * @return boolean
+     */
     protected function addLightModels($nID = -3)
     {
-        if ($GLOBALS["SL"]->REQ->has('addModels') && trim($GLOBALS["SL"]->REQ->get('addModels')) != '') {
-            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addModels'));
+        if ($GLOBALS["SL"]->REQ->has('addModels') 
+            && trim($GLOBALS["SL"]->REQ->get('addModels')) != '') {
+            $lines = $GLOBALS["SL"]->mexplode("\n", 
+                $GLOBALS["SL"]->REQ->get('addModels'));
             if (sizeof($lines) > 0) {
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
@@ -644,14 +770,16 @@ class ScoreAdminMisc extends ScoreCalcs
                             foreach ($cols as $i => $col) {
                                 $cols[$i] = trim($col);
                             }
-                            $manu = RIIManufacturers::where('ManuName', 'LIKE', $cols[0])
+                            $manu = RIIManufacturers::where(
+                                    'ManuName', 'LIKE', $cols[0])
                                 ->first();
                             if (!$manu || !isset($manu->ManuName)) {
                                 $manu = new RIIManufacturers;
                                 $manu->ManuName = $cols[0];
                                 $manu->save();
                             }
-                            $chk = RIILightModels::where('LgtModManuID', 'LIKE', $manu->ManuID)
+                            $chk = RIILightModels::where(
+                                    'LgtModManuID', 'LIKE', $manu->ManuID)
                                 ->where('LgtModName', 'LIKE', $cols[1])
                                 ->first();
                             if (!$chk || !isset($chk->LgtModID)) {
@@ -675,7 +803,9 @@ class ScoreAdminMisc extends ScoreCalcs
         $chk = RIIPSAreas::where('PsAreaPSID', 169)
             ->get();
         if ($chk->isNotEmpty()) {
-            foreach ($chk as $i => $row) $tmp .= ', ' . $row->getKey();
+            foreach ($chk as $i => $row) {
+                $tmp .= ', ' . $row->getKey();
+            }
         }
         echo $tmp . '<br />';
         return true;

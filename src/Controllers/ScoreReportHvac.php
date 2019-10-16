@@ -58,8 +58,11 @@ class ScoreReportHvac extends ScoreReportStats
 
         $this->v["totCnt"] = 0;
         $this->initSearcher(1);
-        $this->searcher->loadAllScoresPublic("->where('PsEfficHvac', '>', 0.00001)"
-            . "->where('PsEfficHvacStatus', '=', " . $this->v["psComplete"] . ")");
+        $this->searcher->loadAllScoresPublic(
+            "->where('PsEfficHvac', '>', 0.00001)"
+            . "->where('PsEfficHvacStatus', '=', " 
+            . $this->v["psComplete"] . ")"
+        );
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             $this->v["totCnt"] = $this->searcher->v["allscores"]->count();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {

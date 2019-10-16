@@ -96,7 +96,8 @@ class ScoreLightModels extends ScoreVars
     protected function getAllLightModels()
     {
         return DB::table('RII_LightModels')
-            ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', '=', 'RII_LightModels.LgtModManuID')
+            ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', 
+                '=', 'RII_LightModels.LgtModManuID')
             ->orderBy('RII_Manufacturers.ManuName', 'asc')
             ->orderBy('RII_LightModels.LgtModName', 'asc')
             ->select('RII_LightModels.*')
@@ -119,9 +120,10 @@ class ScoreLightModels extends ScoreVars
             "model" => ''
             ];
         if ($request->has('group') && trim($request->get('group')) != '') {
-            $this->v["lgtSrch"]["type"] 
-                = $GLOBALS["SL"]->def->getVal('PowerScore Light Types', intVal($request->get('group')));
-            $this->v["results"]["types"] = $this->convertLightScoreType2ImportType($request->get('group'));
+            $this->v["lgtSrch"]["type"] = $GLOBALS["SL"]->def
+                ->getVal('PowerScore Light Types', intVal($request->get('group')));
+            $this->v["results"]["types"] = $this
+                ->convertLightScoreType2ImportType($request->get('group'));
         }
         if ($request->has('make') && trim($request->get('make')) != '') {
             $this->v["lgtSrch"]["make"] = trim($request->get('make'));
@@ -137,26 +139,35 @@ class ScoreLightModels extends ScoreVars
                     $this->v["results"]["set"][] = $model;
                 }
             }
-        } elseif ($this->v["lgtSrch"]["type"] != '' && $this->v["lgtSrch"]["make"] == '' 
+        } elseif ($this->v["lgtSrch"]["type"] != '' 
+            && $this->v["lgtSrch"]["make"] == '' 
             && $this->v["lgtSrch"]["model"] == '') {
-            $models = RIILightModels::whereIn('LgtModTech', $this->v["results"]["types"])
+            $models = RIILightModels::whereIn('LgtModTech', 
+                    $this->v["results"]["types"])
                 ->get();
             $this->addModelResults($models);
-        } elseif ($this->v["lgtSrch"]["type"] > 0 || $this->v["lgtSrch"]["make"] != '' 
+        } elseif ($this->v["lgtSrch"]["type"] > 0 
+            || $this->v["lgtSrch"]["make"] != '' 
             || $this->v["lgtSrch"]["model"] != '') {
             $this->addModelResults(DB::table('RII_LightModels')
-                ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', '=', 'RII_LightModels.LgtModManuID')
-                ->where('RII_Manufacturers.ManuName', 'LIKE', '%' . $this->v["lgtSrch"]["make"] . '%')
-                ->where('RII_LightModels.LgtModName', 'LIKE', '%' . $this->v["lgtSrch"]["model"] . '%')
+                ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', 
+                    '=', 'RII_LightModels.LgtModManuID')
+                ->where('RII_Manufacturers.ManuName', 
+                    'LIKE', '%' . $this->v["lgtSrch"]["make"] . '%')
+                ->where('RII_LightModels.LgtModName', 
+                    'LIKE', '%' . $this->v["lgtSrch"]["model"] . '%')
                 ->whereIn('RII_LightModels.LgtModTech', $this->v["results"]["types"])
                 ->orderBy('RII_Manufacturers.ManuName', 'asc')
                 ->orderBy('RII_LightModels.LgtModName', 'asc')
                 ->select('RII_LightModels.*')
                 ->get());
             $this->addModelResults(DB::table('RII_LightModels')
-                ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', '=', 'RII_LightModels.LgtModManuID')
-                ->where('RII_Manufacturers.ManuName', 'LIKE', '%' . $this->v["lgtSrch"]["make"] . '%')
-                ->where('RII_LightModels.LgtModName', 'LIKE', '%' . $this->v["lgtSrch"]["model"] . '%')
+                ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', 
+                    '=', 'RII_LightModels.LgtModManuID')
+                ->where('RII_Manufacturers.ManuName', 
+                    'LIKE', '%' . $this->v["lgtSrch"]["make"] . '%')
+                ->where('RII_LightModels.LgtModName', 
+                    'LIKE', '%' . $this->v["lgtSrch"]["model"] . '%')
                 ->orderBy('RII_Manufacturers.ManuName', 'asc')
                 ->orderBy('RII_LightModels.LgtModName', 'asc')
                 ->select('RII_LightModels.*')
@@ -181,17 +192,22 @@ class ScoreLightModels extends ScoreVars
                 }
             }
         }
-        return view('vendor.cannabisscore.nodes.894-light-search-ajax', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.894-light-search-ajax', 
+            $this->v
+        )->render();
     }
     
     protected function addMakeSearch($make = '')
     {
         if (trim($make) != '') {
-            $manus = RIIManufacturers::where('ManuName', 'LIKE', '%' . trim($make) . '%')
+            $manus = RIIManufacturers::where('ManuName', 
+                    'LIKE', '%' . trim($make) . '%')
                 ->get();
             if ($manus->isNotEmpty()) {
                 foreach ($manus as $manu) {
-                    if (!in_array($manu->ManuID, $this->v["results"]["manus"])) {
+                    if (!in_array($manu->ManuID, 
+                        $this->v["results"]["manus"])) {
                         $this->v["results"]["manus"][] = $manu->ManuID;
                     }
                 }
@@ -204,16 +220,19 @@ class ScoreLightModels extends ScoreVars
     {
         if (trim($model) != '') {
             $models = null;
-            if (isset($this->v["results"]["manus"]) && sizeof($this->v["results"]["manus"]) > 0) {
+            if (isset($this->v["results"]["manus"]) 
+                && sizeof($this->v["results"]["manus"]) > 0) {
                 if ($this->v["lgtSrch"]["type"] != '') {
-                    $models = RIILightModels::where('LgtModName', 'LIKE', '%' . trim($model) . '%')
+                    $models = RIILightModels::where('LgtModName', 
+                            'LIKE', '%' . trim($model) . '%')
                         ->whereIn('LgtModManuID', $this->v["results"]["manus"])
                         ->whereIn('LgtModTech', $this->v["results"]["types"])
                         ->orderBy('LgtModManuID', 'asc')
                         ->orderBy('LgtModName', 'asc')
                         ->get();
                 } else {
-                    $models = RIILightModels::where('LgtModName', 'LIKE', '%' . trim($model) . '%')
+                    $models = RIILightModels::where('LgtModName', 
+                            'LIKE', '%' . trim($model) . '%')
                         ->whereIn('LgtModManuID', $this->v["results"]["manus"])
                         ->orderBy('LgtModManuID', 'asc')
                         ->orderBy('LgtModName', 'asc')
@@ -221,13 +240,15 @@ class ScoreLightModels extends ScoreVars
                 }
             } else {
                 if ($this->v["lgtSrch"]["type"] != '') {
-                    $models = RIILightModels::where('LgtModName', 'LIKE', '%' . trim($model) . '%')
+                    $models = RIILightModels::where('LgtModName', 
+                            'LIKE', '%' . trim($model) . '%')
                         ->whereIn('LgtModTech', $this->v["results"]["types"])
                         ->orderBy('LgtModManuID', 'asc')
                         ->orderBy('LgtModName', 'asc')
                         ->get();
                 } else {
-                    $models = RIILightModels::where('LgtModName', 'LIKE', '%' . trim($model) . '%')
+                    $models = RIILightModels::where('LgtModName', 
+                            'LIKE', '%' . trim($model) . '%')
                         ->orderBy('LgtModManuID', 'asc')
                         ->orderBy('LgtModName', 'asc')
                         ->get();

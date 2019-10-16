@@ -11,6 +11,7 @@ class RIIPSRankings extends Model
     protected $fillable   = 
     [    
 		'PsRnkPSID', 
+        'PsRnkManuID',
 		'PsRnkFilters', 
 		'PsRnkOverall', 
 		'PsRnkOverallAvg', 
@@ -18,11 +19,15 @@ class RIIPSRankings extends Model
 		'PsRnkProduction', 
 		'PsRnkHVAC', 
 		'PsRnkLighting', 
+        'PsRnkWater',
+        'PsRnkWaste',
 		'PsRnkTotCnt', 
 		'PsRnkFacilityCnt', 
 		'PsRnkProductionCnt', 
 		'PsRnkHVACCnt', 
-		'PsRnkLightingCnt', 
+        'PsRnkLightingCnt', 
+        'PsRnkWaterCnt', 
+        'PsRnkWasteCnt', 
     ];
     
     // END SurvLoop auto-generated portion of Model

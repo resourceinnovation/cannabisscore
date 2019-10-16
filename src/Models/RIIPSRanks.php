@@ -10,6 +10,7 @@ class RIIPSRanks extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [
+        'PsRnkManuID',
 		'PsRnkFilters', 
 		'PsRnkTotCnt', 
 		'PsRnkOverallAvg', 
@@ -17,6 +18,8 @@ class RIIPSRanks extends Model
 		'PsRnkProduction', 
 		'PsRnkHVAC', 
 		'PsRnkLighting', 
+        'PsRnkWater',
+        'PsRnkWaste',
 		'PsRnkAvgSqftKwh',
 		'PsRnkAvgSqftGrm', 
     ];

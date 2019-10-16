@@ -16,6 +16,7 @@ use App\Models\RIIPowerScore;
 use App\Models\RIIPSRanks;
 use App\Models\RIIPSAreas;
 use App\Models\RIIPSLightTypes;
+use App\Models\RIIManufacturers;
 use CannabisScore\Controllers\ScoreListings;
 
 class ScoreReportLightingManu extends ScoreListings
@@ -35,8 +36,10 @@ class ScoreReportLightingManu extends ScoreListings
         $this->v["lightManuName"] = 'Largely Lumens, Inc.';
         if ($GLOBALS["SL"]->REQ->has('manu') 
             && trim($GLOBALS["SL"]->REQ->get('manu')) != '') {
-            $this->v["lightManuName"] = trim($GLOBALS["SL"]->REQ->get('manu'));
+            $this->v["lightManuName"] = trim($GLOBALS["SL"]->REQ->manu);
             $this->printCompareLightManuGetStats($this->v["lightManuName"]);
+        } else {
+            $this->loadSearchLightManuFake();
         }
         $this->v["competitionGraphs"] = [];
 
@@ -56,17 +59,157 @@ class ScoreReportLightingManu extends ScoreListings
     protected function printCompareLightManuGetStats($manu = '')
     {
         if (trim($manu) == '') {
-            return false;
+            return $this->loadSearchLightManuFake();
         }
-        $scoreIDs = $this->getLightManuScoreIDs($manu);
+        $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($manu);
+        $this->loadSearchLightManu('Your Customers');
+
+         $this->v["averageRanks"] = RIIPSRanks::where('PsRnkFilters', '&fltFarm=144')
+            ->first(); // (Indoor)
+        $this->v["lgtCompetData"]->addLineFromRanking(
+            'Indoor Average', 
+            $this->v["averageRanks"],
+            [50, 50, 50, 50, 50, 50]
+        );
+        foreach ($this->v["lgtCompetData"]->dataLegend as $l => $leg) {
+            $fld = 'PsRnk' . str_replace('Hvac', 'HVAC', $leg[0]);
+            if (isset( $this->v["averageRanks"]->{ $fld })) {
+                $this->v["lgtCompetData"]->dataLegend[$l][3]
+                    = $GLOBALS["SL"]->mexplodeSize(',', 
+                         $this->v["averageRanks"]->{ $fld });
+            }
+        }
+        $topManus = $this->getTopLightManuIDs();
+        if (sizeof($topManus) > 0) {
+            foreach ($topManus as $t => $topManu) {
+                $title = 'Customers of Competitor ' . chr(65+$t);
+                $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($topManu);
+                $this->loadSearchLightManu($title);
+            }
+        }
+        $this->v["lgtCompetData"]->checkScoresMax();
+        return true;
+    }
+
+    /**
+     * Initialize the searcher with the current custom list of PSIDs.
+     *
+     * @return int
+     */
+    protected function loadSearchLightManu($title = '')
+    {
         $this->searcher = new CannabisScoreSearcher;
         $this->searcher->getSearchFilts(1);
         $this->searcher->loadAllScoresPublic(
-            "->whereIn('PsID', [" . implode(", ", $scoreIDs) . "])"
-            . "->where('PsStatus', '=', " . $this->v["defCmplt"] . ")"
+            "->whereIn('PsID', [" 
+            . implode(", ", $this->v["yourPsIDs"]) . "])"
+            . "->where('PsEfficLightingStatus', '=', " 
+            . $this->v["defCmplt"] . ")"
         );
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
+        $this->v["lgtCompetData"]->addLine($title);
+        if ($this->v["totCnt"] > 0) {
+            foreach ($this->searcher->v["allscores"] as $i => $ps) {
+                $this->v["lgtCompetData"]->addPowerScore(
+                    $title, 
+                    $ps, 
+                    $this->v["defCmplt"]
+                );
+            }
+            $this->v["lgtCompetData"]->calcScoreAvgs($title);
+        }
+        foreach ($this->v["lgtCompetData"]->dataLines as $ind => $data) {
+            $ranks = [];
+            foreach ($this->v["lgtCompetData"]->dataLegend as $l => $leg) {
+                $fld = 'PsRnk' . str_replace('Hvac', 'HVAC', $leg[0]);
+                if (isset($this->v["averageRanks"]->{ $fld })) {
+                    $ranks[] = $GLOBALS["SL"]->getArrPercentileStr(
+                        $this->v["averageRanks"]->{ $fld }, 
+                        $data->scores[$l], 
+                        ($l != 1)
+                    );
+                } else {
+                    $ranks[] = 0;
+                }
+            }
+            $this->v["lgtCompetData"]->dataLines[$ind]->ranks = $ranks;
+        }
+        return $this->v["totCnt"];
+    }
 
+
+    /**
+     * Get most adopted Manufacturers' IDs.
+     *
+     * @param int $limit
+     * @return array
+     */
+    protected function getTopLightManuIDs($limit = 3)
+    {
+        $ret = $cnts = [];
+        $chk = RIIManufacturers::where('ManuCntFlower', '>', 0)
+            ->orWhere('ManuCntVeg', '>', 0)
+            ->orWhere('ManuCntClone', '>', 0)
+            ->orWhere('ManuCntMother', '>', 0)
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $manu) {
+                $cnts[$manu->ManuName] = intVal($manu->ManuCntFlower)
+                    + intVal($manu->ManuCntVeg)
+                    + intVal($manu->ManuCntClone)
+                    + intVal($manu->ManuCntMother);
+            }
+            arsort($cnts);
+            foreach ($cnts as $manuName => $cnt) {
+                if (sizeof($ret) < $limit) {
+                    $ret[] = $manuName;
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Get PowerScore IDs using a specific lighting manufacturer.
+     *
+     * @param string $manu
+     * @return array
+     */
+    protected function getLightManuScoreIDs($manu = '')
+    {
+        $areaIDs = $scoreIDs = [];
+        $chk = RIIPSLightTypes::where('PsLgTypMake', 
+                'LIKE', '%' . $manu . '%')
+            ->select('PsLgTypAreaID')
+            ->get();
+        if ($chk && sizeof($chk) > 0) {
+            foreach ($chk as $light) {
+                if (!in_array($light->PsLgTypAreaID, $areaIDs)) {
+                    $areaIDs[] = $light->PsLgTypAreaID;
+                }
+            }
+        }
+        $chk = RIIPSAreas::whereIn('PsAreaID', $areaIDs)
+            ->select('PsAreaPSID')
+            ->get();
+        if ($chk && sizeof($chk) > 0) {
+            foreach ($chk as $light) {
+                if (!in_array($light->PsAreaPSID, $scoreIDs)) {
+                    $scoreIDs[] = $light->PsAreaPSID;
+                }
+            }
+        }
+        return $scoreIDs;
+    }
+
+    /**
+     * 
+     *
+     * @return boolean
+     */
+    protected function loadSearchLightManuFake()
+    {
+        $this->v["yourPsIDs"] = [];
         $this->v["lgtCompetData"]->addLine(
             'Your Customers', 
             [25.7, 4.46, 50.9, 15.2, 14.2, 34.0], // raw scores
@@ -92,61 +235,19 @@ class ScoreReportLightingManu extends ScoreListings
             [97.3, 2.43, 14.9, 67.8, 19.3, 33.1],
             [  55,   57,   54,   67,   54,   43]
         );
-
-        $this->v["yourPsIDs"] = [];
-        // clear Your Customers scores and ranks
-        $this->v["lgtCompetData"]->dataLines[0]->clearScores();
-        $this->v["lgtCompetData"]->dataLines[0]->clearRanks();
-        if ($this->v["totCnt"] > 0) {
-            foreach ($this->searcher->v["allscores"] as $i => $ps) {
-                $this->v["lgtCompetData"]
-                    ->addPowerScore('Your Customers', $ps, $this->v["defCmplt"]);
-                $this->v["yourPsIDs"][] = $ps->PsID;
-            }
-            $this->v["lgtCompetData"]->calcScoreAvgs('Your Customers');
-        }
         $this->v["lgtCompetData"]->checkScoresMax();
         return true;
     }
 
-    /**
-     * Get PowerScore IDs using a specific lighting manufacturer.
-     *
-     * @param string $manu
-     * @return array
-     */
-    protected function getLightManuScoreIDs($manu = '')
-    {
-        $areaIDs = $scoreIDs = [];
-        $chk = RIIPSLightTypes::where('PsLgTypMake', 'LIKE', '%' . $manu . '%')
-            ->select('PsLgTypAreaID')
-            ->get();
-        if ($chk && sizeof($chk) > 0) {
-            foreach ($chk as $light) {
-                if (!in_array($light->PsLgTypAreaID, $areaIDs)) {
-                    $areaIDs[] = $light->PsLgTypAreaID;
-                }
-            }
-        }
-        $chk = RIIPSAreas::whereIn('PsAreaID', $areaIDs)
-            ->select('PsAreaPSID')
-            ->get();
-        if ($chk && sizeof($chk) > 0) {
-            foreach ($chk as $light) {
-                if (!in_array($light->PsAreaPSID, $scoreIDs)) {
-                    $scoreIDs[] = $light->PsAreaPSID;
-                }
-            }
-        }
-        return $scoreIDs;
-    }
+
+
 }
 
 
 
 class ScoreLgtManuData
 {
-    public $dataLines = [];
+    public $dataLines  = [];
     public $dataLegend = [];
 
     /**
@@ -158,14 +259,79 @@ class ScoreLgtManuData
     {
         //  prod, fac, hvac, light, water, waste // number of records analyzed
         $this->dataLegend = [
-            ['Facility',   'Facility Efficiency',   'kWh / sq ft',     95, 0],
-            ['Production', 'Production Efficiency', 'g / kWh',         94, 0],
-            ['Lighting',   'HVAC Efficiency',       'kWh / sq ft',     68, 0],
-            ['Hvac',       'Lighting Efficiency',   'W / sq ft',       68, 0],
-            ['Water',      'Water Efficiency',      'gallons / sq ft', 24, 0],
-            ['Waste',      'Waste Efficiency',      'g / kWh',         25, 0]
+            ['Facility',   'Facility Efficiency',   'kWh / sq ft',     0, 0],
+            ['Production', 'Production Efficiency', 'g / kWh',         0, 0],
+            ['Lighting',   'HVAC Efficiency',       'kWh / sq ft',     0, 0],
+            ['Hvac',       'Lighting Efficiency',   'W / sq ft',       0, 0],
+            ['Water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
+            ['Waste',      'Waste Efficiency',      'g / kWh',         0, 0]
         ];
     }
+
+    /**
+     * Add a line of data to this collection using the raw scores results.
+     *
+     * @param string $title
+     * @param array $allscores
+     * @return boolean
+     */
+    /*
+    public function calcAndAddLine($title = '', $allscores = [])
+    {
+        $avgs = $cnts = [];
+        foreach ($this->dataLegend as $d => $dat) {
+            $avgs[$d] = $cnts[$d] = 0;
+        }
+        if ($allscores->isNotEmpty()) {
+            foreach ($allscores as $ps) {
+                foreach ($this->dataLegend as $d => $dat) {
+                    if (isset($ps->{ 'PsEffic' . $dat[0] })
+                        && isset($ps->{ 'PsEffic' . $dat[0] . 'Status' })
+                        && intVal($ps->{ 'PsEffic' . $dat[0] 
+                            . 'Status' }) == 243) {
+                        $avgs[$d] += $ps->{ 'PsEffic' . $dat[0] };
+                        $cnts[$d]++;
+                    }
+                }
+            }
+        }
+        
+        foreach ($this->dataLegend as $d => $dat) {
+            $avgs[$d] = $avgs[$d]/$cnts[$d];
+        }
+
+        $this->addLine(
+            $title, 
+            $avgs, // raw scores
+            [  80,   93,   70,   78,   60,   42]  // relative rankings
+        );
+    }
+    */
+
+    /**
+     * Add a line of data to this collection from a rankings record.
+     *
+     * @param string $title
+     * @param array $rnks
+     * @param array $ranks
+     * @return boolean
+     */
+    public function addLineFromRanking($title = '', $rnks = [], $ranks = [])
+    {
+        $scores = [];
+        foreach ($this->dataLegend as $l => $leg) {
+            $type = (($leg[0] == 'Hvac') ? 'HVAC' : $leg[0]);
+            if (isset($rnks->{ 'PsRnk' . $type })) {
+                $scores[] = $GLOBALS["SL"]
+                    ->commaListAvg($rnks->{ 'PsRnk' . $type });
+            } else {
+                $scores[] = 0;
+            }
+        }
+        $this->addLine($title, $scores, $ranks);
+        return true;
+    }
+
 
     /**
      * Add a line of data to this collection.
@@ -178,7 +344,19 @@ class ScoreLgtManuData
      */
     public function addLine($title = '', $scores = [], $ranks = [], $ids = [])
     {
-        $this->dataLines[] = new ScoreLgtManuDataLine($title, $scores, $ranks, $ids);
+        $ind = sizeof($this->dataLines);
+        $this->dataLines[] = new ScoreLgtManuDataLine(
+            $title, 
+            $scores, 
+            $ranks, 
+            $ids
+        );
+        if (sizeof($scores) == 0) {
+            $this->dataLines[$ind]->clearScores();
+        }
+        if (sizeof($ranks) == 0) {
+            $this->dataLines[$ind]->clearRanks();
+        }
         return true;
     }
 
@@ -210,21 +388,38 @@ class ScoreLgtManuData
     public function addPowerScore($title, $ps, $defCmplt)
     {
         $ind = $this->getIndFromTitle($title);
-        $rankRow = RIIPSRanks::where('PsRnkFilters', '&fltFarm=' . $ps->PsCharacterize)
+        $rankRow = RIIPSRanks::where('PsRnkFilters', 
+                '&fltFarm=' . $ps->PsCharacterize)
             ->first();
         foreach ($this->dataLegend as $l => $leg) {
-            if (isset($ps->{ 'PsEffic' . $leg[0] })
-                && $ps->{ 'PsEffic' . $leg[0] } > 0
-                && $ps->{ 'PsEffic' . $leg[0] . 'Status' } == $defCmplt) {
+            $fld = 'PsEffic' . $leg[0];
+            if (isset($ps->{ $fld }) && $ps->{ $fld } > 0
+                && $ps->{ $fld . 'Status' } == $defCmplt) {
                 $this->dataLines[$ind]->ids[$l][] = $ps->PsID;
-                $score = $ps->{ 'PsEffic' . $leg[0] };
+                $score = $ps->{ $fld };
                 $this->dataLines[$ind]->scores[$l] += $score;
-                if ($rankRow && isset($rankRow->{ 'PsRnk' . $leg[0] })) {
-                    $r = $this->calcScoreRank($score, $rankRow->{ 'PsRnk' . $leg[0] });
+                if ($rankRow 
+                    && isset($rankRow->{ 'PsRnk' . $leg[0] })) {
+                    $rnk = $rankRow->{ 'PsRnk' . $leg[0] };
+                    $r = $this->calcScoreRank($score, $rnk);
                     $this->dataLines[$ind]->ranks[$l] += $r;
                 }
             }
         }
+        return true;
+    }
+
+    /**
+     * 
+     *
+     * @param string $title
+     * @param array $ranks
+     * @return boolean
+     */
+    public function addDataLineRanks($title, $ranks)
+    {
+        $ind = $this->getIndFromTitle($title);
+        $this->dataLines[$ind]->ranks = $ranks;
         return true;
     }
 
@@ -261,9 +456,11 @@ class ScoreLgtManuData
         $ind = $this->getIndFromTitle($title);
         foreach ($this->dataLegend as $l => $leg) {
             if (sizeof($this->dataLines[$ind]->ids[$l]) > 0) {
-                $this->dataLines[$ind]->scores[$l] = $this->dataLines[$ind]->scores[$l]
+                $this->dataLines[$ind]->scores[$l] 
+                    = $this->dataLines[$ind]->scores[$l]
                     /sizeof($this->dataLines[$ind]->ids[$l]);
-                $this->dataLines[$ind]->ranks[$l] = $this->dataLines[$ind]->ranks[$l]
+                $this->dataLines[$ind]->ranks[$l] 
+                    = $this->dataLines[$ind]->ranks[$l]
                     /sizeof($this->dataLines[$ind]->ids[$l]);
             } else {
                 $this->dataLines[$ind]->scores[$l] = 0;

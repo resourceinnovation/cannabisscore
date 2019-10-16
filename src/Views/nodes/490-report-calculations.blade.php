@@ -10,8 +10,8 @@
         @if ($isPast) Calculated PowerScore @else PowerScore Estimate @endif </h3>
         @if (isset($sessData["PowerScore"][0]->PsCharacterize))
             {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["PowerScore"][0]->PsCharacterize) }}
-            <?php /* <input type="hidden" id="filtFarmID" name="filtFarm" value="{{ 
-                $sessData['PowerScore'][0]->PsCharacterize }}"> */ ?>
+            <input type="hidden" id="filtFarmID" name="filtFarm" value="{{ 
+                $sessData['PowerScore'][0]->PsCharacterize }}">
         @endif #{{ $psid }},
         <nobr>
         @if (isset($sessData["PowerScore"][0]->PsZipCode)) 
@@ -32,7 +32,8 @@
 
 <div id="scoreCalcsWrap" class="row">
     <div id="scoreCalcsWrapLeft" class="col-lg-9 col-md-12">
-        <table border=0 cellpadding="0" cellspacing="0" class="table tableScore w100 m0">
+        <table border=0 cellpadding="0" cellspacing="0" 
+            class="table tableScore w100 m0">
         
         <tr class="scoreRowHeader"><td>
             <h5 class="slBlueDark">Energy</h5>
