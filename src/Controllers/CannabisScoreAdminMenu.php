@@ -306,15 +306,16 @@ class CannabisScoreAdminMenu extends AdminMenu
                 $this->admMenuLnk(
                     '/dash/partner-compare-powerscores',
                     'Individual Scores'
-                ),
+                ) /* ,
                 $this->admMenuLnk(
                     '/dash/partner-compare-powerscore-averages',
                     'My Averages'
                 ),
                 $this->admMenuLnk(
                     '/dash/founders-circle-report',
-                    'My Analysis'
+                    'Founders Report'
                 )
+                */
             ]
         );
         $treeMenu[] = $this->admMenuLnk(
@@ -324,16 +325,16 @@ class CannabisScoreAdminMenu extends AdminMenu
             1, 
             [
                 $this->admMenuLnk(
-                    '/dash/partner-compare-powerscores?all=1',
+                    '/dash/compare-powerscores',
                     'Compare All Scores'
                 ),
                 $this->admMenuLnk(
-                    '/dash/partner-compare-powerscore-averages?all=1', 
+                    '/dash/compare-powerscore-averages', 
                     'Score Averages'
                 ),
                 $this->admMenuLnk(
-                    '/dash/founders-circle-report?all=1',
-                    'Founders Circle'
+                    '/dash/founders-circle-report',
+                    'Founders Report'
                 ),
                 $this->admMenuLnk(
                     '/dash/powerscore-final-report',

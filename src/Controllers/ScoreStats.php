@@ -9,6 +9,7 @@
   */
 namespace CannabisScore\Controllers;
 
+use Auth;
 use App\Models\RIIPSAreas;
 use SurvLoop\Controllers\Stats\SurvStatsTbl;
 use SurvLoop\Controllers\Stats\SurvStatTh;
@@ -16,104 +17,13 @@ use SurvLoop\Controllers\Stats\SurvStatsGraph;
 
 class ScoreStats extends SurvStatsGraph
 {
-    public $sfFarms = [
-        [
-            144, 
-            145, 
-            143
-        ], [
-            '<a href="/dash/compare-powerscores?fltFarm=144"'
-                . ' target="_blank">Indoor',
-            '<a href="/dash/compare-powerscores?fltFarm=145"'
-                . ' target="_blank">Greenhouse/Mixed</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=143"'
-                . ' target="_blank">Outdoor</a>'
-        ]
-    ];
-    
-    public $sfSizes = [
-        [
-            375, 
-            376, 
-            431, 
-            377, 
-            378
-        ], [
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=375"'
-                . ' target="_blank">&lt;5,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=376"'
-                . ' target="_blank">5,000-10,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=431"'
-                . ' target="_blank">10,000-30,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=377"'
-                . ' target="_blank">30,000-50,000 sf</a>',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltSize=378"'
-                . ' target="_blank">50,000+ sf</a>'
-        ]
-    ];
-    
-    public $sfAuto = [
-        [
-            1, 
-            2, 
-            3
-        ], [
-            'Automatic Controls', 
-            'Manual Controls',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltAuto=1&fltManu=1"'
-                . ' target="_blank">Using Both</a>'
-        ]
-    ];
-    
-    public $sfVert = [
-        [
-            0, 
-            1
-        ], [
-            'Without Vertical Stacking',
-            '<a href="/dash/compare-powerscores?fltFarm=144&fltVert=1"'
-                . ' target="_blank">With Vertical Stacking</a>'
-        ]
-    ];
-    
-    public $sfHvacs = [
-        [
-            247, 
-            248, 
-            249, 
-            250, 
-            356, 
-            357, 
-            251, 
-            360
-        ], [
-            'System A', 
-            'System B', 
-            'System C', 
-            'System D', 
-            'System E', 
-            'System F', 
-            'Other System', 
-            'None'
-        ]
-    ];
-    
-    public $sfCups = [
-        [  
-            230, 
-            231, 
-            369
-        ], [
-            '<a href="/dash/compare-powerscores?fltCup=230" '
-                . 'target="_blank">Cultivation Classic</a>',
-            '<a href="/dash/compare-powerscores?fltCup=231" '
-                . 'target="_blank">Emerald Cup Regenerative Award</a>',
-            '<a href="/dash/compare-powerscores?fltCup=369" '
-                . 'target="_blank">NWPCC</a>'
-        ]
-    ];
-    
-    public $sfLgts = [];
+    public $sfFarms = [];
+    public $sfSizes = [];
+    public $sfAuto  = [];
+    public $sfVert  = [];
+    public $sfHvacs = [];
+    public $sfCups  = [];
+    public $sfLgts  = [];
     
     function __construct($filts = ['farm'])
     {
@@ -124,6 +34,103 @@ class ScoreStats extends SurvStatsGraph
             'cln-lgty', 
             'mth-lgty'
         ];
+        $baseUrl = '/dash/compare-powerscores';
+        /* if (Auth::user() && Auth::user()->hasRole('partner')) {
+            $baseUrl = '/dash/partner-compare-powerscores';
+        } */
+        $this->sfFarms = [
+            [
+                144, 
+                145, 
+                143
+            ], [
+                '<a href="' . $baseUrl . '?fltFarm=144"'
+                    . ' target="_blank">Indoor',
+                '<a href="' . $baseUrl . '?fltFarm=145"'
+                    . ' target="_blank">Greenhouse/Mixed</a>',
+                '<a href="' . $baseUrl . '?fltFarm=143"'
+                    . ' target="_blank">Outdoor</a>'
+            ]
+        ];
+        $this->sfSizes = [
+            [
+                375, 
+                376, 
+                431, 
+                377, 
+                378
+            ], [
+                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=375"'
+                    . ' target="_blank">&lt;5,000 sf</a>',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=376"'
+                    . ' target="_blank">5,000-10,000 sf</a>',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=431"'
+                    . ' target="_blank">10,000-30,000 sf</a>',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=377"'
+                    . ' target="_blank">30,000-50,000 sf</a>',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=378"'
+                    . ' target="_blank">50,000+ sf</a>'
+            ]
+        ];
+        $this->sfAuto = [
+            [
+                1, 
+                2, 
+                3
+            ], [
+                'Automatic Controls', 
+                'Manual Controls',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltAuto=1&fltManu=1"'
+                    . ' target="_blank">Using Both</a>'
+            ]
+        ];
+        $this->sfVert = [
+            [
+                0, 
+                1
+            ], [
+                'Without Vertical Stacking',
+                '<a href="' . $baseUrl . '?fltFarm=144&fltVert=1"'
+                    . ' target="_blank">With Vertical Stacking</a>'
+            ]
+        ];
+        $this->sfHvacs = [
+            [
+                247, 
+                248, 
+                249, 
+                250, 
+                356, 
+                357, 
+                251, 
+                360
+            ], [
+                'System A', 
+                'System B', 
+                'System C', 
+                'System D', 
+                'System E', 
+                'System F', 
+                'Other System', 
+                'None'
+            ]
+        ];
+        $this->sfCups = [
+            [  
+                230, 
+                231, 
+                369
+            ], [
+                '<a href="' . $baseUrl . '?fltCup=230" '
+                    . 'target="_blank">Cultivation Classic</a>',
+                '<a href="' . $baseUrl . '?fltCup=231" '
+                    . 'target="_blank">Emerald Cup Regenerative Award</a>',
+                '<a href="' . $baseUrl . '?fltCup=369" '
+                    . 'target="_blank">NWPCC</a>'
+            ]
+        ];
+        $this->sfLgts = [];
+
         $this->v["filts"] = $filts;
         $this->constructScoreBasicData();
         if (sizeof($filts) > 0) {

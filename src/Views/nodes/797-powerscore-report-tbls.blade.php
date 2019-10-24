@@ -1,21 +1,32 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/773-powerscore-report-tbls.blade.php -->
 <div class="slWebReport">
 
+<div class="alert alert-danger fade in alert-dismissible show"
+    style="padding: 10px 15px;">
+    This report is an old work in progress, and contains errors.
+    But we welcome <b>your</b> feedback on how to make these reports most useful.
+</div>
+
 <div class="slCard nodeWrap">
-    <h1 class="slBlueDark">Written Report <span class="slGrey">w/ live stats</span></h1>
+    <h2 class="slBlueDark">Written Report</h2>
     <h4>
-    As of {{ date("F j, Y") }}, Resource Innovation Institute's <b class="slBlueDark">Cannabis PowerScore</b> 
-    has collected complete data for <b class="slBlueDark">{{ number_format($allscores->count()) }} observations</b> 
+    As of {{ date("F j, Y") }}, Resource Innovation Institute's 
+    <b class="slBlueDark">Cannabis PowerScore</b> 
+    has collected complete data for 
+    <b class="slBlueDark">{{ number_format($allscores->count()) 
+        }} observations</b> 
     of growers' annual production.
     </h4>
     <p>
     Thus far,
     {{ round(100*$statMisc->getDatTot('PsIncentiveWants')/$allscores->count()) }}%
-    of the survey respondents 
-    would like to work with their utilities to increase the energy efficiency of their operations,
-    and {{ round(100*$statMisc->getDatTot('PsIncentiveUsed')/$allscores->count()) }}% have done so in the past.
-    And a total of {{ round(100*$statMisc->getDatTot('PsConsiderUpgrade')/$allscores->count()) }}% are 
-    considering upgrades in the next 12 months.
+    of the survey respondents would like to work with their 
+    utilities to increase the energy efficiency of their operations,
+    and {{ round(100*$statMisc->getDatTot('PsIncentiveUsed')/$allscores->count()) 
+    }}% have done so in the past.
+    And a total of {{ 
+    round(100*$statMisc->getDatTot('PsConsiderUpgrade')/$allscores->count()) }}% 
+    are considering upgrades in the next 12 months.
     </p>
 </div>
 

@@ -367,7 +367,10 @@ class ScoreImports extends ScoreAdminMisc
         $GLOBALS["SL"]->loadStates();
         $this->searcher->loadCupScoreIDs();
         //$this->searcher->v["psFilters"] = view('vendor.cannabisscore.inc-filter-powerscores', $this->searcher->v)->render();
-        $ret .= view('vendor.cannabisscore.nodes.170-all-powerscores', $this->searcher->v)->render();
+        $ret .= view(
+            'vendor.cannabisscore.nodes.170-all-powerscores', 
+            $this->searcher->v
+        )->render();
 
         //$this->searcher->v["importResult"] .= '<pre>' . $xml . '</pre>';
         return $ret;

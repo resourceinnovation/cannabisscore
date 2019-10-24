@@ -5,8 +5,10 @@
 <div class="slCard nodeWrap">
 <h1 class="slBlueDark">Founders Circle Report</h1>
 <p>
-Many columns are clickable to load the report listing all individual reports matching the filter (when possible).
-Small subscript counts are the number of powerscores upon which each calculated average is based.
+Many columns are clickable to load the report listing all 
+individual reports matching the filter (when possible).
+Small subscript counts are the number of powerscores 
+upon which each calculated average is based.
 <br />&darr; 
 <a href="#flowerarea" class="mL5 mR5">By Area of Flowering Canopy</a> - 
 <a href="#auto" class="mL5 mR5">Automation</a> - 

@@ -33,16 +33,48 @@ class ScoreReportLightingManu extends ScoreListings
     public function printCompareLightManu($nID = -3)
     {
         $this->v["lgtCompetData"] = new ScoreLgtManuData;
-        $this->v["lightManuName"] = 'Largely Lumens, Inc.';
-        if ($GLOBALS["SL"]->REQ->has('manu') 
-            && trim($GLOBALS["SL"]->REQ->get('manu')) != '') {
-            $this->v["lightManuName"] = trim($GLOBALS["SL"]->REQ->manu);
+        $this->v["lightManuName"] = '';
+        if ($GLOBALS["SL"]->REQ->has('manu')) {
+            $manu = trim($GLOBALS["SL"]->REQ->get('manu'));
+            if ($manu != '') {
+                if ($this->v["user"]->hasRole('administrator|staff')) {
+                    $this->v["lightManuName"] = $manu;
+                } elseif ($this->v["user"]->hasRole('partner') 
+                    && isset($this->v["usrInfo"])) {
+                    if (isset($this->v["usrInfo"]->company)
+                        && $manu == $this->v["usrInfo"]->company) {
+                        $this->v["lightManuName"] = $manu;
+                    } elseif (isset($this->v["usrInfo"]->manufacturers)
+                        && sizeof($this->v["usrInfo"]->manufacturers) > 0) {
+                        foreach ($this->v["usrInfo"]->manufacturers as $m) {
+                            if ($m->ManuName == $manu) {
+                                $this->v["lightManuName"] = $manu;
+                            }
+                        }
+                    }
+                }
+            }
+        } elseif ($this->v["user"]->hasRole('partner')
+            && sizeof($this->v["usrInfo"]->manufacturers) > 0
+            && isset($this->v["usrInfo"]->manufacturers[0]->ManuName)) {
+            $this->v["lightManuName"] = $this->v["usrInfo"]
+                ->manufacturers[0]->ManuName;
+        }
+        if ($this->v["lightManuName"] != '') {
+            $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($this->v["lightManuName"]);
+            $validCnt = $this->cntValidScoreIn($this->v["yourPsIDs"]);
+            if ($validCnt == 0) {
+                $this->v["lightManuName"] = '';
+            }
+        }
+
+        if ($this->v["lightManuName"] != '') {
             $this->printCompareLightManuGetStats($this->v["lightManuName"]);
         } else {
+            $this->v["lightManuName"] = 'Largely Lumens, Inc.';
             $this->loadSearchLightManuFake();
         }
         $this->v["competitionGraphs"] = [];
-
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view(
             'vendor.cannabisscore.nodes.979-compare-lighting-manufacturers', 
@@ -63,14 +95,7 @@ class ScoreReportLightingManu extends ScoreListings
         }
         $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($manu);
         $this->loadSearchLightManu('Your Customers');
-
-         $this->v["averageRanks"] = RIIPSRanks::where('PsRnkFilters', '&fltFarm=144')
-            ->first(); // (Indoor)
-        $this->v["lgtCompetData"]->addLineFromRanking(
-            'Indoor Average', 
-            $this->v["averageRanks"],
-            [50, 50, 50, 50, 50, 50]
-        );
+        $this->loadCompareLightManuAvg();
         foreach ($this->v["lgtCompetData"]->dataLegend as $l => $leg) {
             $fld = 'PsRnk' . str_replace('Hvac', 'HVAC', $leg[0]);
             if (isset( $this->v["averageRanks"]->{ $fld })) {
@@ -79,15 +104,42 @@ class ScoreReportLightingManu extends ScoreListings
                          $this->v["averageRanks"]->{ $fld });
             }
         }
-        $topManus = $this->getTopLightManuIDs();
-        if (sizeof($topManus) > 0) {
-            foreach ($topManus as $t => $topManu) {
-                $title = 'Customers of Competitor ' . chr(65+$t);
-                $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($topManu);
-                $this->loadSearchLightManu($title);
+
+        $allManus = $this->getTopLightManuIDs(10, $manu);
+        if (sizeof($allManus) > 0) {
+            foreach ($allManus as $t => $currManu) {
+                $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($currManu);
+                $scoreMissed = $this->loadSearchLightManu(
+                    'Customers of Competitor ' . chr(65+$t)
+                );
+                if ($scoreMissed > 0) {
+                    unset($this->v["lgtCompetData"]->dataLines[
+                        sizeof($this->v["lgtCompetData"]->dataLines)]);
+                }
             }
         }
+
         $this->v["lgtCompetData"]->checkScoresMax();
+//echo 'allManus<pre>'; print_r($allManus); echo '</pre>lgtCompetData<pre>'; print_r($this->v["lgtCompetData"]); echo '</pre>'; exit;
+
+        return true;
+    }
+
+    /**
+     * Add a data line with the current system indoor average.
+     *
+     * @return boolean
+     */
+    protected function loadCompareLightManuAvg()
+    {
+         $this->v["averageRanks"] = RIIPSRanks::where(
+                'PsRnkFilters', '&fltFarm=144')
+            ->first(); // (Indoor)
+        $this->v["lgtCompetData"]->addLineFromRanking(
+            'Indoor Average', 
+            $this->v["averageRanks"],
+            [50, 50, 50, 50, 50, 50]
+        );
         return true;
     }
 
@@ -96,15 +148,16 @@ class ScoreReportLightingManu extends ScoreListings
      *
      * @return int
      */
-    protected function loadSearchLightManu($title = '')
+    protected function loadSearchLightManu($title = '', $skipIfBad = false)
     {
         $this->searcher = new CannabisScoreSearcher;
         $this->searcher->getSearchFilts(1);
         $this->searcher->loadAllScoresPublic(
             "->whereIn('PsID', [" 
-            . implode(", ", $this->v["yourPsIDs"]) . "])"
+                . implode(", ", $this->v["yourPsIDs"]) . "])"
+            . "->where('PsEfficLighting', '>', 0)"
             . "->where('PsEfficLightingStatus', '=', " 
-            . $this->v["defCmplt"] . ")"
+                . $this->v["defCmplt"] . ")"
         );
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         $this->v["lgtCompetData"]->addLine($title);
@@ -118,23 +171,26 @@ class ScoreReportLightingManu extends ScoreListings
             }
             $this->v["lgtCompetData"]->calcScoreAvgs($title);
         }
+        $scoreMissed = 0;
         foreach ($this->v["lgtCompetData"]->dataLines as $ind => $data) {
             $ranks = [];
             foreach ($this->v["lgtCompetData"]->dataLegend as $l => $leg) {
                 $fld = 'PsRnk' . str_replace('Hvac', 'HVAC', $leg[0]);
-                if (isset($this->v["averageRanks"]->{ $fld })) {
+                if (isset($this->v["averageRanks"]->{ $fld })
+                    && $this->v["averageRanks"]->{ $fld } > 0) {
                     $ranks[] = $GLOBALS["SL"]->getArrPercentileStr(
                         $this->v["averageRanks"]->{ $fld }, 
                         $data->scores[$l], 
                         ($l != 1)
                     );
                 } else {
+                    $scoreMissed++;
                     $ranks[] = 0;
                 }
             }
             $this->v["lgtCompetData"]->dataLines[$ind]->ranks = $ranks;
         }
-        return $this->v["totCnt"];
+        return $scoreMissed;
     }
 
 
@@ -144,9 +200,26 @@ class ScoreReportLightingManu extends ScoreListings
      * @param int $limit
      * @return array
      */
-    protected function getTopLightManuIDs($limit = 3)
+    protected function getTopLightManuIDs($limit = 3, $except = '')
     {
         $ret = $cnts = [];
+
+        $tmpTop = [
+            'Fluence',
+            'Bios Lighting',
+            'Sunblaster',
+            'BIOS'
+        ];
+        foreach ($tmpTop as $top) {
+            if ($top != $except) {
+                $ret[] = $top;
+            }
+        }
+        return $ret;
+
+
+        // Once there's more data... 
+
         $chk = RIIManufacturers::where('ManuCntFlower', '>', 0)
             ->orWhere('ManuCntVeg', '>', 0)
             ->orWhere('ManuCntClone', '>', 0)
@@ -161,7 +234,8 @@ class ScoreReportLightingManu extends ScoreListings
             }
             arsort($cnts);
             foreach ($cnts as $manuName => $cnt) {
-                if (sizeof($ret) < $limit) {
+                if (sizeof($ret) < $limit 
+                    && $manuName != $except) {
                     $ret[] = $manuName;
                 }
             }
@@ -203,6 +277,43 @@ class ScoreReportLightingManu extends ScoreListings
     }
 
     /**
+     * Get count of valid sub-scores from within PowerScore IDs array.
+     *
+     * @param string $manu
+     * @return array
+     */
+    protected function cntValidScoreIn($scoreIDs = [])
+    {
+        $cnt = 0;
+        $chk = RIIPowerScore::whereIn('PsID', $scoreIDs)
+            ->where('PsStatus', $this->v["defCmplt"])
+            ->select('PsEfficFacilityStatus', 'PsEfficProductionStatus',
+              'PsEfficLightingStatus', 'PsEfficHvacStatus')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $ps) {
+                if ($ps->PsEfficFacilityStatus 
+                    == $this->v["defCmplt"]) {
+                    $cnt++;
+                }
+                if ($ps->PsEfficProductionStatus 
+                    == $this->v["defCmplt"]) {
+                    $cnt++;
+                }
+                if ($ps->PsEfficLightingStatus 
+                    == $this->v["defCmplt"]) {
+                    $cnt++;
+                }
+                if ($ps->PsEfficHvacStatus 
+                    == $this->v["defCmplt"]) {
+                    $cnt++;
+                }
+            }
+        }
+        return $cnt;
+    }
+
+    /**
      * 
      *
      * @return boolean
@@ -212,27 +323,24 @@ class ScoreReportLightingManu extends ScoreListings
         $this->v["yourPsIDs"] = [];
         $this->v["lgtCompetData"]->addLine(
             'Your Customers', 
-            [25.7, 4.46, 50.9, 15.2, 14.2, 34.0], // raw scores
-            [  80,   93,   70,   78,   60,   42]  // relative rankings
+            [105, 1.46, 37.9, 55.2, 24.2, 34.0], // raw scores
+            [ 80,   93,   70,   78,   60,   42]  // relative rankings
         );
-        $this->v["lgtCompetData"]->addLine(
-            'Average', 
-            [141, 3.42, 20.9, 81.9, 20.4, 31.2],
-            [ 50,   50,   50,   50,   50,   50]
-        );
+        $this->loadCompareLightManuAvg();
+        $this->v["lgtCompetData"]->dataLines[1]->scores[5] = 37;
         $this->v["lgtCompetData"]->addLine(
             'Customers of Competitor A', 
-            [163, 4.26, 30.7, 100, 18.9, 25.7],
+            [163, 1.26, 40.7, 100, 38.9, 25.7],
             [ 70,   77,   60,  61,   55,   62]
         );
         $this->v["lgtCompetData"]->addLine(
             'Customers of Competitor B', 
-            [185,  0.96, 43.4, 90.2, 22.2, 37.7],
+            [185,  0.96, 43.4, 90.2, 42.2, 37.7],
             [  33,   14,   45,   42,   37,   36]
         );
         $this->v["lgtCompetData"]->addLine(
             'Customers of Competitor C', 
-            [97.3, 2.43, 14.9, 67.8, 19.3, 33.1],
+            [97.3, 1.43, 34.9, 67.8, 39.3, 33.1],
             [  55,   57,   54,   67,   54,   43]
         );
         $this->v["lgtCompetData"]->checkScoresMax();
@@ -261,10 +369,10 @@ class ScoreLgtManuData
         $this->dataLegend = [
             ['Facility',   'Facility Efficiency',   'kWh / sq ft',     0, 0],
             ['Production', 'Production Efficiency', 'g / kWh',         0, 0],
-            ['Lighting',   'HVAC Efficiency',       'kWh / sq ft',     0, 0],
-            ['Hvac',       'Lighting Efficiency',   'W / sq ft',       0, 0],
+            ['Lighting',   'Lighting Efficiency',   'W / sq ft',       0, 0],
+            ['Hvac',       'HVAC Efficiency',       'kWh / sq ft',     0, 0],
             ['Water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
-            ['Waste',      'Waste Efficiency',      'g / kWh',         0, 0]
+            ['Waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0]
         ];
     }
 
@@ -395,12 +503,12 @@ class ScoreLgtManuData
             $fld = 'PsEffic' . $leg[0];
             if (isset($ps->{ $fld }) && $ps->{ $fld } > 0
                 && $ps->{ $fld . 'Status' } == $defCmplt) {
-                $this->dataLines[$ind]->ids[$l][] = $ps->PsID;
                 $score = $ps->{ $fld };
                 $this->dataLines[$ind]->scores[$l] += $score;
-                if ($rankRow 
-                    && isset($rankRow->{ 'PsRnk' . $leg[0] })) {
-                    $rnk = $rankRow->{ 'PsRnk' . $leg[0] };
+                $this->dataLines[$ind]->ids[$l][] = $ps->PsID;
+                $fldRnk = 'PsRnk' . $leg[0];
+                if ($rankRow && isset($rankRow->{ $fldRnk })) {
+                    $rnk = $rankRow->{ $fldRnk };
                     $r = $this->calcScoreRank($score, $rnk);
                     $this->dataLines[$ind]->ranks[$l] += $r;
                 }

@@ -47,7 +47,8 @@ class CannabisScoreGlobals
     
     public function getTypeHours($typ)
     {
-        return (($typ == 'Veg') ? 18 : (($typ == 'Flower') ? 12 : 24));
+        return (($typ == 'Veg') 
+            ? 18 : (($typ == 'Flower') ? 12 : 24));
     }
     
     public function getHvacEffic($defID)
@@ -79,17 +80,23 @@ class CannabisScoreGlobals
         }
         return [
             'PsHarvestBatch'
-                => '<a href="/dash/compare-powerscores?fltPerp=1" target="_blank">Perpetual Harvesting</a>',
+                => '<a href="/dash/compare-powerscores?fltPerp=1" '
+                    . 'target="_blank">Perpetual Harvesting</a>',
             'PsHasWaterPump'
-                => '<a href="/dash/compare-powerscores?fltPump=1" target="_blank">Water Pumps</a>',
+                => '<a href="/dash/compare-powerscores?fltPump=1" '
+                    . 'target="_blank">Water Pumps</a>',
             'PsHeatWater'
-                => '<a href="/dash/compare-powerscores?fltWtrh=1" target="_blank">Mechanical Water Heating</a>',
+                => '<a href="/dash/compare-powerscores?fltWtrh=1" '
+                    . 'target="_blank">Mechanical Water Heating</a>',
             'PsControls'
-                => '<a href="/dash/compare-powerscores?fltManu=1" target="_blank">Manual Environmental Controls</a>',
+                => '<a href="/dash/compare-powerscores?fltManu=1" '
+                    . 'target="_blank">Manual Environmental Controls</a>',
             'PsControlsAuto'
-                => '<a href="/dash/compare-powerscores?fltAuto=1" target="_blank">Automatic Environmental Controls</a>',
+                => '<a href="/dash/compare-powerscores?fltAuto=1" '
+                    . 'target="_blank">Automatic Environmental Controls</a>',
             'PsVerticalStack'
-                => '<a href="/dash/compare-powerscores?fltVert=1" target="_blank">Vertical Stacking</a>'
+                => '<a href="/dash/compare-powerscores?fltVert=1" '
+                    . 'target="_blank">Vertical Stacking</a>'
             ];
     }
     
@@ -204,8 +211,23 @@ class CannabisScoreGlobals
     public function allKeyDataAreasEmpty()
     {
         $ret = [];
-        foreach (['areas', 'sqfts', 'sqratio', 'lgtkWh', 'kWh', 'g'] as $k) {
-            $ret[$k] = [ 0 => 0, 162 => 0, 161 => 0, 160 => 0, 237 => 0, 163 => 0 ];
+        $keys = [
+            'areas', 
+            'sqfts', 
+            'sqratio', 
+            'lgtkWh', 
+            'kWh', 
+            'g'
+        ];
+        foreach ($keys as $k) {
+            $ret[$k] = [
+                0   => 0, 
+                162 => 0, 
+                161 => 0, 
+                160 => 0, 
+                237 => 0, 
+                163 => 0 
+            ];
         }
         $ret2 = [];
         foreach ([ 0, 144, 145, 143 ] as $k) {
@@ -218,18 +240,23 @@ class CannabisScoreGlobals
     public function getSizeDefRange($defID)
     {
         $defSet = 'Indoor Size Groups';
-        if ($defID == $GLOBALS["SL"]->def->getID($defSet, '<5,000 sf')) {
+        if ($defID 
+            == $GLOBALS["SL"]->def->getID($defSet, '<5,000 sf')) {
             return [0, 5000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '5,000-10,000 sf')) {
+        } elseif ($defID 
+            == $GLOBALS["SL"]->def->getID($defSet, '5,000-10,000 sf')) {
             return [5000, 10000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '10,000-30,000 sf')) {
+        } elseif ($defID 
+            == $GLOBALS["SL"]->def->getID($defSet, '10,000-30,000 sf')) {
             return [10000, 30000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '30,000-50,000 sf')) {
+        } elseif ($defID 
+            == $GLOBALS["SL"]->def->getID($defSet, '30,000-50,000 sf')) {
             return [30000, 50000];
-        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '50,000+ sf')) {
-            return [50000, 1000000000];
+        } elseif ($defID
+            == $GLOBALS["SL"]->def->getID($defSet, '50,000+ sf')) {
+            return [ 50000, 1000000000 ];
         }
-        return [0, 1000000000];
+        return [ 0, 1000000000 ];
     }
     
     public function getSizeDefID($size)

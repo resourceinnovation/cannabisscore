@@ -9,6 +9,12 @@
         Competitive Performance <nobr>Dashboard for</nobr>
         <nobr>{{ $lightManuName }}</nobr>
     </h3>
+    @if ($lightManuName == 'Largely Lumens, Inc.')
+        <p><b class="red">
+            If we had real data to show you here, 
+            it might look something like the fake report below.
+        </b></p>
+    @endif
     <div class="row">
         <div class="col-4">
             <select name="growthStage" class="form-control" autocomplete="off"
@@ -175,8 +181,6 @@
     </p>
 </div>
 
-<style>
-</style>
 <script type="text/javasript">
 
 Chart.defaults.global.defaultFontFamily = "Lato";
@@ -233,8 +237,8 @@ var barChart{{ $l }} = new Chart(chartDiv{{ $l }}, {
       }],
       xAxes: [{
         ticks: {
-            min: 0,
-            max: {{ $leg[4] }}
+            autoSkip: true, 
+            maxTicksLimit: 6
         }
       }]
     },

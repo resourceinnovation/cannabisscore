@@ -19,11 +19,15 @@ use App\Models\RIIPSMonthly;
 use App\Models\RIIPSCommunications;
 use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
+use App\Models\RIIUserInfo;
+use App\Models\RIIUserManufacturers;
+use App\Models\SLUsersRoles;
 use App\Models\SLUploads;
+use App\Models\User;
 use SurvLoop\Controllers\Stats\SurvTrends;
-use CannabisScore\Controllers\ScoreCalcs;
+use CannabisScore\Controllers\ScorePrintReport;
 
-class ScoreAdminMisc extends ScoreCalcs
+class ScoreAdminMisc extends ScorePrintReport
 {
     protected function getTroubleshoot()
     {
@@ -530,27 +534,25 @@ class ScoreAdminMisc extends ScoreCalcs
         $grapher->addDataLineType('complete', 'Complete', '', '#8DC63F', '#8DC63F');
         $grapher->addDataLineType('archived', 'Archived', '', '#726659', '#726659');
         $grapher->addDataLineType('incomplete', 'Incomplete', '', '#F07B3A', '#F07B3A');
+        $cutoffDate = $grapher->getPastStartDate() . ' 00:00:00';
         $recentAttempts = RIIPowerScore::whereNotNull('PsZipCode')
             ->where('PsZipCode', 'NOT LIKE', '')
-            ->where('created_at', '>=', $grapher->getPastStartDate() . ' 00:00:00')
+            ->where('created_at', '>=', $cutoffDate)
             ->select('PsStatus', 'created_at')
             ->get();
         if ($recentAttempts->isNotEmpty()) {
             foreach ($recentAttempts as $i => $rec) {
-                switch ($rec->PsStatus) {
-                    case $this->statusIncomplete:
-                        $grapher->addDayTally('incomplete', $rec->created_at);
-                        break;
-                    case $this->statusComplete:
-                        $grapher->addDayTally('complete', $rec->created_at);
-                        break;
-                    case $this->statusArchive:
-                        $grapher->addDayTally('archived', $rec->created_at);
-                        break;
+                if ($rec->PsStatus == $this->statusIncomplete) {
+                    $grapher->addDayTally('incomplete', $rec->created_at);
+                } elseif ($rec->PsStatus == $this->statusComplete) {
+                    $grapher->addDayTally('complete', $rec->created_at);
+                } elseif ($rec->PsStatus == $this->statusArchive) {
+                    $grapher->addDayTally('archived', $rec->created_at);
                 }
             }
         }
-        return '<h5 class="slBlueDark">Recent PowerScore Submission Attempts</h5>'
+        return '<h5 class="slBlueDark">'
+            . 'Recent PowerScore Submission Attempts</h5>'
             . $grapher->printDailyGraph();
     }
     
@@ -561,16 +563,20 @@ class ScoreAdminMisc extends ScoreCalcs
             $comms = $this->sessData->dataSets["PSCommunications"];
             if (sizeof($comms) > 0) {
                 foreach ($comms as $com) {
-                    $adms[$com->PsComUser] = $this->printUserLnk($com->PsComUser);
+                    $adms[$com->PsComUser] 
+                        = $this->printUserLnk($com->PsComUser);
                 }
             }
         }
-        return view('vendor.cannabisscore.nodes.845-admin-communications-log', [
-            "nID"   => 845,
-            "ps"    => $this->coreID,
-            "comms" => $comms,
-            "adms"  => $adms
-        ])->render();
+        return view(
+            'vendor.cannabisscore.nodes.845-admin-communications-log', 
+            [
+                "nID"   => 845,
+                "ps"    => $this->coreID,
+                "comms" => $comms,
+                "adms"  => $adms
+            ]
+        )->render();
     }
     
     protected function admCommsForm(Request $request)
@@ -582,13 +588,15 @@ class ScoreAdminMisc extends ScoreCalcs
         $this->v["ps"] = 0;
         if ($request->has('ps') && intVal($request->ps) > 0) {
             $this->v["ps"] = intVal($request->ps);
-            if ($request->has('logCommFld') && trim($request->logCommFld) != '') {
+            if ($request->has('logCommFld') 
+                && trim($request->logCommFld) != '') {
                 $com = new RIIPSCommunications;
                 $com->PsComPSID = $this->v["ps"];
                 $com->PsComUser = $this->v["uID"];
                 $com->PsComDescription = trim($request->logCommFld);
                 $com->save();
-                return $this->redir('/calculated/read-' . $this->v["ps"], true);
+                $redir = '/calculated/read-' . $this->v["ps"];
+                return $this->redir($redir, true);
             }
             return view(
                 'vendor.cannabisscore.nodes.845-admin-communications-log-form', 
@@ -608,7 +616,9 @@ class ScoreAdminMisc extends ScoreCalcs
     {
         $this->v["manus"] = RIIManufacturers::orderBy('ManuName', 'asc')
             ->get();
+        $this->addManufacturers($nID);
         $this->cntManufacturerAdoption();
+        $this->loadPartnerUsers();
         return view(
             'vendor.cannabisscore.nodes.914-manage-manufacturers', 
             $this->v
@@ -662,6 +672,32 @@ class ScoreAdminMisc extends ScoreCalcs
                 $this->v["manus"][$m]->save();
             }
         }
+        return true;
+    }
+    
+    /**
+     * Load all partner users' info, and extended info.
+     *
+     * @return boolean
+     */
+    protected function loadPartnerUsers()
+    {
+        $this->v["partners"] = [];
+        $chk = User::whereIn('id', function($query){
+                $query->select('RoleUserUID')
+                ->from(with(new SLUsersRoles)->getTable())
+                ->where('RoleUserRID', 368); // partner def ID
+            })
+            ->select('id', 'name', 'email')
+            ->orderBy('name', 'asc')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $ind => $usr) {
+                $this->v["partners"][$ind] = new ScoreUserInfo;
+                $this->v["partners"][$ind]->loadUser($usr->id, $usr);
+            }
+        }
+        $this->loadManufactIDs();
         return true;
     }
     
@@ -729,6 +765,38 @@ class ScoreAdminMisc extends ScoreCalcs
                     }
                 }
             }
+        } elseif ($GLOBALS["SL"]->REQ->has('partnerUser')
+            && intVal($GLOBALS["SL"]->REQ->get('partnerUser')) > 0
+            && $GLOBALS["SL"]->REQ->has('partnerManu') 
+            && intVal($GLOBALS["SL"]->REQ->get('partnerManu')) > 0) {
+            $usr = intVal($GLOBALS["SL"]->REQ->partnerUser);
+            $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
+            $chk = SLUsersRoles::where('RoleUserUID', $usr)
+                ->where('RoleUserRID', 368) // partner def ID
+                ->first();
+            if ($chk) {
+                $usrInfo = RIIUserInfo::where('UsrUserID', $usr)
+                    ->first();
+                if (!$usrInfo || !isset($usrInfo->UsrUserID)) {
+                    $usrInfo = new RIIUserInfo;
+                    $usrInfo->UsrUserID = $usr;
+                }
+                if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')) {
+                    $usrInfo->UsrCompanyName = trim(
+                        $GLOBALS["SL"]->REQ->partnerCompanyName
+                    );
+                }
+                $usrInfo->save();
+            }
+            $chk = RIIUserManufacturers::where('UsrManUserID', $usr)
+                ->where('UsrManManuID', $manu)
+                ->first();
+            if (!$chk || !isset($chk->UsrManManuID)) {
+                $chk = new RIIUserManufacturers;
+                $chk->UsrManUserID = $usr;
+                $chk->UsrManManuID = $manu;
+                $chk->save();
+            }
         }
         return true;
     }
@@ -795,6 +863,59 @@ class ScoreAdminMisc extends ScoreCalcs
             }
         }
         return true;
+    }
+    
+    public function printPartnerProfileDashHead($nID)
+    {
+        $title = 'Partner Members Dashboard';
+        $company = $this->getPartnerCompany();
+        if (trim($company) != '') {
+            $title = $company . ' Dashboard';
+        }
+        $ret = '<div class="pL15 pR15"><h2>' . $title . '</h2>';
+        if (isset($this->v["usrInfo"])) {
+            if (isset($this->v["usrInfo"]->manufacturers)
+                && sizeof($this->v["usrInfo"]->manufacturers) > 0) {
+                foreach ($this->v["usrInfo"]->manufacturers as $manu) {
+                    $ret .= '<div class="row mT10">
+                            <div class="col-6">
+                                <a href="/dash/competitive-performance?manu=' 
+                                    . urlencode($manu->ManuName) . '" '
+                                    . 'class="btn btn-xl btn-primary btn-block">' 
+                                    . $manu->ManuName . ' Competitive Performance</a>
+                            </div><div class="col-6 pT10">
+                                <p>Compare the competitive advantage of 
+                                growers who use <b>' . $manu->ManuName 
+                                . '</b> during at least one growth stage.</p>
+                            </div>
+                        </div>';
+                }
+            } else {
+                $ret .= '<div class="row mT10">
+                        <div class="col-6">
+                            <a href="/dash/competitive-performance" '
+                                . 'class="btn btn-xl btn-primary btn-block"'
+                                . '>Competitive Performance Report</a>
+                        </div><div class="col-6 pT10">
+                            <p>Compare the competitive advantage of 
+                            growers who use a partner\'s equipment during at least one growth stage. (Demo)</p>
+                        </div>
+                    </div>';
+            }
+            if ($company != '') {
+                $ret .= '<p>&nbsp;</p><div class="row mT10">
+                    <div class="col-6">
+                        <a href="/dash/partner-compare-powerscores" 
+                            class="btn btn-xl btn-primary btn-block"
+                            >' . $company . ' Individual Scores</a>
+                    </div><div class="col-6 pT10">
+                        <p>List <b>all of your</b> individual PowerScores with sub-score
+                        averages, plus dozens of different filter options.</p>
+                    </div>
+                </div>';
+            }
+        }
+        return $ret . '</div>';
     }
     
     protected function tmpDebug($str = '')

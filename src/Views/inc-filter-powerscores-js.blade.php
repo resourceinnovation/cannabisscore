@@ -53,6 +53,9 @@ function gatherFilts() {
     if (document.getElementById("fltCmplID") && document.getElementById("fltCmplID").value >= 0) {
         baseUrl += "&fltCmpl="+document.getElementById("fltCmplID").value;
     }
+    if (document.getElementById("fltManuLgtID") && document.getElementById("fltManuLgtID").value.trim() != "" && document.getElementById("fltManuLgtID").value.trim() != "0") {
+        baseUrl += "&fltManuLgt="+document.getElementById("fltManuLgtID").value;
+    }
     if (document.getElementById("fltCupID") && document.getElementById("fltCupID").value > 0) {
         baseUrl += "&fltCup="+document.getElementById("fltCupID").value;
     }

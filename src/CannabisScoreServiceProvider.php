@@ -18,8 +18,8 @@ class CannabisScoreServiceProvider extends ServiceProvider
               __DIR__.'/Models'        => base_path('app/Models'),
               
               __DIR__.'/Uploads'       => base_path('storage/app/up/cannabisscore'),
-              __DIR__.'/Database/2019_02_19_000000_create_rii_tables.php' 
-                => base_path('database/migrations/2019_02_19_000000_create_rii_tables.php'),
+              __DIR__.'/Database/2019_10_21_000000_create_rii_tables' 
+                => base_path('database/migrations/2019_10_21_000000_create_rii_tables'),
               __DIR__.'/Database/RIISeeder.php' => base_path('database/seeds/RIISeeder.php')
         ]);
     }

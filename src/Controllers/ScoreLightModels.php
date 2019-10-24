@@ -29,6 +29,7 @@ class ScoreLightModels extends ScoreVars
                 }
             }
         }
+        asort($this->v["manufacts"]);
         return $this->v["manufacts"];
     }
     

@@ -14,6 +14,9 @@ use App\Models\RIIPSAreas;
 use App\Models\RIIPSForCup;
 use App\Models\RIIPSRenewables;
 use App\Models\RIIPSOwners;
+use App\Models\RIIManufacturers;
+use App\Models\RIIUserInfo;
+use App\Models\RIIUserManufacturers;
 use SurvLoop\Controllers\Searcher;
 
 class CannabisScoreSearcher extends Searcher
@@ -22,12 +25,13 @@ class CannabisScoreSearcher extends Searcher
     {
         $this->v["defCmplt"] = 243;
         $this->v["defArch"]  = 364;
+        $set = 'PowerScore Growth Stages';
         $this->v["areaTypes"] = [
-            'Mother' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants'),
-            'Veg'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'),
-            'Flower' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'),
-            'Dry'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing')
+            'Mother' => $GLOBALS["SL"]->def->getID($set, 'Mother Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID($set, 'Clone Plants'),
+            'Veg'    => $GLOBALS["SL"]->def->getID($set, 'Vegetating Plants'),
+            'Flower' => $GLOBALS["SL"]->def->getID($set, 'Flowering Plants'),
+            'Dry'    => $GLOBALS["SL"]->def->getID($set, 'Drying/Curing')
         ];
         $this->v["areaTypesFilt"] = [
             'Flower' => $this->v["areaTypes"]["Flower"],
@@ -77,15 +81,20 @@ class CannabisScoreSearcher extends Searcher
         $this->v["fltNoLgtError"] = (($GLOBALS["SL"]->REQ->has('fltNoLgtError')) 
             ? trim($GLOBALS["SL"]->REQ->get('fltNoLgtError')) : '');
         $this->v["fltLgtArt"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
-            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtArt')) : [ 0, 0 ]);
+            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtArt')) 
+            : [ 0, 0 ]);
         $this->v["fltLgtDep"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
-            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtDep')) : [ 0, 0 ]);
+            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtDep')) 
+            : [ 0, 0 ]);
         $this->v["fltLgtSun"] = (($GLOBALS["SL"]->REQ->has('fltLgtArt')) 
-            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtSun')) : [ 0, 0 ]);
+            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLgtSun')) 
+            : [ 0, 0 ]);
         $this->v["fltLght"] = (($GLOBALS["SL"]->REQ->has('fltLght')) 
-            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLght')) : [ 0, 0 ]);
+            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltLght')) 
+            : [ 0, 0 ]);
         $this->v["fltHvac"] = (($GLOBALS["SL"]->REQ->has('fltHvac')) 
-            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltHvac')) : [ 0, 0 ]);
+            ? $GLOBALS["SL"]->splitNumDash($GLOBALS["SL"]->REQ->get('fltHvac')) 
+            : [ 0, 0 ]);
         $this->v["fltSize"] = (($GLOBALS["SL"]->REQ->has('fltSize')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltSize')) : 0);
         $this->v["fltPerp"] = (($GLOBALS["SL"]->REQ->has('fltPerp')) 
@@ -101,13 +110,17 @@ class CannabisScoreSearcher extends Searcher
         $this->v["fltVert"] = (($GLOBALS["SL"]->REQ->has('fltVert')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltVert')) : 0);
         $this->v["fltRenew"] = (($GLOBALS["SL"]->REQ->has('fltRenew')) 
-            ? $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('fltRenew')) : []);
+            ? $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('fltRenew')) 
+            : []);
         $this->v["fltCmpl"] = (($GLOBALS["SL"]->REQ->has('fltCmpl')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltCmpl')):243);
+        $this->v["fltManuLgt"] = (($GLOBALS["SL"]->REQ->has('fltManuLgt')) 
+            ? trim($GLOBALS["SL"]->REQ->get('fltManuLgt')) : '');
         $this->v["fltCup"] = (($GLOBALS["SL"]->REQ->has('fltCup')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltCup')) : 0);
         $this->v["prtnOwn"] = 0;
-        if (isset($GLOBALS["SL"]->x["partnerVersion"]) && $GLOBALS["SL"]->x["partnerVersion"]
+        if (isset($GLOBALS["SL"]->x["partnerVersion"]) 
+            && $GLOBALS["SL"]->x["partnerVersion"]
             && !$GLOBALS["SL"]->REQ->has('all')) {
             $this->v["prtnOwn"] = 1;
         }
@@ -118,11 +131,12 @@ class CannabisScoreSearcher extends Searcher
     public function searchFiltsURLXtra()
     {
         $this->v["sort"] = [ 'PsID', 'desc' ];
-        if ($GLOBALS["SL"]->REQ->has('srt') && trim($GLOBALS["SL"]->REQ->get('srt')) != '') {
-            $this->v["sort"][0] = $GLOBALS["SL"]->REQ->get('srt');
-            if ($GLOBALS["SL"]->REQ->has('srta') 
-                && in_array(trim($GLOBALS["SL"]->REQ->get('srta')), ['asc', 'desc'])) {
-                $this->v["sort"][1] = $GLOBALS["SL"]->REQ->get('srta');
+        if ($GLOBALS["SL"]->REQ->has('sSort') 
+            && trim($GLOBALS["SL"]->REQ->sSort) != '') {
+            $this->v["sort"][0] = $GLOBALS["SL"]->REQ->sSort;
+            if ($GLOBALS["SL"]->REQ->has('sSortDir') 
+                && in_array(trim($GLOBALS["SL"]->REQ->sSortDir), ['asc', 'desc'])) {
+                $this->v["sort"][1] = $GLOBALS["SL"]->REQ->sSortDir;
             }
         }
         $this->v["xtraFltsDesc"] = '';
@@ -154,19 +168,27 @@ class CannabisScoreSearcher extends Searcher
         }
         if ($this->v["fltLght"][1] > 0) {
             $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltLght"][0] > 0) 
-                ? $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $this->v["fltLght"][0]) : '')
+                ? $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $this->v["fltLght"][0]) 
+                : '')
                 . $GLOBALS["SL"]->def->getVal('PowerScore Light Types', $this->v["fltLght"][1]);
-            $this->v["urlFlts"] .= '&fltLght=' . $this->v["fltLght"][0] . '-' . $this->v["fltLght"][1];
+            $this->v["urlFlts"] .= '&fltLght=' . $this->v["fltLght"][0] 
+                . '-' . $this->v["fltLght"][1];
         }
         if ($this->v["fltHvac"][1] > 0) {
             $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltHvac"][0] > 0) 
-                ? $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $this->v["fltHvac"][0]) : '')
-                . strtolower($GLOBALS["SL"]->def->getVal('PowerScore HVAC Systems', $this->v["fltHvac"][1]));
-            $this->v["urlFlts"] .= '&fltHvac=' . $this->v["fltHvac"][0] . '-' . $this->v["fltHvac"][1];
+                ? $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $this->v["fltHvac"][0]) 
+                : '')
+                . strtolower($GLOBALS["SL"]->def->getVal(
+                    'PowerScore HVAC Systems', 
+                    $this->v["fltHvac"][1]
+                ));
+            $this->v["urlFlts"] .= '&fltHvac=' . $this->v["fltHvac"][0] 
+                . '-' . $this->v["fltHvac"][1];
         }
         if ($this->v["fltSize"] > 0) {
             $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltSize"] > 0) 
-                ? $GLOBALS["SL"]->def->getVal('Indoor Size Groups', $this->v["fltSize"]) : '')
+                ? $GLOBALS["SL"]->def->getVal('Indoor Size Groups', $this->v["fltSize"]) 
+                : '')
                 . strtolower($GLOBALS["SL"]->def->getVal('Indoor Size Groups', $this->v["fltSize"]));
             $this->v["urlFlts"] .= '&fltSize=' . $this->v["fltSize"];
         }
@@ -250,7 +272,8 @@ class CannabisScoreSearcher extends Searcher
             ? (($this->v["isAdmin"]) ? "242, 243, 364" : 243)
             : $this->v["fltCmpl"]) . "])->where('PsTimeType', " 
             . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")";
-        $psidLgtARS = $psidLghts = $psidHvac = $psidRenew = $psidSize = $psidCups = [];
+        $psidLgtARS = $psidLghts = $psidHvac = $psidRenew 
+            = $psidSize = $psidCups = $psidManuLgt = [];
         foreach (["fltLgtArt", "fltLgtDep", "fltLgtSun"] as $flt) {
             $psidLgtARS[$flt] = [];
             if (isset($this->v[$flt][1])) {                 
@@ -313,6 +336,14 @@ class CannabisScoreSearcher extends Searcher
                         $psidRenew[] = $ps->PsRnwPSID;
                     }
                 }
+            }
+        }
+        if (trim($this->v["fltManuLgt"]) != '') {
+            $chk = RIIManufacturers::find($this->v["fltManuLgt"]);
+            if ($chk && isset($chk->ManuName)) {
+                $this->addManuPSIDs($psidManuLgt, $chk);
+            } else {
+                $this->addAllManuPSIDs($psidManuLgt);
             }
         }
         if ($this->v["fltCup"] > 0) {
@@ -419,6 +450,10 @@ class CannabisScoreSearcher extends Searcher
             $eval .= "->whereIn('PsID', [" . ((sizeof($psidRenew) > 0) 
                 ? implode(', ', $psidRenew) : 0) . "])";
         }
+        if (trim($this->v["fltManuLgt"]) != '') {
+            $eval .= "->whereIn('PsID', [" . ((sizeof($psidManuLgt) > 0) 
+                ? implode(', ', $psidManuLgt) : 0) . "])";
+        }
         if ($this->v["fltCup"] > 0) {
             $eval .= "->whereIn('PsID', [" . ((sizeof($psidCups) > 0) 
                 ? implode(', ', $psidCups) : 0) . "])";
@@ -436,14 +471,75 @@ class CannabisScoreSearcher extends Searcher
     
     public function loadAllScoresPublic($xtra = '')
     {
-        $eval = "\$this->v['allscores'] = " . $GLOBALS["SL"]->modelPath('PowerScore') . "::" 
+        $eval = "\$this->v['allscores'] = "
+            . $GLOBALS["SL"]->modelPath('PowerScore') . "::" 
             . $this->filterAllPowerScoresPublic() . $xtra
             . (($this->v["fltCmpl"] == 243) 
-                ? "->where('PsEfficFacility', '>', 0)->where('PsEfficProduction', '>', 0)"
+                ? "->where('PsEfficFacility', '>', 0)"
+                    . "->where('PsEfficProduction', '>', 0)"
                 : "")
-            . "->orderBy('" . $this->v["sort"][0] . "', '" . $this->v["sort"][1] . "')->get();";
+            . "->orderBy('" . $this->v["sort"][0] . "', '" 
+            . $this->v["sort"][1] . "')->get();";
         eval($eval);
 //echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br />'; exit;
+        return true;
+    }
+
+    public function addAllManuPSIDs(&$psidManuLgt)
+    {
+        if (!isset($this->v["fltManuLgt"])) {
+            return false;
+        }
+        $manus = $this->getUsrCompanyManuLnks($this->v["fltManuLgt"]);
+        if ($manus && $manus->isNotEmpty()) {
+            foreach ($manus as $userManu) {
+                $manu = RIIManufacturers::find($userManu->UsrManManuID);
+                $this->addManuPSIDs($psidManuLgt, $manu);
+            }
+        }
+        return true;
+    }
+
+    protected function getUsrCompanyManuLnks($company = '')
+    {
+        $chk = RIIUserInfo::where('UsrCompanyName', 'LIKE', $company)
+            ->first();
+        if ($chk && isset($chk->UsrUserID)) {
+            return RIIUserManufacturers::where('UsrManUserID', $chk->UsrUserID)
+                ->get();
+        }
+        return null;
+    }
+
+    public function getUsrCompanyManus()
+    {
+        $ret = [];
+        if (isset($this->v["fltManuLgt"])) {
+            $manus = $this->getUsrCompanyManuLnks($this->v["fltManuLgt"]);
+            if ($manus && $manus->isNotEmpty()) {
+                foreach ($manus as $userManu) {
+                    $ret[] = RIIManufacturers::find($userManu->UsrManManuID);
+                }
+            }
+        }
+        return $ret;
+    }
+
+    protected function addManuPSIDs(&$psidManuLgt, $manu)
+    {
+        foreach ($this->v["areaTypes"] as $area => $areaType) {
+            if (isset($manu->{ 'ManuIDs' . $area })) {
+                $tmpIDs = $GLOBALS["SL"]->mexplode(
+                    ',', 
+                    $manu->{ 'ManuIDs' . $area }
+                );
+                if (sizeof($tmpIDs) > 0) {
+                    foreach ($tmpIDs as $ps) {
+                        $psidManuLgt[] = $ps;
+                    }
+                }
+            }
+        }
         return true;
     }
     

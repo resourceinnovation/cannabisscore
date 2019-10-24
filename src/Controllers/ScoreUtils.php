@@ -271,31 +271,43 @@ class ScoreUtils extends ScorePowerUtilities
             }
         } elseif ($loop == 'Types of Light Fixtures') {
             if ($itemRow && isset($itemRow->PsLgTypAreaID)) {
-                $lgtDesc = '<b>' . $this->getAreaIdTypeName($itemRow->PsLgTypAreaID) . ':</b> ';
-                if (isset($itemRow->PsLgTypCount) && trim($itemRow->PsLgTypCount) != '') {
-                    $lgtDesc .= number_format($itemRow->PsLgTypCount) . ' fixtures, ';
+                $lgtDesc = '<b>' 
+                    . $this->getAreaIdTypeName($itemRow->PsLgTypAreaID) 
+                    . ':</b> ';
+                if (isset($itemRow->PsLgTypCount) 
+                    && trim($itemRow->PsLgTypCount) != '') {
+                    $lgtDesc .= number_format($itemRow->PsLgTypCount) 
+                        . ' fixtures, ';
                 }
-                if (isset($itemRow->PsLgTypWattage) && trim($itemRow->PsLgTypWattage) != '') {
-                    $lgtDesc .= number_format($itemRow->PsLgTypWattage) . 'W each';
+                if (isset($itemRow->PsLgTypWattage) 
+                    && trim($itemRow->PsLgTypWattage) != '') {
+                    $lgtDesc .= number_format($itemRow->PsLgTypWattage) 
+                        . 'W each';
                 }
                 $lgtDesc .= '</h4>';
-                if (isset($itemRow->PsLgTypLight) && intVal($itemRow->PsLgTypLight) > 0) {
+                if (isset($itemRow->PsLgTypLight)
+                    && intVal($itemRow->PsLgTypLight) > 0) {
                     $lgtDesc .= $GLOBALS["SL"]->def->getVal(
                         'PowerScore Light Types', 
                         $itemRow->PsLgTypLight
                     );
-                    if ((isset($itemRow->PsLgTypMake) && trim($itemRow->PsLgTypMake) != '') 
-                        || (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '')) {
+                    if ((isset($itemRow->PsLgTypMake) 
+                            && trim($itemRow->PsLgTypMake) != '') 
+                        || (isset($itemRow->PsLgTypModel) 
+                            && trim($itemRow->PsLgTypModel) != '')) {
                         $lgtDesc .= ', ';
                     }
                 }
-                if (isset($itemRow->PsLgTypMake) && trim($itemRow->PsLgTypMake) != '') {
+                if (isset($itemRow->PsLgTypMake) 
+                    && trim($itemRow->PsLgTypMake) != '') {
                     $lgtDesc .= $itemRow->PsLgTypMake;
-                    if (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '') {
+                    if (isset($itemRow->PsLgTypModel) 
+                        && trim($itemRow->PsLgTypModel) != '') {
                         $lgtDesc .= ', ';
                     }
                 }
-                if (isset($itemRow->PsLgTypModel) && trim($itemRow->PsLgTypModel) != '') {
+                if (isset($itemRow->PsLgTypModel) 
+                    && trim($itemRow->PsLgTypModel) != '') {
                     $lgtDesc .= $itemRow->PsLgTypModel;
                 }
                 $lgtDesc .= '<h4 class="disNon">';
@@ -309,11 +321,16 @@ class ScoreUtils extends ScorePowerUtilities
     {
         switch ($nID) {
             case 59:
-            case 78: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Solar PV');
-            case 80: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Wind');
-            case 61: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Biomass');
-            case 60: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Geothermal');
-            case 81: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Pelton Wheel');
+            case 78: return $GLOBALS["SL"]->def
+                ->getID('PowerScore Renewables', 'Solar PV');
+            case 80: return $GLOBALS["SL"]->def
+                ->getID('PowerScore Renewables', 'Wind');
+            case 61: return $GLOBALS["SL"]->def
+                ->getID('PowerScore Renewables', 'Biomass');
+            case 60: return $GLOBALS["SL"]->def
+                ->getID('PowerScore Renewables', 'Geothermal');
+            case 81: return $GLOBALS["SL"]->def
+                ->getID('PowerScore Renewables', 'Pelton Wheel');
         }
         return -3;
     }
@@ -397,18 +414,35 @@ class ScoreUtils extends ScorePowerUtilities
         if ($areaID <= 0) {
             return [];
         }
-        $areaArr = [ 'PsLgTypAreaID' => $areaID ];
-        return $this->sessData->getRowIDsByFldVal('PSLightTypes', $areaArr, true);
+        $areaArr = [
+            'PsLgTypAreaID' => $areaID
+        ];
+        return $this->sessData->getRowIDsByFldVal(
+            'PSLightTypes', 
+            $areaArr, 
+            true
+        );
+    }
+    
+    public function printPartnerProfileDashBtn($nID)
+    {
+        return '<a href="/dashboard" '
+            . 'class="btn btn-xl btn-primary btn-block">'
+            . $this->getPartnerCompany() . ' Dashboard</a>';
     }
     
     public function printProfileExtraBtns()
     {
-        if (isset($this->v["profileUser"]) && isset($this->v["profileUser"]->id) 
+        if (isset($this->v["profileUser"]) && isset($this->v["uID"])
+            && isset($this->v["profileUser"]->id)
             && $this->v["profileUser"]->id == $this->v["uID"] 
             && $this->isUserPastCultClassic($this->v["uID"])) {
-            return '<a href="/start/calculator?new=1&cups=230&time=232" class="btn btn-lg btn-primary btn-block">'
-                . 'Start A Fresh PowerScore for the Cultivation Classic</a><br /><br />'
-                . '<a href="/start/calculator?new=1" class="btn btn-lg btn-primary btn-block">'
+            return '<a href="/start/calculator?new=1&cups=230&time=232" '
+                . 'class="btn btn-lg btn-primary btn-block">'
+                . 'Start A Fresh PowerScore for '
+                . 'the Cultivation Classic</a><br /><br />'
+                . '<a href="/start/calculator?new=1" '
+                . 'class="btn btn-lg btn-primary btn-block">'
                 . 'Start A Fresh PowerScore</a>';
         }
         return '';
@@ -417,10 +451,12 @@ class ScoreUtils extends ScorePowerUtilities
     protected function isUserPastCultClassic($uID)
     {
         $chk = DB::table('RII_PowerScore')
-            ->join('RII_PSForCup', 'RII_PSForCup.PsCupPSID', '=', 'RII_PowerScore.PsID')
+            ->join('RII_PSForCup', 
+                'RII_PSForCup.PsCupPSID', '=', 'RII_PowerScore.PsID')
             ->where('RII_PowerScore.PsUserID', $uID)
             ->where('RII_PSForCup.PsCupCupID', 
-                $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic'))
+                $GLOBALS["SL"]->def->getID(
+                    'PowerScore Competitions', 'Cultivation Classic'))
             ->get();
         return $chk->isNotEmpty();
     }
@@ -458,11 +494,13 @@ class ScoreUtils extends ScorePowerUtilities
         $blds = $this->sessData->getBranchChildRows('PSAreasBlds');
         if (sizeof($blds) > 0) {
             foreach ($blds as $i => $bld) {
-                $deet .= (($i > 0) ? ', ' : '') . $GLOBALS["SL"]->def->getVal(
-                    'PowerScore Building Types', 
-                    $bld->PsArBldType
-                );
-                if (isset($bld->PsArBldTypeOther) && trim($bld->PsArBldTypeOther) != '') {
+                $deet .= (($i > 0) ? ', ' : '') 
+                    . $GLOBALS["SL"]->def->getVal(
+                        'PowerScore Building Types', 
+                        $bld->PsArBldType
+                    );
+                if (isset($bld->PsArBldTypeOther) 
+                    && trim($bld->PsArBldTypeOther) != '') {
                     $deet .= ': ' . $bld->PsArBldTypeOther;
                 }
                 $cnsts = $this->sessData->dataWhere(
@@ -473,10 +511,11 @@ class ScoreUtils extends ScorePowerUtilities
                 if ($cnsts) {
                     $deet .= ' (';
                     foreach ($cnsts as $j => $cnst) {
-                        $deet .= (($j > 0) ? ', ' : '') . $GLOBALS["SL"]->def->getVal(
-                            'PowerScore Building Construction', 
-                            $cnst->PsArCnsType
-                        );
+                        $deet .= (($j > 0) ? ', ' : '') 
+                            . $GLOBALS["SL"]->def->getVal(
+                                'PowerScore Building Construction', 
+                                $cnst->PsArCnsType
+                            );
                         if (isset($cnst->PsArCnsTypeOther) 
                             && trim($cnst->PsArCnsTypeOther) != '') {
                             $deet .= ': ' . $cnst->PsArCnsTypeOther;
@@ -496,20 +535,30 @@ class ScoreUtils extends ScorePowerUtilities
         if (sizeof($lgts) > 0) {
             foreach ($lgts as $i => $lgt) {
                 $deet .= (($i > 0) ? ', ' : '') 
-                    . $GLOBALS["SL"]->def->getVal('PowerScore Light Types', $lgt->PsLgTypLight)
-                    . ((isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0) 
+                    . $GLOBALS["SL"]->def->getVal(
+                        'PowerScore Light Types', 
+                        $lgt->PsLgTypLight
+                    ) . ((isset($lgt->PsLgTypCount) 
+                        && intVal($lgt->PsLgTypCount) > 0) 
                         ? ' ' . $lgt->PsLgTypCount . ' x ' 
-                        . ((isset($lgt->PsLgTypWattage) && intVal($lgt->PsLgTypWattage) > 0) 
+                        . ((isset($lgt->PsLgTypWattage) 
+                            && intVal($lgt->PsLgTypWattage) > 0) 
                             ? $lgt->PsLgTypWattage . 'W' : '') : '');
-                if ((isset($lgt->PsLgTypHours) && intVal($lgt->PsLgTypHours) > 0)
-                    || (isset($lgt->PsLgTypMake) && trim($lgt->PsLgTypMake) != '')
-                    || (isset($lgt->PsLgTypModel) && trim($lgt->PsLgTypModel) != '')) {
+                if ((isset($lgt->PsLgTypHours) 
+                        && intVal($lgt->PsLgTypHours) > 0)
+                    || (isset($lgt->PsLgTypMake) 
+                        && trim($lgt->PsLgTypMake) != '')
+                    || (isset($lgt->PsLgTypModel) 
+                        && trim($lgt->PsLgTypModel) != '')) {
                     $deet .= '<div class="pL20">' 
-                        . ((isset($lgt->PsLgTypHours) && intVal($lgt->PsLgTypHours) > 0) 
+                        . ((isset($lgt->PsLgTypHours) 
+                            && intVal($lgt->PsLgTypHours) > 0) 
                             ? ' ' . $lgt->PsLgTypHours . ' hours' : '')
-                        . ((isset($lgt->PsLgTypMake) && trim($lgt->PsLgTypMake) != '') 
+                        . ((isset($lgt->PsLgTypMake) 
+                            && trim($lgt->PsLgTypMake) != '') 
                             ? ' ' . $lgt->PsLgTypMake : '')
-                        . ((isset($lgt->PsLgTypModel) && trim($lgt->PsLgTypModel) != '') 
+                        . ((isset($lgt->PsLgTypModel) 
+                            && trim($lgt->PsLgTypModel) != '') 
                             ? ' ' . $lgt->PsLgTypModel :'')
                         . '</div>';
                 }
@@ -521,35 +570,30 @@ class ScoreUtils extends ScorePowerUtilities
     protected function chkUnprintableSubScores()
     {
         $this->v["noprints"] = '';
+        $ps = $this->sessData->dataSets["PowerScore"][0];
         $noprints = [];
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficFacility)
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficFacility 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficFacility == 0) {
+        if (!isset($ps->PsEfficFacility) || !$ps->PsEfficFacility 
+            || $ps->PsEfficFacility == 0) {
             $noprints[] = 'facility';
         }
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficProduction) 
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficProduction 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficProduction == 0) {
+        if (!isset($ps->PsEfficProduction) || !$ps->PsEfficProduction 
+            || $ps->PsEfficProduction == 0) {
             $noprints[] = 'production';
         }
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficHvac) 
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficHvac 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficHvac == 0) {
+        if (!isset($ps->PsEfficHvac) || !$ps->PsEfficHvac 
+            || $ps->PsEfficHvac == 0) {
             $noprints[] = 'HVAC';
         }
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficLighting) 
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficLighting 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficLighting == 0) {
+        if (!isset($ps->PsEfficLighting) || !$ps->PsEfficLighting 
+            || $ps->PsEfficLighting == 0) {
             $noprints[] = 'lighting';
         }
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficWater) 
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficWater 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficWater == 0) {
+        if (!isset($ps->PsEfficWater) || !$ps->PsEfficWater 
+            || $ps->PsEfficWater == 0) {
             $noprints[] = 'water';
         }
-        if (!isset($this->sessData->dataSets["PowerScore"][0]->PsEfficWaste) 
-            || !$this->sessData->dataSets["PowerScore"][0]->PsEfficWaste 
-            || $this->sessData->dataSets["PowerScore"][0]->PsEfficWaste == 0) {
+        if (!isset($ps->PsEfficWaste) || !$ps->PsEfficWaste 
+            || $ps->PsEfficWaste == 0) {
             $noprints[] = 'waste';
         }
         if (sizeof($noprints) > 0) {
@@ -561,7 +605,9 @@ class ScoreUtils extends ScorePowerUtilities
                         $this->v["noprints"] .= ' and ' . $no;
                     } else {
                         $this->v["noprints"] .= ', ' 
-                            . (($i == (sizeof($noprints)-1)) ? 'and ' : '') . $no;
+                            . (($i == (sizeof($noprints)-1)) 
+                                ? 'and ' : '') 
+                            . $no;
                     }
                 }
             }

@@ -37,14 +37,6 @@ use CannabisScore\Controllers\ScoreImports;
 
 class CannabisScore extends ScoreImports
 {
-    public function printPreviewReport($isAdmin = false)
-    {
-        return view('vendor.cannabisscore.powerscore-report-preview', [
-            "uID"      => $this->v["uID"],
-            "sessData" => $this->sessData->dataSets
-        ])->render();
-    }
-    
     protected function customNodePrint($nID = -3, $tmpSubTier = [], $nIDtxt = '', $nSffx = '', $currVisib = 1)
     {
         $ret = '';
@@ -117,56 +109,48 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 878) {
             $this->auditLgtAlerts();
         } elseif ($nID == 860) {
-            if (isset($this->sessData->dataSets["PSForCup"])) {
-                $deetVal = '';
-                foreach ($this->sessData->dataSets["PSForCup"] 
-                    as $i => $cup) {
-                    if (isset($cup->PsCupCupID) 
-                        && intVal($cup->PsCupCupID) > 0) {
-                        $deetVal .= (($i > 0) ? ', ' : '') 
-                            . $GLOBALS["SL"]->def->getVal(
-                                'PowerScore Competitions', 
-                                $cup->PsCupCupID
-                            );
-                    }
-                }
-                return ['Competition', $deetVal, $nID];
-            }
+            return $this->printReportForCompetition($nID);
         } elseif ($nID == 861) {
-            if (isset($this->sessData->dataSets["PowerScore"])) {
-                $ps = $this->sessData->dataSets["PowerScore"][0];
-                if (isset($ps->PsYear)) {
-                    return [
-                        'Growing Year', 
-                        $ps->PsYear, 
-                        $nID
-                    ];
-                }
-            }
+            return $this->printReportGrowingYear($nID);
         } elseif ($nID == 508) {
-            $this->prepUtilityRefTitle();
-            $ret .= view(
-                'vendor.cannabisscore.nodes.'
-                    . '508-utility-referral-title', 
-                $this->v
-            )->render();
+            $ret .= $this->printReportUtilRef($nID);
             
         // PowerScore Reporting
         } elseif ($nID == 744) {
-            $report = new ScoreReports;
+            $report = new ScoreReports(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $ret .= $report->getCultClassicReport();
         } elseif ($nID == 170) {
-            $report = new ScoreReports;
+            $report = new ScoreReports(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $ret .= $report->getAllPowerScoresPublic($nID);
         } elseif ($nID == 966) {
-            $report = new ScoreReports;
+            $report = new ScoreReports(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $ret .= $report->getPowerScoresOutliers($nID);
         } elseif ($nID == 964) { // Partner Multi-Site Rankings
-            $report = new ScoreReports;
+            $report = new ScoreReports(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getMultiSiteRankings($nID);
         } elseif ($nID == 799) { // Partner Multi-Site Listings
-            $report = new ScoreReports;
+            $report = new ScoreReports(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getAllPowerScoresPublic($nID);
         } elseif ($nID == 773) {
@@ -180,9 +164,13 @@ class CannabisScore extends ScoreImports
             $GLOBALS["SL"]->x["partnerVersion"] = true;
             $ret .= $report->getAllPowerScoreAvgsPublic();
         } elseif ($nID == 979) {
-            $report = new ScoreReportLightingManu;
+            $report = new ScoreReportLightingManu(
+                $this->v["uID"],
+                $this->v["user"],
+                $this->v["usrInfo"]
+            );
             $GLOBALS["SL"]->x["partnerVersion"] = true;
-            $ret .= $report->printCompareLightManu();
+            $ret .= $report->printCompareLightManu($nID);
         } elseif ($nID == 797) {
             $report = new ScoreReportAvgs;
             $ret .= $report->getPowerScoreFinalReport();
@@ -235,14 +223,18 @@ class CannabisScore extends ScoreImports
             $ret .= $this->runNwpccImport();
         } elseif ($nID == 968) {
             return view(
-                'vendor.cannabisscore.nodes.'
-                    . '968-lighting-manufacturers-comparison', 
+                'vendor.cannabisscore.nodes.968-lighting-manufacturers-comparison', 
                 [ "nID" => $nID ]
             )->render();
             
         // Misc
         } elseif ($nID == 843) {
             $ret .= $this->printProfileExtraBtns();
+        } elseif ($nID == 1039) {
+            $ret .= $this->printPartnerProfileDashBtn($nID);
+        } elseif ($nID == 1040) {
+            $ret .= $this->printPartnerProfileDashHead($nID);
+
         }
         return $ret;
     }
@@ -499,59 +491,6 @@ class CannabisScore extends ScoreImports
             'convertGrams();'
         );
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
-    }
-    
-    public function customPrint490($nID)
-    {
-        if ($GLOBALS["SL"]->REQ->has('isPreview')) {
-            return '<style> #blockWrap492, #blockWrap501, #blockWrap727 { display: none; } </style>';
-        }
-        $ret = '';
-        $this->v["nID"] = $nID;
-        if ($GLOBALS["SL"]->REQ->has('refresh')) {
-            $ret .= view('vendor.cannabisscore.nodes.490-report-calculations-top-refresh', [
-                "psid" => $this->coreID
-                ])->render();
-        } else {
-            $ret .= $this->printReport490();
-        }
-        return $ret;
-    }
-    
-    public function printReport490()
-    {
-        if ($GLOBALS["SL"]->REQ->has('step') 
-            && $GLOBALS["SL"]->REQ->has('postAction')
-            && trim($GLOBALS["SL"]->REQ->get('postAction')) != '') {
-            return $this->redir($GLOBALS["SL"]->REQ->get('postAction'), true);
-        }
-        $this->initSearcher();
-        $this->searcher->getSearchFilts();
-        $this->getAllReportCalcs();
-        if (!$GLOBALS["SL"]->REQ->has('fltFarm')) {
-            $this->searcher->v["fltFarm"] = $this->sessData
-                ->dataSets["PowerScore"][0]->PsCharacterize;
-            $this->searcher->searchFiltsURLXtra();
-        }
-        $this->searcher->v["nID"] = 490;
-        $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
-            == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        return view('vendor.cannabisscore.nodes.490-report-calculations', $this->v)
-            ->render();
-    }
-    
-    public function printPsRankingFilters($nID)
-    {
-        $this->initSearcher();
-        $this->searcher->getSearchFilts();
-        $this->searcher->v["nID"] = $nID;
-        $this->searcher->v["psFiltChks"] = view('vendor.cannabisscore.inc-filter-powerscores-checkboxes', $this->searcher->v)
-            ->render();
-        return '<div id="scoreRankFiltWrap"><h5 class="mT0">Compare to other farms</h5>'
-            . '<div class="pT5"></div>' . view(
-                'vendor.cannabisscore.inc-filter-powerscores', 
-                $this->searcher->v
-            )->render() . '</div>';
     }
     
     public function ajaxChecksCustom(Request $request, $type = '')
@@ -1062,12 +1001,17 @@ class CannabisScore extends ScoreImports
             return 0;
         } elseif ($condition == '#ScoreNotLeader') {
             if (isset($this->sessData->dataSets["PowerScore"][0]->PsEfficOverall)) {
-                if (round($this->sessData->dataSets["PowerScore"][0]->PsEfficOverall) < 67) return 1;
-                else return 0;
+                if (round($this->sessData->dataSets["PowerScore"][0]->PsEfficOverall) < 67) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
             return -1;
-        } elseif ($condition == '#ReportDetailsPublic') { // could be replaced by OR functionality
-            if ($this->v["user"] && $this->v["user"]->hasRole('administrator|staff')) {
+        } elseif ($condition == '#ReportDetailsPublic') { 
+            // could be replaced by OR functionality
+            if (isset($this->v["user"]) && $this->v["user"] 
+                && $this->v["user"]->hasRole('administrator|staff')) {
                 return 1;
             }
             if (isset($this->sessData->dataSets["PowerScore"][0]->PsPrivacy)
