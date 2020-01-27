@@ -147,8 +147,8 @@
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ $GLOBALS["SL"]->sigFigs(
-                            $dat->scores[$l], 3) }} 
+                    <p><nobr>
+                        {{ $GLOBALS["SL"]->sigFigs($dat->scores[$l], 3) }} 
                         <span class="fPerc66 slGrey">{{ $leg[2] }}</span>
                     </nobr></p>
                 @endforeach

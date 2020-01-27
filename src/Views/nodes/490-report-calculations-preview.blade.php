@@ -3,98 +3,104 @@
     <table>
         <tr>
             <td colspan=2 >
-                <h3 class="m0">PowerScore Report #{{ $ps->PsID }}</h3>
+                <h3 class="m0">PowerScore Report #{{ $ps->ps_id }}</h3>
                 <div class="slGrey fPerc80">
                     This is how your performance compares with all other {!! $filtDesc !!} farms:
                 </div>
             </td><td class="taC">
-            @if (isset($rank->PsRnkOverall))
+            @if (isset($rank->ps_rnk_overall))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
-                    round($rank->PsRnkOverall) }}.gif" style="width: 100px;" />
+                    round($rank->ps_rnk_overall) }}.gif" style="width: 100px;" />
             @endif
             </td><td>
-            @if (isset($rank->PsRnkOverall))
-                <b>Overall:<br />{!! round($rank->PsRnkOverall) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->PsRnkOverall)) !!} percentile</b>
+            @if (isset($rank->ps_rnk_overall))
+                <b>Overall:<br />{!! round($rank->ps_rnk_overall) 
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_overall)) 
+                !!} percentile</b>
             @endif
             </td>
         </tr>
-    @if (isset($ps->PsEfficFacility) && $ps->PsEfficFacility > 0)
+    @if (isset($ps->ps_effic_facility) && $ps->ps_effic_facility > 0)
         <tr>
             <td>
                 <b>Facility Efficiency:</b>
             </td><td>
-                @if (isset($ps->PsEfficFacility)) {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
+                @if (isset($ps->ps_effic_facility)) 
+                    {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_facility, 3) }}
                 @else 0 @endif &nbsp;&nbsp;kWh / sq ft
             </td><td class="taC">
-            @if (isset($rank->PsRnkFacility))
+            @if (isset($rank->ps_rnk_facility))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
-                    round($rank->PsRnkFacility) }}.gif" style="width: 66px;" />
+                    round($rank->ps_rnk_facility) }}.gif" style="width: 66px;" />
             @endif
             </td><td>
-            @if (isset($rank->PsRnkFacility))
-                {!! round($rank->PsRnkFacility) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->PsRnkFacility)) !!} percentile
+            @if (isset($rank->ps_rnk_facility))
+                {!! round($rank->ps_rnk_facility) 
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_facility)) 
+                !!} percentile
             @endif
             </td>
         </tr>
     @endif
-    @if (isset($ps->PsEfficProduction) && $ps->PsEfficProduction > 0)
+    @if (isset($ps->ps_effic_production) && $ps->ps_effic_production > 0)
         <tr>
             <td>
                 <b>Production Efficiency:</b>
             </td><td>
-                @if (isset($ps->PsEfficProduction)) {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
+                @if (isset($ps->ps_effic_production)) 
+                    {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_production, 3) }}
                 @else 0 @endif &nbsp;&nbsp;grams / kWh
             </td><td class="taC">
-            @if (isset($rank->PsRnkProduction))
+            @if (isset($rank->ps_rnk_production))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
-                    round($rank->PsRnkProduction) }}.gif" style="width: 66px;" />
+                    round($rank->ps_rnk_production) }}.gif" style="width: 66px;" />
             @endif
             </td><td>
-            @if (isset($rank->PsRnkProduction))
-                {!! round($rank->PsRnkProduction) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->PsRnkProduction)) !!} percentile
+            @if (isset($rank->ps_rnk_production))
+                {!! round($rank->ps_rnk_production) 
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_production)) 
+                !!} percentile
             @endif
             </td>
         </tr>
     @endif
-    @if (isset($ps->PsEfficHvac) && $ps->PsEfficHvac > 0)
+    @if (isset($ps->ps_effic_hvac) && $ps->ps_effic_hvac > 0)
         <tr>
             <td>
                 <b>HVAC Efficiency:</b>
             </td><td>
-                @if (isset($ps->PsEfficHvac)) {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
+                @if (isset($ps->ps_effic_hvac)) {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
                 @else 0 @endif &nbsp;&nbsp;kWh / sq ft
             </td><td class="taC">
-            @if (isset($rank->PsRnkHVAC))
-                <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
-                    round($rank->PsRnkHVAC) }}.gif" style="width: 66px;" />
+            @if (isset($rank->ps_rnk_hvac))
+                <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] 
+                    }}/cannabisscore/uploads/greenometer-anim-{{ 
+                    round($rank->ps_rnk_hvac) }}.gif" style="width: 66px;" />
             @endif
             </td><td>
-            @if (isset($rank->PsRnkHVAC))
-                {!! round($rank->PsRnkHVAC) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->PsRnkHVAC)) !!} percentile
+            @if (isset($rank->ps_rnk_hvac))
+                {!! round($rank->ps_rnk_hvac) 
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_hvac)) !!} percentile
             @endif
             </td>
         </tr>
     @endif
-    @if (isset($ps->PsEfficLighting) && $ps->PsEfficLighting > 0)
+    @if (isset($ps->ps_effic_lighting) && $ps->ps_effic_lighting > 0)
         <tr>
             <td>
                 <b>Lighting Efficiency:</b>
             </td><td>
-                @if (isset($ps->PsEfficLighting)) {{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }} 
+                @if (isset($ps->ps_effic_lighting)) {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }} 
                 @else 0 @endif &nbsp;&nbsp;kWh / sq ft
             </td><td class="taC">
-            @if (isset($rank->PsRnkLighting))
+            @if (isset($rank->ps_rnk_lighting))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
-                    round($rank->PsRnkLighting) }}.gif" style="width: 66px;" />
+                    round($rank->ps_rnk_lighting) }}.gif" style="width: 66px;" />
             @endif
             </td><td>
-            @if (isset($rank->PsRnkLighting))
-                {!! round($rank->PsRnkLighting) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->PsRnkLighting)) !!} percentile
+            @if (isset($rank->ps_rnk_lighting))
+                {!! round($rank->ps_rnk_lighting) 
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_lighting)) !!} percentile
             @endif
             </td>
         </tr>

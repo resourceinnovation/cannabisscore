@@ -91,10 +91,7 @@ class ScoreVars extends TreeSurvForm
     {
         $this->v["usrInfo"] = new ScoreUserInfo;
         if (isset($this->v["uID"]) && $this->v["uID"] > 0) {
-            $this->v["usrInfo"]->loadUser(
-                $this->v["uID"], 
-                $this->v["user"]
-            );
+            $this->v["usrInfo"]->loadUser($this->v["uID"], $this->v["user"]);
         }
         return true;
     }
@@ -104,19 +101,18 @@ class ScoreVars extends TreeSurvForm
         if ($userID <= 0 && isset($this->v["uID"])) {
             $userID = $this->v["uID"];
         }
-        $chk = RIIUserInfo::where('UsrUserID', $userID)
+        $chk = RIIUserInfo::where('usr_user_id', $userID)
             ->first();
-        if ($chk && isset($chk->UsrUserID)) {
-            if (isset($chk->UsrCompanyName)) {
-                return trim($chk->UsrCompanyName);
-            }
+        if ($chk && isset($chk->usr_user_id) && isset($chk->usr_company_name)) {
+            return trim($chk->usr_company_name);
         }
         return '';
     }
     
     public function getPartnerCompany($userID = 0)
     {
-        if ($userID <= 0 && isset($this->v["uID"]) 
+        if ($userID <= 0 
+            && isset($this->v["uID"]) 
             && $this->v["uID"] > 0 
             && isset($this->v["usrInfo"]) 
             && isset($this->v["usrInfo"]->company)
@@ -148,28 +144,27 @@ class ScoreVars extends TreeSurvForm
     // not [yet] automatically determined by the software
     protected function loadExtra()
     {
-        if (!session()->has('PowerScoreChecks') 
-            || $GLOBALS["SL"]->REQ->has('refresh')) {
-            $chk = RIIPowerScore::where('PsSubmissionProgress', 'LIKE', '147') 
+        if (!session()->has('PowerScoreChecks') || $GLOBALS["SL"]->REQ->has('refresh')) {
+            $chk = RIIPowerScore::where('ps_submission_progress', 'LIKE', '147') 
                     // redirection page
-                ->where('PsStatus', '=', $this->statusIncomplete)
-                ->update([ 'PsStatus' => $this->v["defCmplt"] ]);
-            $chk = RIIPowerScore::where('PsZipCode', 'NOT LIKE', '')
-                ->whereNull('PsClimateLabel')
+                ->where('ps_status', '=', $this->statusIncomplete)
+                ->update([ 'ps_status' => $this->v["defCmplt"] ]);
+            $chk = RIIPowerScore::where('ps_zip_code', 'NOT LIKE', '')
+                ->whereNull('ps_climate_label')
                 ->get();
             if ($chk->isNotEmpty()) {
                 $GLOBALS["SL"]->loadStates();
                 foreach ($chk as $score) {
-                    $zipRow = $GLOBALS["SL"]->states->getZipRow($score->PsZipCode);
-                    $score->PsAshrae = $GLOBALS["SL"]->states->getAshrae($zipRow);
-                    if (!isset($score->PsState) || trim($score->PsState) == '') {
-                        if ($zipRow && isset($zipRow->ZipZip)) {
-                            $score->PsState  = $zipRow->ZipState;
-                            $score->PsCounty = $zipRow->ZipCounty;
+                    $zipRow = $GLOBALS["SL"]->states->getZipRow($score->ps_zip_code);
+                    $score->ps_ashrae = $GLOBALS["SL"]->states->getAshrae($zipRow);
+                    if (!isset($score->ps_state) || trim($score->ps_state) == '') {
+                        if ($zipRow && isset($zipRow->zip_zip)) {
+                            $score->ps_state  = $zipRow->zip_state;
+                            $score->ps_county = $zipRow->zip_county;
                         }
                     }
-                    $score->PsClimateLabel = $GLOBALS["SL"]->states
-                        ->getAshraeZoneLabel($score->PsAshrae);
+                    $score->ps_climate_label = $GLOBALS["SL"]
+                        ->states->getAshraeZoneLabel($score->ps_ashrae);
                     $score->save();
                 }
             }
@@ -190,12 +185,12 @@ class ScoreVars extends TreeSurvForm
             if (!$coreRec) {
                 return false;
             }
-            if (!isset($coreRec->PsSubmissionProgress) 
-                || intVal($coreRec->PsSubmissionProgress) <= 0) {
+            if (!isset($coreRec->ps_submission_progress) 
+                || intVal($coreRec->ps_submission_progress) <= 0) {
                 return true;
             }
-            if (!isset($coreRec->PsZipCode) 
-                || trim($coreRec->PsZipCode) == '') {
+            if (!isset($coreRec->ps_zip_code) 
+                || trim($coreRec->ps_zip_code) == '') {
                 return true;
             }
         }
@@ -205,11 +200,11 @@ class ScoreVars extends TreeSurvForm
     protected function recordIsIncomplete($coreTbl, $coreID, $coreRec = NULL)
     {
         if ($coreID > 0) {
-            if (!isset($coreRec->PsID)) {
+            if (!isset($coreRec->ps_id)) {
                 $coreRec = RIIPowerScore::find($coreID);
             }
-            return (!isset($coreRec->PsStatus) 
-                || $coreRec->PsStatus == $this->statusIncomplete);
+            return (!isset($coreRec->ps_status) 
+                || $coreRec->ps_status == $this->statusIncomplete);
         }
         return false;
     }
@@ -217,7 +212,7 @@ class ScoreVars extends TreeSurvForm
     public function tblsInPackage()
     {
         if ($this->dbID == 1) {
-            return [ 'PSUtilities', 'PSUtiliZips' ];
+            return [ 'ps_utilities', 'ps_utili_zips' ];
         }
         return [];
     }
@@ -225,20 +220,15 @@ class ScoreVars extends TreeSurvForm
     public function getStageNick($defID)
     {
         switch ($defID) {
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Mother Plants'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'):
                 return 'Mother';
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Clone Plants'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants'):
                 return 'Clone';
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Vegetating Plants'): 
+            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'): 
                 return 'Veg';
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Flowering Plants'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'):
                 return 'Flower';
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Drying/Curing'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing'):
                 return 'Dry';
         }
         return '';
@@ -246,18 +236,20 @@ class ScoreVars extends TreeSurvForm
     
     protected function getAreaIdTypeName($areaID)
     {
-        $area = $this->sessData->getRowById('PSAreas', $areaID);
-        if ($area && isset($area->PsAreaType)) {
-            return $GLOBALS["SL"]->def->getVal(
-                'PowerScore Growth Stages', 
-                $area->PsAreaType
-            );
+        $area = $this->sessData->getRowById('ps_areas', $areaID);
+        if ($area && isset($area->ps_area_type)) {
+            return $GLOBALS["SL"]->def->getVal('PowerScore Growth Stages', $area->ps_area_type);
         }
         return '';
     }
     
     public function xmlAllAccess()
     {
+        if (isset($this->v["user"]) 
+            && $this->v["user"] 
+            && $this->v["user"]->hasRole('administrator|staff')) {
+            return true;
+        }
         return false;
     }
     
@@ -283,7 +275,7 @@ class ScoreVars extends TreeSurvForm
             $chk = RIIManufacturers::get();
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $manu) {
-                    $this->v["manufacts"][$manu->ManuID] = $manu->ManuName;
+                    $this->v["manufacts"][$manu->manu_id] = $manu->manu_name;
                 }
             }
         }
@@ -294,24 +286,17 @@ class ScoreVars extends TreeSurvForm
     protected function convertLightScoreType2ImportType($scoreType = 0)
     {
         switch (intVal($scoreType)) {
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'HID (double-ended HPS)'):
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'HID (single-ended HPS)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended HPS)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended HPS)'):
                 return ['Double Ended HPS', 'Single Ended HPS', 'HID', 'HPS'];
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'HID (double-ended MH)'):
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'HID (single-ended MH)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended MH)'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended MH)'):
                 return ['MH', 'MH/HPS Lamps'];
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'CMH'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'CMH'):
                 return ['Ceramic Metal Halide'];
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'Fluorescent'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'Fluorescent'):
                 return ['Fluorescent', 'Fluorescent + Halogen', 'Fluorescent Induction'];
-            case $GLOBALS["SL"]->def
-                ->getID('PowerScore Light Types', 'LED'):
+            case $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'LED'):
                 return ['LED'];
         }
         return [];
@@ -323,25 +308,19 @@ class ScoreVars extends TreeSurvForm
             case 'Double Ended HPS': 
             case 'HID':
             case 'HPS':
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'HID (double-ended HPS)');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended HPS)');
             case 'Single Ended HPS': 
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'HID (single-ended HPS)');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (single-ended HPS)');
             case 'MH': 
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'HID (double-ended MH)');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'HID (double-ended MH)');
             case 'Ceramic Metal Halide':
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'CMH');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'CMH');
             case 'Fluorescent': 
             case 'Fluorescent + Halogen': 
             case 'Fluorescent Induction': 
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'Fluorescent');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'Fluorescent');
             case 'LED':
-                return $GLOBALS["SL"]->def
-                    ->getID('PowerScore Light Types', 'LED');
+                return $GLOBALS["SL"]->def->getID('PowerScore Light Types', 'LED');
             case 'MH/HPS Lamps': 
             case 'CFL': 
             case 'Plasma': 
@@ -352,14 +331,14 @@ class ScoreVars extends TreeSurvForm
     protected function loadLightImportTypeConverts()
     {
         $this->v["lightImportTypeConvert"] = [];
-        $chk = DB::table('RII_LightModels')
-            ->distinct('LgtModTech')
-            ->select('LgtModTech')
+        $chk = DB::table('rii_light_models')
+            ->distinct('lgt_mod_tech')
+            ->select('lgt_mod_tech')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $mod) {
-                $this->v["lightImportTypeConvert"][$mod->LgtModTech] 
-                    = $this->convertLightImportType2ScoreType($mod->LgtModTech);
+                $this->v["lightImportTypeConvert"][$mod->lgt_mod_tech] 
+                    = $this->convertLightImportType2ScoreType($mod->lgt_mod_tech);
             }
         }
         return $this->v["lightImportTypeConvert"];
@@ -367,12 +346,12 @@ class ScoreVars extends TreeSurvForm
     
     protected function getAllLightModels()
     {
-        return DB::table('RII_LightModels')
-            ->join('RII_Manufacturers', 'RII_Manufacturers.ManuID', 
-                '=', 'RII_LightModels.LgtModManuID')
-            ->orderBy('RII_Manufacturers.ManuName', 'asc')
-            ->orderBy('RII_LightModels.LgtModName', 'asc')
-            ->select('RII_LightModels.*')
+        return DB::table('rii_light_models')
+            ->join('rii_manufacturers', 'rii_manufacturers.manu_id', 
+                '=', 'rii_light_models.lgt_mod_manu_id')
+            ->orderBy('rii_manufacturers.manu_name', 'asc')
+            ->orderBy('rii_light_models.lgt_mod_name', 'asc')
+            ->select('rii_light_models.*')
             ->get();
     }
     
@@ -401,11 +380,11 @@ class ScoreUserInfo
         if ($company != '') {
             $this->company = $company;
         } else {
-            $chk = RIIUserInfo::where('UsrUserID', $this->id)
+            $chk = RIIUserInfo::where('usr_user_id', $this->id)
                 ->first();
-            if ($chk && isset($chk->UsrUserID)) {
-                if (isset($chk->UsrCompanyName)) {
-                    $this->company = trim($chk->UsrCompanyName);
+            if ($chk && isset($chk->usr_user_id)) {
+                if (isset($chk->usr_company_name)) {
+                    $this->company = trim($chk->usr_company_name);
                 }
             }
         }
@@ -416,15 +395,15 @@ class ScoreUserInfo
     public function getUserManufacturers()
     {
         $ret = [];
-        $chk = DB::table('RII_Manufacturers')
-            ->join('RII_UserManufacturers', 'RII_Manufacturers.ManuID', 
-                '=', 'RII_UserManufacturers.UsrManManuID')
-            ->where('RII_UserManufacturers.UsrManUserID', $this->id)
+        $chk = DB::table('rii_manufacturers')
+            ->join('rii_user_manufacturers', 'rii_manufacturers.manu_id', 
+                '=', 'rii_user_manufacturers.usr_man_manu_id')
+            ->where('rii_user_manufacturers.usr_man_user_id', $this->id)
             ->select(
-                'RII_Manufacturers.ManuID',
-                'RII_Manufacturers.ManuName'
+                'rii_manufacturers.manu_id',
+                'rii_manufacturers.manu_name'
             )
-            ->orderBy('ManuName', 'asc')
+            ->orderBy('manu_name', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $manu) {

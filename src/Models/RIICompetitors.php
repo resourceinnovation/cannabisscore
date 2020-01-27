@@ -5,14 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIICompetitors extends Model
 {
-    protected $table      = 'RII_Competitors';
-    protected $primaryKey = 'CmptID';
+    protected $table      = 'rii_competitors';
+    protected $primaryKey = 'cmpt_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'CmptYear', 
-		'CmptCompetition', 
-		'CmptName', 
+		'cmpt_year', 
+		'cmpt_competition', 
+		'cmpt_name', 
     ];
     
     // END SurvLoop auto-generated portion of Model

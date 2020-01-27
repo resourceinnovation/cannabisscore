@@ -18,7 +18,8 @@
             any artifical lighting), and have not been archived.
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
-                @else value="0" @endif >
+                @else value="0" 
+                @endif >
             <br /><b>Found {{ number_format($totCnt) }} PowerScores</b>
             </p>
         </div>
@@ -61,8 +62,8 @@
     <h3>
         @if ($typeID == 144) 1a. 
         @else 1b. 
-        @endif {{ $typeName }}
-        Scores by Type of Flowering Lighting
+        @endif
+        {{ $typeName }} Scores by Type of Flowering Lighting
     </h3>
     {!! $scoreSets["statScorLgtF" . $typeID]->printScoreAvgsTbl2(
         '/dash/compare-powerscores?fltFarm=' 
@@ -79,8 +80,8 @@
         @if ($typeID == 144) 2a. 
         @elseif ($typeID == 145) 2b. 
         @else 2c. 
-        @endif {{ $typeName }}
-        Scores by Type of Vegetative Lighting
+        @endif 
+        {{ $typeName }} Scores by Type of Vegetative Lighting
     </h3>
     {!! $scoreSets["statScorLgtV" . $typeID]->printScoreAvgsTbl2(
         '/dash/compare-powerscores?fltFarm=' 
@@ -97,8 +98,8 @@
         @if ($typeID == 144) 3a. 
         @elseif ($typeID == 145) 3b. 
         @else 3c. 
-        @endif {{ $typeName }}
-        Scores by Type of Clone Lighting
+        @endif 
+        {{ $typeName }} Scores by Type of Clone Lighting
     </h3>
     {!! $scoreSets["statScorLgtC" . $typeID]->printScoreAvgsTbl2(
         '/dash/compare-powerscores?fltFarm=' 
@@ -115,8 +116,8 @@
         @if ($typeID == 144) 4a. 
         @elseif ($typeID == 145) 4b. 
         @else 4c. 
-        @endif {{ $typeName }}
-        Scores by Type of Mother Lighting
+        @endif 
+        {{ $typeName }} Scores by Type of Mother Lighting
     </h3>
     {!! $scoreSets["statScorLgtM" . $typeID]->printScoreAvgsTbl2(
         '/dash/compare-powerscores?fltFarm=' 

@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSWasteAg extends Model
 {
-    protected $table      = 'RII_PSWasteAg';
-    protected $primaryKey = 'PSWstAgID';
+    protected $table      = 'rii_ps_waste_ag';
+    protected $primaryKey = 'ps_wst_ag_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PSWstAgPSID', 
-		'PSWstAgMethod', 
+		'ps_wst_ag_psid', 
+		'ps_wst_ag_method', 
     ];
     
     // END SurvLoop auto-generated portion of Model

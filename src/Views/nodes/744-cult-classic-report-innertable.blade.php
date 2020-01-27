@@ -23,62 +23,87 @@
 </b></tr>
 @forelse ($farms as $i => $f)
     <tr>
-    <td class=" @if ($f['ps'] && isset($f['ps']->PsStatus) && in_array($f['ps']->PsStatus, [ 
-        $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete'),
-        $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') ])) slGreenDark @else txtDanger @endif " >
-        @if (isset($f["name"]) && trim($f["name"]) != '') {{ $f["name"] }} @endif </td>
-    @if (!isset($f["ps"]) || !isset($f["ps"]->PsID))
+    <td class=" 
+        @if ($f['ps'] 
+            && isset($f['ps']->ps_status) 
+            && in_array($f['ps']->ps_status, [ 
+                $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') 
+            ])) slGreenDark
+        @else txtDanger @endif " >
+        @if (isset($f["name"]) && trim($f["name"]) != '') {{ $f["name"] }} @endif
+    </td>
+    @if (!isset($f["ps"]) || !isset($f["ps"]->ps_id))
         <td class="txtDanger"><b>0</b></td>
-        <td colspan=14 >No @if ($GLOBALS["SL"]->REQ->has("search") && sizeof($f["srch"]) > 0)
-            <span class="slGrey fPerc80">
-            @foreach ($f["srch"] as $psID => $psName)
-                , <a href="/calculated/u-{{ $psID }}" target="_blank">{{ $psName }}</a>
-            @endforeach </span>
-        @endif </td><td colspan=4 >&nbsp;</td>
+        <td colspan=14 >No 
+            @if ($GLOBALS["SL"]->REQ->has("search") && sizeof($f["srch"]) > 0)
+                <span class="slGrey fPerc80">
+                @foreach ($f["srch"] as $psID => $psName)
+                    , <a href="/calculated/u-{{ $psID }}" target="_blank">{{ $psName }}</a>
+                @endforeach </span>
+            @endif
+        </td>
+        <td colspan=4 >&nbsp;</td>
     @else
-        <td @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ])) class="slGreenDark"
-            @else class="txtDanger" @endif ><b>
-            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) 0
-            @elseif ($f["ps"]->PsEfficOverall > 66) 2
-            @elseif ($f["ps"]->PsEfficOverall > 33) 1.5
+        <td @if (in_array($f["ps"]->ps_status, [
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') 
+                ])) class="slGreenDark"
+            @else class="txtDanger" 
+            @endif ><b>
+            @if ($f["ps"]->ps_status 
+                == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) 0
+            @elseif ($f["ps"]->ps_effic_overall > 66) 2
+            @elseif ($f["ps"]->ps_effic_overall > 33) 1.5
             @else 1
             @endif
         </b></td>
         <td>
-            @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ])) Yes @else No @endif
+            @if (in_array($f["ps"]->ps_status, [ 
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived')
+                ])) Yes 
+            @else No 
+            @endif
         </td>
-        @if ($GLOBALS["SL"]->REQ->has('excel')) <td>#{{ $f["ps"]->PsID }}</td>
-        @else <td><a href="/calculated/u-{{ $f['ps']->PsID }}" target="_blank"
-            @if ($f["ps"]->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete')) class="txtDanger"
-            @endif >#{{ $f["ps"]->PsID }}</a></td> @endif
-        @if (in_array($f["ps"]->PsStatus, [ $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+        @if ($GLOBALS["SL"]->REQ->has('excel'))
+            <td>#{{ $f["ps"]->ps_id }}</td>
+        @else
+            <td><a href="/calculated/u-{{ $f['ps']->ps_id }}" target="_blank"
+            @if ($f["ps"]->ps_status 
+                == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete'))
+                class="txtDanger"
+            @endif >#{{ $f["ps"]->ps_id }}</a></td>
+        @endif
+        @if (in_array($f["ps"]->ps_status, [
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ]))
-            <td>{{ round($f["ps"]->PsEfficOverall) }}%</td>
-            <td>{{ round($f["ps"]->PsRnkFacility) }}%</td>
-            <td>{{ round($f["ps"]->PsRnkProduction) }}%</td>
-            <td>{{ round($f["ps"]->PsRnkLighting) }}%</td>
-            <td>{{ round($f["ps"]->PsRnkHVAC) }}%</td>
-            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->PsEfficFacility, 3) }}</td>
-            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->PsEfficProduction, 3) }}</td>
-            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->PsEfficLighting, 3) }}</td>
-            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->PsEfficHvac, 3) }}</td>
-            <td>{{ number_format($f["ps"]->PsGrams) }}</td>
-            <td>{{ number_format($f["ps"]->PsKWH) }}</td>
-            <td>{{ number_format($f["ps"]->PsTotalSize) }}</td>
+            <td>{{ round($f["ps"]->ps_effic_overall) }}%</td>
+            <td>{{ round($f["ps"]->ps_rnk_facility) }}%</td>
+            <td>{{ round($f["ps"]->ps_rnk_production) }}%</td>
+            <td>{{ round($f["ps"]->ps_rnk_lighting) }}%</td>
+            <td>{{ round($f["ps"]->ps_rnk_hvac) }}%</td>
+            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->ps_effic_facility, 3) }}</td>
+            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->ps_effic_production, 3) }}</td>
+            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->ps_effic_lighting, 3) }}</td>
+            <td>{{ $GLOBALS["SL"]->sigFigs($f["ps"]->ps_effic_hvac, 3) }}</td>
+            <td>{{ number_format($f["ps"]->ps_grams) }}</td>
+            <td>{{ number_format($f["ps"]->ps_kwh) }}</td>
+            <td>{{ number_format($f["ps"]->ps_total_size) }}</td>
         @else 
             <td colspan=12 class="txtDanger" >
-                <i>Page: {!! $GLOBALS["SL"]->getNodePageName($f["ps"]->PsSubmissionProgress) !!}</i>
+                <i>Page: {!! $GLOBALS["SL"]->getNodePageName($f["ps"]->ps_submission_progress) !!}</i>
             </td>
         @endif
-        <td>{{ $f["ps"]->PsCounty }} {{ $f["ps"]->PsState }}</td>
-        <td> @if (isset($f["ps"]->PsEmail) && trim($f["ps"]->PsEmail) != '') {{ $f["ps"]->PsEmail }} @endif </td>
+        <td>{{ $f["ps"]->ps_county }} {{ $f["ps"]->ps_state }}</td>
+        <td> @if (isset($f["ps"]->ps_email) && trim($f["ps"]->ps_email) != '') {{ $f["ps"]->ps_email }} @endif </td>
         <td>{{ date("n/j/Y", strtotime($f["ps"]->created_at)) }}</td>
         <td>
-        @if ($GLOBALS["SL"]->REQ->has('excel')) http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}
-        @else <a href="/calculated/u-{{ $f['ps']->PsID }}" target="_blank"
-            >http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->PsID }}</a>
+        @if ($GLOBALS["SL"]->REQ->has('excel')) 
+            http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->ps_id }}
+        @else
+            <a href="/calculated/u-{{ $f['ps']->ps_id }}" target="_blank"
+                >http://cannabispowerscore.org/calculated/u-{{ $f["ps"]->ps_id }}</a>
         @endif
         </td>
     @endif

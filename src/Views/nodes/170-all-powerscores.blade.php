@@ -60,12 +60,96 @@
 
 </div>
 
+@if (isset($reportExtras))
+    <div class="slCard nodeWrap">{!! $reportExtras !!}</div>
+@endif
+
+
 <style>
 @if ($nID == 170) 
      #updateScoreFiltsBtn2, #updateScoreFiltsBtn3 { display: none; } 
 @endif
 </style>
 
-@if (isset($reportExtras))
-    <div class="slCard nodeWrap">{!! $reportExtras !!}</div>
+@if (isset($lgtCompetData))
+<script type="text/javascript">
+
+Chart.defaults.global.defaultFontFamily = "Lato";
+Chart.defaults.global.defaultFontSize = 18;
+
+var chartOptions = {
+  scales: {
+    yAxes: [{
+      barPercentage: 0.8
+    }],
+    xAxes: [{
+      ticks: {
+          min: 0,
+          max: 100
+      }
+    }]
+  },
+  elements: {
+    rectangle: {
+      borderSkipped: 'left'
+    }
+  },
+  legend: {
+    display: false
+  }
+};
+
+@foreach ($lgtCompetData->dataLegend as $l => $leg)
+    @if ($l < 4)
+
+var chartData{{ $l }} = {
+  label: '{{ $leg[1] }} ({{ $leg[2] }})',
+  data: [ @foreach ($lgtCompetData->dataLines as $j => $dat) @if ($j > 0) , @endif {{ $dat->scores[$l] }} @endforeach ],
+  backgroundColor: [
+    'rgba(240, 123, 58, 0.8)', 'rgba(141, 198, 63, 0.8)' @for ($j = 2; $j < sizeof($lgtCompetData->dataLines); $j++) , 'rgba(130, 142, 89, 0.8)' @endfor
+  ],
+  borderColor: [
+    'rgba(240, 123, 58, 1)', 'rgba(141, 198, 63, 1)' @for ($j = 2; $j < sizeof($lgtCompetData->dataLines); $j++) , 'rgba(130, 142, 89, 1)' @endfor
+  ],
+  borderWidth: 2,
+  hoverBorderWidth: 0
+};
+
+var chartDiv{{ $l }} = document.getElementById("chartDiv{{ $l }}");
+var barChart{{ $l }} = new Chart(chartDiv{{ $l }}, {
+  type: 'horizontalBar',
+  data: {
+    labels: [ @foreach ($lgtCompetData->dataLines as $j => $dat) @if ($j > 0) , @endif "{{ str_replace('Customers of ', '', $dat->title) }}" @endforeach ],
+    datasets: [chartData{{ $l }}]
+  },
+  options: {
+    scales: {
+      yAxes: [{
+        barPercentage: 0.8
+      }],
+      xAxes: [{
+        ticks: {
+            autoSkip: true, 
+            maxTicksLimit: 6
+        }
+      }]
+    },
+    elements: {
+      rectangle: {
+        borderSkipped: 'left'
+      }
+    },
+    legend: {
+      display: false
+    },
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+
+    @endif
+@endforeach
+
+</script>
 @endif
+

@@ -7,7 +7,8 @@
 
         {!! $sendResults !!}
 
-        <form method="post" name="emailBlast" action="?wchLst={{ $wchLst }}&wchEma={{ $wchEma }}">
+        <form method="post" name="emailBlast" 
+            action="?wchLst={{ $wchLst }}&wchEma={{ $wchEma }}">
         <input type="hidden" id="csrfTok" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" name="sub" value="1">
         <input type="hidden" id="yesSendID" name="yesSend" value="0">
@@ -15,15 +16,21 @@
         <div class="p10"></div>
         
         <select name="list" id="listID" class="form-control form-control-lg w100">
-            <option value="all" @if (!isset($wchLst) || trim($wchLst) == '' || trim($wchLst) == 'all') SELECTED @endif 
-                >Send to all email addresses of completed PowerScores</option>
-            <option value="abv" @if (isset($wchLst) && trim($wchLst) == 'abv') SELECTED @endif 
+            <option value="all" 
+                @if (!isset($wchLst) || trim($wchLst) == '' || trim($wchLst) == 'all') 
+                    SELECTED 
+                @endif >Send to all email addresses of completed PowerScores</option>
+            <option value="abv" 
+                @if (isset($wchLst) && trim($wchLst) == 'abv') SELECTED @endif 
                 >Send to email addresses of Above Average completed PowerScores</option>
-            <option value="avg" @if (isset($wchLst) && trim($wchLst) == 'avg') SELECTED @endif 
+            <option value="avg" 
+                @if (isset($wchLst) && trim($wchLst) == 'avg') SELECTED @endif 
                 >Send to email addresses of Average completed PowerScores</option>
-            <option value="blw" @if (isset($wchLst) && trim($wchLst) == 'blw') SELECTED @endif 
+            <option value="blw" 
+                @if (isset($wchLst) && trim($wchLst) == 'blw') SELECTED @endif 
                 >Send to email addresses of Below Average completed PowerScores</option>
-            <option value="inc" @if (isset($wchLst) && trim($wchLst) == 'inc') SELECTED @endif 
+            <option value="inc" 
+                @if (isset($wchLst) && trim($wchLst) == 'inc') SELECTED @endif 
                 >Send to email addresses who haven't fully completed their PowerScores</option>
         </select>
         
@@ -32,7 +39,8 @@
         <div class="row">
             <div class="col-8">
                 <select name="ema" id="emaID" class="form-control form-control-lg w100">
-                    <option value="0" @if (!isset($wchEma) || intVal($wchEma) == 0) SELECTED @endif 
+                    <option value="0" 
+                        @if (!isset($wchEma) || intVal($wchEma) == 0) SELECTED @endif 
                         >Select an email template to send</option>
                     {!! $GLOBALS["SL"]->loadEmailDropOpts($wchEma, 1) !!}
                 </select>
@@ -74,7 +82,8 @@
                 <table class="table table-striped">
                 @foreach ($scoreLists[$wchLst] as $i => $scr)
                     <tr>
-                    <td><input type="checkbox" id="score{{ $i }}" name="scores[]" value="{{ $scr['id'] }}" CHECKED ></td>
+                    <td><input type="checkbox" id="score{{ $i }}" 
+                        name="scores[]" value="{{ $scr['id'] }}" CHECKED ></td>
                     <td><a href="/calculated/u-{{ $scr['id'] }}">#{{ $scr["id"] }}</a></td>
                     <td>{{ round($scr["score"]) }}%</td>
                     <td>{{ $scr["email"] }}</td>
@@ -85,10 +94,13 @@
             @endif
             </div>
             <div class="col-4 pT20">
-                <a id="hidivBtnSendChk" class="btn btn-primary btn-lg btn-xl w100 hidivBtn" href="javascript:;">Send Bulk Email</a>
+                <a class="btn btn-primary btn-lg btn-xl w100 hidivBtn" 
+                    id="hidivBtnSendChk" href="javascript:;"
+                    >Send Bulk Email</a>
                 <div id="hidivSendChk" class="disNon pT20 red">
                     <i class="red fPerc133">Please confirm you want to bulk send...</i><br />
-                    <a id="sendCnfmBtn" class="btn btn-primary btn-lg btn-xl w100" href="javascript:;">Yes, SEND IT</a>
+                    <a id="sendCnfmBtn" class="btn btn-primary btn-lg btn-xl w100" 
+                        href="javascript:;">Yes, SEND IT</a>
                 </div>
             </div>
         </div>

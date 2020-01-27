@@ -1,7 +1,9 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/502-utility-offers.blade.php -->
-@if (isset($utilOffer) && isset($utilOffer[0]) && trim($utilOffer[0]) != '' 
+@if (isset($utilOffer) 
+    && isset($utilOffer[0]) 
+    && trim($utilOffer[0]) != '' 
     && (!$GLOBALS["SL"]->REQ->has("hidePromos") 
-    || intVal($GLOBALS["SL"]->REQ->get("hidePromos")) != 1))
+        || intVal($GLOBALS["SL"]->REQ->get("hidePromos")) != 1))
     <div class="row">
         <div class="col-8 pR20 pT20">
             <h5><i class="fa fa-star" aria-hidden="true"></i> {{ $utilOffer[0] }}
@@ -16,9 +18,11 @@
     </div>
 @else
     <h5><i class="fa fa-star" aria-hidden="true"></i> 
-       Your farm may be eligible for upgrade incentives from your utility.</h5>
+       Your farm may be eligible for upgrade incentives from your utility.
+    </h5>
     <p>
-        We encourage you to contact your electricity provider to ask about incentives on efficient lighting and HVAC.
+        We encourage you to contact your electricity provider to 
+        ask about incentives on efficient lighting and HVAC.
     </p>
 @endif
 <style> #node501 { margin-top: 40px; } </style>

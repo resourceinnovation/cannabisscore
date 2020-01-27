@@ -15,15 +15,43 @@
 </tr>
 @forelse ($feedback as $i => $row)
 <tr>
-<td> @if (isset($row->PsfFeedback1)) {!! $GLOBALS["SL"]->plainLineBreaks($row->PsfFeedback1) !!} @endif </td>
-<td> @if (isset($row->PsfFeedback2)) {!! $GLOBALS["SL"]->plainLineBreaks($row->PsfFeedback2) !!} @endif </td>
-<td> @if (isset($row->PsfFeedback3)) {!! $GLOBALS["SL"]->plainLineBreaks($row->PsfFeedback3) !!} @endif </td>
-<td> @if (isset($row->PsfFeedback4)) {!! $GLOBALS["SL"]->plainLineBreaks($row->PsfFeedback4) !!} @endif </td>
-<td> @if (isset($row->PsfFeedback5)) {!! $GLOBALS["SL"]->plainLineBreaks($row->PsfFeedback5) !!} @endif </td>
-<td> @if (isset($row->PsEfficOverall)) {{ round($row->PsEfficOverall) }}% @endif </td>
-<td><a href="/calculated/u-{{ $row->PsfPsID }}" target="_blank">#{{ $row->PsfPsID }} 
-    @if (isset($row->PsName)) <br />{{ $row->PsName }} @endif </a></td>
-<td> @if (isset($row->created_at)) {{ date("n/j/y g:ia", strtotime($row->created_at)) }} @endif </td>
+<td>
+    @if (isset($row->psf_feedback1))
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback1) !!}
+    @endif
+</td>
+<td>
+    @if (isset($row->psf_feedback2)) 
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback2) !!} 
+    @endif 
+</td>
+<td> 
+    @if (isset($row->psf_feedback3)) 
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback3) !!} 
+    @endif 
+</td>
+<td> 
+    @if (isset($row->psf_feedback4)) 
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback4) !!} 
+    @endif 
+</td>
+<td> 
+    @if (isset($row->psf_feedback5)) 
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback5) !!} 
+    @endif 
+</td>
+<td>
+    @if (isset($row->ps_effic_overall)) {{ round($row->ps_effic_overall) }}% @endif
+</td>
+<td>
+    <a href="/calculated/u-{{ $row->psf_ps_id }}" target="_blank">#{{ $row->psf_ps_id }} 
+        @if (isset($row->ps_name)) <br />{{ $row->ps_name }} @endif </a>
+</td>
+<td>
+    @if (isset($row->created_at))
+        {{ date("n/j/y g:ia", strtotime($row->created_at)) }}
+    @endif
+</td>
 </tr>
 @empty
 

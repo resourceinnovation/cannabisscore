@@ -4,7 +4,8 @@
     <ul>
     @forelse ($utils as $i => $u)
         @if (isset($powerUtilsInd[$u]))
-        <?php $uAbbr = 'Ut' . $powerUtils[$powerUtilsInd[$u]]["id"] . $GLOBALS["SL"]->states->getStateAbrr($state); ?>
+        <?php $uAbbr = 'Ut' . $powerUtils[$powerUtilsInd[$u]]["id"] 
+            . $GLOBALS["SL"]->states->getStateAbrr($state); ?>
             <li><a href="javascript:;" class="hidivBtn" id="hidivBtn{{ $uAbbr }}"
                 >{{ $powerUtils[$powerUtilsInd[$u]]["name"] }}</a>
             <div id="hidiv{{ $uAbbr }}" class="disNon slGrey fPerc80">

@@ -7,68 +7,70 @@
 <th>Submitted</th>
 <th>
     <b>Overall % Rank</b>, Sub-Ranks: 
-    <div class="fPerc80"><b>F</b>acility, <b>P</b>roduction, <b>L</b>ighting, <b>H</b>VAC</div>
+    <div class="fPerc80">
+        <b>F</b>acility, <b>P</b>roduction, <b>L</b>ighting, <b>H</b>VAC
+    </div>
 </th>
 <th>Sub-Scores</th>
 <th>Grams, kWh, Sq Ft</th>
 </tr>
 @forelse ($scores as $i => $s)
-    <tr id="psRowA{{ $s->PsID }}" class="psRowA1" >
+    <tr id="psRowA{{ $s->ps_id }}" class="psRowA1" >
     <td>
-        <a href="/calculated/u-{{ $s->PsID }}" target="_blank" class="mR10 mT10"
+        <a href="/calculated/u-{{ $s->ps_id }}" target="_blank" class="mR10 mT10"
             ><i class="fa fa-external-link" aria-hidden="true"></i></a></nobr>
-    </td><td class="psOpen" data-psid="{{ $s->PsID }}">
+    </td><td class="psOpen" data-psid="{{ $s->ps_id }}">
         <nobr><a href="javascript:;" class="btn btn-primary" 
-            >#{{ $s->PsID }}</a>
-    </td><td class="psOpen" data-psid="{{ $s->PsID }}">
-        <div class="fPerc125 bld mTn5"> @if (isset($s->PsName) && trim($s->PsName) != '') {{ $s->PsName }} @endif </div>
-        {{ $s->PsCounty }} {{ $s->PsState }}
-        @if (isset($s->PsEmail) && trim($s->PsEmail) != '') 
-            <br /><a href="mailto:{{ $s->PsEmail }}">{{ $s->PsEmail }}</a>
+            >#{{ $s->ps_id }}</a>
+    </td><td class="psOpen" data-psid="{{ $s->ps_id }}">
+        <div class="fPerc125 bld mTn5"> @if (isset($s->ps_name) && trim($s->ps_name) != '') {{ $s->ps_name }} @endif </div>
+        {{ $s->ps_county }} {{ $s->ps_state }}
+        @if (isset($s->ps_email) && trim($s->ps_email) != '') 
+            <br /><a href="mailto:{{ $s->ps_email }}">{{ $s->ps_email }}</a>
         @endif
-    </td><td class="psOpen" data-psid="{{ $s->PsID }}">
-        @if (isset($s->PsStatus))
-            <div class=" @if ($s->PsStatus == $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete')) 
+    </td><td class="psOpen" data-psid="{{ $s->ps_id }}">
+        @if (isset($s->ps_status))
+            <div class=" @if ($s->ps_status == $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete')) 
             slGreenDark @else txtDanger @endif ">
-            {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $s->PsStatus) }}</div>
+            {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $s->ps_status) }}</div>
         @endif
         {{ date("n/j, g:ia", strtotime($s->created_at)) }}
     </td>
-    @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
-        <td class="psOpen" data-psid="{{ $s->PsID }}">
-            <b class="fPerc133">{{ round($s->PsEfficOverall) }}%</b> <div class="fPerc80">
-            @if (isset($s->PsRnkFacility) && $s->PsRnkFacility > 0) 
-                <span class="slGrey">, <nobr>F:</span>{{ round($s->PsRnkFacility) }}%</nobr> @endif
-            @if (isset($s->PsRnkProduction) && $s->PsRnkProduction > 0) 
-                <span class="slGrey">, <nobr>P:</span>{{ round($s->PsRnkProduction) }}%</nobr> @endif
-            @if (isset($s->PsRnkLighting) && $s->PsRnkLighting > 0) 
-                <span class="slGrey">, <nobr>L:</span>{{ round($s->PsRnkLighting) }}%</nobr> @endif
-            @if (isset($s->PsRnkHVAC) && $s->PsRnkHVAC > 0) 
-                <span class="slGrey">, <nobr>H:</span>{{ round($s->PsRnkHVAC) }}%</nobr> @endif
+    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
+        <td class="psOpen" data-psid="{{ $s->ps_id }}">
+            <b class="fPerc133">{{ round($s->ps_effic_overall) }}%</b> <div class="fPerc80">
+            @if (isset($s->ps_rnk_facility) && $s->ps_rnk_facility > 0) 
+                <span class="slGrey">, <nobr>F:</span>{{ round($s->ps_rnk_facility) }}%</nobr> @endif
+            @if (isset($s->ps_rnk_production) && $s->ps_rnk_production > 0) 
+                <span class="slGrey">, <nobr>P:</span>{{ round($s->ps_rnk_production) }}%</nobr> @endif
+            @if (isset($s->ps_rnk_lighting) && $s->ps_rnk_lighting > 0) 
+                <span class="slGrey">, <nobr>L:</span>{{ round($s->ps_rnk_lighting) }}%</nobr> @endif
+            @if (isset($s->ps_rnk_hvac) && $s->ps_rnk_hvac > 0) 
+                <span class="slGrey">, <nobr>H:</span>{{ round($s->ps_rnk_hvac) }}%</nobr> @endif
             </div>
         </td>
-        <td class="psOpen fPerc80" data-psid="{{ $s->PsID }}">
-            @if (isset($s->PsEfficFacility) && $s->PsEfficFacility > 0)
-                <span class="slGrey">F:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficFacility, 3) 
+        <td class="psOpen fPerc80" data-psid="{{ $s->ps_id }}">
+            @if (isset($s->ps_effic_facility) && $s->ps_effic_facility > 0)
+                <span class="slGrey">F:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_facility, 3) 
                     }} kWh / sq ft<br /> @endif
-            @if (isset($s->PsEfficProduction) && $s->PsEfficProduction > 0) 
-                <span class="slGrey">P:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficProduction, 3) 
+            @if (isset($s->ps_effic_production) && $s->ps_effic_production > 0) 
+                <span class="slGrey">P:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_production, 3) 
                     }} grams / kWh<br /> @endif
-            @if (isset($s->PsEfficLighting) && $s->PsEfficLighting > 0)
-                <span class="slGrey">L:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficLighting, 3) 
+            @if (isset($s->ps_effic_lighting) && $s->ps_effic_lighting > 0)
+                <span class="slGrey">L:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_lighting, 3) 
                     }} W / sq ft<br /> @endif
-            @if (isset($s->PsEfficHvac) && $s->PsEfficHvac > 0) 
-                <span class="slGrey">H:</span> {{ $GLOBALS["SL"]->sigFigs($s->PsEfficHvac, 3) 
+            @if (isset($s->ps_effic_hvac) && $s->ps_effic_hvac > 0) 
+                <span class="slGrey">H:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_hvac, 3) 
                     }} kWh / sq ft<br /> @endif
         </td>
-        <td class="psOpen" data-psid="{{ $s->PsID }}">
-            {{ number_format($s->PsGrams) }} g<br />
-            {{ number_format($s->PsKWH) }} kWh<br />
-            {{ number_format($s->PsTotalSize) }} sq ft
+        <td class="psOpen" data-psid="{{ $s->ps_id }}">
+            {{ number_format($s->ps_grams) }} g<br />
+            {{ number_format($s->ps_kwh) }} kWh<br />
+            {{ number_format($s->ps_total_size) }} sq ft
         </td>
     @else 
-        <td colspan=4 class="psOpen" data-psid="{{ $s->PsID }}" ><i class="txtDanger">
-            {!! $GLOBALS["SL"]->getNodePageName($s->PsSubmissionProgress) !!}
+        <td colspan=4 class="psOpen" data-psid="{{ $s->ps_id }}" ><i class="txtDanger">
+            {!! $GLOBALS["SL"]->getNodePageName($s->ps_submission_progress) !!}
         </i></td>
     @endif
     </td>

@@ -1,4 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores.blade.php -->
+<?php if (!isset($psid)) $psid = 0; ?>
 <div class="row" >
     <div class="col-2">
 
@@ -24,7 +25,8 @@
         <select name="fltStateClim" id="fltStateClimID" 
             class="form-control psChageFilter ntrStp slTab mT5"
             autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
-            <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
+            <option value="" 
+                @if (isset($fltStateClim) && trim($fltStateClim) == '') SELECTED @endif
                 >All Climates and States</option>
             <option disabled ></option>
             {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
@@ -172,7 +174,7 @@
 @endif
     </div>
 </div>
-    <?php /* @if (isset($psid) && $psid > 0)
+    <?php /* @if ($psid > 0)
         <label><input type="checkbox" name="psid" id="psidID" value=""></label>
     @endif */ ?>
 <div id="filtsAdv" class="
@@ -232,10 +234,10 @@
                 >All Light Manufacturers</option>
             <option DISABLED > </option>
         @forelse ($manuList as $m => $manu)
-            <option value="{{ $manu->ManuID }}" 
+            <option value="{{ $manu->manu_id }}" 
                 @if (isset($fltManuLgt) 
-                    && intVal($fltManuLgt) == $manu->ManuID) SELECTED @endif 
-                >{{ $manu->ManuName }}</option>
+                    && intVal($fltManuLgt) == $manu->manu_id) SELECTED @endif 
+                >{{ $manu->manu_name }}</option>
         @empty
         @endforelse
             <option DISABLED > </option>
@@ -243,11 +245,11 @@
             <option DISABLED > </option>
         @forelse ($usrCompanies as $c => $company)
             @if (Auth::user()->hasRole('administrator|staff')
-                || Auth::user()->id == $company->UsrUserID)
-                <option value="{{ $company->UsrCompanyName }}" 
+                || Auth::user()->id == $company->usr_user_id)
+                <option value="{{ $company->usr_company_name }}" 
                     @if (isset($fltManuLgt) && trim($fltManuLgt)
-                        == trim($company->UsrCompanyName)) SELECTED @endif 
-                    >{{ $company->UsrCompanyName }}</option>
+                        == trim($company->usr_company_name)) SELECTED @endif 
+                    >{{ $company->usr_company_name }}</option>
             @endif
         @empty
         @endforelse
@@ -321,7 +323,8 @@
         <a id="btnFiltsAdvHide" class="disNon pull-left" href="javascript:;" 
             style="color: #FFF;">Show Less<br />Filters</a>
         <a id="updateScoreFiltsBtn3" href="javascript:;"
-            class="pull-right btn btn-info updateScoreFilts" >Apply Filters</a><br />
+            class="pull-right btn btn-info updateScoreFilts" 
+            >Apply Filters</a><br />
     </div>
 @endif
 

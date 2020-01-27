@@ -59,43 +59,43 @@ class ScoreReportHvac extends ScoreReportStats
         $this->v["totCnt"] = 0;
         $this->initSearcher(1);
         $this->searcher->loadAllScoresPublic(
-            "->where('PsEfficHvac', '>', 0.00001)"
-            . "->where('PsEfficHvacStatus', '=', " 
+            "->where('ps_effic_hvac', '>', 0.00001)"
+            . "->where('ps_effic_hvac_status', '=', " 
             . $this->v["psComplete"] . ")"
         );
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             $this->v["totCnt"] = $this->searcher->v["allscores"]->count();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', '>', 0)
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->where('ps_area_type', '>', 0)
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        $areaType = $this->motherToClone($area->PsAreaType);
-                        if ($this->v["areaTypes"]["Flower"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcF" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                        } elseif ($this->v["areaTypes"]["Veg"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcV" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
-                        } elseif ($this->v["areaTypes"]["Clone"] == $area->PsAreaType) {
-                            $this->v["scoreSets"]["statScorHvcC" . $ps->PsCharacterize]
-                                ->addRecFilt('hvac', $area->PsAreaHvacType, $ps->PsID);
+                        $areaType = $this->motherToClone($area->ps_area_type);
+                        if ($this->v["areaTypes"]["Flower"] == $area->ps_area_type) {
+                            $this->v["scoreSets"]["statScorHvcF" . $ps->ps_characterize]
+                                ->addRecFilt('hvac', $area->ps_area_hvac_type, $ps->ps_id);
+                        } elseif ($this->v["areaTypes"]["Veg"] == $area->ps_area_type) {
+                            $this->v["scoreSets"]["statScorHvcV" . $ps->ps_characterize]
+                                ->addRecFilt('hvac', $area->ps_area_hvac_type, $ps->ps_id);
+                        } elseif ($this->v["areaTypes"]["Clone"] == $area->ps_area_type) {
+                            $this->v["scoreSets"]["statScorHvcC" . $ps->ps_characterize]
+                                ->addRecFilt('hvac', $area->ps_area_hvac_type, $ps->ps_id);
                         }
-                        if ($ps->PsCharacterize != 143 && isset($area->PsAreaHvacType) 
-                            && isset($area->PsAreaSize)
-                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][
-                                $area->PsAreaType])
-                            && isset($this->v["hvacSqft"][$ps->PsCharacterize][
-                                $area->PsAreaType][2][$area->PsAreaHvacType])) {
-                            $this->v["hvacSqft"][$ps->PsCharacterize][
-                                $area->PsAreaType][2][$area->PsAreaHvacType][1][] 
-                                = $area->PsAreaSize;
+                        if ($ps->ps_characterize != 143 && isset($area->ps_area_hvac_type) 
+                            && isset($area->ps_area_size)
+                            && isset($this->v["hvacSqft"][$ps->ps_characterize][
+                                $area->ps_area_type])
+                            && isset($this->v["hvacSqft"][$ps->ps_characterize][
+                                $area->ps_area_type][2][$area->ps_area_hvac_type])) {
+                            $this->v["hvacSqft"][$ps->ps_characterize][
+                                $area->ps_area_type][2][$area->ps_area_hvac_type][1][] 
+                                = $area->ps_area_size;
                         }
                     }
                     foreach ($this->statScoreSets as $set) {
                         if (intVal(substr($set[0], strlen($set[0])-3)) 
-                            == $ps->PsCharacterize) {
+                            == $ps->ps_characterize) {
                             $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                             $this->v["scoreSets"][$set[0]]->resetRecFilt();
                         }

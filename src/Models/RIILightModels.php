@@ -5,14 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIILightModels extends Model
 {
-    protected $table      = 'RII_LightModels';
-    protected $primaryKey = 'LgtModID';
+    protected $table      = 'rii_light_models';
+    protected $primaryKey = 'lgt_mod_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'LgtModManuID', 
-		'LgtModName', 
-		'LgtModTech', 
+		'lgt_mod_manu_id', 
+		'lgt_mod_name', 
+		'lgt_mod_tech', 
     ];
     
     // END SurvLoop auto-generated portion of Model

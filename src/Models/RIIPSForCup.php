@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSForCup extends Model
 {
-    protected $table      = 'RII_PSForCup';
-    protected $primaryKey = 'PsCupID';
+    protected $table      = 'rii_ps_for_cup';
+    protected $primaryKey = 'ps_cup_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsCupPSID', 
-		'PsCupCupID', 
+		'ps_cup_psid', 
+		'ps_cup_cup_id', 
     ];
     
     // END SurvLoop auto-generated portion of Model

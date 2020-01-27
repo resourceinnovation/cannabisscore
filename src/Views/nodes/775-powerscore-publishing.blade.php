@@ -20,27 +20,29 @@ Should all of these be removed from the list of 'published' scores which others 
 </tr>
 @forelse ($allscores as $i => $ps)
     <tr>
-    <td class="taR"><a href="/calculated/u-{{ $ps->PsID }}" target="_blank">#{{ $ps->PsID }}</a></td>
-    <td> @if (isset($ps->PsName)) {{ $ps->PsName }} @endif </td>
-    <td class="taR">{{ round($ps->PsEfficOverall) }}%</td>
-    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficFacility, 3) }}
-        @if (isset($ps->PsRnkFacility) && $ps->PsRnkFacility > 0) 
-            <span class="slGrey">{{ round($ps->PsRnkFacility) }}%</span> @endif </td>
-    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficProduction, 3) }}
-        @if (isset($ps->PsRnkProduction) && $ps->PsRnkProduction > 0) 
-            <span class="slGrey">{{ round($ps->PsRnkProduction) }}%</span> @endif </td>
-    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficLighting, 3) }}
-        @if (isset($ps->PsRnkLighting) && $ps->PsRnkLighting > 0) 
-            <span class="slGrey">{{ round($ps->PsRnkLighting) }}%</span> @endif </td>
-    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->PsEfficHvac, 3) }}
-        @if (isset($ps->PsRnkHVAC) && $ps->PsRnkHVAC > 0) 
-            <span class="slGrey">{{ round($ps->PsRnkHVAC) }}%</span> @endif </td>
-    <td class="taR">{{ number_format($ps->PsGrams) }}</td>
-    <td class="taR">{{ number_format($ps->PsKWH) }}</td>
-    <td class="taR">{{ number_format($ps->PsTotalSize) }}</td>
+    <td class="taR">
+        <a href="/calculated/u-{{ $ps->ps_id }}" target="_blank">#{{ $ps->ps_id }}</a>
+    </td>
+    <td> @if (isset($ps->ps_name)) {{ $ps->ps_name }} @endif </td>
+    <td class="taR">{{ round($ps->ps_effic_overall) }}%</td>
+    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_facility, 3) }}
+        @if (isset($ps->ps_rnk_facility) && $ps->ps_rnk_facility > 0) 
+            <span class="slGrey">{{ round($ps->ps_rnk_facility) }}%</span> @endif </td>
+    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_production, 3) }}
+        @if (isset($ps->ps_rnk_production) && $ps->ps_rnk_production > 0) 
+            <span class="slGrey">{{ round($ps->ps_rnk_production) }}%</span> @endif </td>
+    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }}
+        @if (isset($ps->ps_rnk_lighting) && $ps->ps_rnk_lighting > 0) 
+            <span class="slGrey">{{ round($ps->ps_rnk_lighting) }}%</span> @endif </td>
+    <td class="taR">{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
+        @if (isset($ps->ps_rnk_hvac) && $ps->ps_rnk_hvac > 0) 
+            <span class="slGrey">{{ round($ps->ps_rnk_hvac) }}%</span> @endif </td>
+    <td class="taR">{{ number_format($ps->ps_grams) }}</td>
+    <td class="taR">{{ number_format($ps->ps_kwh) }}</td>
+    <td class="taR">{{ number_format($ps->ps_total_size) }}</td>
     <td>{{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
-        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)) }}</td>
-    <td>{{ $ps->PsCounty }} {{ $ps->PsState }}</td>
+        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)) }}</td>
+    <td>{{ $ps->ps_county }} {{ $ps->ps_state }}</td>
     </tr>
 @empty
 @endforelse

@@ -3,8 +3,7 @@
 <tr>
 <th colspan=10 align="left" >Lighting Report 
     @if (trim($fltStateClim) != '') 
-        - {!! $GLOBALS["SL"]->states
-            ->getZoneOrState($fltStateClim) !!} 
+        - {!! $GLOBALS["SL"]->states->getZoneOrState($fltStateClim) !!} 
     @endif
     @if ($GLOBALS["SL"]->REQ->has('fltNoNWPCC'))
         - No NWPCC
@@ -37,8 +36,7 @@
         @endif {{ $typeName }} 
         Scores by Type of Flowering Lighting
     </td></tr>
-    {!! $scoreSets["statScorLgtF" . $typeID]
-        ->printScoreAvgsExcel2() !!}
+    {!! $scoreSets["statScorLgtF" . $typeID]->printScoreAvgsExcel2() !!}
 @endforeach
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
@@ -52,8 +50,7 @@
         @endif {{ $typeName }}
         Scores by Type of Vegetative Lighting
     </td></tr>
-    {!! $scoreSets["statScorLgtV" . $typeID]
-        ->printScoreAvgsExcel2() !!}
+    {!! $scoreSets["statScorLgtV" . $typeID]->printScoreAvgsExcel2() !!}
 @endforeach
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
@@ -67,8 +64,7 @@
         @endif {{ $typeName }}
         Scores by Type of Clone Lighting
     </td></tr>
-    {!! $scoreSets["statScorLgtC" . $typeID]
-        ->printScoreAvgsExcel2() !!}
+    {!! $scoreSets["statScorLgtC" . $typeID]->printScoreAvgsExcel2() !!}
 @endforeach
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
@@ -82,6 +78,5 @@
         @endif {{ $typeName }}
         Scores by Type of Mother Lighting
     </td></tr>
-    {!! $scoreSets["statScorLgtM" . $typeID]
-        ->printScoreAvgsExcel2() !!}
+    {!! $scoreSets["statScorLgtM" . $typeID]->printScoreAvgsExcel2() !!}
 @endforeach

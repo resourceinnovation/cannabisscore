@@ -28,21 +28,21 @@ class ScoreStatEnvs extends SurvStatsGraph
         $this->envPies = [];
         $this->envIDs  = [ 0 => [] ];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
-            $this->cmpl[$type->DefID]    = [ 0 => 0 ];
-            $this->blds[$type->DefID]    = [];
-            $this->envPies[$type->DefID] = [];
-            $this->envIDs[$type->DefID]  = [ 0 => [] ];
+            $this->cmpl[$type->def_id]    = [ 0 => 0 ];
+            $this->blds[$type->def_id]    = [];
+            $this->envPies[$type->def_id] = [];
+            $this->envIDs[$type->def_id]  = [ 0 => [] ];
             foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
-                $this->envIDs[$type->DefID][$bld->DefID] = [];
+                $this->envIDs[$type->def_id][$bld->def_id] = [];
             }
             foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $area) {
-                if ($area->DefValue != 'Dry') {
-                    $this->cmpl[$type->DefID][$area->DefID]    = [ 0 => 0 ];
-                    $this->blds[$type->DefID][$area->DefID]    = [];
-                    $this->envPies[$type->DefID][$area->DefID] = [];
-                    $this->envIDs[$type->DefID][$area->DefID]  = [];
+                if ($area->def_value != 'Dry') {
+                    $this->cmpl[$type->def_id][$area->def_id]    = [ 0 => 0 ];
+                    $this->blds[$type->def_id][$area->def_id]    = [];
+                    $this->envPies[$type->def_id][$area->def_id] = [];
+                    $this->envIDs[$type->def_id][$area->def_id]  = [];
                     foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
-                        $this->cmpl[$type->DefID][$area->DefID][$bld->DefID] = 0;
+                        $this->cmpl[$type->def_id][$area->def_id][$bld->def_id] = 0;
                     }
                 }
             }
@@ -53,24 +53,26 @@ class ScoreStatEnvs extends SurvStatsGraph
     public function addDataEnvs($ps, $areaType, $areaID)
     {
         $this->addRecFilt('area', $areaType, $areaID);
-        $blds = RIIPSAreasBlds::where('PsArBldAreaID', $areaID)
+        $farmType = $ps->ps_characterize;
+        $blds = RIIPSAreasBlds::where('ps_ar_bld_area_id', $areaID)
             ->get();
-        if ($blds->isNotEmpty() && isset($this->cmpl[$ps->PsCharacterize][$areaType])) {
-            if (!in_array($ps->PsID, $this->envIDs[0])) {
-                $this->envIDs[0][] = $ps->PsID;
+        if ($blds->isNotEmpty() && isset($this->cmpl[$farmType][$areaType])) {
+            if (!in_array($ps->ps_id, $this->envIDs[0])) {
+                $this->envIDs[0][] = $ps->ps_id;
             }
-            if (!in_array($ps->PsID, $this->envIDs[$ps->PsCharacterize][0])) {
-                $this->envIDs[$ps->PsCharacterize][0][] = $ps->PsID;
+            if (!in_array($ps->ps_id, $this->envIDs[$farmType][0])) {
+                $this->envIDs[$farmType][0][] = $ps->ps_id;
             }
-            if (!in_array($ps->PsID, $this->envIDs[$ps->PsCharacterize][$areaType])) {
-                $this->envIDs[$ps->PsCharacterize][$areaType][] = $ps->PsID;
+            if (!in_array($ps->ps_id, $this->envIDs[$farmType][$areaType])) {
+                $this->envIDs[$farmType][$areaType][] = $ps->ps_id;
             }
             foreach ($blds as $bld) {
-                if (!in_array($ps->PsID, $this->envIDs[$ps->PsCharacterize][$bld->PsArBldType])) {
-                    $this->envIDs[$ps->PsCharacterize][$bld->PsArBldType][] = $ps->PsID;
+                $type = $bld->ps_ar_bld_type;
+                if (!in_array($ps->ps_id, $this->envIDs[$farmType][$type])) {
+                    $this->envIDs[$farmType][$type][] = $ps->ps_id;
                 }
-                $this->addRecDat('bld' . $bld->PsArBldType, 1, $areaID);
-                $this->cmpl[$ps->PsCharacterize][$areaType][$bld->PsArBldType]++;
+                $this->addRecDat('bld' . $bld->ps_ar_bld_type, 1, $areaID);
+                $this->cmpl[$farmType][$areaType][$type]++;
             }
         }
         $this->delRecFilt('area');
@@ -80,25 +82,27 @@ class ScoreStatEnvs extends SurvStatsGraph
     public function calcBlds()
     {
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
-            $this->cmpl[$type->DefID][0] = sizeof($this->envIDs[$type->DefID][0]);
+            $this->cmpl[$type->def_id][0] = sizeof($this->envIDs[$type->def_id][0]);
             foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $area) {
-                $this->cmpl[$type->DefID][$area->DefID][0] = sizeof($this->envIDs[$type->DefID][$area->DefID]);
+                $this->cmpl[$type->def_id][$area->def_id][0] 
+                    = sizeof($this->envIDs[$type->def_id][$area->def_id]);
                 foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $j => $bld) {
                     $color1 = $GLOBALS["SL"]->getCssColor('color-main-on');
                     $color2 = $GLOBALS["SL"]->getCssColor('color-main-bg');
-                    $this->blds[$type->DefID][$area->DefID][] = [
-                        $this->cmpl[$type->DefID][$area->DefID][$bld->DefID],
-                        str_replace('Commercial/Warehouse', 'Commercial', 
-                            str_replace('House/Garage', 'House', $bld->DefValue)),
+                    $bldType = str_replace('Commercial/Warehouse', 'Commercial', 
+                        str_replace('House/Garage', 'House', $bld->def_value));
+                    $this->blds[$type->def_id][$area->def_id][] = [
+                        $this->cmpl[$type->def_id][$area->def_id][$bld->def_id],
+                        $bldType,
                         "'" . $GLOBALS["SL"]->printColorFadeHex(($j*0.16), $color1, $color2) . "'"
-                        ];
+                    ];
                 }
             }
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
             foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $area) {
-                $this->envPies[$type->DefID][$area->DefID] 
-                    = $this->pieView($this->blds[$type->DefID][$area->DefID]);
+                $this->envPies[$type->def_id][$area->def_id] 
+                    = $this->pieView($this->blds[$type->def_id][$area->def_id]);
             }
         }
         return true;
@@ -126,22 +130,28 @@ class ScoreStatEnvs extends SurvStatsGraph
         $farm = intVal(str_replace('a', '', $this->applyCurrFilt('1')));
         $this->tblOut = [];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
-            $row = [ $bld->DefValue, round(100*sizeof($this->envIDs[$farm][$bld->DefID])/$this->cmpl[$farm][0]) ];
+            $row = [
+                $bld->def_value, 
+                round(100*sizeof($this->envIDs[$farm][$bld->def_id])/$this->cmpl[$farm][0])
+            ];
             if ($row[1] > 0) {
-                $row[1] = $row[1] . '% <sub class="slGrey">' . number_format(sizeof($this->envIDs[$farm][$bld->DefID]))
-                    . '</sub>';
+                $row[1] = $row[1] . '% <sub class="slGrey">' 
+                    . number_format(sizeof($this->envIDs[$farm][$bld->def_id])) . '</sub>';
             }
             foreach ($this->filts["b"]["val"] as $i => $val) {
-                $cell = round(100*$this->cmpl[$farm][$val][$bld->DefID]/$this->cmpl[$farm][$val][0]);
+                $cell = round(100*$this->cmpl[$farm][$val][$bld->def_id]/$this->cmpl[$farm][$val][0]);
                 if ($cell > 0) {
-                    $cell .= '% <sub class="slGrey">' . number_format($this->cmpl[$farm][$val][$bld->DefID])
-                        . '</sub>';
+                    $cell .= '% <sub class="slGrey">' 
+                        . number_format($this->cmpl[$farm][$val][$bld->def_id]) . '</sub>';
                 }
                 $row[] = $cell;
             }
             $this->tblOut[] = $row;
         }
-        return view('vendor.survloop.reports.inc-stat-tbl-percs', [ "tblOut" => $this->tblOut ])->render();
+        return view(
+            'vendor.survloop.reports.inc-stat-tbl-percs', 
+            [ "tblOut" => $this->tblOut ]
+        )->render();
     }
     
     

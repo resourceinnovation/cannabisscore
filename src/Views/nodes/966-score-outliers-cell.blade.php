@@ -2,27 +2,27 @@
 
 <?php
 $currVal = -1; 
-if (isset($ps->{ 'PsEffic' . $scr }) && $ps->{ 'PsEffic' . $scr } > 0) {
-    $currVal = $ps->{ 'PsEffic' . $scr };
+if (isset($ps->{ 'ps_effic_' . $scr }) && $ps->{ 'ps_effic_' . $scr } > 0) {
+    $currVal = $ps->{ 'ps_effic_' . $scr };
 } elseif ($scr == 'Flow SqFt/Fix') {
-    $currVal = $ps->PsAreaSqFtPerFix2;
-} elseif ($scr == 'Veg SqFt/Fix' && isset($scoresVegSqFtFix[$ps->PsID])) {
-    $currVal = $scoresVegSqFtFix[$ps->PsID];
+    $currVal = $ps->ps_area_sq_ft_per_fix2;
+} elseif ($scr == 'Veg SqFt/Fix' && isset($scoresVegSqFtFix[$ps->ps_id])) {
+    $currVal = $scoresVegSqFtFix[$ps->ps_id];
 }
 ?>
 
-@if (!in_array($scr, $showStats[$ps->PsID]))
+@if (!in_array($scr, $showStats[$ps->ps_id]))
 
     <span class="slGrey">-</span>
 
 @elseif ($currVal >= 0)
 
-    @if (isset($ps->{ 'PsEffic' . $scr }) && $ps->{ 'PsEffic' . $scr } > 0)
+    @if (isset($ps->{ 'ps_effic_' . $scr }) && $ps->{ 'ps_effic_' . $scr } > 0)
         <label>
         <input type="checkbox" name="goodScores[]" class="mLn10 mR0" autocomplete="off" 
-            value="p{{ $ps->PsID }}s{{ str_replace(' SqFt/Fix', 'SqFix', $scr) }}"
-            @if (isset($ps->{ 'PsEffic' . $scr . 'Status' }) 
-                && intVal($ps->{ 'PsEffic' . $scr . 'Status' }) == 243) 
+            value="p{{ $ps->ps_id }}s{{ str_replace(' SqFt/Fix', 'SqFix', $scr) }}"
+            @if (isset($ps->{ 'ps_effic_' . $scr . '_status' }) 
+                && intVal($ps->{ 'ps_effic_' . $scr . '_status' }) == 243) 
                 CHECKED
             @endif >
         {{ $GLOBALS["SL"]->sigFigs($currVal, 3) }}

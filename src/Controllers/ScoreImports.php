@@ -39,12 +39,12 @@ class ScoreImports extends ScoreAdminMisc
                     if ($i > 0) {
                         echo '<pre>'; print_r($row); echo '</pre>';
                         $score = new RIIPowerScore;
-                        $score->PsName            = $row[0];
-                        $score->PsZipCode         = $row[1];
-                        if (isset($row[2]) && trim($row[2]) != '') $score->PsGrams             = $row[2];
-                        if (isset($row[3]) && trim($row[3]) != '') $score->PsTotalSize       = $row[3];
-                        if (isset($row[5]) && trim($row[5]) != '') $score->PsEfficFacility   = $row[5];
-                        if (isset($row[6]) && trim($row[6]) != '') $score->PsEfficProduction = $row[6];
+                        $score->ps_name            = $row[0];
+                        $score->ps_zip_code         = $row[1];
+                        if (isset($row[2]) && trim($row[2]) != '') $score->ps_grams             = $row[2];
+                        if (isset($row[3]) && trim($row[3]) != '') $score->ps_total_size       = $row[3];
+                        if (isset($row[5]) && trim($row[5]) != '') $score->ps_effic_facility   = $row[5];
+                        if (isset($row[6]) && trim($row[6]) != '') $score->ps_effic_production = $row[6];
                         $score->save();
                     }
                 }
@@ -101,21 +101,21 @@ class ScoreImports extends ScoreAdminMisc
                         $row[3] = $row[4]; $row[4] = $row[5]; $row[5] = $row[6]; 
                         $row[6] = $row[7]; $row[7] = $row[8]; $row[8] = $row[9];
                     }
-                    $ut = RIIPSUtilities::where('PsUtName', trim($row[2]))
+                    $ut = RIIPSUtilities::where('ps_ut_name', trim($row[2]))
                         ->first();
-                    if (!$ut || !isset($ut->PsUtID)) {
+                    if (!$ut || !isset($ut->ps_ut_id)) {
                         $ut = new RIIPSUtilities;
-                        $ut->PsUtName = trim($row[2]);
-                        $ut->PsUtType = $GLOBALS["SL"]->def->getID('Utility Company Type', 'Non-Investor Owned Utilities');
+                        $ut->ps_ut_name = trim($row[2]);
+                        $ut->ps_ut_type = $GLOBALS["SL"]->def->getID('Utility Company Type', 'Non-Investor Owned Utilities');
                         $ut->save();
                     }
-                    $utzip = RIIPSUtiliZips::where('PsUtZpUtilID', $ut->PsUtID)
-                        ->where('PsUtZpZipCode', trim($row[0]))
+                    $utzip = RIIPSUtiliZips::where('ps_ut_zp_util_id', $ut->ps_ut_id)
+                        ->where('ps_ut_zp_zip_code', trim($row[0]))
                         ->first();
-                    if (!$utzip || !isset($utzip->PsUtZpID)) {
+                    if (!$utzip || !isset($utzip->ps_ut_zp_id)) {
                         $utzip = new RIIPSUtiliZips;
-                        $utzip->PsUtZpUtilID = $ut->PsUtID;
-                        $utzip->PsUtZpZipCode = trim($row[0]);
+                        $utzip->ps_ut_zp_util_id = $ut->ps_ut_id;
+                        $utzip->ps_ut_zp_zip_code = trim($row[0]);
                         $utzip->save();
                     } else {
                         //echo 'already found ' . $row[0] . ', ' . $row[2] . '??<br />';
@@ -143,79 +143,88 @@ class ScoreImports extends ScoreAdminMisc
                             $id = intVal($row[0]);
                             $this->v["nwpcc"][$id] = [];
                             $this->v["nwpcc"][$id]["PowerScore"] = new RIIPowerScore;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsName = 'NWPCC #' . $row[0];
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsEmail = 'NWPCC@NWPCC.com';
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsTimeType = 232;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsStatus = 242;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsPrivacy = 361;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsUserID = 0;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsSubmissionProgress = 44;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsUniqueStr 
-                                = $this->getRandStr('PowerScore', 'PsUniqueStr', 20);
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsIsMobile = 0;
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsIPaddy = '--import--';
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsZipCode = $row[1];
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsKWH = 0;
-                            if (trim($row[4]) != '' || (trim($row[3]) != '' && trim($row[4]) != '') 
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_name = 'NWPCC #' . $row[0];
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_email = 'NWPCC@NWPCC.com';
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_time_type = 232;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_status = 242;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_privacy = 361;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_user_id = 0;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_submission_progress = 44;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_unique_str = $this->getRandStr(
+                                'powerscore', 
+                                'ps_unique_str', 
+                                20
+                            );
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_is_mobile = 0;
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_ip_addy = '--import--';
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_zip_code = $row[1];
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_kwh = 0;
+                            if (trim($row[4]) != '' 
+                                || (trim($row[3]) != '' && trim($row[4]) != '') 
                                 || (trim($row[3]) != '' && trim($row[5]) != '')
                                 || (trim($row[4]) != '' && trim($row[5]) != '')) {
-                                $this->v["nwpcc"][$id]["PowerScore"]->PsCharacterize = 145;
+                                $this->v["nwpcc"][$id]["PowerScore"]->ps_characterize = 145;
                             } elseif (trim($row[3]) != '') {
-                                $this->v["nwpcc"][$id]["PowerScore"]->PsCharacterize = 143;
+                                $this->v["nwpcc"][$id]["PowerScore"]->ps_characterize = 143;
                             } elseif (trim($row[5]) != '') {
-                                $this->v["nwpcc"][$id]["PowerScore"]->PsCharacterize = 144;
+                                $this->v["nwpcc"][$id]["PowerScore"]->ps_characterize = 144;
                             }
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsTotalSize = intVal($row[8]);
-                            $this->v["nwpcc"][$id]["PowerScore"]->PsHavestsPerYear 
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_total_size = intVal($row[8]);
+                            $this->v["nwpcc"][$id]["PowerScore"]->ps_harvests_per_year 
                                 = (isset($row[30]) && (intVal($row[30]) > 0) ? intVal($row[30]) : 1);
                             if (isset($row[31]) && intVal($row[31]) > 0) {
-                                $this->v["nwpcc"][$id]["PowerScore"]->PsGrams 
-                                    = $this->v["nwpcc"][$id]["PowerScore"]->PsHavestsPerYear
+                                $this->v["nwpcc"][$id]["PowerScore"]->ps_grams 
+                                    = $this->v["nwpcc"][$id]["PowerScore"]->ps_harvests_per_year
                                         *$GLOBALS["CUST"]->cnvrtLbs2Grm(intVal($row[31]));
                             }
                             $this->v["nwpcc"][$id]["PowerScore"]->save();
                             $this->v["nwpcc"][$id]["PSForCup"] = new RIIPSForCup;
-                            $this->v["nwpcc"][$id]["PSForCup"]->PsCupCupID = 369;
+                            $this->v["nwpcc"][$id]["PSForCup"]->ps_cup_cup_id = 369;
                             $this->v["nwpcc"][$id]["PSForCup"]->save();
                             if ($row[2] == 'Recreational') {
                                 $this->v["nwpcc"][$id]["PSLicenses"] = new RIIPSLicenses;
-                                $this->v["nwpcc"][$id]["PSLicenses"]->PsLicLicense = 142;
+                                $this->v["nwpcc"][$id]["PSLicenses"]->ps_lic_license = 142;
                                 $this->v["nwpcc"][$id]["PSLicenses"]->save();
                             } elseif ($row[2] == 'Medical') {
                                 $this->v["nwpcc"][$id]["PSLicenses"] = new RIIPSLicenses;
-                                $this->v["nwpcc"][$id]["PSLicenses"]->PsLicLicense = 141;
+                                $this->v["nwpcc"][$id]["PSLicenses"]->ps_lic_license = 141;
                                 $this->v["nwpcc"][$id]["PSLicenses"]->save();
                             }
                             $this->runNwpccImportInitAreas($id);
-                            //$this->v["nwpcc"][$id]["PSAreas"][1]->PsAreaSize = $row[5];
+                            //$this->v["nwpcc"][$id]["PSAreas"][1]->ps_area_size = $row[5];
                             $totSize = intVal($row[7]);
-                            $this->v["nwpcc"][$id]["PSAreas"][0]->update([ 'PsAreaSize' => $totSize*(10/366) ]);
-                            $this->v["nwpcc"][$id]["PSAreas"][1]->update([ 'PsAreaSize' => $totSize*(10/366) ]);
-                            $this->v["nwpcc"][$id]["PSAreas"][2]->update([ 'PsAreaSize' => $totSize*(68/366) ]);
-                            $this->v["nwpcc"][$id]["PSAreas"][3]->update([ 'PsAreaSize' => $totSize*(245/366) ]);
-                            $this->v["nwpcc"][$id]["PSAreas"][4]->update([ 'PsAreaSize' => $totSize*(23/366) ]);
-                            $this->v["nwpcc"][$id]["PSAreas"][3]->update([ 'PsAreaLgtDep' 
-                                => (($row[9] == 'TRUE') ? 1 : 0) ]);
-                            if (in_array($row[25], ['PGE', 'Portland General'])) $row[25] = 'Portland General Electric';
+                            $this->v["nwpcc"][$id]["PSAreas"][0]->update([ 'ps_area_size' => $totSize*(10/366) ]);
+                            $this->v["nwpcc"][$id]["PSAreas"][1]->update([ 'ps_area_size' => $totSize*(10/366) ]);
+                            $this->v["nwpcc"][$id]["PSAreas"][2]->update([ 'ps_area_size' => $totSize*(68/366) ]);
+                            $this->v["nwpcc"][$id]["PSAreas"][3]->update([ 'ps_area_size' => $totSize*(245/366) ]);
+                            $this->v["nwpcc"][$id]["PSAreas"][4]->update([ 'ps_area_size' => $totSize*(23/366) ]);
+                            $this->v["nwpcc"][$id]["PSAreas"][3]->update([
+                                'ps_area_lgt_dep' => (($row[9] == 'TRUE') ? 1 : 0)
+                            ]);
+                            if (in_array($row[25], [ 'PGE', 'Portland General' ])) {
+                                $row[25] = 'Portland General Electric';
+                            }
                             if (trim($row[25]) != '') {
-                                $chk = RIIPSUtilities::where('PsUtName', 'LIKE', $row[25])
+                                $chk = RIIPSUtilities::where('ps_ut_name', 'LIKE', $row[25])
                                     ->first();
                                 if ($chk) {
                                     $this->v["nwpcc"][$id]["PSUtiliLinks"] = new RIIPSUtiliLinks;
-                                    $this->v["nwpcc"][$id]["PSUtiliLinks"]->PsUtLnkUtilityID = $chk->PsUtID;
+                                    $this->v["nwpcc"][$id]["PSUtiliLinks"]->ps_ut_lnk_utility_id = $chk->ps_ut_id;
                                     $this->v["nwpcc"][$id]["PSUtiliLinks"]->save();
                                 } else {
-                                    $this->v["nwpcc"][$id]["PowerScore"]->update([ 'PsSourceUtilityOther' => $row[25]]);
+                                    $this->v["nwpcc"][$id]["PowerScore"]->update([
+                                        'ps_source_utility_other' => $row[25]
+                                    ]);
                                 }
                             }
                             if (intVal($row[27]) > 0 || intVal($row[28]) > 0) {
                                 $this->v["nwpcc"][$id]["PSRenewables"] = new RIIPSRenewables;
-                                $this->v["nwpcc"][$id]["PSRenewables"]->PsRnwRenewable = 153;
+                                $this->v["nwpcc"][$id]["PSRenewables"]->ps_rnw_renewable = 153;
                                 $this->v["nwpcc"][$id]["PSRenewables"]->save();
                             }
                             if (intVal($row[28]) > 0) {
                                 $this->v["nwpcc"][$id]["PSRenewables"] = new RIIPSRenewables;
-                                $this->v["nwpcc"][$id]["PSRenewables"]->PsRnwRenewable = 154;
+                                $this->v["nwpcc"][$id]["PSRenewables"]->ps_rnw_renewable = 154;
                                 $this->v["nwpcc"][$id]["PSRenewables"]->save();
                             }
                         } 
@@ -232,10 +241,15 @@ class ScoreImports extends ScoreAdminMisc
                         if ($i > 1) {
                             $id = intVal($row[0]);
                             $area = 3;
-                            if ($row[1] == 'Greenhouse' && in_array($id, [61, 69])) $area = 2;
-                            elseif ($row[1] == 'Vegetative Room') $area = 2;
-                            elseif ($row[1] == 'Clone Room') $area = 1;
-                            elseif ($row[1] == 'Drying Room') $area = 4;
+                            if ($row[1] == 'Greenhouse' && in_array($id, [61, 69])) {
+                                $area = 2;
+                            } elseif ($row[1] == 'Vegetative Room') {
+                                $area = 2;
+                            } elseif ($row[1] == 'Clone Room') {
+                                $area = 1;
+                            } elseif ($row[1] == 'Drying Room') {
+                                $area = 4;
+                            }
                             if (!isset($this->v["nwpcc"][$id]["PSLightTypes"])) {
                                 $this->v["nwpcc"][$id]["PSLightTypes"] = [];
                             }
@@ -244,37 +258,38 @@ class ScoreImports extends ScoreAdminMisc
                             }
                             $lgtInd = sizeof($this->v["nwpcc"][$id]["PSLightTypes"][$area]);
                             $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd] = new RIIPSLightTypes;
-                            $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypAreaID 
-                                = $this->v["nwpcc"][$id]["PSAreas"][$area]->PsAreaID;
+                            $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_area_id 
+                                = $this->v["nwpcc"][$id]["PSAreas"][$area]->ps_area_id;
                             if (isset($row[5]) && intVal($row[5]) > 0) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypHours = intVal($row[5]);
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]
+                                    ->ps_lg_typ_hours = intVal($row[5]);
                             }
                             if (in_array(trim($row[2]), ['Linear Fluorescent T5', 'Compact Fluorescent'])) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 165;
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 165;
                             } elseif (trim($row[2]) == 'High Pressure Sodium Double-Ended') {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 168;
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 168;
                             } elseif (trim($row[2]) == 'High Pressure Sodium') {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 169;
-                            } elseif (in_array(trim($row[2]), ['Metal Halide Ceramic', 'Metal Halide', 
-                                'High Intensity Discharge'])) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 171;
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 169;
+                            } elseif (in_array(trim($row[2]), 
+                                [ 'Metal Halide Ceramic', 'Metal Halide', 'High Intensity Discharge' ])) {
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 171;
                             } elseif (trim($row[2]) == 'LED') {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 203;
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 203;
                             } elseif (trim($row[2]) == 'LED') {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypLight = 203;
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_light = 203;
                             }
                             if (intVal($row[3]) > 0) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypCount = $row[3];
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_count = $row[3];
                             }
                             if (intVal($row[4]) > 0) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypWattage = $row[4];
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_wattage = $row[4];
                             }
                             if (intVal($row[5]) > 0) {
-                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->PsLgTypHours = $row[5];
+                                $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->ps_lg_typ_hours = $row[5];
                             }
                             $this->v["nwpcc"][$id]["PSLightTypes"][$area][$lgtInd]->save();
                             if (intVal($row[8]) > 0) {
-                                $this->v["nwpcc"][$id]["PowerScore"]->PsKWH += intVal($row[8]);
+                                $this->v["nwpcc"][$id]["PowerScore"]->ps_kwh += intVal($row[8]);
                             }
                             $this->v["nwpcc"][$id]["PowerScore"]->save();
                         }
@@ -289,7 +304,9 @@ class ScoreImports extends ScoreAdminMisc
                 if (sizeof($lines) > 0) {
                     foreach ($lines as $i => $l) {
                         $row = $GLOBALS["SL"]->mexplode(',', $l);
-                        if ($i > 0 && isset($row[1])) $hvacCool[intVal($row[0])] = $row[1];
+                        if ($i > 0 && isset($row[1])) {
+                            $hvacCool[intVal($row[0])] = $row[1];
+                        }
                     }
                 }
             }
@@ -299,7 +316,9 @@ class ScoreImports extends ScoreAdminMisc
                 if (sizeof($lines) > 0) {
                     foreach ($lines as $i => $l) {
                         $row = $GLOBALS["SL"]->mexplode(',', $l);
-                        if ($i > 0 && isset($row[1])) $hvacDehum[intVal($row[0])] = $row[1];
+                        if ($i > 0 && isset($row[1])) {
+                            $hvacDehum[intVal($row[0])] = $row[1];
+                        }
                     }
                 }
             }
@@ -315,41 +334,42 @@ class ScoreImports extends ScoreAdminMisc
                     }
                 }
                 foreach ($this->v["nwpcc"][$id]["PSAreas"] as $area => $row) {
-                    $this->v["nwpcc"][$id]["PSAreas"][$area]->PsAreaHvacType = $hvac;
+                    $this->v["nwpcc"][$id]["PSAreas"][$area]->ps_area_hvac_type = $hvac;
                     $this->v["nwpcc"][$id]["PSAreas"][$area]->save();
                 }
             }
             
         }
         $this->searchResultsXtra();
-        $this->searcher->v["psFilter"] = '<a href="?showEmpty=1"><i class="fa fa-toggle-off" aria-hidden="true"></i> '
-            . 'Show Empties</a>';
-        $this->searcher->v["allscores"] = RIIPowerScore::where('PsName', 'LIKE', 'NWPCC%')
-            ->where('PsEfficFacility', '>', 0)
-            ->where('PsEfficProduction', '>', 0)
-            ->where('PsEfficLighting', '>', 0)
-            ->where('PsEfficHvac', '>', 0)
+        $this->searcher->v["psFilter"] = '<a href="?showEmpty=1">'
+            . '<i class="fa fa-toggle-off" aria-hidden="true"></i> Show Empties</a>';
+        $this->searcher->v["allscores"] = RIIPowerScore::where('ps_name', 'LIKE', 'NWPCC%')
+            ->where('ps_effic_facility', '>', 0)
+            ->where('ps_effic_production', '>', 0)
+            ->where('ps_effic_lighting', '>', 0)
+            ->where('ps_effic_hvac', '>', 0)
             ->orderBy($this->searcher->v["sort"][0], $this->searcher->v["sort"][1])
             ->get();
         if ($GLOBALS["SL"]->REQ->has('showEmpty')) {
-            $this->searcher->v["allscores"] = RIIPowerScore::where('PsName', 'LIKE', 'NWPCC%')
+            $this->searcher->v["allscores"] = RIIPowerScore::where('ps_name', 'LIKE', 'NWPCC%')
                 ->orderBy($this->searcher->v["sort"][0], $this->searcher->v["sort"][1])
                 ->get();
-            $this->searcher->v["psFilter"] = '<a href="?"><i class="fa fa-toggle-on" aria-hidden="true"></i> Hide Empties</a>';
+            $this->searcher->v["psFilter"] = '<a href="?">'
+                . '<i class="fa fa-toggle-on" aria-hidden="true"></i> Hide Empties</a>';
         } elseif ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $i => $score) {
-                $this->searcher->v["allscores"][$i]->update([ 'PsStatus' => 243 ]);
+                $this->searcher->v["allscores"][$i]->update([ 'ps_status' => 243 ]);
             }
         }
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $ps) {
-                $chk = RIIPSForCup::where('PsCupPSID', $ps->PsID)
-                    ->where('PsCupCupID', 369)
+                $chk = RIIPSForCup::where('ps_cup_psid', $ps->ps_id)
+                    ->where('ps_cup_cup_id', 369)
                     ->first();
                 if (!$chk) {
                     $chk = new RIIPSForCup;
-                    $chk->PsCupPSID = $ps->PsID;
-                    $chk->PsCupCupID = 369;
+                    $chk->ps_cup_psid = $ps->ps_id;
+                    $chk->ps_cup_cup_id = 369;
                     $chk->save();
                 }
             }
@@ -358,7 +378,10 @@ class ScoreImports extends ScoreAdminMisc
         $this->searcher->getAllscoresAvgFlds();
         $this->searcher->v["isExcel"] = $GLOBALS["SL"]->REQ->has('excel');
         if ($GLOBALS["SL"]->REQ->has('excel')) {
-            $innerTable = view('vendor.cannabisscore.nodes.170-all-powerscores-excel', $this->searcher->v)->render();
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.170-all-powerscores-excel', 
+                $this->searcher->v
+            )->render();
             $exportFile = 'NWPCC Import Into PowerScore';
             $exportFile = str_replace(' ', '_', $exportFile) . '-' . date("Y-m-d") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $exportFile);
@@ -381,29 +404,29 @@ class ScoreImports extends ScoreAdminMisc
         if (!isset($this->v["nwpcc"][$id]["PSAreas"])) {
             $this->v["nwpcc"][$id]["PSAreas"] = [];
             $this->v["nwpcc"][$id]["PSAreas"][0] = new RIIPSAreas;
-            $this->v["nwpcc"][$id]["PSAreas"][0]->PsAreaPSID = $this->v["nwpcc"][$id]["PowerScore"]->PsID;
-            $this->v["nwpcc"][$id]["PSAreas"][0]->PsAreaType = 237;
-            $this->v["nwpcc"][$id]["PSAreas"][0]->PsAreaHasStage = 1;
+            $this->v["nwpcc"][$id]["PSAreas"][0]->ps_area_psid = $this->v["nwpcc"][$id]["PowerScore"]->ps_id;
+            $this->v["nwpcc"][$id]["PSAreas"][0]->ps_area_type = 237;
+            $this->v["nwpcc"][$id]["PSAreas"][0]->ps_area_has_stage = 1;
             $this->v["nwpcc"][$id]["PSAreas"][0]->save();
             $this->v["nwpcc"][$id]["PSAreas"][1] = new RIIPSAreas;
-            $this->v["nwpcc"][$id]["PSAreas"][1]->PsAreaPSID = $this->v["nwpcc"][$id]["PowerScore"]->PsID;
-            $this->v["nwpcc"][$id]["PSAreas"][1]->PsAreaType = 160;
-            $this->v["nwpcc"][$id]["PSAreas"][1]->PsAreaHasStage = 1;
+            $this->v["nwpcc"][$id]["PSAreas"][1]->ps_area_psid = $this->v["nwpcc"][$id]["PowerScore"]->ps_id;
+            $this->v["nwpcc"][$id]["PSAreas"][1]->ps_area_type = 160;
+            $this->v["nwpcc"][$id]["PSAreas"][1]->ps_area_has_stage = 1;
             $this->v["nwpcc"][$id]["PSAreas"][1]->save();
             $this->v["nwpcc"][$id]["PSAreas"][2] = new RIIPSAreas;
-            $this->v["nwpcc"][$id]["PSAreas"][2]->PsAreaPSID = $this->v["nwpcc"][$id]["PowerScore"]->PsID;
-            $this->v["nwpcc"][$id]["PSAreas"][2]->PsAreaType = 161;
-            $this->v["nwpcc"][$id]["PSAreas"][2]->PsAreaHasStage = 1;
+            $this->v["nwpcc"][$id]["PSAreas"][2]->ps_area_psid = $this->v["nwpcc"][$id]["PowerScore"]->ps_id;
+            $this->v["nwpcc"][$id]["PSAreas"][2]->ps_area_type = 161;
+            $this->v["nwpcc"][$id]["PSAreas"][2]->ps_area_has_stage = 1;
             $this->v["nwpcc"][$id]["PSAreas"][2]->save();
             $this->v["nwpcc"][$id]["PSAreas"][3] = new RIIPSAreas;
-            $this->v["nwpcc"][$id]["PSAreas"][3]->PsAreaPSID = $this->v["nwpcc"][$id]["PowerScore"]->PsID;
-            $this->v["nwpcc"][$id]["PSAreas"][3]->PsAreaType = 162;
-            $this->v["nwpcc"][$id]["PSAreas"][3]->PsAreaHasStage = 1;
+            $this->v["nwpcc"][$id]["PSAreas"][3]->ps_area_psid = $this->v["nwpcc"][$id]["PowerScore"]->ps_id;
+            $this->v["nwpcc"][$id]["PSAreas"][3]->ps_area_type = 162;
+            $this->v["nwpcc"][$id]["PSAreas"][3]->ps_area_has_stage = 1;
             $this->v["nwpcc"][$id]["PSAreas"][3]->save();
             $this->v["nwpcc"][$id]["PSAreas"][4] = new RIIPSAreas;
-            $this->v["nwpcc"][$id]["PSAreas"][4]->PsAreaPSID = $this->v["nwpcc"][$id]["PowerScore"]->PsID;
-            $this->v["nwpcc"][$id]["PSAreas"][4]->PsAreaType = 163;
-            $this->v["nwpcc"][$id]["PSAreas"][4]->PsAreaHasStage = 1;
+            $this->v["nwpcc"][$id]["PSAreas"][4]->ps_area_psid = $this->v["nwpcc"][$id]["PowerScore"]->ps_id;
+            $this->v["nwpcc"][$id]["PSAreas"][4]->ps_area_type = 163;
+            $this->v["nwpcc"][$id]["PSAreas"][4]->ps_area_has_stage = 1;
             $this->v["nwpcc"][$id]["PSAreas"][4]->save();
         }
         return true;

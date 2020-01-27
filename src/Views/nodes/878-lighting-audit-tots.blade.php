@@ -9,33 +9,36 @@
 </div>
 
 @forelse ($areas as $a => $area)
-    @if (isset($area->PsAreaHasStage) 
-        && intVal($area->PsAreaHasStage) == 1)
+    @if (isset($area->ps_area_has_stage) 
+        && intVal($area->ps_area_has_stage) == 1)
         <div class="row mB10">
             <div class="col-3">{!! $GLOBALS["SL"]->def->getVal(
                 'PowerScore Growth Stages', 
-                $area->PsAreaType
+                $area->ps_area_type
             ) !!}</div>
             <div class="col-3"><nobr>{{ 
-                number_format($area->PsAreaSize)
+                number_format($area->ps_area_size)
             }} Sq Ft</nobr></div>
-            <div class="col-3">{!!
-                number_format($areaCnts[$area->PsAreaID])
-            !!}</div>
-            @if ($areaCnts[$area->PsAreaID] > 0 
-                && isset($area->PsAreaSqFtPerFix2))
-                @if ($area->PsAreaSqFtPerFix2 < 9
-                    || $area->PsAreaSqFtPerFix2 > 49) 
+            <div class="col-3">
+                @if (isset($areaCnts[$area->ps_area_id]))
+                    {!! number_format($areaCnts[$area->ps_area_id]) !!}
+                @endif
+            </div>
+            @if (isset($areaCnts[$area->ps_area_id]) 
+                && $areaCnts[$area->ps_area_id] > 0 
+                && isset($area->ps_area_sq_ft_per_fix2))
+                @if ($area->ps_area_sq_ft_per_fix2 < 9
+                    || $area->ps_area_sq_ft_per_fix2 > 49) 
                     <div class="col-3 red bld">
                         <nobr>
                         <i class="fa fa-exclamation-triangle mR5"
                             aria-hidden="true"></i>
-                        {{ round($area->PsAreaSqFtPerFix2) }}
+                        {{ round($area->ps_area_sq_ft_per_fix2) }}
                         Sq Ft</nobr>
                     </div>
                 @else
                     <div class="col-3"><nobr>{{ 
-                        round($area->PsAreaSqFtPerFix2) 
+                        round($area->ps_area_sq_ft_per_fix2) 
                     }} Sq Ft</nobr></div>
                 @endif
             @else

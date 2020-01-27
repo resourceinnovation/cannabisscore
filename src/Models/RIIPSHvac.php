@@ -5,21 +5,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSHvac extends Model
 {
-    protected $table      = 'RII_PSHvac';
-    protected $primaryKey = 'PsHvcID';
+    protected $table      = 'rii_ps_hvac';
+    protected $primaryKey = 'ps_hvc_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsHvcPSID', 
-		'PsHvcUnitType', 
-		'PsHvcCount', 
-		'PsHvcSize', 
-		'PsHvcEfficiency', 
-		'PsHvcMake', 
-		'PsHvcModel', 
-		'PsHvcHours', 
-		'PsHvcMonths', 
-		'PsHvcUnitTypeOther', 
+		'ps_hvc_psid', 
+		'ps_hvc_unit_type', 
+		'ps_hvc_count', 
+		'ps_hvc_size', 
+		'ps_hvc_efficiency', 
+		'ps_hvc_make', 
+		'ps_hvc_model', 
+		'ps_hvc_hours', 
+		'ps_hvc_months', 
+		'ps_hvc_unit_type_other', 
     ];
     
     // END SurvLoop auto-generated portion of Model

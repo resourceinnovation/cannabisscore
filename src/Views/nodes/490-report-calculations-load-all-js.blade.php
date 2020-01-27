@@ -3,8 +3,8 @@
 
 function updateRanks() {
 @foreach (['Overall', 'Facility', 'Production', 'HVAC', 'Lighting', 'Water', 'Waste'] as $i => $eff)
-    @if (isset($currRanks->{ 'PsRnk' . $eff . '' }))
-    <?php $perc = round($currRanks->{ 'PsRnk' . $eff . '' }); ?>
+    @if (isset($currRanks->{ 'ps_rnk_' . strtolower($eff) }))
+    <?php $perc = round($currRanks->{ 'ps_rnk_' . strtolower($eff) }); ?>
         guageList[{{ $i }}][2] = {!! $perc !!};
         @if ($eff == 'Overall')
             guageList[{{ $i }}][3] = {!! json_encode($withinFilters) !!};

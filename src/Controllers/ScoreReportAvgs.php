@@ -72,8 +72,8 @@ class ScoreReportAvgs extends ScoreReportStats
         }
         $psTags = [];
         foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-            $psTags[$ps->PsID] 
-                = $this->loadPsTags($ps, RIIPSAreas::where('PsAreaPSID', $ps->PsID)->get());
+            $psTags[$ps->ps_id] 
+                = $this->loadPsTags($ps, RIIPSAreas::where('ps_area_psid', $ps->ps_id)->get());
         }
         $this->v["scoreSets"] = [
             ['farm',     'PowerScore Averages by Type of Farm'],
@@ -89,8 +89,8 @@ class ScoreReportAvgs extends ScoreReportStats
             $tmp = new ScoreStats([$set[0]]);
             $tmp->loadMap();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                if (!in_array($i, [2, 3, 4]) || $ps->PsCharacterize == 144) {
-                    $tmp->applyScoreFilts($ps, 0, $psTags[$ps->PsID]);
+                if (!in_array($i, [2, 3, 4]) || $ps->ps_characterize == 144) {
+                    $tmp->applyScoreFilts($ps, 0, $psTags[$ps->ps_id]);
                     $tmp->addScoreData($ps);
                     $tmp->resetRecFilt();
                 }
@@ -120,10 +120,10 @@ class ScoreReportAvgs extends ScoreReportStats
             $this->v["statMisc"]->addDataType($fld, $name);
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $renew) {
-            $this->v["statMisc"]->addDataType('rnw' . $renew->DefID, $renew->DefValue);
+            $this->v["statMisc"]->addDataType('rnw' . $renew->def_id, $renew->def_value);
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore License Types') as $lic) {
-            $this->v["statMisc"]->addDataType('lic' . $lic->DefID, $lic->DefValue);
+            $this->v["statMisc"]->addDataType('lic' . $lic->def_id, $lic->def_value);
         }
         $this->v["statMisc"]->loadMap();
         
@@ -172,157 +172,176 @@ class ScoreReportAvgs extends ScoreReportStats
             "pie"   => []
         ];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
-            $this->v["enrgys"]["cmpl"][$type->DefID] = [ 0 => 0 ];
-            $this->v["enrgys"]["extra"][$type->DefID] = [ 0 => 0 ];
-            $this->v["enrgys"]["data"][$type->DefID] = [];
-            $this->v["enrgys"]["pie"][$type->DefID] = [];
+            $this->v["enrgys"]["cmpl"][$type->def_id] = [ 0 => 0 ];
+            $this->v["enrgys"]["extra"][$type->def_id] = [ 0 => 0 ];
+            $this->v["enrgys"]["data"][$type->def_id] = [];
+            $this->v["enrgys"]["pie"][$type->def_id] = [];
             foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $j => $renew) {
-                $this->v["enrgys"]["cmpl"][$type->DefID][$renew->DefID] = 0;
-                $this->v["enrgys"]["extra"][$type->DefID][$renew->DefID] = 0;
+                $this->v["enrgys"]["cmpl"][$type->def_id][$renew->def_id] = 0;
+                $this->v["enrgys"]["extra"][$type->def_id][$renew->def_id] = 0;
             }
         }
         
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
+                $char = $ps->ps_characterize;
                 $this->v["statMisc"]->resetRecFilt();
-                $this->v["statMisc"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
-                $this->v["statMisc"]->addRecDat('g', $ps->PsGrams, $ps->PsID);
-                $this->v["statMisc"]->addRecDat('kWh', $ps->PsKWH, $ps->PsID);
+                $this->v["statMisc"]->addRecFilt('farm', $char, $ps->ps_id);
+                $this->v["statMisc"]->addRecDat('g', $ps->ps_grams, $ps->ps_id);
+                $this->v["statMisc"]->addRecDat('kWh', $ps->ps_kwh, $ps->ps_id);
                 foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
                     if (isset($ps->{ $fld }) && intVal($ps->{ $fld }) == 1) {
-                        $this->v["statMisc"]->addRecDat($fld, 1, $ps->PsID);
+                        $this->v["statMisc"]->addRecDat($fld, 1, $ps->ps_id);
                     }
                 }
                 foreach ($GLOBALS["CUST"]->psContact() as $fld => $name) {
                     if (isset($ps->{ $fld }) && intVal($ps->{ $fld }) == 1) {
-                        $this->v["statMisc"]->addRecDat($fld, 1, $ps->PsID);
+                        $this->v["statMisc"]->addRecDat($fld, 1, $ps->ps_id);
                     }
                 }
-                $chk = RIIPSRenewables::where('PsRnwPSID', $ps->PsID)->get();
+                $chk = RIIPSRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
                 if ($chk->isNotEmpty()) {
                     $this->v["enrgys"]["cmpl"][0]++;
-                    $this->v["enrgys"]["cmpl"][$ps->PsCharacterize][0]++;
+                    $this->v["enrgys"]["cmpl"][$char][0]++;
                     foreach ($chk as $renew) {
-                        $this->v["statMisc"]->addRecDat('rnw' . $renew->PsRnwRenewable, 1, $ps->PsID);
-                        $this->v["enrgys"]["cmpl"][$ps->PsCharacterize][$renew->PsRnwRenewable]++;
+                        $type = $renew->ps_rnw_renewable;
+                        $this->v["statMisc"]->addRecDat('rnw' . $type, 1, $ps->ps_id);
+                        $this->v["enrgys"]["cmpl"][$char][$type]++;
                     }
                 }
-                $chk = RIIPSLicenses::where('PsLicPSID', $ps->PsID)->get();
+                $chk = RIIPSLicenses::where('ps_lic_psid', $ps->ps_id)->get();
                 if ($chk->isNotEmpty()) {
                     foreach ($chk as $lic) {
-                        $this->v["statMisc"]->addRecDat('lic' . $lic->PsLicLicense, 1, $ps->PsID);
+                        $type = 'lic' . $lic->ps_lic_license;
+                        $this->v["statMisc"]->addRecDat($type, 1, $ps->ps_id);
                     }
                 }
                 
                 $this->v["statSqft"]->resetRecFilt();
-                $this->v["statSqft"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
+                $this->v["statSqft"]->addRecFilt('farm', $char, $ps->ps_id);
                 
                 $this->v["statLgts"]->resetRecFilt();
-                $this->v["statLgts"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
+                $this->v["statLgts"]->addRecFilt('farm', $char, $ps->ps_id);
                 $hasArtifLgt = false;
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        if (isset($area->PsAreaType) && $area->PsAreaType == $this->v["areaTypes"]["Flower"]
-                            && intVal($area->PsAreaHasStage) == 1 && intVal($area->PsAreaLgtArtif) == 1) {
+                        if (isset($area->ps_area_type) 
+                            && $area->ps_area_type == $this->v["areaTypes"]["Flower"]
+                            && intVal($area->ps_area_has_stage) == 1 
+                            && intVal($area->ps_area_lgt_artif) == 1) {
                             $hasArtifLgt = true;
                         }
                     }
                 }
                 if ($hasArtifLgt) {
                     $this->v["statLarf"]->resetRecFilt();
-                    $this->v["statLarf"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
+                    $this->v["statLarf"]->addRecFilt('farm', $char, $ps->ps_id);
                 }
                 
                 $this->v["statHvac"]->resetRecFilt();
-                $this->v["statHvac"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
+                $this->v["statHvac"]->addRecFilt('farm', $char, $ps->ps_id);
                 
                 $kwh = 0;
                 $sqft = [ 0 => 0, 162 => 0, 161 => 0, 160 => 0, 237 => 0, 163 => 0 ];
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        if (isset($area->PsAreaType) && intVal($area->PsAreaHasStage) == 1) {
-                            $aID = $area->PsAreaID;
+                        if (isset($area->ps_area_type) && intVal($area->ps_area_has_stage) == 1) {
+                            $aID = $area->ps_area_id;
                             $aTyp = $this->getAType($area);
-                            $this->v["statSqft"]->addRecFilt('area', $area->PsAreaType, $ps->PsID);
-                            $this->v["statSqft"]->addRecDat('sqft', intVal($area->PsAreaSize), $ps->PsID);
+                            $this->v["statSqft"]->addRecFilt('area', $area->ps_area_type, $ps->ps_id);
+                            $this->v["statSqft"]->addRecDat('sqft', intVal($area->ps_area_size), $ps->ps_id);
                             $this->v["statSqft"]->delRecFilt('area');
                             
                             $hvac = 360;
-                            if (isset($area->PsAreaHvacType) && intVal($area->PsAreaHvacType) > 0) {
-                                $hvac = $area->PsAreaHvacType;
+                            if (isset($area->ps_area_hvac_type) && intVal($area->ps_area_hvac_type) > 0) {
+                                $hvac = $area->ps_area_hvac_type;
                             }
-                            $this->v["statHvac"]->addRecFilt('area', $area->PsAreaType, $ps->PsID);
+                            $this->v["statHvac"]->addRecFilt('area', $area->ps_area_type, $ps->ps_id);
                             $this->v["statHvac"]->addRecFilt('hvac', $hvac, $aID);
-                            $this->v["statHvac"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
+                            $this->v["statHvac"]->addRecDat('sqft', intVal($area->ps_area_size), $aID);
                             $this->v["statHvac"]->addRecDat('kWh/sqft', $GLOBALS["CUST"]->getHvacEffic($hvac), $aID);
                             $this->v["statHvac"]->delRecFilt('hvac');
                             $this->v["statHvac"]->delRecFilt('area');
                             
-                            $this->v["statLgts"]->addRecFilt('area', $area->PsAreaType, $aID);
-                            $this->v["statLgts"]->addRecDat('sun', intVal($area->PsAreaLgtSun), $aID);
-                            $this->v["statLgts"]->addRecDat('dep', intVal($area->PsAreaLgtDep), $aID);
-                            $this->v["statLgts"]->addRecDat('arf', intVal($area->PsAreaLgtArtif), $aID);
+                            $this->v["statLgts"]->addRecFilt('area', $area->ps_area_type, $aID);
+                            $this->v["statLgts"]->addRecDat('sun', intVal($area->ps_area_lgt_sun), $aID);
+                            $this->v["statLgts"]->addRecDat('dep', intVal($area->ps_area_lgt_dep), $aID);
+                            $this->v["statLgts"]->addRecDat('arf', intVal($area->ps_area_lgt_artif), $aID);
                             $w = 0;
-                            if (isset($area->PsAreaTotalLightWatts) && $area->PsAreaTotalLightWatts > 0) {
-                                $w = ($area->PsAreaTotalLightWatts
-                                    *$GLOBALS["CUST"]->getTypeHours($area->PsAreaType)*365)/1000;
-                                $this->v["statLgts"]->addRecDat('W', $area->PsAreaTotalLightWatts, $aID);
+                            if (isset($area->ps_area_total_light_watts) && $area->ps_area_total_light_watts > 0) {
+                                $w = ($area->ps_area_total_light_watts
+                                    *$GLOBALS["CUST"]->getTypeHours($area->ps_area_type)*365)/1000;
+                                $this->v["statLgts"]->addRecDat('W', $area->ps_area_total_light_watts, $aID);
                                 if ($hasArtifLgt) {
-                                    $this->v["statLarf"]->addRecFilt('area', $area->PsAreaType, $aID);
-                                    $this->v["statLarf"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
-                                    $this->v["statLarf"]->addRecDat('W', $area->PsAreaTotalLightWatts, $aID);
+                                    $this->v["statLarf"]->addRecFilt('area', $area->ps_area_type, $aID);
+                                    $this->v["statLarf"]->addRecDat('sqft', intVal($area->ps_area_size), $aID);
+                                    $this->v["statLarf"]->addRecDat('W', $area->ps_area_total_light_watts, $aID);
                                 }
                             }
                             $this->v["statLgts"]->addRecDat('kWh', $w, $aID);
                             $foundLights = $foundHID = $foundLED = false;
                             $fixtureCnt = 0;
-                            $lgts = RIIPSLightTypes::where('PsLgTypAreaID', $area->getKey())
+                            $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->getKey())
                                 ->get();
                             if ($lgts->isNotEmpty()) {
                                 foreach ($lgts as $lgt) {
-                                    if (isset($lgt->PsLgTypLight) && intVal($lgt->PsLgTypLight) > 0
-                                        && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0) {
-                                        $this->v["statLgts"]->addRecFilt('lgty', $lgt->PsLgTypLight, $aID);
-                                        $this->v["statLgts"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
-                                        $this->v["statLgts"]->addRecDat('lgtfx', $lgt->PsLgTypCount, $lgt->PsLgTypID);
+                                    if (isset($lgt->ps_lg_typ_light) 
+                                        && intVal($lgt->ps_lg_typ_light) > 0
+                                        && isset($lgt->ps_lg_typ_count) 
+                                        && intVal($lgt->ps_lg_typ_count) > 0) {
+                                        $this->v["statLgts"]->addRecFilt(
+                                            'lgty', 
+                                            $lgt->ps_lg_typ_light, 
+                                            $aID
+                                        );
+                                        $this->v["statLgts"]->addRecDat(
+                                            'sqft', 
+                                            intVal($area->ps_area_size), 
+                                            $aID
+                                        );
+                                        $this->v["statLgts"]->addRecDat(
+                                            'lgtfx', 
+                                            $lgt->ps_lg_typ_count, 
+                                            $lgt->ps_lg_typ_id
+                                        );
                                         $foundLights = true;
-                                        if (in_array($lgt->PsLgTypLight, [168, 169, 170, 171])) {
+                                        if (in_array($lgt->ps_lg_typ_light, [168, 169, 170, 171])) {
                                             $foundHID = true;
                                         }
-                                        if (in_array($lgt->PsLgTypLight, [165, 203])) {
+                                        if (in_array($lgt->ps_lg_typ_light, [165, 203])) {
                                             $foundLED = true;
                                         }
-                                        $fixtureCnt += $lgt->PsLgTypCount;
+                                        $fixtureCnt += $lgt->ps_lg_typ_count;
                                     }
                                 }
                             }
-                            if (!$foundLights) { // && intVal($area->PsAreaLgtArtif) == 0
+                            if (!$foundLights) { // && intVal($area->ps_area_lgt_artif) == 0
                                 $this->v["statLgts"]->addRecFilt('lgty', 2, $aID); // no lights status
-                                $this->v["statLgts"]->addRecDat('sqft', intVal($area->PsAreaSize), $aID);
+                                $this->v["statLgts"]->addRecDat('sqft', intVal($area->ps_area_size), $aID);
                                 $this->v["statLgts"]->addRecDat('lgtfx', 0, $aID);
                                 $this->v["statLgts"]->delRecFilt('lgty');
                             }
                             $this->v["statLgts"]->delRecFilt('area');
                             
                             if ($aTyp == 'flw' && $foundHID) {
-                                $this->v["statMore"]["scrHID"][0] += $ps->PsEfficOverall;
-                                $this->v["statMore"]["scrHID"][1] += $ps->PsEfficFacility;
-                                $this->v["statMore"]["scrHID"][2] += $ps->PsEfficProduction;
-                                $this->v["statMore"]["scrHID"][3] += $ps->PsEfficLighting;
-                                $this->v["statMore"]["scrHID"][4] += $ps->PsEfficHvac;
+                                $this->v["statMore"]["scrHID"][0] += $ps->ps_effic_overall;
+                                $this->v["statMore"]["scrHID"][1] += $ps->ps_effic_facility;
+                                $this->v["statMore"]["scrHID"][2] += $ps->ps_effic_production;
+                                $this->v["statMore"]["scrHID"][3] += $ps->ps_effic_lighting;
+                                $this->v["statMore"]["scrHID"][4] += $ps->ps_effic_hvac;
                                 $this->v["statMore"]["scrHID"][5]++;
                                 if ($fixtureCnt > 0) {
-                                    $this->v["statMore"]["scrHID"][6] += $area->PsAreaSize/$fixtureCnt;
+                                    $this->v["statMore"]["scrHID"][6] += $area->ps_area_size/$fixtureCnt;
                                 }
                             }
                             if ($aTyp == 'flw' && $foundLED) {
-                                $this->v["statMore"]["scrLED"][0] += $ps->PsEfficOverall;
-                                $this->v["statMore"]["scrLED"][1] += $ps->PsEfficFacility;
-                                $this->v["statMore"]["scrLED"][2] += $ps->PsEfficProduction;
-                                $this->v["statMore"]["scrLED"][3] += $ps->PsEfficLighting;
-                                $this->v["statMore"]["scrLED"][4] += $ps->PsEfficHvac;
+                                $this->v["statMore"]["scrLED"][0] += $ps->ps_effic_overall;
+                                $this->v["statMore"]["scrLED"][1] += $ps->ps_effic_facility;
+                                $this->v["statMore"]["scrLED"][2] += $ps->ps_effic_production;
+                                $this->v["statMore"]["scrLED"][3] += $ps->ps_effic_lighting;
+                                $this->v["statMore"]["scrLED"][4] += $ps->ps_effic_hvac;
                                 $this->v["statMore"]["scrLED"][5]++;
                             }
                         }
@@ -381,40 +400,45 @@ class ScoreReportAvgs extends ScoreReportStats
             
         }
         
-        $chk = RIIPSRenewables::whereIn('PsRnwPSID', [1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 1725, 1756, 
+        $chk = RIIPSRenewables::whereIn('ps_rnw_psid', [1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 1725, 1756, 
                 2101, 878, 881, 884, 914, 922, 929, 934])
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $renew) {
-                if (!in_array($renew->PsRnwPSID, $this->v["enrgys"]["extra"][1])) {
-                    $this->v["enrgys"]["extra"][1][] = $renew->PsRnwPSID;
+                if (!in_array($renew->ps_rnw_psid, $this->v["enrgys"]["extra"][1])) {
+                    $this->v["enrgys"]["extra"][1][] = $renew->ps_rnw_psid;
                     $this->v["enrgys"]["extra"][0]++;
                     $this->v["enrgys"]["extra"][143][0]++;
                 }
-                $this->v["enrgys"]["extra"][143][$renew->PsRnwRenewable]++;
+                $this->v["enrgys"]["extra"][143][$renew->ps_rnw_renewable]++;
             }
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
-            foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $j => $renew) {
-                $this->v["enrgys"]["data"][$type->DefID][] = [
-                    $this->v["enrgys"]["cmpl"][$type->DefID][$renew->DefID],
-                    $renew->DefValue,
-                    "'" . $GLOBALS["SL"]->printColorFadeHex(($j*0.1), 
-                        $GLOBALS["SL"]->getCssColor('color-main-on'), $GLOBALS["SL"]->getCssColor('color-main-bg')) . "'"
-                    ];
+            foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') 
+                as $j => $renew) {
+                $color = $GLOBALS["SL"]->printColorFadeHex(
+                    ($j*0.1), 
+                    $GLOBALS["SL"]->getCssColor('color-main-on'), 
+                    $GLOBALS["SL"]->getCssColor('color-main-bg')
+                );
+                $this->v["enrgys"]["data"][$type->def_id][] = [
+                    $this->v["enrgys"]["cmpl"][$type->def_id][$renew->def_id],
+                    $renew->def_value,
+                    "'" . $color . "'"
+                ];
             }
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {
-            $this->v["enrgys"]["pie"][$type->DefID] 
-                = ''; //$this->v["statScor"]->pieView($this->v["enrgys"]["data"][$type->DefID]);
+            $this->v["enrgys"]["pie"][$type->def_id] 
+                = ''; //$this->v["statScor"]->pieView($this->v["enrgys"]["data"][$type->def_id]);
         }
         $this->v["enrgys"]["data"][143143] = $this->v["enrgys"]["pie"][143143] = [];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $j => $renew) {
             $color1 = $GLOBALS["SL"]->getCssColor('color-main-on');
             $color2 = $GLOBALS["SL"]->getCssColor('color-main-bg');
             $this->v["enrgys"]["data"][143143][] = [
-                $this->v["enrgys"]["extra"][143][$renew->DefID],
-                $renew->DefValue,
+                $this->v["enrgys"]["extra"][143][$renew->def_id],
+                $renew->def_value,
                 "'" . $GLOBALS["SL"]->printColorFadeHex(($j*0.1), $color1, $color2) . "'"
                 ];
         }
@@ -425,11 +449,11 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function getAType($area)
     {
         $aTyp = '';
-        if ($area->PsAreaType == $this->v["areaTypes"]["Clone"]) {
+        if ($area->ps_area_type == $this->v["areaTypes"]["Clone"]) {
             $aTyp = 'cln';
-        } elseif ($area->PsAreaType == $this->v["areaTypes"]["Veg"]) {
+        } elseif ($area->ps_area_type == $this->v["areaTypes"]["Veg"]) {
             $aTyp = 'veg';
-        } elseif ($area->PsAreaType == $this->v["areaTypes"]["Flower"]) {
+        } elseif ($area->ps_area_type == $this->v["areaTypes"]["Flower"]) {
             $aTyp = 'flw';
         }
         return $aTyp;
@@ -438,12 +462,12 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function loadPsTags($ps, $areas)
     {
         $psTags = [];
-        $psTags[] = ['farm', $ps->PsCharacterize];
-        $chk = RIIPSForCup::where('PsCupPSID', $ps->PsID)
+        $psTags[] = ['farm', $ps->ps_characterize];
+        $chk = RIIPSForCup::where('ps_cup_psid', $ps->ps_id)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {
-                $psTags[] = ['cups', $c->PsCupCupID];
+                $psTags[] = ['cups', $c->ps_cup_cup_id];
             }
         }
         foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
@@ -451,35 +475,35 @@ class ScoreReportAvgs extends ScoreReportStats
                 $psTags[] = ['tech', $fld];
             }
         }
-        $chk = RIIPSRenewables::where('PsRnwPSID', $ps->PsID)->get();
+        $chk = RIIPSRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $renew) {
-                $psTags[] = ['powr', $renew->PsRnwRenewable];
+                $psTags[] = ['powr', $renew->ps_rnw_renewable];
             }
         }
         $foundLights = $foundHID = $foundLED = false;
         if ($areas->isNotEmpty()) {
             foreach ($areas as $area) {
-                if (isset($area->PsAreaType) && intVal($area->PsAreaHasStage) == 1) {
+                if (isset($area->ps_area_type) && intVal($area->ps_area_has_stage) == 1) {
                     $aTyp = $this->getAType($area);
                     if ($aTyp != '') {
-                        if (intVal($area->PsAreaHvacType) > 0) {
-                            $psTags[] = [ $aTyp . '-hvac', $area->PsAreaHvacType ];
+                        if (intVal($area->ps_area_hvac_type) > 0) {
+                            $psTags[] = [ $aTyp . '-hvac', $area->ps_area_hvac_type ];
                         }
-                        $lgts = RIIPSLightTypes::where('PsLgTypAreaID', $area->getKey())
+                        $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->getKey())
                             ->get();
                         if ($lgts->isNotEmpty()) {
                             foreach ($lgts as $lgt) {
-                                if (isset($lgt->PsLgTypLight) && intVal($lgt->PsLgTypLight) > 0
-                                    && isset($lgt->PsLgTypCount) && intVal($lgt->PsLgTypCount) > 0) {
+                                if (isset($lgt->ps_lg_typ_light) && intVal($lgt->ps_lg_typ_light) > 0
+                                    && isset($lgt->ps_lg_typ_count) && intVal($lgt->ps_lg_typ_count) > 0) {
                                     $foundLights = true;
-                                    if (in_array($lgt->PsLgTypLight, [168, 169, 170, 171])) {
+                                    if (in_array($lgt->ps_lg_typ_light, [168, 169, 170, 171])) {
                                         $foundHID = true;
                                     }
-                                    if (in_array($lgt->PsLgTypLight, [165, 203])) {
+                                    if (in_array($lgt->ps_lg_typ_light, [165, 203])) {
                                         $foundLED = true;
                                     }
-                                    $psTags[] = [ $aTyp . '-lgty', $lgt->PsLgTypLight ];
+                                    $psTags[] = [ $aTyp . '-lgty', $lgt->ps_lg_typ_light ];
                                 }
                             }
                         }

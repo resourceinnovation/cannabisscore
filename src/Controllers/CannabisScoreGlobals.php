@@ -70,31 +70,31 @@ class CannabisScoreGlobals
     {
         if (!$lnks) {
             return [
-                'PsHarvestBatch'  => 'Perpetual Harvesting',
-                'PsHasWaterPump'  => 'Water Pumps',
-                'PsHeatWater'     => 'Mechanical Water Heating',
-                'PsControls'      => 'Manual Environmental Controls',
-                'PsControlsAuto'  => 'Automatic Environmental Controls',
-                'PsVerticalStack' => 'Vertical Stacking'
-                ];
+                'ps_harvest_batch'  => 'Perpetual Harvesting',
+                'ps_has_water_pump' => 'Water Pumps',
+                'ps_heat_water'     => 'Mechanical Water Heating',
+                'ps_controls'       => 'Manual Environmental Controls',
+                'ps_controls_auto'  => 'Automatic Environmental Controls',
+                'ps_vertical_stack' => 'Vertical Stacking'
+            ];
         }
         return [
-            'PsHarvestBatch'
+            'ps_harvest_batch'
                 => '<a href="/dash/compare-powerscores?fltPerp=1" '
                     . 'target="_blank">Perpetual Harvesting</a>',
-            'PsHasWaterPump'
+            'ps_has_water_pump'
                 => '<a href="/dash/compare-powerscores?fltPump=1" '
                     . 'target="_blank">Water Pumps</a>',
-            'PsHeatWater'
+            'ps_heat_water'
                 => '<a href="/dash/compare-powerscores?fltWtrh=1" '
                     . 'target="_blank">Mechanical Water Heating</a>',
-            'PsControls'
+            'ps_controls'
                 => '<a href="/dash/compare-powerscores?fltManu=1" '
                     . 'target="_blank">Manual Environmental Controls</a>',
-            'PsControlsAuto'
+            'ps_controls_auto'
                 => '<a href="/dash/compare-powerscores?fltAuto=1" '
                     . 'target="_blank">Automatic Environmental Controls</a>',
-            'PsVerticalStack'
+            'ps_vertical_stack'
                 => '<a href="/dash/compare-powerscores?fltVert=1" '
                     . 'target="_blank">Vertical Stacking</a>'
             ];
@@ -103,10 +103,10 @@ class CannabisScoreGlobals
     public function psContact()
     {
         return [
-            'PsConsiderUpgrade' => 'Considering Upgrade Next 12 Months',
-            'PsIncentiveWants'  => 'Wants Utility Incentives',
-            'PsIncentiveUsed'   => 'Has Used Utility Incentives',
-            'PsNewsletter'      => 'RII Newsletter'
+            'ps_consider_upgrade' => 'Considering Upgrade Next 12 Months',
+            'ps_incentive_wants'  => 'Wants Utility Incentives',
+            'ps_incentive_used'   => 'Has Used Utility Incentives',
+            'ps_newsletter'       => 'RII Newsletter'
             ];
     }
     
@@ -240,20 +240,15 @@ class CannabisScoreGlobals
     public function getSizeDefRange($defID)
     {
         $defSet = 'Indoor Size Groups';
-        if ($defID 
-            == $GLOBALS["SL"]->def->getID($defSet, '<5,000 sf')) {
+        if ($defID == $GLOBALS["SL"]->def->getID($defSet, '<5,000 sf')) {
             return [0, 5000];
-        } elseif ($defID 
-            == $GLOBALS["SL"]->def->getID($defSet, '5,000-10,000 sf')) {
+        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '5,000-10,000 sf')) {
             return [5000, 10000];
-        } elseif ($defID 
-            == $GLOBALS["SL"]->def->getID($defSet, '10,000-30,000 sf')) {
+        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '10,000-30,000 sf')) {
             return [10000, 30000];
-        } elseif ($defID 
-            == $GLOBALS["SL"]->def->getID($defSet, '30,000-50,000 sf')) {
+        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '30,000-50,000 sf')) {
             return [30000, 50000];
-        } elseif ($defID
-            == $GLOBALS["SL"]->def->getID($defSet, '50,000+ sf')) {
+        } elseif ($defID == $GLOBALS["SL"]->def->getID($defSet, '50,000+ sf')) {
             return [ 50000, 1000000000 ];
         }
         return [ 0, 1000000000 ];

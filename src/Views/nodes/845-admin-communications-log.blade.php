@@ -2,8 +2,9 @@
 <div class="mTn10">
 @forelse ($comms as $i => $com)
     <div class="brdBot pT10 pB10">
-        {!! str_replace("\n", "<br />", $com->PsComDescription) !!}<br />
-        - {!! str_replace('a href=', 'a style="color: #000;" href=', $adms[$com->PsComUser]) !!},
+        {!! str_replace("\n", "<br />", $com->ps_com_description) !!}<br />
+        - {!! str_replace('a href=', 'a style="color: #000;" href=', 
+            $adms[$com->ps_com_user]) !!},
         {{ date("g:ia n/j/y", strtotime($com->created_at)) }}
     </div>
 @empty
@@ -11,5 +12,6 @@
 @endif
 </div>
 
-<iframe src="<?= $GLOBALS['SL']->sysOpts['app-url'] ?>/ajadm/adm-comms?ps={{ $ps }}&print=1" 
-    frameborder=0 class="w100" style="min-height: 150px;" ></iframe>
+<iframe src="<?= $GLOBALS['SL']->sysOpts['app-url'] 
+    ?>/ajadm/adm-comms?ps={{ $ps }}&print=1" frameborder=0 
+    class="w100" style="min-height: 150px;" ></iframe>

@@ -14,30 +14,40 @@
             <!--- <nobr><a href="javascript:;" onClick="return loadFullReport();">Lighting Report</a></nobr> --->
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
-                @else value="0" @endif >
+                @else value="0" 
+                @endif >
             <br /><b>Found {{ number_format($totCnt) }} PowerScores</b>
             </p>
         </div>
         <div class="col-4">
-            <select name="fltStateClim" id="fltStateClimID" class="form-control" style="width: 300px;"
-                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
-                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
+            <select name="fltStateClim" id="fltStateClimID" 
+                class="form-control" style="width: 300px;"
+                onChange="window.location='?fltStateClim='+this.value;" 
+                autocomplete="off">
+                <option value="" 
+                    @if (trim($fltStateClim) == '') SELECTED @endif
                     >All Climates and States</option>
                 <option disabled ></option>
                 {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
             </select>
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
-                    name="fltNoNWPCC" id="fltNoNWPCCID" value="1" onClick="return gatherFilts();"
+                    name="fltNoNWPCC" id="fltNoNWPCCID" value="1" 
+                    onClick="return gatherFilts();"
                     @if ($GLOBALS["SL"]->REQ->has('fltNoNWPCC') 
-                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) CHECKED @endif
+                        && intVal($GLOBALS["SL"]->REQ->fltNoNWPCC) == 1) 
+                        CHECKED 
+                    @endif
                     > Exclude NWPCC Imports
             </label>
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
-                    name="fltNoLgtError" id="fltNoLgtErrorID" value="1" onClick="return gatherFilts();"
+                    name="fltNoLgtError" id="fltNoLgtErrorID" value="1" 
+                    onClick="return gatherFilts();"
                     @if ($GLOBALS["SL"]->REQ->has('fltNoLgtError') 
-                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) CHECKED @endif
+                        && intVal($GLOBALS["SL"]->REQ->fltNoLgtError) == 1) 
+                        CHECKED 
+                    @endif
                     > Exclude Lighting Errors
             </label>
         </div>
@@ -88,7 +98,8 @@
                     <?php $cls = ((in_array($c, [4, 6, 10, 14, 18, 27, 36, 45, 56])) 
                         ? 'class="brdLft"' : ''); ?>
                     @if ($c == 0) <th {!! $cls !!} >{!! $col !!}</th>
-                    @else <td {!! $cls !!} >{!! $col !!}</td> @endif
+                    @else <td {!! $cls !!} >{!! $col !!}</td> 
+                    @endif
                 @endif
             @endforeach
             </tr>

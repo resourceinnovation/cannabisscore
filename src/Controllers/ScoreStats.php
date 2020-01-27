@@ -198,7 +198,7 @@ class ScoreStats extends SurvStatsGraph
                 } elseif ($f == 'tech') {
                     foreach ($GLOBALS["CUST"]->psTechs(true) 
                         as $fld => $name) {
-                        if ($fld != 'PsVerticalStack') {
+                        if ($fld != 'ps_vertical_stack') {
                             $this->addFilt(
                                 $fld, 
                                 $name, 
@@ -211,18 +211,15 @@ class ScoreStats extends SurvStatsGraph
                     $set = $GLOBALS["SL"]->def
                         ->getSet('PowerScore Onsite Power Sources');
                     foreach ($set as $def) {
-                        if (($f == 'pow1' && in_array($def->DefID, 
-                                [149, 159, 151, 150, 158])) 
-                            || ($f != 'pow1' && !in_array($def->DefID, 
-                                [149, 159, 151, 150, 158]))) {
-                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' 
-                                . $def->DefID . '" target="_blank">' 
-                                . $def->DefValue . '</a>';
+                        if (($f == 'pow1' && in_array($def->def_id, [149, 159, 151, 150, 158])) 
+                            || ($f != 'pow1' && !in_array($def->def_id, [149, 159, 151, 150, 158]))) {
+                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' . $def->def_id
+                                . '" target="_blank">' . $def->def_value . '</a>';
                             $this->addFilt(
-                                'powr' . $def->DefID, 
+                                'powr' . $def->def_id, 
                                 $lab, 
-                                [0, 1], 
-                                ['No', 'Yes']
+                                [ 0, 1 ], 
+                                [ 'No', 'Yes' ]
                             );
                         }
                     }
@@ -284,8 +281,8 @@ class ScoreStats extends SurvStatsGraph
                 if ($filt["abr"] == 'farm') {
                     $this->addRecFilt(
                         'farm', 
-                        $ps->PsCharacterize, 
-                        $ps->PsID
+                        $ps->ps_characterize, 
+                        $ps->ps_id
                     );
                 } elseif ($filt["abr"] == 'size') {
                     if ($size > 0) {
@@ -301,85 +298,56 @@ class ScoreStats extends SurvStatsGraph
                         } elseif ($size >= 50000) {
                             $sizeDef = 378;
                         }
-                        $this->addRecFilt('size', $sizeDef, $ps->PsID);
+                        $this->addRecFilt('size', $sizeDef, $ps->ps_id);
                     }
                 } elseif ($filt["abr"] == 'auto') {
-                    if (isset($ps->PsControls) 
-                        && intVal($ps->PsControls) == 1 
-                        && isset($ps->PsControlsAuto) 
-                        && intVal($ps->PsControlsAuto) == 1) {
-                        $this->addRecFilt('auto', 3, $ps->PsID);
-                    } elseif (isset($ps->PsControlsAuto) 
-                        && intVal($ps->PsControlsAuto) == 1) {
-                        $this->addRecFilt('auto', 1, $ps->PsID);
-                    } elseif (isset($ps->PsControls) 
-                        && intVal($ps->PsControls) == 1) {
-                        $this->addRecFilt('auto', 2, $ps->PsID);
+                    if (isset($ps->ps_controls) 
+                        && intVal($ps->ps_controls) == 1 
+                        && isset($ps->ps_controls_auto) 
+                        && intVal($ps->ps_controls_auto) == 1) {
+                        $this->addRecFilt('auto', 3, $ps->ps_id);
+                    } elseif (isset($ps->ps_controls_auto) 
+                        && intVal($ps->ps_controls_auto) == 1) {
+                        $this->addRecFilt('auto', 1, $ps->ps_id);
+                    } elseif (isset($ps->ps_controls) 
+                        && intVal($ps->ps_controls) == 1) {
+                        $this->addRecFilt('auto', 2, $ps->ps_id);
                     }
                 } elseif ($filt["abr"] == 'vert') {
-                    if (isset($ps->PsVerticalStack)) {
-                        $this->addRecFilt(
-                            'vert', 
-                            intVal($ps->PsVerticalStack), 
-                            $ps->PsID
-                        );
+                    if (isset($ps->ps_vertical_stack)) {
+                        $this->addRecFilt('vert', intVal($ps->ps_vertical_stack), $ps->ps_id);
                     } else {
-                        $this->addRecFilt(
-                            'vert', 
-                            0, 
-                            $ps->PsID
-                        );
+                        $this->addRecFilt('vert', 0, $ps->ps_id);
                     }
                 } elseif ($filt["abr"] == 'cups') {
                     if (sizeof($psTags) > 0) {
                         foreach ($psTags as $tag) {
                             if ($tag[0] == 'cups') {
-                                $this->addRecFilt(
-                                    'cups', 
-                                    $tag[1], 
-                                    $ps->PsID
-                                );
+                                $this->addRecFilt('cups', $tag[1], $ps->ps_id);
                             }
                         }
                     }
                 } else {
-                    foreach ($GLOBALS["CUST"]->psTechs() 
-                        as $fld => $name) {
-                        if ($filt["abr"] == $fld 
-                            && isset($ps->{ $fld })) {
-                            $this->addRecFilt(
-                                $fld, 
-                                intVal($ps->{ $fld }), 
-                                $ps->PsID
-                            );
+                    foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
+                        if ($filt["abr"] == $fld && isset($ps->{ $fld })) {
+                            $this->addRecFilt($fld, intVal($ps->{ $fld }), $ps->ps_id);
                         }
                     }
-                    $set = $GLOBALS["SL"]->def
-                        ->getSet('PowerScore Onsite Power Sources');
+                    $set = $GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources');
                     foreach ($set as $def) {
-                        if ($filt["abr"] == 'powr' . $def->DefID 
-                            && sizeof($psTags) > 0) {
+                        if ($filt["abr"] == 'powr' . $def->def_id && sizeof($psTags) > 0) {
                             foreach ($psTags as $tag) {
                                 if ($tag[0] == 'powr') {
-                                    $this->addRecFilt(
-                                        'powr' . $tag[1], 
-                                        1, 
-                                        $ps->PsID
-                                    );
+                                    $this->addRecFilt('powr' . $tag[1], 1, $ps->ps_id);
                                 }
                             }
                         }
                     }
                     foreach ($this->sfLgts as $val => $name) {
-                        if ($filt["abr"] == 'lgt' . $val 
-                            && sizeof($psTags) > 0) {
+                        if ($filt["abr"] == 'lgt' . $val && sizeof($psTags) > 0) {
                             foreach ($psTags as $tag) {
                                 if ($tag[0] == $this->v["filts"][0]) {
-                                    $this->addRecFilt(
-                                        'lgt' . $tag[1], 
-                                        1, 
-                                        $ps->PsID
-                                    );
+                                    $this->addRecFilt('lgt' . $tag[1], 1, $ps->ps_id);
                                 }
                             }
                         }
@@ -392,38 +360,34 @@ class ScoreStats extends SurvStatsGraph
     
     public function addScoreData($ps = null, $area = null)
     {
-        if ($ps && isset($ps->PsID)) {
+        if ($ps && isset($ps->ps_id)) {
             $dataPoints = [
-                ['fac', 'Facility'],
-                ['pro', 'Production'],
-                ['hvc', 'Hvac'],
-                ['lgt', 'Lighting']
+                ['fac', 'facility'],
+                ['pro', 'production'],
+                ['hvc', 'hvac'],
+                ['lgt', 'lighting']
             ];
             foreach ($dataPoints as $type) {
-                if (isset($ps->{ 'PsEffic' . $type[1] . 'Status' })
-                    && intVal($ps->{ 'PsEffic' . $type[1] . 'Status' }) 
-                        == $this->v["psComplete"]) {
-                    $this->addRecDat(
-                        $type[0], 
-                        $ps->{ 'PsEffic' . $type[1] }, 
-                        $ps->PsID
-                    );
+                $fld = 'ps_effic_' . $type[1];
+                if (isset($ps->{ $fld . '_status' })
+                    && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"]) {
+                    $this->addRecDat($type[0], $ps->{ $fld }, $ps->ps_id);
                 }
             }
-            if (isset($ps->PsEfficLightingStatus)
-                && intVal($ps->PsEfficLightingStatus) 
-                    == $this->v["psComplete"]) {
-                foreach (['Mother', 'Clone', 'Veg', 'Flower'] as $type) {
-                    $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                        ->where('PsAreaType', 
-                            $GLOBALS["CUST"]->getAreaTypeFromNick($type))
+            if (isset($ps->ps_effic_lighting_status)
+                && intVal($ps->ps_effic_lighting_status) == $this->v["psComplete"]) {
+                foreach ([ 'Mother', 'Clone', 'Veg', 'Flower' ] as $type) {
+                    $area = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                        ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
                         ->first();
-                    if ($area && isset($area->PsAreaSize) 
-                        && $area->PsAreaSize > 0) {
-                        if (isset($area->PsAreaLightingEffic) 
-                            && $area->PsAreaLightingEffic > 0) {
-                            $this->addRecDat('lgt' . substr($type, 0, 1), 
-                                $area->PsAreaLightingEffic, $ps->PsID);
+                    if ($area && isset($area->ps_area_size) && $area->ps_area_size > 0) {
+                        if (isset($area->ps_area_lighting_effic) 
+                            && $area->ps_area_lighting_effic > 0) {
+                            $this->addRecDat(
+                                'lgt' . substr($type, 0, 1), 
+                                $area->ps_area_lighting_effic, 
+                                $ps->ps_id
+                            );
                         }
                     }
                 }
@@ -443,15 +407,10 @@ class ScoreStats extends SurvStatsGraph
         foreach ($this->filts[$fLet]["val"] as $v => $val) {
             $lab = $this->filts[$fLet]["vlu"][$v];
             if (trim($lnk) != '') {
-                $lab = '<a href="' 
-                    . str_replace('[[val]]', $val, $lnk) 
-                    . '" target="_blank">' . $lab 
-                    . '</a>';
+                $lab = '<a href="' . str_replace('[[val]]', $val, $lnk) 
+                    . '" target="_blank">' . $lab . '</a>';
             }
-            $tbl->addHeaderCol(
-                $lab, 
-                $this->getDatCnt($fLet . $val)
-            );
+            $tbl->addHeaderCol($lab, $this->getDatCnt($fLet . $val));
         }
         foreach ($this->datMap as $dLet => $dat) {
             $tbl->addRowStart($dat["lab"]);
@@ -476,9 +435,7 @@ class ScoreStats extends SurvStatsGraph
     {
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-table', 
-            [
-                "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk)
-            ]
+            [ "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk) ]
         )->render();
     }
     
@@ -486,9 +443,7 @@ class ScoreStats extends SurvStatsGraph
     {
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-excel', 
-            [
-                "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk)
-            ]
+            [ "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk) ]
         )->render();
     }
     
@@ -496,12 +451,8 @@ class ScoreStats extends SurvStatsGraph
     {
         $tbl = new SurvStatsTbl('', [0, 3], [1]);
         foreach ($this->filts as $fLet => $filt) {
-            if (sizeof($only) == 0 
-                || in_array($fLet, $only)) {
-                $tbl->addHeaderCol(
-                    $filt["lab"], 
-                    $this->getDatCnt($fLet . '1')
-                );
+            if (sizeof($only) == 0 || in_array($fLet, $only)) {
+                $tbl->addHeaderCol($filt["lab"], $this->getDatCnt($fLet . '1'));
             }
         }
         foreach ($this->datMap as $dLet => $dat) {
@@ -511,24 +462,14 @@ class ScoreStats extends SurvStatsGraph
                 $this->getDatCntForDatLet('1', $dLet)
             );
             foreach ($this->filts as $fLet => $filt) {
-                if (sizeof($only) == 0 
-                    || in_array($fLet, $only)) {
-                    $cnt = $this->getDatCntForDatLet(
-                        $fLet . '1', 
-                        $dLet
-                    );
-                    $avg = $this->getDatLetAvg(
-                        $dLet, 
-                        $fLet . '1'
-                    );
+                if (sizeof($only) == 0 || in_array($fLet, $only)) {
+                    $cnt = $this->getDatCntForDatLet($fLet . '1', $dLet);
+                    $avg = $this->getDatLetAvg($dLet, $fLet . '1');
                     $tbl->addRowCell($avg, $cnt);
                 }
             }
         }
-        $tbl->rows[0][1] = new SurvStatTh(
-            'Averages', 
-            $this->getDatCntForDatLet('1', 'a')
-        );
+        $tbl->rows[0][1] = new SurvStatTh('Averages', $this->getDatCntForDatLet('1', 'a'));
         return $tbl;
     }
     
@@ -536,9 +477,7 @@ class ScoreStats extends SurvStatsGraph
     {
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-table', 
-            [
-                "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only)
-            ]
+            [ "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only) ]
         )->render();
     }
     
@@ -546,16 +485,13 @@ class ScoreStats extends SurvStatsGraph
     {
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-excel', 
-            [
-                "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only)
-            ]
+            [ "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only) ]
         )->render();
     }
     
     protected function loadLgts($area)
     {
-        $base = '<a href="/dash/compare-powerscores'
-            . '?fltFarm=144&fltLght=' . $area;
+        $base = '<a href="/dash/compare-powerscores?fltFarm=144&fltLght=' . $area;
         $end = '" target="_blank">';
         $this->sfLgts = [
             168 => $base . '-168' . $end . 'HID (double-ended HPS)</a>',

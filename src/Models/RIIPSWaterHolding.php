@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSWaterHolding extends Model
 {
-    protected $table      = 'RII_PSWaterHolding';
-    protected $primaryKey = 'PsWtrHldID';
+    protected $table      = 'rii_ps_water_holding';
+    protected $primaryKey = 'ps_wtr_hld_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsWtrHldPSID', 
-		'PsWtrHldHolding', 
+		'ps_wtr_hld_psid', 
+		'ps_wtr_hld_holding', 
     ];
     
     // END SurvLoop auto-generated portion of Model

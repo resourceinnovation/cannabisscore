@@ -5,9 +5,10 @@
 <h2 class="slBlueDark">Competitive Performance Dashboard for Megalumens</h2>
 <table class="table table-striped w100" border="0">
     <tbody><tr class="brdBot">
-             <th>
+        <th>
         
-         </th>              <th class="brdRgt">
+        </th>
+        <th class="brdRgt">
         Averages<sub class="slGrey">76</sub>
          </th>              <th>
         <b>Your Customers</b><sub class="slGrey">23</sub>

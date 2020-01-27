@@ -66,9 +66,9 @@ class ScoreReportStats
         ];
         $this->v["sfLgts"] = [ [], [] ];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Light Types') as $l) {
-            $this->v["sfLgts"][0][] = $l->DefID;
+            $this->v["sfLgts"][0][] = $l->def_id;
             $this->v["sfLgts"][1][] = str_replace('single-ended ', '1x', 
-                str_replace('double-ended ', '2x', $l->DefValue));
+                str_replace('double-ended ', '2x', $l->def_value));
         }
         $this->v["sfLgts"][0][] = 2;
         $this->v["sfLgts"][1][] = 'No Lights';
@@ -86,8 +86,8 @@ class ScoreReportStats
         $flowerSize = 0;
         if ($areas && $areas->isNotEmpty()) {
             foreach ($areas as $a) {
-                if ($a->PsAreaType == $this->v["areaTypes"]["Flower"]) {
-                    $flowerSize = $a->PsAreaSize;
+                if ($a->ps_area_type == $this->v["areaTypes"]["Flower"]) {
+                    $flowerSize = $a->ps_area_size;
                 }
             }
         }

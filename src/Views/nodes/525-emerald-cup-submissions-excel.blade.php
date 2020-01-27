@@ -24,31 +24,32 @@
 </tr>
 @forelse ($cupScores as $i => $s)
     <tr>
-    <td>#{{ $s->PsID }}</td>
-    <td> @if (isset($s->PsName) && trim($s->PsName) != '') {{ $s->PsName }} @endif </td>
-    <td> @if (isset($s->PsEmail) && trim($s->PsEmail) != '') {{ $s->PsEmail }} @endif </td>
-    <td>{{ $s->PsCounty }} {{ $s->PsState }}</td>
+    <td>#{{ $s->ps_id }}</td>
+    <td> @if (isset($s->ps_name) && trim($s->ps_name) != '') {{ $s->ps_name }} @endif </td>
+    <td> @if (isset($s->ps_email) && trim($s->ps_email) != '') {{ $s->ps_email }} @endif </td>
+    <td>{{ $s->ps_county }} {{ $s->ps_state }}</td>
     <td>{{ date("n/j/Y", strtotime($s->created_at)) }}</td>
-    <td> @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete')) Yes @else No @endif </td>
-    <td> @if (in_array($s->PsID, $cultClassicIds)) Yes @endif </td>
-    <td> @if (in_array($s->PsID, $emeraldIds)) Yes @endif </td>
-    @if ($s->PsStatus == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
-        <td>{{ round($s->PsEfficOverall) }}%</td>
-        <td>{{ round($s->PsRnkFacility) }}%</td>
-        <td>{{ round($s->PsRnkProduction) }}%</td>
-        <td>{{ round($s->PsRnkLighting) }}%</td>
-        <td>{{ round($s->PsRnkHVAC) }}%</td>
-        <td>{{ $s->PsEfficFacility }}</td>
-        <td>{{ $s->PsEfficProduction }}</td>
-        <td>{{ $s->PsEfficLighting }}</td>
-        <td>{{ $s->PsEfficHvac }}</td>
-        <td>{{ number_format($s->PsGrams) }}</td>
-        <td>{{ number_format($s->PsKWH) }}</td>
-        <td>{{ number_format($s->PsTotalSize) }}</td>
+    <td> @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete')) Yes 
+        @else No @endif </td>
+    <td> @if (in_array($s->ps_id, $cultClassicIds)) Yes @endif </td>
+    <td> @if (in_array($s->ps_id, $emeraldIds)) Yes @endif </td>
+    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
+        <td>{{ round($s->ps_effic_overall) }}%</td>
+        <td>{{ round($s->ps_rnk_facility) }}%</td>
+        <td>{{ round($s->ps_rnk_production) }}%</td>
+        <td>{{ round($s->ps_rnk_lighting) }}%</td>
+        <td>{{ round($s->ps_rnk_hvac) }}%</td>
+        <td>{{ $s->ps_effic_facility }}</td>
+        <td>{{ $s->ps_effic_production }}</td>
+        <td>{{ $s->ps_effic_lighting }}</td>
+        <td>{{ $s->ps_effic_hvac }}</td>
+        <td>{{ number_format($s->ps_grams) }}</td>
+        <td>{{ number_format($s->ps_kwh) }}</td>
+        <td>{{ number_format($s->ps_total_size) }}</td>
     @else 
-        <td colspan=12 >{!! $GLOBALS["SL"]->getNodePageName($s->PsSubmissionProgress) !!}</td>
+        <td colspan=12 >{!! $GLOBALS["SL"]->getNodePageName($s->ps_submission_progress) !!}</td>
     @endif
-    <td>http://cannabispowerscore.org/calculated/u-{{ $s->PsID }}</td>
+    <td>http://cannabispowerscore.org/calculated/u-{{ $s->ps_id }}</td>
     </tr>
 @empty
     <tr><td colspan=8 ><i>No records found.</i></td></tr>

@@ -5,9 +5,12 @@
         <div class="col-8">
             <a href="/dash/compare-powerscores"><h1 class="slBlueDark">Compare All Lighting</h1></a>
         </div><div class="col-4 taR"><div class="mTn10 pB10">
-        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) || !$GLOBALS["SL"]->x["partnerVersion"])
-            <a class="btn btn-secondary mT20" href="/dash/compare-powerscores?lighting=1&srt={{ $sort[0] }}&srta={{ 
-                $sort[1] }}{{ $urlFlts }}&excel=1"><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) 
+            || !$GLOBALS["SL"]->x["partnerVersion"])
+            <a class="btn btn-secondary mT20" 
+                href="/dash/compare-powerscores?lighting=1&srt={{ 
+                $sort[0] }}&srta={{ $sort[1] }}{{ $urlFlts }}&excel=1"
+                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
         @endif
         </div></div>
     </div>
@@ -22,69 +25,84 @@
 @foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $i => $area)
     @if (!$GLOBALS["SL"]->REQ->has('excel'))
         <div class="slCard nodeWrap">
-        <h2 class="slBlueDark">{{ $area->DefValue }} ({{ sizeof($allights[$area->DefID]) }})</h2>
+        <h2 class="slBlueDark">{{ $area->def_value }} ({{ sizeof($allights[$area->def_id]) }})</h2>
         <table border=0 class="table w100 bgWht">
-    @else <tr><td colspan=5>{{ $area->DefValue }} ({{ sizeof($allights[$area->DefID]) }})</td></tr>
+    @else <tr><td colspan=5>{{ $area->def_value }} ({{ sizeof($allights[$area->def_id]) }})</td></tr>
     @endif
     <tr>
     <th>
-        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Score ID#',
-            "srtVal" => 'PsID',
-            "sort"   => $sort
-            ])->render() !!}
+        {!! view(
+            'vendor.survloop.reports.inc-tbl-head-sort', 
+            [
+                "eng"    => 'Score ID#',
+                "srtVal" => 'psid',
+                "sort"   => $sort
+            ]
+        )->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+        {!! view(
+            'vendor.survloop.reports.inc-tbl-head-sort', 
+            [
             "eng"    => 'Light Types',
             "srtVal" => 'type',
             "sort"   => $sort
-            ])->render() !!}
+            ]
+        )->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Watts / SF',
-            "srtVal" => 'wsft',
-            "sort"   => $sort
-            ])->render() !!}
+        {!! view(
+            'vendor.survloop.reports.inc-tbl-head-sort', 
+            [
+                "eng"    => 'Watts / SF',
+                "srtVal" => 'wsft',
+                "sort"   => $sort
+            ]
+        )->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Days',
-            "srtVal" => 'days',
-            "sort"   => $sort
-            ])->render() !!}
+        {!! view(
+            'vendor.survloop.reports.inc-tbl-head-sort', 
+            [
+                "eng"    => 'Days',
+                "srtVal" => 'days',
+                "sort"   => $sort
+            ]
+        )->render() !!}
     </th>
     <th>
-        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Hours',
-            "srtVal" => 'hour',
-            "sort"   => $sort
-            ])->render() !!}
+        {!! view(
+            'vendor.survloop.reports.inc-tbl-head-sort', 
+            [
+                "eng"    => 'Hours',
+                "srtVal" => 'hour',
+                "sort"   => $sort
+            ]
+        )->render() !!}
     </th>
     </tr>
     <!---
     <tr>
         <th>Averages</th>
         <td>&nbsp;</td>
-        <th>{{ round($psAvg->PsEfficOverall) }}%</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficFacility, 3) }}</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficProduction, 3) }}</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficLighting, 3) }}</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->PsEfficHvac, 3) }}</th>
+        <th>{{ round($psAvg->ps_effic_overall) }}%</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</th>
         @if (!$isExcel) <th colspan=2 ><span class="mR10"><nbor> @else <th> @endif
-            {{ number_format($psAvg->PsGrams) }} g
+            {{ number_format($psAvg->ps_grams) }} g
             @if (!$isExcel) </nobr></span><span class="mR10"><nbor> @else </th><th> @endif
-            {{ number_format($psAvg->PsKWH) }} kWh
+            {{ number_format($psAvg->ps_kwh) }} kWh
             @if (!$isExcel) </nbor></span><nbor> @else </th><th> @endif
-            {{ number_format($psAvg->PsTotalSize) }} sq ft
+            {{ number_format($psAvg->ps_total_size) }} sq ft
             @if (!$isExcel) </nbor> @endif
         </th>
     </tr>
     --->
-    @if (isset($allights[$area->DefID]) && sizeof($allights[$area->DefID]) > 0)
+    @if (isset($allights[$area->def_id]) && sizeof($allights[$area->def_id]) > 0)
         <?php $cnt = 0; ?>
-        @forelse ($allights[$area->DefID] as $psid => $ps)
+        @forelse ($allights[$area->def_id] as $psid => $ps)
             <tr @if ($cnt%2 == 0) class="row2" @endif >
             <td><a href="/calculated/u-{{ $psid }}" target="_blank">#{{ $psid }}</a></td>
             <td>{{ $ps["type"] }}</td>

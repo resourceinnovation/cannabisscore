@@ -34,12 +34,13 @@ class ScorePrintReport extends ScoreCalcs
             'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
             $this->searcher->v
         )->render();
+        $ret = view(
+            'vendor.cannabisscore.inc-filter-powerscores', 
+            $this->searcher->v
+        )->render();
         return '<div id="scoreRankFiltWrap">'
             . '<h5 class="mT0">Compare to other farms</h5>'
-            . '<div class="pT5"></div>' . view(
-                'vendor.cannabisscore.inc-filter-powerscores', 
-                $this->searcher->v
-            )->render() . '</div>';
+            . '<div class="pT5"></div>' . $ret . '</div>';
     }
 
     protected function printReportForCompetition($nID)
@@ -48,12 +49,12 @@ class ScorePrintReport extends ScoreCalcs
             $deetVal = '';
             foreach ($this->sessData->dataSets["PSForCup"] 
                 as $i => $cup) {
-                if (isset($cup->PsCupCupID) 
-                    && intVal($cup->PsCupCupID) > 0) {
+                if (isset($cup->ps_cup_cup_id) 
+                    && intVal($cup->ps_cup_cup_id) > 0) {
                     $deetVal .= (($i > 0) ? ', ' : '') 
                         . $GLOBALS["SL"]->def->getVal(
                             'PowerScore Competitions', 
-                            $cup->PsCupCupID
+                            $cup->ps_cup_cup_id
                         );
                 }
             }
@@ -64,10 +65,10 @@ class ScorePrintReport extends ScoreCalcs
 
     protected function printReportGrowingYear($nID)
     {
-        if (isset($this->sessData->dataSets["PowerScore"])) {
-            $ps = $this->sessData->dataSets["PowerScore"][0];
-            if (isset($ps->PsYear)) {
-                return [ 'Growing Year', $ps->PsYear, $nID ];
+        if (isset($this->sessData->dataSets["powerscore"])) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            if (isset($ps->ps_year)) {
+                return [ 'Growing Year', $ps->ps_year, $nID ];
             }
         }
         return [];
@@ -76,10 +77,11 @@ class ScorePrintReport extends ScoreCalcs
     protected function printReportUtilRef($nID)
     {
         $this->prepUtilityRefTitle();
-        return view(
+        $ret = view(
             'vendor.cannabisscore.nodes.508-utility-referral-title', 
             $this->v
         )->render();
+        return $ret;
     }
     
     public function customPrint490($nID)
@@ -100,7 +102,7 @@ class ScorePrintReport extends ScoreCalcs
         } else {
             $ret .= $this->printReport490();
         }
-        return $ret;
+        return ' <!-- customPrint490.start --> ' . $ret . ' <!-- customPrint490.end --> ';
     }
     
     public function printReport490()
@@ -115,16 +117,25 @@ class ScorePrintReport extends ScoreCalcs
         $this->getAllReportCalcs();
         if (!$GLOBALS["SL"]->REQ->has('fltFarm')) {
             $this->searcher->v["fltFarm"] = $this->sessData
-                ->dataSets["PowerScore"][0]->PsCharacterize;
+                ->dataSets["powerscore"][0]->ps_characterize;
             $this->searcher->searchFiltsURLXtra();
         }
         $this->searcher->v["nID"] = 490;
-        $this->v["isPast"] = ($this->sessData->dataSets["PowerScore"][0]->PsTimeType 
+        $this->v["isPast"] = ($this->sessData->dataSets["powerscore"][0]->ps_time_type 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        return view(
+
+        $GLOBALS["SL"]->pageCSS .= view(
+            'vendor.cannabisscore.nodes.490-report-calculations-css'
+        )->render();
+        $GLOBALS["SL"]->pageJAVA .= view(
+            'vendor.cannabisscore.nodes.490-report-calculations-js',
+            $this->v
+        )->render();
+        $ret = view(
             'vendor.cannabisscore.nodes.490-report-calculations', 
             $this->v
         )->render();
+        return ' <!-- printReport490.start --> ' . $ret . ' <!-- printReport490.end --> ';
     }
 
 

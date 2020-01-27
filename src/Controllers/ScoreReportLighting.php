@@ -67,15 +67,15 @@ class ScoreReportLighting extends ScoreReportStats
         }
 
         $this->initSearcher(1);
-        $qry = "->where('PsEfficLighting', '>', 0.000001)"
-            . "->where('PsEfficLightingStatus', '=', " 
+        $qry = "->where('ps_effic_lighting', '>', 0.000001)"
+            . "->where('ps_effic_lighting_status', '=', " 
             . $this->v["psComplete"] . ")";
         $this->searcher->loadAllScoresPublic($qry);
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->whereIn('PsAreaType', [
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->whereIn('ps_area_type', [
                         $this->v["areaTypes"]["Flower"],
                         $this->v["areaTypes"]["Veg"],
                         $this->v["areaTypes"]["Clone"],
@@ -85,7 +85,7 @@ class ScoreReportLighting extends ScoreReportStats
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
                         $set = "statScorLgt";
-                        switch ($area->PsAreaType) {
+                        switch ($area->ps_area_type) {
                             case $this->v["areaTypes"]["Flower"]:
                                 $set .= "F"; break;
                             case $this->v["areaTypes"]["Veg"]:
@@ -95,21 +95,21 @@ class ScoreReportLighting extends ScoreReportStats
                             case $this->v["areaTypes"]["Mother"]:
                                 $set .= "M"; break;
                         }
-                        $set .= $ps->PsCharacterize;
+                        $set .= $ps->ps_characterize;
                         if (isset($this->v["scoreSets"][$set])) {
                             $lgts = RIIPSLightTypes::where(
-                                'PsLgTypAreaID', $area->PsAreaID)
+                                'ps_lg_typ_area_id', $area->ps_area_id)
                                 ->get();
                             if ($lgts->isNotEmpty()) {
                                 foreach ($lgts as $lgt) {
-                                    if (isset($lgt->PsLgTypLight) 
-                                        && intVal($lgt->PsLgTypLight) > 0
-                                        && isset($lgt->PsLgTypCount) 
-                                        && intVal($lgt->PsLgTypCount) > 0) {
+                                    if (isset($lgt->ps_lg_typ_light) 
+                                        && intVal($lgt->ps_lg_typ_light) > 0
+                                        && isset($lgt->ps_lg_typ_count) 
+                                        && intVal($lgt->ps_lg_typ_count) > 0) {
                                         $this->v["scoreSets"][$set]->addRecFilt(
-                                            'lgt' . $lgt->PsLgTypLight, 
+                                            'lgt' . $lgt->ps_lg_typ_light, 
                                             1, 
-                                            $ps->PsID
+                                            $ps->ps_id
                                         );
                                     }
                                 }
@@ -154,8 +154,8 @@ class ScoreReportLighting extends ScoreReportStats
         $this->initClimateFilts();
         $this->initSearcher(1); 
         $this->searcher->loadAllScoresPublic(
-            "->where('PsEfficLighting', '>', 0.00001)"
-            . "->where('PsEfficLightingStatus', '=', " 
+            "->where('ps_effic_lighting', '>', 0.00001)"
+            . "->where('ps_effic_lighting_status', '=', " 
             . $this->v["psComplete"] . ")"
         );
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
@@ -164,59 +164,59 @@ class ScoreReportLighting extends ScoreReportStats
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
 
                 $row = [
-                    '<a href="/calculated/u-' . $ps->PsID . '" target="_blank">#'
-                        . $ps->PsID . '</a>',
-                    $ps->PsState,
+                    '<a href="/calculated/u-' . $ps->ps_id . '" target="_blank">#'
+                        . $ps->ps_id . '</a>',
+                    $ps->ps_state,
                     str_replace(
                         'Greenhouse/Hybrid/Mixed Light', 'Greenhouse', 
-                        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->PsCharacterize)
+                        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)
                     ),
-                    (($ps->PsLightingError > 0) ? '<span class="red">' 
-                        . $ps->PsLightingError . '</span>'
+                    (($ps->ps_lighting_error > 0) ? '<span class="red">' 
+                        . $ps->ps_lighting_error . '</span>'
                         : '<span class="slGrey">-</span>'),
-                    round($ps->PsEfficOverSimilar) 
-                        . $GLOBALS["SL"]->numSupscript(round($ps->PsEfficOverSimilar)),
-                    (($ps->PsEfficLighting > 0.00001) 
-                        ? number_format($ps->PsEfficLighting) : $blank)
+                    round($ps->ps_effic_over_similar) 
+                        . $GLOBALS["SL"]->numSupscript(round($ps->ps_effic_over_similar)),
+                    (($ps->ps_effic_lighting > 0.00001) 
+                        ? number_format($ps->ps_effic_lighting) : $blank)
                 ];
                 $totSqFt = 0;
                 $areaCols = $areaSqFtEffic[] = $areaSqFtPercs[] = $areaSqFtWeighted[] = [];
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', '>', 0)
-                    ->where('PsAreaType', 'NOT LIKE', 163)
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->where('ps_area_type', '>', 0)
+                    ->where('ps_area_type', 'NOT LIKE', 163)
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        $totSqFt += intVal($area->PsAreaSize);
-                        $areaCols[$area->PsAreaType] = [
-                            (($area->PsAreaHasStage == 1) ? 'Y' : 'N'),
-                            (($area->PsAreaLgtArtif == 1) ? 'Y' : 'N'),
-                            $area->PsAreaSize,
-                            number_format($area->PsAreaCalcWatts),
-                            number_format($area->PsAreaSqFtPerFix2),
+                        $totSqFt += intVal($area->ps_area_size);
+                        $areaCols[$area->ps_area_type] = [
+                            (($area->ps_area_has_stage == 1) ? 'Y' : 'N'),
+                            (($area->ps_area_lgt_artif == 1) ? 'Y' : 'N'),
+                            $area->ps_area_size,
+                            number_format($area->ps_area_calc_watts),
+                            number_format($area->ps_area_sq_ft_per_fix2),
                             '',
                             '',
                             '',
                             ''
                         ];
-                        $areaSqFtEffic[$area->PsAreaType] = $area->PsAreaLightingEffic;
-                        $lgts = RIIPSLightTypes::where('PsLgTypAreaID', $area->PsAreaID)
+                        $areaSqFtEffic[$area->ps_area_type] = $area->ps_area_lighting_effic;
+                        $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->ps_area_id)
                             ->get();
                         if ($lgts->isNotEmpty()) {
                             $lgtInd = 0;
                             foreach ($lgts as $i => $lgt) {
-                                if ($lgtInd < 3 && isset($lgt->PsLgTypCount) 
-                                    && intVal($lgt->PsLgTypCount) > 0 
-                                    && isset($lgt->PsLgTypWattage) 
-                                    && intVal($lgt->PsLgTypWattage) > 0) {
-                                    $areaCols[$area->PsAreaType][(5+$lgtInd)] 
-                                        .= '<nobr>' . $lgt->PsLgTypCount . ' * ' 
-                                        . number_format($lgt->PsLgTypWattage) 
+                                if ($lgtInd < 3 && isset($lgt->ps_lg_typ_count) 
+                                    && intVal($lgt->ps_lg_typ_count) > 0 
+                                    && isset($lgt->ps_lg_typ_wattage) 
+                                    && intVal($lgt->ps_lg_typ_wattage) > 0) {
+                                    $areaCols[$area->ps_area_type][(5+$lgtInd)] 
+                                        .= '<nobr>' . $lgt->ps_lg_typ_count . ' * ' 
+                                        . number_format($lgt->ps_lg_typ_wattage) 
                                         . '<span class="slGrey fPerc66">W</span> ' 
-                                        . ((intVal($lgt->PsLgTypLight) > 0) 
+                                        . ((intVal($lgt->ps_lg_typ_light) > 0) 
                                             ? $GLOBALS["SL"]->def->getVal(
                                                 'PowerScore Light Types', 
-                                                $lgt->PsLgTypLight
+                                                $lgt->ps_lg_typ_light
                                             ) : '') 
                                         . '</nobr>';
                                     $lgtInd++;
@@ -250,7 +250,7 @@ class ScoreReportLighting extends ScoreReportStats
                             if ($a == 3) {
                                 $row[] = $GLOBALS["SL"]->def->getVal(
                                     'PowerScore Mother Location', 
-                                    $ps->PsMotherLoc
+                                    $ps->ps_mother_loc
                                 );
                             }
                             $row[] = number_format($col);

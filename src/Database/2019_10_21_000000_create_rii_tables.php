@@ -13,37 +13,37 @@ class RIICreateTables extends Migration
      */
     public function up()
     {
-    	Schema::create('RII_PowerScore', function(Blueprint $table)
+    	Schema::create('rii_powerscore', function(Blueprint $table)
 		{
-			$table->increments('PsID');
-			$table->integer('PsUserID')->unsigned()->nullable();
-			$table->integer('PsStatus')->unsigned()->nullable();
+			$table->increments('ps_id');
+			$table->integer('ps_user_id')->unsigned()->nullable();
+			$table->integer('ps_status')->unsigned()->nullable();
 			$table->boolean('PsIsPro')->default('0')->nullable();
-			$table->integer('PsTimeType')->unsigned()->nullable();
-			$table->integer('PsYear')->nullable();
+			$table->integer('ps_time_type')->unsigned()->nullable();
+			$table->integer('ps_year')->nullable();
 			$table->integer('PsPrivacy')->unsigned()->nullable();
 			$table->string('PsZipCode', 10)->nullable();
 			$table->string('PsCounty', 255)->nullable();
-			$table->string('PsState', 255)->nullable();
+			$table->string('ps_state', 255)->nullable();
 			$table->string('PsCountry', 100)->nullable();
-			$table->string('PsAshrae', 10)->nullable();
+			$table->string('ps_ashrae', 10)->nullable();
 			$table->string('PsClimateLabel', 12)->nullable();
-			$table->string('PsEmail')->nullable();
-			$table->string('PsName')->nullable();
-			$table->integer('PsCharacterize')->unsigned()->nullable();
-			$table->double('PsEfficOverall')->nullable();
-			$table->double('PsEfficOverSimilar')->nullable();
-			$table->double('PsEfficFacility')->nullable();
-			$table->double('PsEfficProduction')->nullable();
-			$table->double('PsEfficLighting')->nullable();
-			$table->double('PsEfficHvac')->nullable();
+			$table->string('ps_email')->nullable();
+			$table->string('ps_name')->nullable();
+			$table->integer('ps_characterize')->unsigned()->nullable();
+			$table->double('ps_effic_overall')->nullable();
+			$table->double('ps_effic_over_similar')->nullable();
+			$table->double('ps_effic_facility')->nullable();
+			$table->double('ps_effic_production')->nullable();
+			$table->double('ps_effic_lighting')->nullable();
+			$table->double('ps_effic_hvac')->nullable();
 			$table->double('PsGrams')->nullable();
 			$table->double('PsKWH')->nullable();
 			$table->double('PsTotalSize')->nullable();
-			$table->double('PsTotalCanopySize')->nullable();
-			$table->integer('PsHavestsPerYear')->nullable();
-			$table->char('PsHarvestBatch', 1)->nullable();
-			$table->boolean('PsHasWaterPump')->nullable();
+			$table->double('ps_total_canopy_size')->nullable();
+			$table->integer('ps_havests_per_year')->nullable();
+			$table->char('ps_harvest_batch', 1)->nullable();
+			$table->boolean('ps_has_water_pump')->nullable();
 			$table->boolean('PsCuresIndoor')->default('0')->nullable();
 			$table->boolean('PsCuresOutdoor')->default('0')->nullable();
 			$table->boolean('PsCuresOffsite')->default('0')->nullable();
@@ -51,27 +51,27 @@ class RIICreateTables extends Migration
 			$table->boolean('PsSourceUtility')->nullable();
 			$table->boolean('PsSourceRenew')->nullable();
 			$table->string('PsOtherPower')->nullable();
-			$table->integer('PsMotherLoc')->unsigned()->nullable();
+			$table->integer('ps_mother_loc')->unsigned()->nullable();
 			$table->boolean('PsProcessingOnsite')->nullable();
-			$table->string('PsSourceUtilityOther')->nullable();
-			$table->boolean('PsVerticalStack')->nullable();
-			$table->boolean('PsUploadEnergyBills')->nullable();
+			$table->string('ps_source_utility_other')->nullable();
+			$table->boolean('ps_vertical_stack')->nullable();
+			$table->boolean('ps_upload_energy_bills')->nullable();
 			$table->boolean('PsEnergyNonFarm')->nullable();
 			$table->integer('PsEnergyNonFarmPerc')->nullable();
 			$table->longText('PsHvacOther')->nullable();
-			$table->boolean('PsHeatWater')->nullable();
+			$table->boolean('ps_heat_water')->nullable();
 			$table->boolean('PsExtractingOnsite')->nullable();
-			$table->boolean('PsControls')->nullable();
-			$table->boolean('PsControlsAuto')->nullable();
-			$table->string('PsIPaddy')->nullable();
-			$table->string('PsUniqueStr')->nullable();
+			$table->boolean('ps_controls')->nullable();
+			$table->boolean('ps_controls_auto')->nullable();
+			$table->string('ps_ip_addy')->nullable();
+			$table->string('ps_unique_str')->nullable();
 			$table->string('PsTreeVersion')->nullable();
 			$table->string('PsVersionAB')->nullable();
-			$table->string('PsIsMobile')->nullable();
+			$table->string('ps_is_mobile')->nullable();
 			$table->integer('PsSubmissionProgress')->nullable();
 			$table->longText('PsNotes')->nullable();
 			$table->longText('PsWaterInnovation')->nullable();
-			$table->double('PsGreenWasteLbs')->nullable();
+			$table->double('ps_green_waste_lbs')->nullable();
 			$table->boolean('PsGreenWasteMixed')->nullable();
 			$table->string('PsComplianceWasteTrack')->nullable();
 			$table->boolean('PsGramsAreWetWeight')->nullable();
@@ -79,16 +79,16 @@ class RIICreateTables extends Migration
 			$table->integer('PsCrop')->unsigned()->default('481')->nullable();
 			$table->string('PsCropOther')->nullable();
 			$table->integer('PsOnsiteType')->unsigned()->nullable();
-			$table->double('PsEfficWater')->nullable();
-			$table->double('PsEfficWaste')->nullable();
+			$table->double('ps_effic_water')->nullable();
+			$table->double('ps_effic_waste')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSRankings', function(Blueprint $table)
+		Schema::create('rii_ps_rankings', function(Blueprint $table)
 		{
-			$table->increments('PsRnkID');
-			$table->integer('PsRnkPSID')->unsigned()->nullable();
+			$table->increments('ps_rnk_id');
+			$table->integer('ps_rnk_psid')->unsigned()->nullable();
 			$table->integer('PsRnkManuID')->unsigned()->nullable();
-			$table->string('PsRnkFilters')->nullable();
+			$table->string('ps_rnk_filters')->nullable();
 			$table->double('PsRnkOverall')->nullable();
 			$table->double('PsRnkOverallAvg')->nullable();
 			$table->double('PsRnkFacility')->nullable();
@@ -97,7 +97,7 @@ class RIICreateTables extends Migration
 			$table->double('PsRnkLighting')->nullable();
 			$table->double('PsRnkWater')->nullable();
 			$table->double('PsRnkWaste')->nullable();
-			$table->integer('PsRnkTotCnt')->default('0')->nullable();
+			$table->integer('ps_rnk_tot_cnt')->default('0')->nullable();
 			$table->integer('PsRnkFacilityCnt')->default('0')->nullable();
 			$table->integer('PsRnkProductionCnt')->default('0')->nullable();
 			$table->integer('PsRnkHVACCnt')->default('0')->nullable();
@@ -110,7 +110,7 @@ class RIICreateTables extends Migration
 		{
 			$table->increments('PsLicID');
 			$table->integer('PsLicPSID')->unsigned()->nullable();
-			$table->integer('PsLicLicense')->unsigned()->nullable();
+			$table->integer('ps_lic_license')->unsigned()->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSFarm', function(Blueprint $table)
@@ -123,8 +123,8 @@ class RIICreateTables extends Migration
 		Schema::create('RII_PSMonthly', function(Blueprint $table)
 		{
 			$table->increments('PsMonthID');
-			$table->integer('PsMonthPSID')->unsigned()->nullable();
-			$table->integer('PsMonthMonth')->nullable();
+			$table->integer('ps_month_psid')->unsigned()->nullable();
+			$table->integer('ps_month_month')->nullable();
 			$table->double('PsMonthKWH1')->nullable();
 			$table->double('PsMonthGrams')->nullable();
 			$table->double('PsMonthWasteLbs')->nullable();
@@ -135,14 +135,14 @@ class RIICreateTables extends Migration
 		{
 			$table->increments('PsUtLnkID');
 			$table->integer('PsUtLnkPSID')->unsigned()->nullable();
-			$table->integer('PsUtLnkUtilityID')->unsigned()->nullable();
+			$table->integer('ps_ut_lnk_utility_id')->unsigned()->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSRenewables', function(Blueprint $table)
 		{
 			$table->increments('PsRnwID');
-			$table->integer('PsRnwPSID')->unsigned()->nullable();
-			$table->integer('PsRnwRenewable')->unsigned()->nullable();
+			$table->integer('ps_rnw_psid')->unsigned()->nullable();
+			$table->integer('ps_rnw_renewable')->unsigned()->nullable();
 			$table->integer('PsRnwLoadPercent')->nullable();
 			$table->string('PsRnwKWH')->nullable();
 			$table->timestamps();
@@ -154,48 +154,48 @@ class RIICreateTables extends Migration
 			$table->integer('PsOthPwrSource')->unsigned()->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSAreas', function(Blueprint $table)
+		Schema::create('rii_ps_areas', function(Blueprint $table)
 		{
-			$table->increments('PsAreaID');
-			$table->integer('PsAreaPSID')->unsigned()->nullable();
-			$table->integer('PsAreaType')->unsigned()->nullable();
-			$table->boolean('PsAreaHasStage')->nullable();
-			$table->double('PsAreaSize')->nullable();
-			$table->integer('PsAreaDaysCycle')->nullable();
-			$table->boolean('PsAreaLgtSun')->nullable();
-			$table->boolean('PsAreaLgtDep')->nullable();
-			$table->boolean('PsAreaLgtArtif')->nullable();
+			$table->increments('ps_area_id');
+			$table->integer('ps_area_psid')->unsigned()->nullable();
+			$table->integer('ps_area_type')->unsigned()->nullable();
+			$table->boolean('ps_area_has_stage')->nullable();
+			$table->double('ps_area_size')->nullable();
+			$table->integer('ps_area_days_cycle')->nullable();
+			$table->boolean('ps_area_lgt_sun')->nullable();
+			$table->boolean('ps_area_lgt_dep')->nullable();
+			$table->boolean('ps_area_lgt_artif')->nullable();
 			$table->integer('PsAreaTotalLightWatts')->nullable();
-			$table->double('PsAreaLightingEffic')->nullable();
+			$table->double('ps_area_lighting_effic')->nullable();
 			$table->boolean('PsAreaVertStack')->nullable();
-			$table->integer('PsAreaHvacType')->unsigned()->nullable();
+			$table->integer('ps_area_hvac_type')->unsigned()->nullable();
 			$table->longText('PsAreaHvacOther')->nullable();
-			$table->double('PsAreaHvacEffic')->nullable();
-			$table->double('PsAreaCalcWatts')->nullable();
-			$table->double('PsAreaCalcSize')->nullable();
+			$table->double('ps_area_hvac_effic')->nullable();
+			$table->double('ps_area_calc_watts')->nullable();
+			$table->double('ps_area_calc_size')->nullable();
 			$table->integer('PsAreaLgtPattern')->unsigned()->nullable();
-			$table->double('PsAreaLgtFixSize1')->nullable();
-			$table->double('PsAreaLgtFixSize2')->nullable();
-			$table->double('PsAreaGallons')->nullable();
+			$table->double('ps_area_lgt_fix_size1')->nullable();
+			$table->double('ps_area_lgt_fix_size2')->nullable();
+			$table->double('ps_area_gallons')->nullable();
 			$table->integer('PsAreaWaterFreq')->unsigned()->nullable();
 			$table->integer('PsAreaWateringMethod')->unsigned()->nullable();
-			$table->double('PsAreaWaterEffic')->nullable();
+			$table->double('ps_area_water_effic')->nullable();
 			$table->integer('PsAreaCommissioning')->unsigned()->nullable();
 			$table->integer('PsAreaTemperature')->nullable();
 			$table->integer('PsAreaHumidity')->nullable();
-			$table->double('PsAreaSqFtPerFix1')->nullable();
-			$table->double('PsAreaSqFtPerFix2')->nullable();
+			$table->double('ps_area_sq_ft_per_fix1')->nullable();
+			$table->double('ps_area_sq_ft_per_fix2')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSAreasBlds', function(Blueprint $table)
+		Schema::create('rii_ps_areasBlds', function(Blueprint $table)
 		{
 			$table->increments('PsArBldID');
 			$table->integer('PsArBldAreaID')->unsigned()->nullable();
-			$table->integer('PsArBldType')->unsigned()->nullable();
-			$table->string('PsArBldTypeOther')->nullable();
+			$table->integer('ps_ar_bld_type')->unsigned()->nullable();
+			$table->string('ps_ar_bld_type_other')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSAreasConstr', function(Blueprint $table)
+		Schema::create('rii_ps_areasConstr', function(Blueprint $table)
 		{
 			$table->increments('PsArCnsID');
 			$table->integer('PsArCnsBldID')->unsigned()->nullable();
@@ -203,23 +203,23 @@ class RIICreateTables extends Migration
 			$table->string('PsArCnsTypeOther')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSAreasGreen', function(Blueprint $table)
+		Schema::create('rii_ps_areasGreen', function(Blueprint $table)
 		{
 			$table->increments('PsArGrnID');
 			$table->integer('PsArGrnAreaID')->unsigned()->nullable();
 			$table->integer('PsArGrnType')->unsigned()->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSLightTypes', function(Blueprint $table)
+		Schema::create('rii_ps_light_types', function(Blueprint $table)
 		{
 			$table->increments('PsLgTypID');
-			$table->integer('PsLgTypAreaID')->unsigned()->nullable();
-			$table->integer('PsLgTypLight')->unsigned()->nullable();
-			$table->integer('PsLgTypCount')->nullable();
-			$table->double('PsLgTypWattage')->nullable();
-			$table->double('PsLgTypHours')->nullable();
-			$table->string('PsLgTypMake')->nullable();
-			$table->string('PsLgTypModel')->nullable();
+			$table->integer('ps_lg_typ_area_id')->unsigned()->nullable();
+			$table->integer('ps_lg_typ_light')->unsigned()->nullable();
+			$table->integer('ps_lg_typ_count')->nullable();
+			$table->double('ps_lg_typ_wattage')->nullable();
+			$table->double('ps_lg_typ_hours')->nullable();
+			$table->string('ps_lg_typ_make')->nullable();
+			$table->string('ps_lg_typ_model')->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSWaterSources', function(Blueprint $table)
@@ -285,11 +285,11 @@ class RIICreateTables extends Migration
 			$table->integer('PsWstPrcsMethod')->unsigned()->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSForCup', function(Blueprint $table)
+		Schema::create('rii_ps_for_cup', function(Blueprint $table)
 		{
 			$table->increments('PsCupID');
-			$table->integer('PsCupPSID')->unsigned()->nullable();
-			$table->integer('PsCupCupID')->unsigned()->nullable();
+			$table->integer('ps_cup_psid')->unsigned()->nullable();
+			$table->integer('ps_cup_cup_id')->unsigned()->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PsReferral', function(Blueprint $table)
@@ -316,16 +316,16 @@ class RIICreateTables extends Migration
 			$table->longText('PsComDescription')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PSOwners', function(Blueprint $table)
+		Schema::create('rii_ps_owners', function(Blueprint $table)
 		{
 			$table->increments('PsOwnID');
-			$table->integer('PsOwnPartnerUser')->unsigned()->nullable();
+			$table->integer('ps_own_partner_user')->unsigned()->nullable();
 			$table->integer('PsOwnClientUser')->unsigned()->nullable();
 			$table->integer('PsOwnType')->unsigned()->nullable();
 			$table->string('PsOwnClientName')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_Manufacturers', function(Blueprint $table)
+		Schema::create('rii_manufacturers', function(Blueprint $table)
 		{
 			$table->increments('ManuID');
 			$table->string('ManuName')->nullable();
@@ -339,12 +339,12 @@ class RIICreateTables extends Migration
 			$table->longText('ManuIDsMother')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_LightModels', function(Blueprint $table)
+		Schema::create('rii_light_models', function(Blueprint $table)
 		{
-			$table->increments('LgtModID');
-			$table->integer('LgtModManuID')->nullable();
-			$table->string('LgtModName')->nullable();
-			$table->integer('LgtModTech')->unsigned()->nullable();
+			$table->increments('lgt_mod_id');
+			$table->integer('lgt_mod_manu_id')->nullable();
+			$table->string('lgt_mod_name')->nullable();
+			$table->integer('lgt_mod_tech')->unsigned()->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSUtilities', function(Blueprint $table)
@@ -357,9 +357,9 @@ class RIICreateTables extends Migration
 		});
 		Schema::create('RII_PSUtiliZips', function(Blueprint $table)
 		{
-			$table->increments('PsUtZpID');
-			$table->string('PsUtZpZipCode', 10)->nullable();
-			$table->integer('PsUtZpUtilID')->unsigned()->nullable();
+			$table->increments('ps_ut_zp_id');
+			$table->string('ps_ut_zp_zip_code', 10)->nullable();
+			$table->integer('ps_ut_zp_util_id')->unsigned()->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_PSPageFeedback', function(Blueprint $table)
@@ -390,7 +390,7 @@ class RIICreateTables extends Migration
 			$table->longText('PsPagFeedFeedback9')->nullable();
 			$table->timestamps();
 		});
-		Schema::create('RII_PsFeedback', function(Blueprint $table)
+		Schema::create('rii_ps_feedback', function(Blueprint $table)
 		{
 			$table->increments('PsfID');
 			$table->string('PsfVersionAB')->nullable();
@@ -429,15 +429,15 @@ class RIICreateTables extends Migration
 		Schema::create('RII_UserInfo', function(Blueprint $table)
 		{
 			$table->increments('UsrID');
-			$table->integer('UsrUserID')->unsigned()->nullable();
-			$table->string('UsrCompanyName')->nullable();
+			$table->integer('usr_user_id')->unsigned()->nullable();
+			$table->string('usr_company_name')->nullable();
 			$table->timestamps();
 		});
 		Schema::create('RII_UserManufacturers', function(Blueprint $table)
 		{
-			$table->increments('UsrManID');
-			$table->integer('UsrManUserID')->unsigned()->nullable();
-			$table->integer('UsrManManuID')->unsigned()->nullable();
+			$table->increments('usr_manu_id');
+			$table->integer('usr_manu_user_id')->unsigned()->nullable();
+			$table->integer('usr_man_manu_id')->unsigned()->nullable();
 			$table->timestamps();
 		});
 	
@@ -450,19 +450,19 @@ class RIICreateTables extends Migration
      */
     public function down()
     {
-    	Schema::drop('RII_PowerScore');
-		Schema::drop('RII_PSRankings');
+    	Schema::drop('rii_powerscore');
+		Schema::drop('rii_ps_rankings');
 		Schema::drop('RII_PSLicenses');
 		Schema::drop('RII_PSFarm');
 		Schema::drop('RII_PSMonthly');
 		Schema::drop('RII_PSUtiliLinks');
 		Schema::drop('RII_PSRenewables');
 		Schema::drop('RII_PSOtherPower');
-		Schema::drop('RII_PSAreas');
-		Schema::drop('RII_PSAreasBlds');
-		Schema::drop('RII_PSAreasConstr');
-		Schema::drop('RII_PSAreasGreen');
-		Schema::drop('RII_PSLightTypes');
+		Schema::drop('rii_ps_areas');
+		Schema::drop('rii_ps_areasBlds');
+		Schema::drop('rii_ps_areasConstr');
+		Schema::drop('rii_ps_areasGreen');
+		Schema::drop('rii_ps_light_types');
 		Schema::drop('RII_PSWaterSources');
 		Schema::drop('RII_PSWaterHolding');
 		Schema::drop('RII_PSWaterFilter');
@@ -472,16 +472,16 @@ class RIICreateTables extends Migration
 		Schema::drop('RII_PSWasteAg');
 		Schema::drop('RII_PSWasteSupplies');
 		Schema::drop('RII_PSWasteProcess');
-		Schema::drop('RII_PSForCup');
+		Schema::drop('rii_ps_for_cup');
 		Schema::drop('RII_PsReferral');
 		Schema::drop('RII_PSCommunications');
-		Schema::drop('RII_PSOwners');
-		Schema::drop('RII_Manufacturers');
-		Schema::drop('RII_LightModels');
+		Schema::drop('rii_ps_owners');
+		Schema::drop('rii_manufacturers');
+		Schema::drop('rii_light_models');
 		Schema::drop('RII_PSUtilities');
 		Schema::drop('RII_PSUtiliZips');
 		Schema::drop('RII_PSPageFeedback');
-		Schema::drop('RII_PsFeedback');
+		Schema::drop('rii_ps_feedback');
 		Schema::drop('RII_PublicProcess');
 		Schema::drop('RII_UserInfo');
 		Schema::drop('RII_UserManufacturers');

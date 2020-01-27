@@ -13,19 +13,18 @@
     As of {{ date("F j, Y") }}, Resource Innovation Institute's 
     <b class="slBlueDark">Cannabis PowerScore</b> 
     has collected complete data for 
-    <b class="slBlueDark">{{ number_format($allscores->count()) 
-        }} observations</b> 
+    <b class="slBlueDark">{{ number_format($allscores->count()) }} observations</b> 
     of growers' annual production.
     </h4>
     <p>
     Thus far,
-    {{ round(100*$statMisc->getDatTot('PsIncentiveWants')/$allscores->count()) }}%
+    {{ round(100*$statMisc->getDatTot('ps_incentive_wants')/$allscores->count()) }}%
     of the survey respondents would like to work with their 
     utilities to increase the energy efficiency of their operations,
-    and {{ round(100*$statMisc->getDatTot('PsIncentiveUsed')/$allscores->count()) 
+    and {{ round(100*$statMisc->getDatTot('ps_incentive_used')/$allscores->count()) 
     }}% have done so in the past.
     And a total of {{ 
-    round(100*$statMisc->getDatTot('PsConsiderUpgrade')/$allscores->count()) }}% 
+    round(100*$statMisc->getDatTot('ps_consider_upgrade')/$allscores->count()) }}% 
     are considering upgrades in the next 12 months.
     </p>
 </div>
@@ -45,9 +44,15 @@
             <th>{{ $name }}</th>
             <td>{{ number_format($statLgts->getDatTot('kWh', 'a' . $defID)) }}</td>
             <td>{{ number_format($statLgts->getDatTot('sqft', 'a' . $defID)) }}</td>
-            <td> @if ($statLgts->getDatTot('sqft', 'a' . $defID) > 0) {{ $GLOBALS["SL"]->sigFigs(
-                $statLgts->getDatTot('kWh', 'a' . $defID)/$statLgts->getDatTot('sqft', 'a' . $defID), 3) 
-                }} @else 0 @endif </td>
+            <td>
+                @if ($statLgts->getDatTot('sqft', 'a' . $defID) > 0) 
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $statLgts->getDatTot('kWh', 'a' . $defID)
+                            /$statLgts->getDatTot('sqft', 'a' . $defID)
+                    , 3) }}
+                @else 0 
+                @endif 
+            </td>
             <td>{{ number_format($statMisc->getDatCnt('a' . $defID)) }}</td>
         </tr>
     @endforeach
@@ -55,8 +60,14 @@
         <th>Aggregated</th>
         <td>{{ number_format($statLgts->getDatTot('kWh')) }}</td>
         <td>{{ number_format($statLgts->getDatTot('sqft')) }}</td>
-        <td> @if ($statLgts->getDatTot('sqft') > 0) {{ 
-            $GLOBALS["SL"]->sigFigs($statLgts->getDatTot('kWh')/$statLgts->getDatTot('sqft'), 3) }} @else 0 @endif </td>
+        <td>
+            @if ($statLgts->getDatTot('sqft') > 0) 
+                {{ $GLOBALS["SL"]->sigFigs(
+                    $statLgts->getDatTot('kWh')/$statLgts->getDatTot('sqft')
+                , 3) }} 
+            @else 0 
+            @endif 
+        </td>
         <td>{{ number_format($statMisc->getDatCnt()) }}</td>
     </tr>
     </table>
@@ -102,19 +113,24 @@
     @foreach ($farmTypes as $name => $defID)
         <tr>
             <th>{{ $name }}</th>
-            <td><?php /* {{ number_format($statScor->tagTot["a"]["a" . $defID]["avg"]["row"][0]) }} */ ?></td>
+            <td><?php /* {{ number_format(
+                $statScor->tagTot["a"]["a" . $defID]["avg"]["row"][0]
+            ) }} */ ?></td>
         </tr>
     @endforeach
     <tr class="brdTop">
         <th>Aggregated</th>
-        <td><?php /* {{ number_format($statScor->tagTot["a"]["1"]["avg"]["row"][0]) }} */ ?></td>
+        <td><?php /* {{ number_format(
+            $statScor->tagTot["a"]["1"]["avg"]["row"][0]
+        ) }} */ ?></td>
     </tr>
     </table>
 </div>
 
 <div class="slCard nodeWrap">
     <p>
-    On a weighted average basis (square footage by canopy environment), demand for power was about 
+    On a weighted average basis (square footage by 
+    canopy environment), demand for power was about 
     {{ $GLOBALS["SL"]->sigFigs($statLgts->getDatTot('kWh/sqft'), 3) }}
     kilowatt-hours per square foot. 
     </p>
@@ -211,7 +227,11 @@
     </tr>
     @foreach (["scrHID", "scrLED"] as $lyt)
         <tr>
-            <td> @if ($lyt == 'scrLED') High-Efficient Lamps @else High-Intensity Lamps @endif </td>
+            <td>
+                @if ($lyt == 'scrLED') High-Efficient Lamps 
+                @else High-Intensity Lamps 
+                @endif 
+            </td>
             <td>{{ $GLOBALS["SL"]->sigFigs($statMore[$lyt][0], 3) }}</td>
             <td>{{ $GLOBALS["SL"]->sigFigs($statMore[$lyt][1], 3) }}</td>
             <td>{{ $GLOBALS["SL"]->sigFigs($statMore[$lyt][2], 3) }}</td>
@@ -239,7 +259,8 @@
 
 <div class="slCard nodeWrap">
     <p>
-    Table 6 shows additional details on the type of lighting technologies in each grow environment. 
+    Table 6 shows additional details on the type of 
+    lighting technologies in each grow environment. 
     In the flowering rooms for example, 
     {{ round(100*$statMore["flwrPercHID"]) }}
     percent of lighting was HID; 
@@ -252,10 +273,14 @@
     {{ number_format($statMore["sqftFxtHID"]) }}
     square feet is used.
     </p>
-    <h3 class="mB0">Table 6: Breakdown of sites and lighting technologies across the survey participants</h3>
+    <h3 class="mB0">
+        Table 6: Breakdown of sites and lighting 
+        technologies across the survey participants
+    </h3>
     <div class="pT5 pB5 slGrey">
-        Totals indicate the percent of all farms that use each lighting style for at least one growth stage 
-        which they operate.
+        Totals indicate the percent of all farms 
+        that use each lighting style for at least 
+        one growth stage which they operate.
     </div>
     {!! $statLgts->printTblPercHas('area', 'lgty') !!}
 </div>
@@ -273,12 +298,16 @@
             <tr>
                 <th>Medical Licenses</th>
                 <td>{{ $statMisc->getDatTot('lic141') }}</td>
-                <td>{{ round(100*$statMisc->getDatTot('lic141')/$allscores->count()) }}%</td>
+                <td>{{ round(
+                    100*$statMisc->getDatTot('lic141')/$allscores->count()
+                ) }}%</td>
             </tr>
             <tr>
                 <th>Recreational Licenses</th>
                 <td>{{ $statMisc->getDatTot('lic142') }}</td>
-                <td>{{ round(100*$statMisc->getDatTot('lic142')/$allscores->count()) }}%</td>
+                <td>{{ round(
+                    100*$statMisc->getDatTot('lic142')/$allscores->count()
+                ) }}%</td>
             </tr>
             </table>
         </div>
@@ -292,9 +321,13 @@
             @foreach ($farmTypes as $name => $defID)
                 <tr>
                     <th>{{ $name }}</th>
-                    <td>{{ number_format($statLgts->getDatTot('sqft', 'a' . $defID)) }}</td>
-                    <td>{{ number_format(100*$statLgts->getDatTot('sqft', 'a' . $defID)/$statLgts->getDatTot('sqft', '1')) 
-                        }}%</td>
+                    <td>{{ number_format(
+                        $statLgts->getDatTot('sqft', 'a' . $defID)
+                    ) }}</td>
+                    <td>{{ number_format(
+                        100*$statLgts->getDatTot('sqft', 'a' . $defID)
+                            /$statLgts->getDatTot('sqft', '1')
+                    ) }}%</td>
                 </tr>
             @endforeach
             </table>
@@ -306,7 +339,15 @@
     <h3>Table 8: Energy Efficiency Interest</h3>
     <table class="table w100">
     {!! $statMisc->tblHeaderRow('farm') !!}
-    {!! $statMisc->tblPercHasDat('farm', [ 'PsConsiderUpgrade', 'PsIncentiveWants', 'PsIncentiveUsed', 'PsNewsletter' ]) !!}
+    {!! $statMisc->tblPercHasDat(
+        'farm', 
+        [
+            'ps_consider_upgrade', 
+            'ps_incentive_wants', 
+            'ps_incentive_used', 
+            'ps_newsletter' 
+        ]
+    ) !!}
     </table>
 </div>
 

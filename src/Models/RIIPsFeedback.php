@@ -5,24 +5,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPsFeedback extends Model
 {
-    protected $table      = 'RII_PsFeedback';
-    protected $primaryKey = 'PsfID';
+    protected $table      = 'rii_ps_feedback';
+    protected $primaryKey = 'psf_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsfVersionAB', 
-		'PsfSubmissionProgress', 
-		'PsfIPaddy', 
-		'PsfTreeVersion', 
-		'PsfUniqueStr', 
-		'PsfUserID', 
-		'PsfIsMobile', 
-		'PsfPsID', 
-		'PsfFeedback1', 
-		'PsfFeedback2', 
-		'PsfFeedback3', 
-		'PsfFeedback4', 
-		'PsfFeedback5', 
+		'psf_version_ab', 
+		'psf_submission_progress', 
+		'psf_ip_addy', 
+		'psf_tree_version', 
+		'psf_unique_str', 
+		'psf_user_id', 
+		'psf_is_mobile', 
+		'psf_psid', 
+		'psf_feedback1', 
+		'psf_feedback2', 
+		'psf_feedback3', 
+		'psf_feedback4', 
+		'psf_feedback5', 
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -45,8 +45,8 @@ class ScoreReportFound extends ScoreReportStats
         $this->v["statEnv"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]);
         $this->v["statEnv"]->addFilt('area', 'Growth Stage', $this->v["sfAreasAlt"][0], $this->v["sfAreasAlt"][1]);
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
-            $this->v["statEnv"]->addDataType('bld' . $bld->DefID, $bld->DefValue);
-            $this->v["bldDats"][] = 'bld' . $bld->DefID;
+            $this->v["statEnv"]->addDataType('bld' . $bld->def_id, $bld->def_value);
+            $this->v["bldDats"][] = 'bld' . $bld->def_id;
         }
         $this->v["statEnv"]->loadMap();
         $this->v["statEnv"]->initEnvs();
@@ -65,60 +65,60 @@ class ScoreReportFound extends ScoreReportStats
         
         if ($allScores->isNotEmpty()) {
             foreach ($allScores as $cnt => $ps) {
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', '>', 0)
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->where('ps_area_type', '>', 0)
                     ->get();
                 if ($areas->isNotEmpty()) {
-                    $this->v["scoreSets"]["statScorSize" . $ps->PsCharacterize]
+                    $this->v["scoreSets"]["statScorSize" . $ps->ps_characterize]
                         ->applyScoreFilts($ps, $this->getFlowerSize($areas));
-                    if ($ps->PsCharacterize == 144) {
+                    if ($ps->ps_characterize == 144) {
                         $this->v["scoreSets"]["statScorAuto"]
                             ->applyScoreFilts($ps, $this->getFlowerSize($areas));
                         $this->v["scoreSets"]["statScorVert"]
                             ->applyScoreFilts($ps, $this->getFlowerSize($areas));
                     }
                     foreach ($areas as $area) {
-                        $areaType = $this->motherToClone($area->PsAreaType);
-                        $this->v["statEnv"]->addDataEnvs($ps, $areaType, $area->PsAreaID);
+                        $areaType = $this->motherToClone($area->ps_area_type);
+                        $this->v["statEnv"]->addDataEnvs($ps, $areaType, $area->ps_area_id);
                     }
                     foreach ($this->statScoreSets as $set) {
                         if (in_array($set[0], ['statScorAuto', 'statScorVert'])) {
-                            if ($ps->PsCharacterize == 144) {
+                            if ($ps->ps_characterize == 144) {
                                 $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                                 $this->v["scoreSets"][$set[0]]->resetRecFilt();
                             }
-                        } elseif (intVal(substr($set[0], strlen($set[0])-3)) == $ps->PsCharacterize) {
+                        } elseif (intVal(substr($set[0], strlen($set[0])-3)) == $ps->ps_characterize) {
                             $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                             $this->v["scoreSets"][$set[0]]->resetRecFilt();
                         }
                     }
 
-                    if ($ps->PsCharacterize == 144 && isset($ps->PsEfficProduction) && $ps->PsEfficProduction > 0) {
+                    if ($ps->ps_characterize == 144 && isset($ps->ps_effic_production) && $ps->ps_effic_production > 0) {
                         $vert = 0;
-                        if (isset($ps->PsVerticalStack)) {
-                            $vert = intVal($ps->PsVerticalStack);
+                        if (isset($ps->ps_vertical_stack)) {
+                            $vert = intVal($ps->ps_vertical_stack);
                         }
-                        $area = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                            ->where('PsAreaType', $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
+                        $area = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                            ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
                             ->first();
-                        if ($area && isset($area->PsAreaSize) && $area->PsAreaSize > 0) {
-                            $this->v["vertDense"][$vert][1][] = $ps->PsEfficProduction/$area->PsAreaSize;
+                        if ($area && isset($area->ps_area_size) && $area->ps_area_size > 0) {
+                            $this->v["vertDense"][$vert][1][] = $ps->ps_effic_production/$area->ps_area_size;
                         }
                     }
 
-                    $this->v["statLeads"]->addRecFilt('farm', $ps->PsCharacterize, $ps->PsID);
-                    $this->v["statLeads"]->addRecDat('count', 1, $ps->PsID);
-                    if (isset($ps->PsEnergyNonFarm) && intVal($ps->PsEnergyNonFarm) == 1) {
-                        $this->v["statLeads"]->addRecDat('nonfarm', 1, $ps->PsID);
+                    $this->v["statLeads"]->addRecFilt('farm', $ps->ps_characterize, $ps->ps_id);
+                    $this->v["statLeads"]->addRecDat('count', 1, $ps->ps_id);
+                    if (isset($ps->ps_energy_non_farm) && intVal($ps->ps_energy_non_farm) == 1) {
+                        $this->v["statLeads"]->addRecDat('nonfarm', 1, $ps->ps_id);
                     }
-                    if (isset($ps->PsConsiderUpgrade) && intVal($ps->PsConsiderUpgrade) == 1) {
-                        $this->v["statLeads"]->addRecDat('upgrade', 1, $ps->PsID);
+                    if (isset($ps->ps_consider_upgrade) && intVal($ps->ps_consider_upgrade) == 1) {
+                        $this->v["statLeads"]->addRecDat('upgrade', 1, $ps->ps_id);
                     }
-                    if (isset($ps->PsIncentiveUsed) && intVal($ps->PsIncentiveUsed) == 1) {
-                        $this->v["statLeads"]->addRecDat('incent', 1, $ps->PsID);
+                    if (isset($ps->ps_incentive_used) && intVal($ps->ps_incentive_used) == 1) {
+                        $this->v["statLeads"]->addRecDat('incent', 1, $ps->ps_id);
                     }
-                    if (isset($ps->PsIncentiveWants) && intVal($ps->PsIncentiveWants) == 1) {
-                        $this->v["statLeads"]->addRecDat('contact', 1, $ps->PsID);
+                    if (isset($ps->ps_incentive_wants) && intVal($ps->ps_incentive_wants) == 1) {
+                        $this->v["statLeads"]->addRecDat('contact', 1, $ps->ps_id);
                     }
                     $this->v["statLeads"]->resetRecFilt();
                 }

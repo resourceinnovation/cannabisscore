@@ -1,6 +1,5 @@
 /* generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations-css.blade.php */
 
-
 #efficScoreMainTitle {
     margin: 50px 0px 20px -15px;
     color: #726658;

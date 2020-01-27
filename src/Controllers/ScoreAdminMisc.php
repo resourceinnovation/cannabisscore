@@ -31,54 +31,65 @@ class ScoreAdminMisc extends ScorePrintReport
 {
     protected function getTroubleshoot()
     {
-        $this->v["lgtChk"] = $this->v["lgtAvg"] = $this->v["hvcChk"] 
-            = $this->v["hvcAvg"] = [ 0, 0, 0, 0 ];
-        $this->v["allScoreIDs"] = RIIPowerScore::where('PsStatus', $this->v["defCmplt"])
-            ->where('PsCharacterize', 144)
-            ->select('PsID', 'PsName', 'PsEfficLighting', 'PsEfficHvac')
-            ->orderBy('PsID', 'desc')
+        $this->v["lgtChk"] = $this->v["lgtAvg"] 
+            = $this->v["hvcChk"] = $this->v["hvcAvg"] = [
+            0, 
+            0, 
+            0, 
+            0 
+        ];
+        $this->v["allScoreIDs"] = RIIPowerScore::where('ps_status', $this->v["defCmplt"])
+            ->where('ps_characterize', 144)
+            ->select('ps_id', 'ps_name', 'ps_effic_lighting', 'ps_effic_hvac')
+            ->orderBy('ps_id', 'desc')
             ->get();
         if ($this->v["allScoreIDs"]->isNotEmpty()) {
             foreach ($this->v["allScoreIDs"] as $i => $ps) {
-                $this->v["hvcChk"][$i] = [ $ps->PsEfficHvac, 0, 0 ];
+                $this->v["hvcChk"][$i] = [ $ps->ps_effic_hvac, 0, 0 ];
                 $this->v["lgtChk"][$i] = [ $ps, [], 0, 0, 0, 0, 0, 0, 0, 0 ];
-                $this->v["lgtChk"][$i][1] = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->select('PsAreaType', 'PsAreaSize', 'PsAreaTotalLightWatts', 'PsAreaHvacType')
+                $this->v["lgtChk"][$i][1] = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->select('ps_area_type', 'ps_area_size', 'ps_area_total_light_watts', 'ps_area_hvac_type')
                     ->get();
                 if ($this->v["lgtChk"][$i][1]->isNotEmpty()) {
                     $areaTot = 0;
                     foreach ($this->v["lgtChk"][$i][1] as $area) {
-                        if (isset($area->PsAreaSize)) $areaTot += $area->PsAreaSize;
+                        if (isset($area->ps_area_size)) $areaTot += $area->ps_area_size;
                     }
                     foreach ($this->v["lgtChk"][$i][1] as $area) {
                         foreach ($this->v["areaTypes"] as $typ => $defID) {
-                            if ($area->PsAreaType == $defID && $typ != 'Dry') {
-                                if (isset($area->PsAreaSize) && isset($area->PsAreaTotalLightWatts) 
-                                    && intVal($area->PsAreaSize) > 0 && intVal($area->PsAreaTotalLightWatts) > 0) {
-                                    $this->v["lgtChk"][$i][2] += $area->PsAreaSize;
-                                    $this->v["lgtChk"][$i][3] 
-                                        += $area->PsAreaTotalLightWatts*$GLOBALS["CUST"]->getTypeHours($typ)*365;
-                                    $this->v["lgtChk"][$i][6] += $area->PsAreaTotalLightWatts;
-                                    $this->v["lgtChk"][$i][8] += ($area->PsAreaTotalLightWatts/$area->PsAreaSize);
+                            if ($area->ps_area_type == $defID && $typ != 'Dry') {
+                                if (isset($area->ps_area_size) 
+                                    && isset($area->ps_area_total_light_watts) 
+                                    && intVal($area->ps_area_size) > 0 
+                                    && intVal($area->ps_area_total_light_watts) > 0) {
+                                    $this->v["lgtChk"][$i][2] += $area->ps_area_size;
+                                    $this->v["lgtChk"][$i][3] += $area->ps_area_total_light_watts
+                                        *$GLOBALS["CUST"]->getTypeHours($typ)*365;
+                                    $this->v["lgtChk"][$i][6] += $area->ps_area_total_light_watts;
+                                    $this->v["lgtChk"][$i][8] += ($area->ps_area_total_light_watts
+                                        /$area->ps_area_size);
                                     $this->v["lgtChk"][$i][9]++;
                                 }
                             }
                         }
-                        $effic = $GLOBALS["CUST"]->getHvacEffic($area->PsAreaHvacType);
-                        if (isset($area->PsAreaSize) && $area->PsAreaSize > 0 && $effic > 0) {
-                            $this->v["hvcChk"][$i][1] += ($area->PsAreaSize*$effic);
-                            $this->v["hvcChk"][$i][2] += $effic*($area->PsAreaSize/$areaTot);
+                        $effic = $GLOBALS["CUST"]->getHvacEffic($area->ps_area_hvac_type);
+                        if (isset($area->ps_area_size) && $area->ps_area_size > 0 && $effic > 0) {
+                            $this->v["hvcChk"][$i][1] += ($area->ps_area_size*$effic);
+                            $this->v["hvcChk"][$i][2] += $effic*($area->ps_area_size/$areaTot);
                         }
                     }
                     if ($this->v["lgtChk"][$i][2] > 0) {
-                        $this->v["lgtChk"][$i][4] = $this->v["lgtChk"][$i][3]/(1000*$this->v["lgtChk"][$i][2]);
-                        $this->v["lgtChk"][$i][5] = $this->v["lgtChk"][$i][6]/$this->v["lgtChk"][$i][2];
+                        $this->v["lgtChk"][$i][4] = $this->v["lgtChk"][$i][3]
+                            /(1000*$this->v["lgtChk"][$i][2]);
+                        $this->v["lgtChk"][$i][5] = $this->v["lgtChk"][$i][6]
+                            /$this->v["lgtChk"][$i][2];
                     }
                 }
                 if ($this->v["lgtChk"][$i][9] > 0) {
-                    $this->v["lgtChk"][$i][7] = $this->v["lgtChk"][$i][8]/$this->v["lgtChk"][$i][9];
+                    $this->v["lgtChk"][$i][7] = $this->v["lgtChk"][$i][8]
+                        /$this->v["lgtChk"][$i][9];
                 }
-                $this->v["lgtAvg"][0] += $ps->PsEfficLighting;
+                $this->v["lgtAvg"][0] += $ps->ps_effic_lighting;
                 $this->v["lgtAvg"][1] += $this->v["lgtChk"][$i][4];
                 $this->v["lgtAvg"][2] += $this->v["lgtChk"][$i][5];
                 $this->v["lgtAvg"][3] += $this->v["lgtChk"][$i][7];
@@ -98,19 +109,19 @@ class ScoreAdminMisc extends ScorePrintReport
         /*
         $this->v["logOne"] = '';
         $this->v["subTblsPowerScore"] = [
-            'PSAreas'       => ['PsAreaID',   'PsAreaPSID'   ],
+            'PSAreas'       => ['ps_area_id',   'ps_area_psid'   ],
             'PSFarm'        => ['PsFrmID',    'PsFrmPSID'    ],
-            'PSForCup'      => ['PsCupID',    'PsCupPSID'    ],
-            'PSLicenses'    => ['PsLicID',    'PsLicPSID'    ],
-            'PSMonthly'     => ['PsMonthID',  'PsMonthPSID'  ],
+            'PSForCup'      => ['PsCupID',    'ps_cup_psid'    ],
+            'PSLicenses'    => ['PsLicID',    'ps_lic_psid'    ],
+            'PSMonthly'     => ['PsMonthID',  'ps_month_psid'  ],
             'PSOtherPower'  => ['PsOthPwrID', 'PsOthPwrPSID' ],
-            'PSRankings'    => ['PsRnkID',    'PsRnkPSID'    ],
-            'PSRenewables'  => ['PsRnwID',    'PsRnwPSID'    ],
+            'PSRankings'    => ['ps_rnk_id',    'ps_rnk_psid'    ],
+            'PSRenewables'  => ['PsRnwID',    'ps_rnw_psid'    ],
             'PSUtiliLinks'  => ['PsUtLnkID',  'PsUtLnkPSID'  ]
             ];
         $this->v["subTblsPSAreas"] = [
-            'PSAreasBlds'   => ['PsArBldID',  'PsArBldAreaID'],
-            'PSLightTypes'  => ['PsLgTypID',  'PsLgTypAreaID']
+            'PSAreasBlds'   => ['PsArBldID',  'ps_ar_bld_area_id'],
+            'PSLightTypes'  => ['PsLgTypID',  'ps_lg_typ_area_id']
             ];
         $this->v["subTblsPSAreasBlds"] = [
             'PSAreasConstr' => ['PsArCnsID',  'PsArCnsBldID' ]
@@ -118,7 +129,7 @@ class ScoreAdminMisc extends ScorePrintReport
         $baks = [ '_221', '_310', '_417', '_521' ];
         foreach ($baks as $b => $bak) {
             $qman = "SELECT r2.* FROM `RII" . $bak . "_PowerScore` r2 JOIN "
-                . "`RII_PowerScore` r ON r2.`PsID` LIKE r.`PsID` WHERE r2.`PsZipCode` IS NOT NULL "
+                . "`rii_powerscore` r ON r2.`ps_id` LIKE r.`PsID` WHERE r2.`PsZipCode` IS NOT NULL "
                 . "AND r2.`PsZipCode` NOT LIKE '' AND (r.`PsZipCode` IS NULL OR r.`PsZipCode` LIKE '')";
             $this->v["logOne"] .= '<div class="fPerc66">' . $qman . '</div>';
             $this->v["chk1"] = DB::select( DB::raw( $qman ) );
@@ -126,12 +137,12 @@ class ScoreAdminMisc extends ScorePrintReport
             if ($this->v["chk1"]->isNotEmpty()) {
                 foreach ($this->v["chk1"] as $i => $ps) {
                     $this->v["logOne"] .= $GLOBALS["SL"]->copyTblRecFromRow('PowerScore', $ps);
-                    $this->logAdd('session-stuff', 'Manually Restoring PowerScore#' . $ps->PsID 
+                    $this->logAdd('session-stuff', 'Manually Restoring PowerScore#' . $ps->ps_id 
                         . ' <i>(RII.getTroubleshoot)</i>');
                     $this->v["chks2"][$i] = [];
                     foreach ($this->v["subTblsPowerScore"] as $tbl => $keys) {
                         $qman = "SELECT * FROM `RII" . $bak . "_" . $tbl . "` WHERE `" . $keys[1] . "` LIKE '" 
-                            . $ps->PsID . "'";
+                            . $ps->ps_id . "'";
                         $chk1 = DB::select( DB::raw( $qman ) );
                         //echo '<br />' . $qman . '<pre>'; print_r($chk1); echo '</pre>';
                         if ($chk1->isNotEmpty() && isset($this->v["subTbls" . $tbl . ""]) 
@@ -178,19 +189,21 @@ class ScoreAdminMisc extends ScorePrintReport
         /*
         $ret = '';
         foreach ($baks as $b => $bak) {
-            $qman = "SELECT r2.* FROM `RII" . $bak . "_PowerScore` r2 WHERE r2.`PsStatus` LIKE " . $this->v["defCmplt"]
-                . " AND r2.`PsID` NOT IN (SELECT r.`PsID` FROM `RII_PowerScore` r WHERE r.`PsStatus` LIKE " 
+            $qman = "SELECT r2.* FROM `RII" . $bak . "_PowerScore` r2 WHERE r2.`ps_status` LIKE " . $this->v["defCmplt"]
+                . " AND r2.`PsID` NOT IN (SELECT r.`PsID` FROM `rii_powerscore` r WHERE r.`ps_status` LIKE " 
                 . $this->v["defCmplt"] . ")";
             $this->v["chk3"] = DB::select( DB::raw( $qman ) );
             $this->v["chks4"] = [];
             if ($this->v["chk3"]->isNotEmpty()) {
                 foreach ($this->v["chk3"] as $i => $ps) {
-                     $ret .= '<h3>' . $ps->PsID . '</h3><pre>' . print_r($ps) . '</pre><br />';
+                     $ret .= '<h3>' . $ps->ps_id . '</h3><pre>' . print_r($ps) . '</pre><br />';
                 }
             }
         }
         */
-        if ($GLOBALS["SL"]->REQ->has('import')) $this->runImport();
+        if ($GLOBALS["SL"]->REQ->has('import')) {
+            $this->runImport();
+        }
         if ($GLOBALS["SL"]->REQ->has('refresh')) {
             return $this->calcAllScoreRanks();
         } elseif ($GLOBALS["SL"]->REQ->has('recalc')) {
@@ -203,80 +216,95 @@ class ScoreAdminMisc extends ScorePrintReport
     protected function getEmailsList()
     {
         $this->v["sendResults"] = '';
-        $this->v["emailList"] = [ 'Newsletter' => [] ];
-        $this->v["scoreLists"] = [ 'all' => [], 'blw' => [], 'avg' => [], 'abv' => [], 'inc' => [] ];
+        $this->v["emailList"] = [
+            'Newsletter' => [] 
+        ];
+        $wchLsts = [ 'all', 'blw', 'avg', 'abv', 'inc' ];
+        $this->v["scoreLists"] = [];
+        foreach ($wchLsts as $lst) {
+            $this->v["scoreLists"][$lst] = [];
+        }
         $this->v["wchLst"] = 'all';
         if ($GLOBALS["SL"]->REQ->has('wchLst') 
-            && in_array($GLOBALS["SL"]->REQ->wchLst, ['all', 'blw', 'avg', 'abv', 'inc'])) {
+            && in_array($GLOBALS["SL"]->REQ->wchLst, $wchLsts)) {
             $this->v["wchLst"] = $GLOBALS["SL"]->REQ->wchLst;
         }
         $this->v["wchEma"] = 0;
-        if ($GLOBALS["SL"]->REQ->has('wchEma') && intVal($GLOBALS["SL"]->REQ->wchEma) > 0) {
+        if ($GLOBALS["SL"]->REQ->has('wchEma') 
+            && intVal($GLOBALS["SL"]->REQ->wchEma) > 0) {
             $this->v["wchEma"] = $GLOBALS["SL"]->REQ->wchEma;
         }
-        if ($GLOBALS["SL"]->REQ->has('yesSend') && intVal($GLOBALS["SL"]->REQ->yesSend) == 1
-            && $GLOBALS["SL"]->REQ->has('scores') && sizeof($GLOBALS["SL"]->REQ->scores) > 0
+        if ($GLOBALS["SL"]->REQ->has('yesSend') 
+            && intVal($GLOBALS["SL"]->REQ->yesSend) == 1
+            && $GLOBALS["SL"]->REQ->has('scores') 
+            && sizeof($GLOBALS["SL"]->REQ->scores) > 0
             && $this->v["wchEma"] > 0) {
-            $chk = RIIPowerScore::whereIn('PsID', $GLOBALS["SL"]->REQ->scores)
+            $chk = RIIPowerScore::whereIn('ps_id', $GLOBALS["SL"]->REQ->scores)
                 ->get();
             if ($chk->isNotEmpty()) {
                 $ajax = '';
                 foreach ($chk as $i => $ps) {
-                    $this->v["sendResults"] .= '<div>Sending #' . $ps->PsID . ' ' . $ps->PsEmail . ' (' . $ps->PsName 
-                        . ')<br /><div id="emaAjax' . $ps->PsID . '">' . $GLOBALS["SL"]->sysOpts["spinner-code"] 
-                        . '</div></div>';
+                    $this->v["sendResults"] .= '<div>Sending #' . $ps->ps_id . ' ' . $ps->ps_email 
+                        . ' (' . $ps->ps_name . ')<br /><div id="emaAjax' . $ps->ps_id . '">' 
+                        . $GLOBALS["SL"]->sysOpts["spinner-code"] . '</div></div>';
                     $ajax .= 'setTimeout(function() { 
                         var name = encodeURIComponent(document.getElementById(\'replyNameID\').value);
-                        var url = "/ajadm/send-email?e=' . $this->v["wchEma"] . '&t=1&c=' . $ps->PsID 
+                        var url = "/ajadm/send-email?e=' . $this->v["wchEma"] 
+                            . '&t=1&c=' . $ps->ps_id 
                             . '&r="+document.getElementById(\'replyToID\').value+"&rn="+name+"";
-                        $("#emaAjax' . $ps->PsID . '").load(url); }, ' . ($i*2000) . ');';
+                        $("#emaAjax' . $ps->ps_id . '").load(url); }, ' . ($i*2000) . ');';
                 }
                 $this->v["sendResults"] .= $GLOBALS["SL"]->opnAjax() . $ajax . $GLOBALS["SL"]->clsAjax();
             }
         }
-        $chk = RIIPowerScore::where('PsEmail', 'NOT LIKE', '')
-            ->orderBy('PsEmail', 'asc')
-            ->orderBy('PsID', 'desc')
+        $chk = RIIPowerScore::where('ps_email', 'NOT LIKE', '')
+            ->orderBy('ps_email', 'asc')
+            ->orderBy('ps_id', 'desc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $row) {
-                if (isset($row->PsEmail) && trim($row->PsEmail) != '') {
-                    if (!isset($this->v["emailList"][$row->PsState])) {
-                        $this->v["emailList"][$row->PsState] = [];
+                if (isset($row->ps_email) && trim($row->ps_email) != '') {
+                    if (!isset($this->v["emailList"][$row->ps_state])) {
+                        $this->v["emailList"][$row->ps_state] = [];
                     }
-                    if (isset($row->PsNewsletter) && intVal($row->PsNewsletter) == 1 
-                        && !in_array(trim($row->PsEmail), $this->v["emailList"]["Newsletter"])) {
-                        $this->v["emailList"]["Newsletter"][] = trim($row->PsEmail);
+                    if (isset($row->ps_newsletter) && intVal($row->ps_newsletter) == 1 
+                        && !in_array(trim($row->ps_email), $this->v["emailList"]["Newsletter"])) {
+                        $this->v["emailList"]["Newsletter"][] = trim($row->ps_email);
                     }
 
                     $found = false;
                     if (sizeof($this->v["scoreLists"]["all"]) > 0) {
                         foreach ($this->v["scoreLists"]["all"] as $i => $infChk) {
-                            if (strtolower($infChk["email"]) == strtolower($row->PsEmail)) {
+                            if (strtolower($infChk["email"]) == strtolower($row->ps_email)) {
                                 $found = true;
                             }
                         }
                     }
                     if (!$found) {
-                        if (!in_array(trim($row->PsEmail), $this->v["emailList"][$row->PsState])) {
-                            $this->v["emailList"][$row->PsState][] = trim($row->PsEmail);
+                        if (!in_array(trim($row->ps_email), $this->v["emailList"][$row->ps_state])) {
+                            $this->v["emailList"][$row->ps_state][] = trim($row->ps_email);
                         }
                         $infArr = [
-                            "id"    => $row->PsID,
-                            "email" => $row->PsEmail, 
-                            "farm"  => $row->PsName, 
-                            "score" => $row->PsEfficOverSimilar,
+                            "id"    => $row->ps_id,
+                            "email" => $row->ps_email, 
+                            "farm"  => $row->ps_name, 
+                            "score" => $row->ps_effic_over_similar,
                             "sent"  => false
                         ];
                         $this->v["scoreLists"]["all"][] = $infArr;
-                        if ($row->PsStatus != $this->v["defCmplt"] || !isset($row->PsEfficFacility) 
-                            || !isset($row->PsEfficProduction) || !isset($row->PsEfficHvac) 
-                            || !isset($row->PsEfficLighting) || $row->PsEfficFacility <= 0 
-                            || $row->PsEfficProduction <= 0 || $row->PsEfficHvac <= 0 || $row->PsEfficLighting <= 0) {
+                        if ($row->ps_status != $this->v["defCmplt"] 
+                            || !isset($row->ps_effic_facility) 
+                            || !isset($row->ps_effic_production) 
+                            || !isset($row->ps_effic_hvac) 
+                            || !isset($row->ps_effic_lighting) 
+                            || $row->ps_effic_facility <= 0 
+                            || $row->ps_effic_production <= 0 
+                            || $row->ps_effic_hvac <= 0 
+                            || $row->ps_effic_lighting <= 0) {
                             $this->v["scoreLists"]["inc"][] = $infArr;
-                        } elseif ($row->PsEfficOverSimilar >= 200/3) {
+                        } elseif ($row->ps_effic_over_similar >= 200/3) {
                             $this->v["scoreLists"]["abv"][] = $infArr;
-                        } elseif ($row->PsEfficOverSimilar >= 100/3) {
+                        } elseif ($row->ps_effic_over_similar >= 100/3) {
                             $this->v["scoreLists"]["avg"][] = $infArr;
                         } else {
                             $this->v["scoreLists"]["blw"][] = $infArr;
@@ -286,55 +314,60 @@ class ScoreAdminMisc extends ScorePrintReport
                 }
             }
         }
-        $GLOBALS["SL"]->pageAJAX .= view('vendor.cannabisscore.nodes.637-email-list-ajax', $this->v)->render();
+        $GLOBALS["SL"]->pageAJAX .= view(
+            'vendor.cannabisscore.nodes.637-email-list-ajax', 
+            $this->v
+        )->render();
         return view('vendor.cannabisscore.nodes.637-email-list', $this->v)->render();
     }
     
     protected function getProccessUploads()
     {
-        $this->v["uploaders"] = RIIPowerScore::where('PsUploadEnergyBills', 'LIKE', 1)
-            //->where('PsStatus', 'LIKE', $this->v["defCmplt"])
-            ->orderBy('PsID', 'desc')
+        $this->v["uploaders"] = RIIPowerScore::where('ps_upload_energy_bills', 'LIKE', 1)
+            //->where('ps_status', 'LIKE', $this->v["defCmplt"])
+            ->orderBy('ps_id', 'desc')
             ->get();
         $this->v["upMonths"] = [];
         if ($this->v["uploaders"] && sizeof($this->v["uploaders"]) > 0) {
             foreach ($this->v["uploaders"] as $i => $ps) {
-                $this->v["upMonths"][$ps->PsID] = [];
-                $chk = RIIPSMonthly::where('PsMonthPSID', 'LIKE', $ps->PsID)
+                $this->v["upMonths"][$ps->ps_id] = [];
+                $chk = RIIPSMonthly::where('ps_month_psid', 'LIKE', $ps->ps_id)
                     ->get();
                 if ($chk && sizeof($chk) > 0) {
-                    foreach ($chk as $mon) $this->v["upMonths"][$ps->PsID][$mon->PsMonthMonth] = $mon;
+                    foreach ($chk as $mon) {
+                        $this->v["upMonths"][$ps->ps_id][$mon->ps_month_month] = $mon;
+                    }
                 }
             }
             if ($GLOBALS["SL"]->REQ->has("sub")) {
                 foreach ($this->v["uploaders"] as $i => $ps) {
-                    if ($GLOBALS["SL"]->REQ->has("kwh" . $ps->PsID)) {
-                        $newKwh = $GLOBALS["SL"]->REQ->get("kwh" . $ps->PsID);
-                        if (!$GLOBALS["SL"]->REQ->has("kwh" . $ps->PsID . "a") || 
-                            $GLOBALS["SL"]->REQ->get("kwh" . $ps->PsID . "a") != $newKwh) {
-                            $this->v["uploaders"][$i]->PsKWH = $newKwh;
+                    if ($GLOBALS["SL"]->REQ->has("kwh" . $ps->ps_id)) {
+                        $newKwh = $GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id);
+                        if (!$GLOBALS["SL"]->REQ->has("kwh" . $ps->ps_id . "a") 
+                            || $GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id . "a") != $newKwh) {
+                            $this->v["uploaders"][$i]->ps_kwh = $newKwh;
                             $this->v["uploaders"][$i]->save();
                         }
                         for ($mon = 1; $mon <= 12; $mon++) {
-                            if ($GLOBALS["SL"]->REQ->has("kwh" . $ps->PsID . "m" . $mon) 
-                                && $GLOBALS["SL"]->REQ->get("kwh" . $ps->PsID . "m" . $mon)) {
-                                $kWh = intVal($GLOBALS["SL"]->REQ->get("kwh" . $ps->PsID . "m" . $mon));
-                                if (!isset($this->v["upMonths"][$ps->PsID][$mon])) {
-                                    $this->v["upMonths"][$ps->PsID][$mon] = new RIIPSMonthly;
-                                    $this->v["upMonths"][$ps->PsID][$mon]->PsMonthPSID = $ps->PsID;
-                                    $this->v["upMonths"][$ps->PsID][$mon]->PsMonthMonth = $mon;
+                            if ($GLOBALS["SL"]->REQ->has("kwh" . $ps->ps_id . "m" . $mon) 
+                                && $GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id . "m" . $mon)) {
+                                $kWh = intVal($GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id . "m" . $mon));
+                                if (!isset($this->v["upMonths"][$ps->ps_id][$mon])) {
+                                    $this->v["upMonths"][$ps->ps_id][$mon] = new RIIPSMonthly;
+                                    $this->v["upMonths"][$ps->ps_id][$mon]->ps_month_psid = $ps->ps_id;
+                                    $this->v["upMonths"][$ps->ps_id][$mon]->ps_month_month = $mon;
                                 }
-                                $this->v["upMonths"][$ps->PsID][$mon]->PsMonthKWH1 = intVal($kWh);
-                                $this->v["upMonths"][$ps->PsID][$mon]->save();
+                                $this->v["upMonths"][$ps->ps_id][$mon]->ps_month_kwh1 = intVal($kWh);
+                                $this->v["upMonths"][$ps->ps_id][$mon]->save();
                             }
                         }
                     }
-                    if ($GLOBALS["SL"]->REQ->has("status" . $ps->PsID)) {
-                        $newStatus = intVal($GLOBALS["SL"]->REQ->get("status" . $ps->PsID));
-                        if ($newStatus > 0 && $this->v["uploaders"][$i]->PsStatus != $newStatus) {
-                            $this->v["uploaders"][$i]->PsStatus = $newStatus;
+                    if ($GLOBALS["SL"]->REQ->has("status" . $ps->ps_id)) {
+                        $newStatus = intVal($GLOBALS["SL"]->REQ->get("status" . $ps->ps_id));
+                        if ($newStatus > 0 && $this->v["uploaders"][$i]->ps_status != $newStatus) {
+                            $this->v["uploaders"][$i]->ps_status = $newStatus;
                             $this->v["uploaders"][$i]->save();
-                            $this->logAdd('session-stuff', 'Admin Changing PowerScore#' . $ps->PsID 
+                            $this->logAdd('session-stuff', 'Admin Changing PowerScore#' . $ps->ps_id 
                                 . ' Status To ' . $newStatus . ' <i>(RII.getProccessUploads)</i>');
                         }
                     }
@@ -351,41 +384,47 @@ class ScoreAdminMisc extends ScorePrintReport
         $this->v["uploads"] = $this->v["uploadInfo"] = [];
         if (isset($this->v["uploaders"]) && $this->v["uploaders"]->isNotEmpty()) {
             foreach ($this->v["uploaders"] as $i => $ps) {
-                $this->v["uploads"][$i] = SLUploads::where('UpTreeID', '=', 1)
-                    ->where('UpCoreID', '=', $ps->getKey())
-                    ->orderBy('UpID', 'asc')
+                $this->v["uploads"][$i] = SLUploads::where('up_tree_id', '=', 1)
+                    ->where('up_core_id', '=', $ps->getKey())
+                    ->orderBy('up_id', 'asc')
                     ->get();
                 if ($this->v["uploads"][$i] && sizeof($this->v["uploads"][$i]) > 0) {
+                    $fld = '../storage/app/up/evidence/' 
+                        . str_replace('-', '/', substr($ps->created_at, 0, 10));
                     $this->v["uploadInfo"][$i] = [
-                        "fld"  => '../storage/app/up/evidence/' . str_replace('-', '/', substr($ps->created_at, 0, 10)),
-                        "fold" => $this->getUploadFolder(69, $ps, 'PowerScore'),
+                        "fld"  => $fld,
+                        "fold" => $this->getUploadFolder(69, $ps, 'powerscore'),
                         "ups"  => []
-                        ];
+                    ];
                     foreach ($this->v["uploads"][$i] as $j => $up) {
-                        if (trim($up->UpStoredFile) != '') {
-                            $baseFilen = $up->UpStoredFile . '.' . $GLOBALS["SL"]->getFileExt($up->UpUploadFile);
+                        if (trim($up->up_stored_file) != '') {
+                            $baseFilen = $up->up_stored_file . '.' 
+                                . $GLOBALS["SL"]->getFileExt($up->up_upload_file);
                             $this->v["uploadInfo"][$i]["ups"][$j] = [
                                 "full" => $this->v["uploadInfo"][$i]["fold"] . $baseFilen,
                                 "subf" => []
-                                ];
+                            ];
                             //$this->v["uploadInfo"][$i]["full"] 
                             //    = $GLOBALS["SL"]->searchDeeperDirs($this->v["uploadInfo"][$i]["full"]);
                             if (!file_exists($this->v["uploadInfo"][$i]["ups"][$j]["full"])) {
-                                $this->v["uploadInfo"][$i]["ups"][$j]["subf"] 
-                                    = $GLOBALS["SL"]->findDirFile($this->v["uploadInfo"][$i]["fld"], $baseFilen);
-                                $this->v["log1"] .= '<h3>' . $ps->PsID . '</h3> Not Found: ' 
+                                $this->v["uploadInfo"][$i]["ups"][$j]["subf"] = $GLOBALS["SL"]->findDirFile(
+                                    $this->v["uploadInfo"][$i]["fld"], 
+                                    $baseFilen
+                                );
+                                $this->v["log1"] .= '<h3>' . $ps->ps_id . '</h3> Not Found: ' 
                                     . $this->v["uploadInfo"][$i]["ups"][$j]["full"] . '<br />';
                                 if (sizeof($this->v["uploadInfo"][$i]["ups"][$j]["subf"]) > 0) {
                                     foreach ($this->v["uploadInfo"][$i]["ups"][$j]["subf"] as $k => $fld) {
                                         $this->v["log1"] .= ', ' . $fld;
                                     }
-                                    $ps->PsUniqueStr = $this->v["uploadInfo"][$i]["ups"][$j]["subf"][
-                                        sizeof($this->v["uploadInfo"][$i]["ups"][$j]["subf"])-1];
+                                    $ind = sizeof($this->v["uploadInfo"][$i]["ups"][$j]["subf"])-1;
+                                    $ps->ps_unique_str = $this->v["uploadInfo"][$i]["ups"][$j]["subf"][$ind];
                                     $ps->save();
                                 }
-                                $this->v["log1"] .= '<br />new uniqueStr: ' . $ps->PsUniqueStr . '<br /><br />';
-                                $this->logAdd('session-stuff', 'Manually Restoring PowerScore#' . $ps->PsID 
-                                    . ' UniqueStr ' . $ps->PsUniqueStr . ' <i>(RII.getProccessUploadsBadLnks)</i>');
+                                $this->v["log1"] .= '<br />new uniqueStr: ' . $ps->ps_unique_str . '<br /><br />';
+                                $logDesc = 'Manually Restoring PowerScore#' . $ps->ps_id . ' UniqueStr '
+                                    . $ps->ps_unique_str . ' <i>(RII.getProccessUploadsBadLnks)</i>';
+                                $this->logAdd('session-stuff', $logDesc);
                             }
                         }
                     }
@@ -400,13 +439,15 @@ class ScoreAdminMisc extends ScorePrintReport
         $ret = '';
         if ($GLOBALS["SL"]->REQ->has('p')) {
             $ps = RIIPowerScore::find($GLOBALS["SL"]->REQ->get('p'));
-            if ($ps && isset($ps->PsID) && $this->v["isAdmin"]) {
+            if ($ps && isset($ps->ps_id) && $this->v["isAdmin"]) {
                 $this->loadTree(1);
-                $this->loadAllSessData('PowerScore', $ps->getKey());
+                $this->loadAllSessData('powerscore', $ps->getKey());
                 $ups = $this->getUploads(69, $this->v["isAdmin"]);
                 if (sizeof($ups) > 0) {
-                    foreach ($ups as $up) $ret .= $up;
-                    $ret .= '<style> #psUpload' . $ps->PsID . ' { display: table-row; } </style>';
+                    foreach ($ups as $up) {
+                        $ret .= $up;
+                    }
+                    $ret .= '<style> #psUpload' . $ps->ps_id . ' { display: table-row; } </style>';
                 }
             }
         }
@@ -420,21 +461,32 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         $this->v["nID"] = 838;
         $this->v["feedbackPages"] = ['', '', '', '', '', '', '', '', ''];
-        $this->v["feedbackPName"] = ['Your Farm', 'Your Growing Environments', 'Your Lighting', 'Your HVAC', 
-            'Your Annual Totals', 'Other Techniques & Energy', 'Contact & Options', '', ''];
-        $this->v["feedbackscores"] = RIIPowerScore::select('PsFeedback1', 'PsFeedback2', 'PsFeedback3', 'PsFeedback4',
-            'PsFeedback5', 'PsFeedback6', 'PsFeedback7', 'PsFeedback8', 'PsID', 'PsStatus', 'created_at')
+        $this->v["feedbackPName"] = [
+            'Your Farm', 
+            'Your Growing Environments', 
+            'Your Lighting', 
+            'Your HVAC', 
+            'Your Annual Totals', 
+            'Other Techniques & Energy', 
+            'Contact & Options', 
+            '', 
+            ''
+        ];
+        $this->v["feedbackscores"] = RIIPowerScore::select('ps_feedback1', 'ps_feedback2', 
+            'ps_feedback3', 'ps_feedback4', 'ps_feedback5', 'ps_feedback6', 'ps_feedback7', 
+            'ps_feedback8', 'ps_id', 'ps_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get();
         if ($this->v["feedbackscores"]->isNotEmpty()) {
             foreach ($this->v["feedbackscores"] as $ps) {
                 for ($page = 1; $page < 9; $page++) {
-                    if (isset($ps->{ 'PsFeedback' . $page }) && trim($ps->{ 'PsFeedback' . $page }) != '') {
-                        $this->v["feedbackPages"][($page-1)] .= strip_tags($ps->{ 'PsFeedback' . $page }) 
-                            . ' <a href="/calculated/read-' . $ps->PsID 
-                            . '" target="_blank" class="slGrey mL10 fPerc66">' . date("n/j/y", strtotime($ps->created_at)) . ' '
-                            . $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) . ' #' 
-                            . $ps->PsID . '</a><br /><br />';
+                    if (isset($ps->{ 'ps_feedback' . $page }) && trim($ps->{ 'ps_feedback' . $page }) != '') {
+                        $this->v["feedbackPages"][($page-1)] .= strip_tags($ps->{ 'ps_feedback' . $page }) 
+                            . ' <a href="/calculated/read-' . $ps->ps_id 
+                            . '" target="_blank" class="slGrey mL10 fPerc66">' 
+                            . date("n/j/y", strtotime($ps->created_at)) . ' '
+                            . $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->ps_status) 
+                            . ' #' . $ps->ps_id . '</a><br /><br />';
                     }
                 }
             }
@@ -445,18 +497,18 @@ class ScoreAdminMisc extends ScorePrintReport
     protected function reportPowerScoreFeedback()
     {
         $this->v["feedback"] = [];
-        $chk = DB::table('RII_PsFeedback')
-            ->join('RII_PowerScore', 'RII_PsFeedback.PsfPsID', '=', 'RII_PowerScore.PsID')
-            ->orderBy('RII_PsFeedback.created_at', 'desc')
-            ->select('RII_PowerScore.PsName', 'RII_PowerScore.PsEfficOverall', 'RII_PsFeedback.*')
+        $chk = DB::table('rii_ps_feedback')
+            ->join('rii_powerscore', 'rii_ps_feedback.psf_psid', '=', 'rii_powerscore.ps_id')
+            ->orderBy('rii_ps_feedback.created_at', 'desc')
+            ->select('rii_powerscore.ps_name', 'rii_powerscore.ps_effic_overall', 'rii_ps_feedback.*')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $row) {
-                if ((isset($row->PsfFeedback1) && trim($row->PsfFeedback1) != '')
-                    || (isset($row->PsfFeedback2) && trim($row->PsfFeedback2) != '')
-                    || (isset($row->PsfFeedback3) && trim($row->PsfFeedback3) != '')
-                    || (isset($row->PsfFeedback4) && trim($row->PsfFeedback4) != '')
-                    || (isset($row->PsfFeedback5) && trim($row->PsfFeedback5) != '')) {
+                if ((isset($row->psf_feedback1) && trim($row->psf_feedback1) != '')
+                    || (isset($row->psf_feedback2) && trim($row->psf_feedback2) != '')
+                    || (isset($row->psf_feedback3) && trim($row->psf_feedback3) != '')
+                    || (isset($row->psf_feedback4) && trim($row->psf_feedback4) != '')
+                    || (isset($row->psf_feedback5) && trim($row->psf_feedback5) != '')) {
                     $this->v["feedback"][] = $row;
                 }
             }
@@ -466,22 +518,25 @@ class ScoreAdminMisc extends ScorePrintReport
     
     protected function checkBadRecs()
     {
-        $this->v["goodies"] = [776, 788, 878, 881, 884, 899, 901, 914, 915, 920, 922, 929, 930, 932, 934, 947, 958, 993,
-            1140, 1235, 1364, 1365, 1390, 1396, 1427, 1449, 1477, 1492, 1498, 1503, 1505, 1506, 1605, 1634, 1696, 1714,
-            1771, 1829, 1840, 1869, 1879, 1894, 1917, 1919, 1955, 1959, 1978, 1986, 1993, 2033, 2040, 2056, 2170];
+        $this->v["goodies"] = [
+            776, 788, 878, 881, 884, 899, 901, 914, 915, 920, 922, 929, 930,  932, 934, 
+            947, 958, 993,1140, 1235, 1364, 1365, 1390, 1396, 1427, 1449, 1477, 1492, 
+            1498, 1503, 1505, 1506, 1605, 1634, 1696, 1714, 1771, 1829, 1840, 1869, 1879, 
+            1894, 1917, 1919, 1955, 1959, 1978, 1986, 1993, 2033, 2040, 2056, 2170
+        ];
         $this->initSearcher();
         $this->searcher->v["allscores"] = $added = [];
-        $chk = DB::table('RII_PowerScore')
-            ->leftJoin('RII_PSRankings', 'RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-            ->where('RII_PSRankings.PsRnkFilters', '')
-            ->where('RII_PowerScore.PsStatus', 'LIKE', $this->v["defCmplt"])
-            ->orderBy('RII_PowerScore.PsID', 'desc')
+        $chk = DB::table('rii_powerscore')
+            ->leftJoin('rii_ps_rankings', 'rii_ps_rankings.ps_rnk_psid', '=', 'rii_powerscore.ps_id')
+            ->where('rii_ps_rankings.ps_rnk_filters', '')
+            ->where('rii_powerscore.ps_status', 'LIKE', $this->v["defCmplt"])
+            ->orderBy('rii_powerscore.ps_id', 'desc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $ps) {
-                if (!in_array($ps->PsID, $added) && !in_array($ps->PsID, $this->v["goodies"])) {
+                if (!in_array($ps->ps_id, $added) && !in_array($ps->ps_id, $this->v["goodies"])) {
                     $this->searcher->v["allscores"][] = $ps;
-                    $added[] = $ps->PsID;
+                    $added[] = $ps->ps_id;
                 }
             }
         }
@@ -496,32 +551,32 @@ class ScoreAdminMisc extends ScorePrintReport
         }
         if (sizeof($searches) > 0) {
             foreach ($searches as $s) {
-                $rows = DB::table('RII_PowerScore')
-                    ->join('RII_PSRankings', function ($join) {
-                        $join->on('RII_PowerScore.PsID', '=', 'RII_PSRankings.PsRnkPSID')
-                            ->where('RII_PSRankings.PsRnkFilters', '');
+                $rows = DB::table('rii_powerscore')
+                    ->join('rii_ps_rankings', function ($join) {
+                        $join->on('rii_powerscore.ps_id', '=', 'rii_ps_rankings.ps_rnk_psid')
+                            ->where('rii_ps_rankings.ps_rnk_filters', '');
                     })
-                    ->where('RII_PowerScore.PsName', 'LIKE', '%' . $s . '%')
-                    ->orWhere('RII_PowerScore.PsZipCode', 'LIKE', '%' . $s . '%')
-                    ->orWhere('RII_PowerScore.PsCounty', 'LIKE', '%' . $s . '%')
-                    ->orWhere('RII_PowerScore.PsEmail', 'LIKE', '%' . $s . '%')
-                    ->orderBy('RII_PowerScore.PsName', 'asc')
+                    ->where('rii_powerscore.ps_name', 'LIKE', '%' . $s . '%')
+                    ->orWhere('rii_powerscore.ps_zip_code', 'LIKE', '%' . $s . '%')
+                    ->orWhere('rii_powerscore.ps_county', 'LIKE', '%' . $s . '%')
+                    ->orWhere('rii_powerscore.ps_email', 'LIKE', '%' . $s . '%')
+                    ->orderBy('rii_powerscore.ps_name', 'asc')
                     ->get();
-                $GLOBALS["SL"]->addSrchResults('name', $rows, 'PsID');
+                $GLOBALS["SL"]->addSrchResults('name', $rows, 'ps_id');
             }
         }
         $GLOBALS["SL"]->getDumpSrchResultIDs($searches, 1);
         if (sizeof($searches) > 0) {
             foreach ($searches as $s) {
-                $rows = DB::table('RII_PowerScore')
-                    ->join('RII_PSRankings', function ($join) {
-                        $join->on('RII_PowerScore.PsID', '=', 'RII_PSRankings.PsRnkPSID')
-                            ->where('RII_PSRankings.PsRnkFilters', '');
+                $rows = DB::table('rii_powerscore')
+                    ->join('rii_ps_rankings', function ($join) {
+                        $join->on('rii_powerscore.ps_id', '=', 'rii_ps_rankings.ps_rnk_psid')
+                            ->where('rii_ps_rankings.ps_rnk_filters', '');
                     })
-                    ->whereIn('RII_PowerScore.PsID', $GLOBALS["SL"]->x["srchResDump"])
-                    ->orderBy('RII_PowerScore.PsName', 'asc')
+                    ->whereIn('rii_powerscore.ps_id', $GLOBALS["SL"]->x["srchResDump"])
+                    ->orderBy('rii_powerscore.ps_name', 'asc')
                     ->get();
-                $GLOBALS["SL"]->addSrchResults('dump', $rows, 'PsID');
+                $GLOBALS["SL"]->addSrchResults('dump', $rows, 'ps_id');
             }
         }
         return view('vendor.cannabisscore.nodes.786-admin-search-results', $this->v)->render();
@@ -535,36 +590,35 @@ class ScoreAdminMisc extends ScorePrintReport
         $grapher->addDataLineType('archived', 'Archived', '', '#726659', '#726659');
         $grapher->addDataLineType('incomplete', 'Incomplete', '', '#F07B3A', '#F07B3A');
         $cutoffDate = $grapher->getPastStartDate() . ' 00:00:00';
-        $recentAttempts = RIIPowerScore::whereNotNull('PsZipCode')
-            ->where('PsZipCode', 'NOT LIKE', '')
+        $recentAttempts = RIIPowerScore::whereNotNull('ps_zip_code')
+            ->where('ps_zip_code', 'NOT LIKE', '')
             ->where('created_at', '>=', $cutoffDate)
-            ->select('PsStatus', 'created_at')
+            ->select('ps_status', 'created_at')
             ->get();
         if ($recentAttempts->isNotEmpty()) {
             foreach ($recentAttempts as $i => $rec) {
-                if ($rec->PsStatus == $this->statusIncomplete) {
+                if ($rec->ps_status == $this->statusIncomplete) {
                     $grapher->addDayTally('incomplete', $rec->created_at);
-                } elseif ($rec->PsStatus == $this->statusComplete) {
+                } elseif ($rec->ps_status == $this->statusComplete) {
                     $grapher->addDayTally('complete', $rec->created_at);
-                } elseif ($rec->PsStatus == $this->statusArchive) {
+                } elseif ($rec->ps_status == $this->statusArchive) {
                     $grapher->addDayTally('archived', $rec->created_at);
                 }
             }
         }
-        return '<h5 class="slBlueDark">'
-            . 'Recent PowerScore Submission Attempts</h5>'
+        return '<h5 class="slBlueDark">Recent PowerScore Submission Attempts</h5>'
             . $grapher->printDailyGraph();
     }
     
     protected function printAdminPsComms()
     {
         $comms = $adms = [];
-        if (isset($this->sessData->dataSets["PSCommunications"])) {
-            $comms = $this->sessData->dataSets["PSCommunications"];
+        if (isset($this->sessData->dataSets["ps_communications"])) {
+            $comms = $this->sessData->dataSets["ps_communications"];
             if (sizeof($comms) > 0) {
                 foreach ($comms as $com) {
-                    $adms[$com->PsComUser] 
-                        = $this->printUserLnk($com->PsComUser);
+                    $adms[$com->ps_com_user] = $this
+                        ->printUserLnk($com->ps_com_user);
                 }
             }
         }
@@ -591,9 +645,9 @@ class ScoreAdminMisc extends ScorePrintReport
             if ($request->has('logCommFld') 
                 && trim($request->logCommFld) != '') {
                 $com = new RIIPSCommunications;
-                $com->PsComPSID = $this->v["ps"];
-                $com->PsComUser = $this->v["uID"];
-                $com->PsComDescription = trim($request->logCommFld);
+                $com->ps_com_psid = $this->v["ps"];
+                $com->ps_com_user = $this->v["uID"];
+                $com->ps_com_description = trim($request->logCommFld);
                 $com->save();
                 $redir = '/calculated/read-' . $this->v["ps"];
                 return $this->redir($redir, true);
@@ -636,33 +690,35 @@ class ScoreAdminMisc extends ScorePrintReport
         $this->v["errorNotes"] = '';
         if ($this->v["manus"]->isNotEmpty()) {
             foreach ($this->v["manus"] as $m => $manu) {
-                $this->v["manus"][$m]->ManuCntFlower 
-                    = $this->v["manus"][$m]->ManuCntVeg
-                    = $this->v["manus"][$m]->ManuCntClone
-                    = $this->v["manus"][$m]->ManuCntMother = 0;
+                $this->v["manus"][$m]->manu_cnt_flower 
+                    = $this->v["manus"][$m]->manu_cnt_veg
+                    = $this->v["manus"][$m]->manu_cnt_clone
+                    = $this->v["manus"][$m]->manu_cnt_mother = 0;
             }
             $areaIDs = $areaIDsDone = [];
-            $chk = RIIPSAreas::whereIn('PsAreaPSID', function($query){
-                $query->select('PsID')
-                ->from(with(new RIIPowerScore)->getTable())
-                ->where('PsStatus', 243)
-                ->where('PsEfficLightingStatus', 243);
-            })->select('PsAreaID')->get();
+            $chk = RIIPSAreas::whereIn('ps_area_psid', function($query){
+                    $query->select('ps_id')
+                    ->from(with(new RIIPowerScore)->getTable())
+                    ->where('ps_status', 243)
+                    ->where('ps_effic_lighting_status', 243);
+                })
+                ->select('ps_area_id')
+                ->get();
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $area) {
-                    $areaIDs[] = $area->PsAreaID;
+                    $areaIDs[] = $area->ps_area_id;
                 }
             }
-            $lgts = DB::table('RII_PSLightTypes')
-                ->join('RII_PSAreas', 'RII_PSAreas.PsAreaID', 
-                    '=', 'RII_PSLightTypes.PsLgTypAreaID')
-                ->where('RII_PSLightTypes.PsLgTypMake', 'NOT LIKE', '')
-                ->whereNotNull('RII_PSLightTypes.PsLgTypMake')
-                ->whereIn('RII_PSLightTypes.PsLgTypAreaID', $areaIDs)
+            $lgts = DB::table('rii_ps_light_types')
+                ->join('rii_ps_areas', 'rii_ps_areas.ps_area_id', 
+                    '=', 'rii_ps_light_types.ps_lg_typ_area_id')
+                ->where('rii_ps_light_types.ps_lg_typ_make', 'NOT LIKE', '')
+                ->whereNotNull('rii_ps_light_types.ps_lg_typ_make')
+                ->whereIn('rii_ps_light_types.ps_lg_typ_area_id', $areaIDs)
                 ->select(
-                    'RII_PSLightTypes.PsLgTypMake', 
-                    'RII_PSAreas.PsAreaType', 
-                    'RII_PSAreas.PsAreaPSID'
+                    'rii_ps_light_types.ps_lg_typ_make', 
+                    'rii_ps_areas.ps_area_type', 
+                    'rii_ps_areas.ps_area_psid'
                 )
                 ->get();
             foreach ($this->v["manus"] as $m => $manu) {
@@ -684,9 +740,9 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         $this->v["partners"] = [];
         $chk = User::whereIn('id', function($query){
-                $query->select('RoleUserUID')
+                $query->select('role_user_uid')
                 ->from(with(new SLUsersRoles)->getTable())
-                ->where('RoleUserRID', 368); // partner def ID
+                ->where('role_user_rid', 368); // partner def ID
             })
             ->select('id', 'name', 'email')
             ->orderBy('name', 'asc')
@@ -718,22 +774,20 @@ class ScoreAdminMisc extends ScorePrintReport
             'Mother' => []
         ];
         foreach($lgts as $lgt) {
-            $nick = $this->getStageNick($lgt->PsAreaType);
+            $nick = $this->getStageNick($lgt->ps_area_type);
             $pos = stripos(
-                ' ' . $lgt->PsLgTypMake . ' ', 
-                ' ' . $this->v["manus"][$m]->ManuName . ' '
+                ' ' . $lgt->ps_lg_typ_make . ' ', 
+                ' ' . $this->v["manus"][$m]->manu_name . ' '
             );
             if ($pos !== false
-                && !in_array($lgt->PsAreaPSID, $found[$nick])) {
-                $found[$nick][] = $lgt->PsAreaPSID;
+                && !in_array($lgt->ps_area_psid, $found[$nick])) {
+                $found[$nick][] = $lgt->ps_area_psid;
             }
         }
         $stages = ['Flower', 'Veg', 'Clone', 'Mother'];
         foreach ($stages as $nick) {
-            $this->v["manus"][$m]->{ 'ManuCnt' . $nick } 
-                += sizeof($found[$nick]);
-            $this->v["manus"][$m]->{ 'ManuIDs' . $nick } 
-                = ',' . implode(',', $found[$nick]) . ',';
+            $this->v["manus"][$m]->{ 'manu_cnt_' . $nick } += sizeof($found[$nick]);
+            $this->v["manus"][$m]->{ 'manu_ids_' . $nick } = ',' . implode(',', $found[$nick]) . ',';
         }
         return true;
     }
@@ -748,18 +802,16 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         if ($GLOBALS["SL"]->REQ->has('addManu') 
             && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
-            $lines = $GLOBALS["SL"]->mexplode("\n", 
-                $GLOBALS["SL"]->REQ->get('addManu'));
+            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addManu'));
             if (sizeof($lines) > 0) {
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
                     if ($line != '') {
-                        $chk = RIIManufacturers::where(
-                                'ManuName', 'LIKE', $line)
+                        $chk = RIIManufacturers::where('manu_name', 'LIKE', $line)
                             ->first();
-                        if (!$chk || !isset($chk->ManuID)) {
+                        if (!$chk || !isset($chk->manu_id)) {
                             $chk = new RIIManufacturers;
-                            $chk->ManuName = $line;
+                            $chk->manu_name = $line;
                             $chk->save();
                         }
                     }
@@ -771,30 +823,28 @@ class ScoreAdminMisc extends ScorePrintReport
             && intVal($GLOBALS["SL"]->REQ->get('partnerManu')) > 0) {
             $usr = intVal($GLOBALS["SL"]->REQ->partnerUser);
             $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
-            $chk = SLUsersRoles::where('RoleUserUID', $usr)
-                ->where('RoleUserRID', 368) // partner def ID
+            $chk = SLUsersRoles::where('role_user_uid', $usr)
+                ->where('role_user_rid', 368) // partner def ID
                 ->first();
             if ($chk) {
-                $usrInfo = RIIUserInfo::where('UsrUserID', $usr)
+                $usrInfo = RIIUserInfo::where('usr_user_id', $usr)
                     ->first();
-                if (!$usrInfo || !isset($usrInfo->UsrUserID)) {
+                if (!$usrInfo || !isset($usrInfo->usr_user_id)) {
                     $usrInfo = new RIIUserInfo;
-                    $usrInfo->UsrUserID = $usr;
+                    $usrInfo->usr_user_id = $usr;
                 }
                 if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')) {
-                    $usrInfo->UsrCompanyName = trim(
-                        $GLOBALS["SL"]->REQ->partnerCompanyName
-                    );
+                    $usrInfo->usr_company_name = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
                 }
                 $usrInfo->save();
             }
-            $chk = RIIUserManufacturers::where('UsrManUserID', $usr)
-                ->where('UsrManManuID', $manu)
+            $chk = RIIUserManufacturers::where('usr_man_user_id', $usr)
+                ->where('usr_man_manu_id', $manu)
                 ->first();
-            if (!$chk || !isset($chk->UsrManManuID)) {
+            if (!$chk || !isset($chk->usr_man_manu_id)) {
                 $chk = new RIIUserManufacturers;
-                $chk->UsrManUserID = $usr;
-                $chk->UsrManManuID = $manu;
+                $chk->usr_man_user_id = $usr;
+                $chk->usr_man_manu_id = $manu;
                 $chk->save();
             }
         }
@@ -827,8 +877,7 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         if ($GLOBALS["SL"]->REQ->has('addModels') 
             && trim($GLOBALS["SL"]->REQ->get('addModels')) != '') {
-            $lines = $GLOBALS["SL"]->mexplode("\n", 
-                $GLOBALS["SL"]->REQ->get('addModels'));
+            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addModels'));
             if (sizeof($lines) > 0) {
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
@@ -838,24 +887,22 @@ class ScoreAdminMisc extends ScorePrintReport
                             foreach ($cols as $i => $col) {
                                 $cols[$i] = trim($col);
                             }
-                            $manu = RIIManufacturers::where(
-                                    'ManuName', 'LIKE', $cols[0])
+                            $manu = RIIManufacturers::where('manu_name', 'LIKE', $cols[0])
                                 ->first();
-                            if (!$manu || !isset($manu->ManuName)) {
+                            if (!$manu || !isset($manu->manu_name)) {
                                 $manu = new RIIManufacturers;
-                                $manu->ManuName = $cols[0];
+                                $manu->manu_name = $cols[0];
                                 $manu->save();
                             }
-                            $chk = RIILightModels::where(
-                                    'LgtModManuID', 'LIKE', $manu->ManuID)
-                                ->where('LgtModName', 'LIKE', $cols[1])
+                            $chk = RIILightModels::where('lgt_mod_manu_id', 'LIKE', $manu->manu_id)
+                                ->where('lgt_mod_name', 'LIKE', $cols[1])
                                 ->first();
-                            if (!$chk || !isset($chk->LgtModID)) {
+                            if (!$chk || !isset($chk->lgt_mod_id)) {
                                 $chk = new RIILightModels;
-                                $chk->LgtModManuID = $manu->ManuID;
-                                $chk->LgtModName = $cols[1];
+                                $chk->lgt_mod_manu_id = $manu->manu_id;
+                                $chk->lgt_mod_name = $cols[1];
                             }
-                            $chk->LgtModTech = $cols[2];
+                            $chk->lgt_mod_tech = $cols[2];
                             $chk->save();
                         }
                     }
@@ -880,12 +927,12 @@ class ScoreAdminMisc extends ScorePrintReport
                     $ret .= '<div class="row mT10">
                             <div class="col-6">
                                 <a href="/dash/competitive-performance?manu=' 
-                                    . urlencode($manu->ManuName) . '" '
+                                    . urlencode($manu->manu_name) . '" '
                                     . 'class="btn btn-xl btn-primary btn-block">' 
-                                    . $manu->ManuName . ' Competitive Performance</a>
+                                    . $manu->manu_name . ' Competitive Performance</a>
                             </div><div class="col-6 pT10">
                                 <p>Compare the competitive advantage of 
-                                growers who use <b>' . $manu->ManuName 
+                                growers who use <b>' . $manu->manu_name 
                                 . '</b> during at least one growth stage.</p>
                             </div>
                         </div>';
@@ -921,7 +968,7 @@ class ScoreAdminMisc extends ScorePrintReport
     protected function tmpDebug($str = '')
     {
         $tmp = ' - tmpDebug - ' . $str;
-        $chk = RIIPSAreas::where('PsAreaPSID', 169)
+        $chk = RIIPSAreas::where('ps_area_psid', 169)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $row) {

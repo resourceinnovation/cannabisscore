@@ -11,77 +11,77 @@
     @endif */ ?>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Score <br />ID#',
-            "srtVal" => 'PsID',
+            "srtVal" => 'ps_id',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Overall',
-            "srtVal" => 'PsEfficOverall',
+            "srtVal" => 'ps_effic_overall',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Facility <br />Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
-            "srtVal" => 'PsEfficFacility',
+            "srtVal" => 'ps_effic_facility',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Production <br />Score <div class="fPerc66 slGrey">g/kWh</div>',
-            "srtVal" => 'PsEfficProduction',
+            "srtVal" => 'ps_effic_production',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Lighting <br />Score <div class="fPerc66 slGrey">W/SqFt</div>',
-            "srtVal" => 'PsEfficLighting',
+            "srtVal" => 'ps_effic_lighting',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'HVAC <br />Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
-            "srtVal" => 'PsEfficHvac',
+            "srtVal" => 'ps_effic_hvac',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Grams',
-            "srtVal" => 'PsGrams',
+            "srtVal" => 'ps_grams',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'kWh',
-            "srtVal" => 'PsKWH',
+            "srtVal" => 'ps_kwh',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Sq Ft',
-            "srtVal" => 'PsTotalSize',
+            "srtVal" => 'ps_total_size',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Type',
-            "srtVal" => 'PsCharacterize',
+            "srtVal" => 'ps_characterize',
             "sort"   => $sort
         ])->render() !!}
     @if (isset($fltCmpl) && $fltCmpl == 0 
         && Auth::user()->hasRole('administrator|staff'))
         <br />{!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Status',
-            "srtVal" => 'PsStatus',
+            "srtVal" => 'ps_status',
             "sort"   => $sort
         ])->render() !!}
     @endif
@@ -89,13 +89,13 @@
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'County State',
-            "srtVal" => 'PsCounty',
+            "srtVal" => 'ps_county',
             "sort"   => $sort
         ])->render() !!}
     @if (Auth::user()->hasRole('administrator|staff'))
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Zip',
-            "srtVal" => 'PsZipCode',
+            "srtVal" => 'ps_zip_code',
             "sort"   => $sort
         ])->render() !!}
     @endif

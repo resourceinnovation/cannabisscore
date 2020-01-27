@@ -19,35 +19,10 @@ use App\Models\RIICompetitors;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use CannabisScore\Controllers\CannabisScoreSearcher;
+use CannabisScore\Controllers\ScoreReportLightingManu;
 
-class ScoreListings
+class ScoreListings extends ScoreReportLightingManu
 {
-    protected $v        = [];
-    protected $searcher = null;
-    
-    public function __construct($uID = 0, $user = null, $usrInfo = null)
-    {
-        $this->v["uID"]     = $uID;
-        $this->v["user"]    = $user;
-        $this->v["usrInfo"] = $usrInfo;
-        $this->v["isAdmin"] = ($this->v["user"] 
-            && $this->v["user"]->hasRole('administrator|staff'));
-
-        $this->v["defCmplt"] = 243;
-        $this->v["defArch"]  = 364;
-        $this->v["defInc"]   = 242;
-
-        $this->v["frmTypOut"] = $GLOBALS["SL"]->def
-            ->getID('PowerScore Farm Types', 'Outdoor');
-        $this->v["frmTypIn"]  = $GLOBALS["SL"]->def
-            ->getID('PowerScore Farm Types', 'Indoor');
-        $this->v["frmTypGrn"] = $GLOBALS["SL"]->def
-            ->getID('PowerScore Farm Types', 
-                'Greenhouse/Hybrid/Mixed Light');
-
-        $this->searcher = new CannabisScoreSearcher;
-        $this->copyUserToSearcher();
-    }
     
     public function copyUserToSearcher()
     {
@@ -65,24 +40,15 @@ class ScoreListings
     {
         if ($GLOBALS["SL"]->REQ->has('random') 
             && intVal($GLOBALS["SL"]->REQ->get('random')) == 1) {
-            $randScore = RIIPowerScore::where(
-                    'PsStatus', $this->v["defCmplt"])
-                ->where('PsEfficFacility', '>', 0)
-                ->where('PsEfficProduction', '>', 0)
-                ->inRandomOrder()
-                ->first();
-            if ($randScore && isset($randScore->PsID)) {
-                return '<script type="text/javascript"> '
-                    . 'setTimeout("window.location=\'/calculated/read-' 
-                    . $randScore->PsID . '\'", 1); </script><br /><br /><center>'
-                    . $GLOBALS["SL"]->sysOpts["spinner-code"] . '</center>';
-            }
+            return $this->getRandomPowerScores();
         }
         $GLOBALS["SL"]->loadStates();
         $this->searcher->v["allListings"] = '';
+        $this->searcher->v["fltStateClim"] = '';
 
         $usrCompany = '';
-        if ($this->v["user"] && $this->v["user"]->hasRole('partner')
+        if ($this->v["user"] 
+            && $this->v["user"]->hasRole('partner')
             && isset($this->v["usrInfo"]) 
             && isset($this->v["usrInfo"]->company)
             && trim($this->v["usrInfo"]->company) != '') {
@@ -92,8 +58,7 @@ class ScoreListings
         $origFltManuLgt = '';
         if ($GLOBALS["SL"]->REQ->has('fltManuLgt')) {
             $origFltManuLgt = trim($GLOBALS["SL"]->REQ->fltManuLgt);
-            if ($this->v["isAdmin"] 
-                || $origFltManuLgt == $usrCompany) {
+            if ($this->v["isAdmin"] || $origFltManuLgt == $usrCompany) {
                 $psidManuLgt = [];
                 $this->searcher->addAllManuPSIDs($psidManuLgt);
                 if (sizeof($psidManuLgt) == 0) {
@@ -108,6 +73,8 @@ class ScoreListings
                 $origFltManuLgt = $usrCompany;
             }
         }
+
+        $this->fakeMultiSite();
 
         if (in_array($origFltManuLgt, ['', '0'])) {
 
@@ -126,12 +93,11 @@ class ScoreListings
                 foreach ($manus as $manu) {
                     $this->searcher->getSearchFilts();
                     //$this->searcher->searchResultsXtra();
-                    $this->searcher->v["fltManuLgt"] = $manu->ManuID;
+                    $this->searcher->v["fltManuLgt"] = $manu->manu_id;
                     $this->searcher->v["allListings"] .= '<a target="_blank" '
                         . 'href="/dash/competitive-performance?manu='
-                        . urlencode($manu->ManuName) . '"><h4>'
-                        . $manu->ManuName . '</h4></a>'
-                        . $this->getPowerScoresPublic($nID);
+                        . urlencode($manu->manu_name) . '"><h4>' . $manu->manu_name 
+                        . '</h4></a>' . $this->getPowerScoresPublic($nID);
                 }
             }
 
@@ -149,19 +115,15 @@ class ScoreListings
                 );
             }
             if ($this->searcher->v["fltClimate"] != '') {
-                $exportFile .= ' Climate Zone ' 
-                    . $this->searcher->v["fltClimate"];
+                $exportFile .= ' Climate Zone ' . $this->searcher->v["fltClimate"];
             }
-            $exportFile = str_replace(' ', '_', $exportFile) 
-                . '-' . date("Y-m-d") . '.xls';
+            $exportFile = str_replace(' ', '_', $exportFile) . '-' . date("Y-m-d") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($ret, $exportFile);
         }
 
-        $this->searcher->v["manuList"] = RIIManufacturers::orderBy(
-                'ManuName', 'asc')
+        $this->searcher->v["manuList"] = RIIManufacturers::orderBy('manu_name', 'asc')
             ->get();
-        $this->searcher->v["usrCompanies"] = RIIUserInfo::orderBy(
-                'UsrCompanyName', 'asc')
+        $this->searcher->v["usrCompanies"] = RIIUserInfo::orderBy('usr_company_name', 'asc')
             ->get();
         $this->searcher->v["psFiltChks"] = view(
             'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
@@ -178,14 +140,29 @@ class ScoreListings
         )->render();
     }
     
+    protected function getRandomPowerScores()
+    {
+        $randScore = RIIPowerScore::where('ps_status', $this->v["defCmplt"])
+            ->where('ps_effic_facility', '>', 0)
+            ->where('ps_effic_production', '>', 0)
+            ->inRandomOrder()
+            ->first();
+        if ($randScore && isset($randScore->ps_id)) {
+            return '<script type="text/javascript"> '
+                . 'setTimeout("window.location=\'/calculated/read-' 
+                . $randScore->ps_id . '\'", 1); </script><br /><br /><center>'
+                . $GLOBALS["SL"]->sysOpts["spinner-code"] . '</center>';
+        }
+        return 'None found.';
+    }
+    
     protected function getPowerScoresPublic($nID)
     {
         $ret = '';
         $xtra = "";
         if ($GLOBALS["SL"]->REQ->has('review')) {
             $this->v["fltCmpl"] = 0;
-            $xtra = "->whereNotNull('PsNotes')"
-                . "->where('PsNotes', 'NOT LIKE', '')";
+            $xtra = "->whereNotNull('ps_notes')->where('ps_notes', 'NOT LIKE', '')";
         }
         $this->searcher->loadAllScoresPublic($xtra);
         $this->searcher->v["allmores"] = [];
@@ -199,23 +176,22 @@ class ScoreListings
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $ps) {
                 $areaIDs = [];
-                $areas = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
+                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
-                        $areaIDs[] = $area->PsAreaID;
+                        $areaIDs[] = $area->ps_area_id;
                     }
                 }
-                $lgts = RIIPSLightTypes::whereIn('PsLgTypAreaID', $areaIDs)
+                $lgts = RIIPSLightTypes::whereIn('ps_lg_typ_area_id', $areaIDs)
                     ->get();
-                $this->searcher->v["allmores"][$ps->PsID] = [];
-                $this->searcher->v["allmores"][$ps->PsID]["areas"]   = $areas;
-                $this->searcher->v["allmores"][$ps->PsID]["areaIDs"] = $areaIDs;
-                $this->searcher->v["allmores"][$ps->PsID]["lights"]  = $lgts;
+                $this->searcher->v["allmores"][$ps->ps_id] = [];
+                $this->searcher->v["allmores"][$ps->ps_id]["areas"]   = $areas;
+                $this->searcher->v["allmores"][$ps->ps_id]["areaIDs"] = $areaIDs;
+                $this->searcher->v["allmores"][$ps->ps_id]["lights"]  = $lgts;
             }
             if ($GLOBALS["SL"]->REQ->has('lighting') 
-                && $this->searcher->v["allmores"][$ps->PsID]["lights"]
-                    ->isNotEmpty()) {
+                && $this->searcher->v["allmores"][$ps->ps_id]["lights"]->isNotEmpty()) {
                 foreach ($this->searcher->v["allscores"] as $ps) {
                     $this->getAllPowerScoresPublicAreaLights($ps);
                 }
@@ -260,10 +236,9 @@ class ScoreListings
         $this->v["allranks"] = [];
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $s) {
-                $this->v["allranks"][$s->PsID] 
-                    = RIIPSRankings::where('PsRnkPSID', $s->PsID)
-                        ->where('PsRnkFilters', '&fltFarm=0')
-                        ->first();
+                $this->v["allranks"][$s->ps_id] = RIIPSRankings::where('ps_rnk_psid', $s->ps_id)
+                    ->where('ps_rnk_filters', '&fltFarm=0')
+                    ->first();
             }
         }
         return true;
@@ -271,35 +246,35 @@ class ScoreListings
     
     protected function getAllPowerScoresPublicAreaLights($ps)
     {
-        foreach ($this->searcher->v["allmores"][$ps->PsID]["areas"] as $a => $area) {
-            foreach ($this->searcher->v["allmores"][$ps->PsID]["lights"] as $l => $lgt) {
-                if ($lgt->PsLgTypAreaID == $area->PsAreaID) {
-                    if (!isset($this->searcher->v["allights"][$area->PsAreaType][$ps->PsID])) {
+        foreach ($this->searcher->v["allmores"][$ps->ps_id]["areas"] as $a => $area) {
+            foreach ($this->searcher->v["allmores"][$ps->ps_id]["lights"] as $l => $lgt) {
+                if ($lgt->ps_lg_typ_area_id == $area->ps_area_id) {
+                    if (!isset($this->searcher->v["allights"][$area->ps_area_type][$ps->ps_id])) {
                         $lgtDef = $GLOBALS["SL"]->def->getVal(
                             'PowerScore Light Types', 
-                            $lgt->PsLgTypLight
+                            $lgt->ps_lg_typ_light
                         );
                         $wsft = '-';
-                        if (intVal($area->PsAreaSize) > 0) {
-                            $wsft = ($lgt->PsLgTypCount*$lgt->PsLgTypWattage)
-                                /$area->PsAreaSize;
+                        if (intVal($area->ps_area_size) > 0) {
+                            $wsft = ($lgt->ps_lg_typ_count*$lgt->ps_lg_typ_wattage)
+                                /$area->ps_area_size;
                         }
-                        $this->searcher->v["allights"][$area->PsAreaType][$ps->PsID] = [
+                        $this->searcher->v["allights"][$area->ps_area_type][$ps->ps_id] = [
                             "type" => $lgtDef,
                             "wsft" => $wsft,
-                            "days" => intVal($area->PsAreaDaysCycle),
-                            "hour" => intVal($lgt->PsLgTypHours)
+                            "days" => intVal($area->ps_area_days_cycle),
+                            "hour" => intVal($lgt->ps_lg_typ_hours)
                         ];
                     } else {
-                        $this->searcher->v["allights"][$area->PsAreaType][$ps->PsID]["type"] 
+                        $this->searcher->v["allights"][$area->ps_area_type][$ps->ps_id]["type"] 
                             .= ', ' . $GLOBALS["SL"]->def->getVal(
                                 'PowerScore Light Types', 
-                                $lgt->PsLgTypLight
+                                $lgt->ps_lg_typ_light
                             );
-                        if (intVal($area->PsAreaSize) > 0) {
-                            $this->searcher->v["allights"][$area->PsAreaType][$ps->PsID]["wsft"] 
-                                += ($lgt->PsLgTypCount*$lgt->PsLgTypWattage)
-                                    /$area->PsAreaSize;
+                        if (intVal($area->ps_area_size) > 0) {
+                            $this->searcher->v["allights"][$area->ps_area_type][$ps->ps_id]["wsft"] 
+                                += ($lgt->ps_lg_typ_count*$lgt->ps_lg_typ_wattage)
+                                    /$area->ps_area_size;
                         }
                     }
                 }
@@ -310,34 +285,32 @@ class ScoreListings
     
     public function getCultClassicReport()
     {
-        $this->v["farms"] = $this->v["psAdded"] 
-            = $this->v["namesChecked"] = [];
+        $this->v["farms"] = $this->v["psAdded"] = $this->v["namesChecked"] = [];
         $defCC = $GLOBALS["SL"]->def->getID(
             'PowerScore Competitions',
             'Cultivation Classic'
         );
-        $chk = RIICompetitors::where('CmptYear', '=', date("Y"))
-            ->where('CmptCompetition', '=', $defCC)
-            ->orderBy('CmptName', 'asc')
+        $chk = RIICompetitors::where('cmpt_year', '=', date("Y"))
+            ->where('cmpt_competition', '=', $defCC)
+            ->orderBy('cmpt_name', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $farm) {
-                $this->loadCultClassicFarmName($i, $farm->CmptName);
+                $this->loadCultClassicFarmName($i, $farm->cmpt_name);
             }
         }
-        $chk = DB::table('RII_PowerScore')
-            ->join('RII_PSForCup', function ($join) {
-                $join->on('RII_PSForCup.PsCupPSID', 
-                        '=', 'RII_PowerScore.PsID')
-                    ->where('RII_PSForCup.PsCupCupID', $defCC);
+        $chk = DB::table('rii_powerscore')
+            ->join('rii_ps_for_cup', function ($join) {
+                $join->on('rii_ps_for_cup.ps_cup_psid', '=', 'rii_powerscore.ps_id')
+                    ->where('rii_ps_for_cup.ps_cup_cup_id', $defCC);
             })
-            ->leftJoin('RII_PSRankings', function ($join) {
-                $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-                    ->where('RII_PSRankings.PsRnkFilters', '&fltFarm=0');
+            ->leftJoin('rii_ps_rankings', function ($join) {
+                $join->on('rii_ps_rankings.ps_rnk_psid', '=', 'rii_powerscore.ps_id')
+                    ->where('rii_ps_rankings.ps_rnk_filters', '&fltFarm=0');
             })
-            ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
-            ->whereNotIn('RII_PowerScore.PsID', $this->v["psAdded"])
-            ->orderBy('RII_PowerScore.PsName', 'asc')
+            ->where('rii_powerscore.ps_year', 'LIKE', (date("Y")-1))
+            ->whereNotIn('rii_powerscore.ps_id', $this->v["psAdded"])
+            ->orderBy('rii_powerscore.ps_name', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $ps) {
@@ -348,9 +321,8 @@ class ScoreListings
         if (sizeof($this->v["farms"]) > 0) {
             foreach ($this->v["farms"] as $i => $f) {
                 if (isset($this->v["farms"][$i]["ps"]) 
-                    && isset($this->v["farms"][$i]["ps"]->PsStatus)) {
-                    if ($this->v["farms"][$i]["ps"]->PsStatus 
-                        == $this->v["defInc"]) {
+                    && isset($this->v["farms"][$i]["ps"]->ps_status)) {
+                    if ($this->v["farms"][$i]["ps"]->ps_status == $this->v["defInc"]) {
                         $this->v["farmTots"][0]++;
                     } else {
                         $this->v["farmTots"][1]++;
@@ -385,49 +357,50 @@ class ScoreListings
             "name" => $farmName,
             "ps"   => [],
             "srch" => []
-            ];
-        $chk2 = DB::table('RII_PowerScore')
-            ->leftJoin('RII_PSRankings', function ($join) {
-                $join->on('RII_PSRankings.PsRnkPSID', '=', 'RII_PowerScore.PsID')
-                    ->where('RII_PSRankings.PsRnkFilters', '&fltFarm=0');
+        ];
+        $chk2 = DB::table('rii_powerscore')
+            ->leftJoin('rii_ps_rankings', function ($join) {
+                $join->on('rii_ps_rankings.ps_rnk_psid', '=', 'rii_powerscore.ps_id')
+                    ->where('rii_ps_rankings.ps_rnk_filters', '&fltFarm=0');
             })
-            ->where('RII_PowerScore.PsName', 'LIKE', $farmName)
-            ->where('RII_PowerScore.PsYear', 'LIKE', (date("Y")-1))
-            ->whereIn('RII_PowerScore.PsStatus', [$this->v["defCmplt"], 364])
-            ->orderBy('RII_PowerScore.PsID', 'desc')
+            ->where('rii_powerscore.ps_name', 'LIKE', $farmName)
+            ->where('rii_powerscore.ps_year', 'LIKE', (date("Y")-1))
+            ->whereIn('rii_powerscore.ps_status', [$this->v["defCmplt"], 364])
+            ->orderBy('rii_powerscore.ps_id', 'desc')
             ->get();
         if ($chk2->isNotEmpty()) {
             foreach ($chk2 as $j => $ps) {
                 if ($j == 0) {
                     $this->v["farms"][$i]["ps"] = $ps;
-                    $this->v["psAdded"][] = $ps->PsID;
+                    $this->v["psAdded"][] = $ps->ps_id;
                 }
             }
         } else {
-            $chk2 = RIIPowerScore::where('PsName', 'LIKE', $farmName)
-                ->where('PsStatus', 'LIKE', $this->v["defInc"])
-                ->where('PsYear', 'LIKE', (date("Y")-1))
-                ->orderBy('PsID', 'desc')
+            $chk2 = RIIPowerScore::where('ps_name', 'LIKE', $farmName)
+                ->where('ps_status', 'LIKE', $this->v["defInc"])
+                ->where('ps_year', 'LIKE', (date("Y")-1))
+                ->orderBy('ps_id', 'desc')
                 ->get();
             if ($chk2->isNotEmpty()) {
                 foreach ($chk2 as $j => $ps) {
                     if ($j == 0) {
                         $this->v["farms"][$i]["ps"] = $ps;
-                        $this->v["psAdded"][] = $ps->PsID;
+                        $this->v["psAdded"][] = $ps->ps_id;
                     }
                 }
             } else {
                 $srchs = $GLOBALS["SL"]->parseSearchWords($farmName);
                 if (sizeof($srchs) > 0) {
                     foreach ($srchs as $srch) {
-                        $chk2 = RIIPowerScore::where('PsName', 'LIKE', '%' . $srch . '%')
-                            ->where('PsYear', 'LIKE', (date("Y")-1))
+                        $chk2 = RIIPowerScore::where('ps_name', 'LIKE', '%' . $srch . '%')
+                            ->where('ps_year', 'LIKE', (date("Y")-1))
                             ->get();
                         if ($chk2->isNotEmpty()) {
                             foreach ($chk2 as $j => $ps) {
-                                if (isset($ps->PsName) && trim($ps->PsName) != '' 
-                                    && !isset($this->v["farms"][$i]["srch"][$ps->PsID])) {
-                                    $this->v["farms"][$i]["srch"][$ps->PsID] = $ps->PsName;
+                                if (isset($ps->ps_name) 
+                                    && trim($ps->ps_name) != '' 
+                                    && !isset($this->v["farms"][$i]["srch"][$ps->ps_id])) {
+                                    $this->v["farms"][$i]["srch"][$ps->ps_id] = $ps->ps_name;
                                 }
                             }
                         }
@@ -440,11 +413,10 @@ class ScoreListings
     
     protected function loadCultClassicID($ps)
     {
-        if (!isset($ps->PsName) 
-            || !in_array($ps->PsName, $this->v["namesChecked"])) {
-            $this->v["psAdded"][] = $ps->PsID;
+        if (!isset($ps->ps_name) || !in_array($ps->ps_name, $this->v["namesChecked"])) {
+            $this->v["psAdded"][] = $ps->ps_id;
             $this->v["farms"][] = [
-                "name" => ((isset($ps->PsName)) ? trim($ps->PsName) : ''),
+                "name" => ((isset($ps->ps_name)) ? trim($ps->ps_name) : ''),
                 "ps"   => $ps,
                 "srch" => []
             ];
@@ -452,57 +424,9 @@ class ScoreListings
         return true;
     }
     
-    public function getMultiSiteRankings($nID)
-    {
-        return '<!-- -->';
-    }
-    
-    protected function printCompareGraphs()
-    {
-        
-        $this->searcher->v["allMultiSiteRankings"] = '';
-        
-        
-        
-        /*
-        $this->searcher->v["psGraphDat"] = [
-            "Facility"   => [ "dat" => '', "lab" => '', "bg" => '', "brd" => '' ],
-            "Production" => [ "dat" => '', "lab" => '', "bg" => '', "brd" => '' ],
-            "Lighting"   => [ "dat" => '', "lab" => '', "bg" => '', "brd" => '' ],
-            "Hvac"       => [ "dat" => '', "lab" => '', "bg" => '', "brd" => '' ]
-            ];
-        
-        
-        $cnt = 0;
-        $currTime = $this->v["genTots"]["date"][2];
-        $currDate = date("Y-m-d", $currTime);
-        while ($currDate != date("Y-m-d")) {
-            $cma = (($cnt > 0) ? ", " : "");
-            $this->v["graph2"]["dat"] .= $cma . ((isset($this->v["genTots"]["date"][3][$currDate])) 
-                ? $this->v["genTots"]["date"][3][$currDate] : 0);
-            $this->v["graph2"]["lab"] .= $cma . "\"" . $currDate . "\"";
-            $this->v["graph2"]["bg"]  .= $cma . "\"" . $this->v["css"]["color-main-on"]  . "\"";
-            $this->v["graph2"]["brd"] .= $cma . "\"" . $this->v["css"]["color-main-grey"] . "\"";
-            $cnt++;
-            $currTime += (24*60*60);
-            $currDate = date("Y-m-d", $currTime);
-        }
-        
-        $this->v["graph2print"] = view('vendor.survloop.reports.graph-bar', [
-            "currGraphID" => 'treeSessCalen',
-            "hgt"         => '380px',
-            "yAxes"       => '# of Submission Attempts (Active Sessions)',
-            "title"       => '<h3 class="mT0 mB10">Number of Submission Attempts by Date</h3>',
-            "graph"       => $this->v["graph2"],
-            "css"         => $this->v["css"]
-            ])->render();
-        */
-    }
-    
     public function getPowerScoresOutliers($nID)
     {
-        $this->v["stats"] = $this->v["showStats"] 
-            = $this->v["scoresVegSqFtFix"] = [];
+        $this->v["stats"] = $this->v["showStats"] = $this->v["scoresVegSqFtFix"] = [];
         $status = [ $this->v["defCmplt"] ];
         if (!$GLOBALS["SL"]->REQ->has('status') 
             || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') {
@@ -532,43 +456,42 @@ class ScoreListings
             && trim($GLOBALS["SL"]->REQ->get('sizes')) == 'no') {
             $this->v["sizes"] = [0];
         }
-        $this->v["scores"] = DB::table('RII_PowerScore')
-            ->join('RII_PSAreas', 'RII_PowerScore.PsID', 
-                '=', 'RII_PSAreas.PsAreaPSID')
-            ->whereIn('RII_PowerScore.PsStatus', $status)
-            ->where('RII_PowerScore.PsTimeType', $GLOBALS["SL"]->def
-                ->getID('PowerScore Submission Type', 'Past'))
-            ->where('RII_PowerScore.PsEfficFacility', '>', 0)
-            ->where('RII_PowerScore.PsEfficProduction', '>', 0)
-            ->where('RII_PSAreas.PsAreaType', 162) // flower
+        $this->v["scores"] = DB::table('rii_powerscore')
+            ->join('rii_ps_areas', 'rii_powerscore.ps_id', '=', 'rii_ps_areas.ps_area_psid')
+            ->whereIn('rii_powerscore.ps_status', $status)
+            ->where('rii_powerscore.ps_time_type', 
+                $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'))
+            ->where('rii_powerscore.ps_effic_facility', '>', 0)
+            ->where('rii_powerscore.ps_effic_production', '>', 0)
+            ->where('rii_ps_areas.ps_area_type', 162) // flower
             ->select(
-                'RII_PowerScore.PsID', 
-                'RII_PowerScore.PsCharacterize', 
-                'RII_PowerScore.PsEfficOverall',
-                'RII_PowerScore.PsEfficFacility', 
-                'RII_PowerScore.PsEfficProduction', 
-                'RII_PowerScore.PsEfficLighting', 
-                'RII_PowerScore.PsEfficHvac', 
-                'RII_PowerScore.PsEfficCarbon', 
-                'RII_PowerScore.PsEfficWater', 
-                'RII_PowerScore.PsEfficWaste', 
-                'RII_PowerScore.PsEfficFacilityStatus', 
-                'RII_PowerScore.PsEfficProductionStatus', 
-                'RII_PowerScore.PsEfficLightingStatus', 
-                'RII_PowerScore.PsEfficHvacStatus', 
-                'RII_PowerScore.PsEfficCarbonStatus', 
-                'RII_PowerScore.PsEfficWaterStatus', 
-                'RII_PowerScore.PsEfficWasteStatus', 
-                'RII_PowerScore.PsGrams', 
-                'RII_PowerScore.PsKWH', 
-                'RII_PowerScore.PsCounty', 
-                'RII_PowerScore.PsState',
-                'RII_PowerScore.PsStatus', 
-                'RII_PowerScore.PsNotes', 
-                'RII_PSAreas.PsAreaSize', 
-                'RII_PSAreas.PsAreaSqFtPerFix2'
+                'rii_powerscore.ps_id', 
+                'rii_powerscore.ps_characterize', 
+                'rii_powerscore.ps_effic_overall',
+                'rii_powerscore.ps_effic_facility', 
+                'rii_powerscore.ps_effic_production', 
+                'rii_powerscore.ps_effic_lighting', 
+                'rii_powerscore.ps_effic_hvac', 
+                'rii_powerscore.ps_effic_carbon', 
+                'rii_powerscore.ps_effic_water', 
+                'rii_powerscore.ps_effic_waste', 
+                'rii_powerscore.ps_effic_facility_status', 
+                'rii_powerscore.ps_effic_production_status', 
+                'rii_powerscore.ps_effic_lighting_status', 
+                'rii_powerscore.ps_effic_hvac_status', 
+                'rii_powerscore.ps_effic_carbonStatus', 
+                'rii_powerscore.ps_effic_water_status', 
+                'rii_powerscore.ps_effic_waste_status', 
+                'rii_powerscore.ps_grams', 
+                'rii_powerscore.ps_kwh', 
+                'rii_powerscore.ps_county', 
+                'rii_powerscore.ps_state',
+                'rii_powerscore.ps_status', 
+                'rii_powerscore.ps_notes', 
+                'rii_ps_areas.ps_area_size', 
+                'rii_ps_areas.ps_area_sq_ft_per_fix2'
             )
-            ->orderBy('RII_PowerScore.PsID', 'desc')
+            ->orderBy('rii_powerscore.ps_id', 'desc')
             ->get();
         if ($this->v["scores"]->isNotEmpty()) {
 
@@ -577,7 +500,7 @@ class ScoreListings
                 && is_array($GLOBALS["SL"]->REQ->get('goodScores'))) {
                 $scoreChecks = [];
                 foreach ($this->v["scores"] as $p => $ps) {
-                    $scoreChecks[$ps->PsID] = [];
+                    $scoreChecks[$ps->ps_id] = [];
                 }
                 foreach ($GLOBALS["SL"]->REQ->get('goodScores') as $score) {
                     list($psID, $scr) = explode('s', str_replace('p', '', $score));
@@ -586,11 +509,11 @@ class ScoreListings
                 foreach ($this->v["scores"] as $p => $ps) {
                     foreach ($this->v["outlierCols"] as $scr) {
                         if (strpos($scr, 'SqFt/Fix') === false) {
-                            $status = ((in_array($scr, $scoreChecks[$ps->PsID]))
+                            $status = ((in_array($scr, $scoreChecks[$ps->ps_id]))
                                 ? $this->v["defCmplt"] : $this->v["defArch"]);
-                            $this->v["scores"][$p]->{ 'PsEffic' . $scr . 'Status' } = $status;
-                            $ps = RIIPowerScore::find($ps->PsID);
-                            $ps->{ 'PsEffic' . $scr . 'Status' } = $status;
+                            $this->v["scores"][$p]->{ 'ps_effic_' . $scr . '_status' } = $status;
+                            $ps = RIIPowerScore::find($ps->ps_id);
+                            $ps->{ 'ps_effic_' . $scr . '_status' } = $status;
                             $ps->save();
                         }
                     }
@@ -598,29 +521,29 @@ class ScoreListings
             }
 
             foreach ($this->v["scores"] as $ps) {
-                $this->v["showStats"][$ps->PsID] = [];
+                $this->v["showStats"][$ps->ps_id] = [];
                 if (!$GLOBALS["SL"]->REQ->has('status') 
                     || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') {
-                    $this->v["showStats"][$ps->PsID] = $this->v["outlierCols"];
+                    $this->v["showStats"][$ps->ps_id] = $this->v["outlierCols"];
                 } else { // hide archived
                     foreach ($this->v["outlierCols"] as $scr) {
                         if (!in_array($scr, ['Flow SqFt/Fix', 'Veg SqFt/Fix'])
-                            && $ps->{ 'PsEffic' . $scr . 'Status' } == $this->v["defCmplt"]) {
-                            $this->v["showStats"][$ps->PsID][] = $scr;
+                            && $ps->{ 'ps_effic_' . $scr . '_status' } == $this->v["defCmplt"]) {
+                            $this->v["showStats"][$ps->ps_id][] = $scr;
                             if ($scr == 'Lighting') {
-                                $this->v["showStats"][$ps->PsID][] = 'Flow SqFt/Fix';
-                                $this->v["showStats"][$ps->PsID][] = 'Veg SqFt/Fix';
+                                $this->v["showStats"][$ps->ps_id][] = 'Flow SqFt/Fix';
+                                $this->v["showStats"][$ps->ps_id][] = 'Veg SqFt/Fix';
                             }
                         }
                     }
                 }
-                $this->v["scoresVegSqFtFix"][$ps->PsID] = 0;
-                $areaChk = RIIPSAreas::where('PsAreaPSID', $ps->PsID)
-                    ->where('PsAreaType', 161) // veg
-                    ->select('PsAreaSqFtPerFix2')
+                $this->v["scoresVegSqFtFix"][$ps->ps_id] = 0;
+                $areaChk = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    ->where('ps_area_type', 161) // veg
+                    ->select('ps_area_sq_ft_per_fix2')
                     ->first();
-                if ($areaChk && isset($areaChk->PsAreaSqFtPerFix2)) {
-                    $this->v["scoresVegSqFtFix"][$ps->PsID] = $areaChk->PsAreaSqFtPerFix2;
+                if ($areaChk && isset($areaChk->ps_area_sq_ft_per_fix2)) {
+                    $this->v["scoresVegSqFtFix"][$ps->ps_id] = $areaChk->ps_area_sq_ft_per_fix2;
                 }
             }
 
@@ -653,22 +576,22 @@ class ScoreListings
     {
         $dat = [];
         foreach ($this->v["scores"] as $ps) {
-            if ($ps->PsCharacterize == $type && ($size == 0 
-                || $GLOBALS["CUST"]->getSizeDefID($ps->PsAreaSize) == $size)) {
+            $sizeDef = $GLOBALS["CUST"]->getSizeDefID($ps->ps_area_size);
+            if ($ps->ps_characterize == $type && ($size == 0 || $sizeDef == $size)) {
                 if ($scr == 'Flow SqFt/Fix') {
-                    if (in_array('Lighting', $this->v["showStats"][$ps->PsID])
-                        && $ps->PsAreaSqFtPerFix2 > 0) {
-                        $dat[] = $ps->PsAreaSqFtPerFix2;
+                    if (in_array('Lighting', $this->v["showStats"][$ps->ps_id])
+                        && $ps->ps_area_sq_ft_per_fix2 > 0) {
+                        $dat[] = $ps->ps_area_sq_ft_per_fix2;
                     }
                 } elseif ($scr == 'Veg SqFt/Fix') {
-                    if (in_array('Lighting', $this->v["showStats"][$ps->PsID])
-                        && $this->v["scoresVegSqFtFix"][$ps->PsID] > 0) {
-                        $dat[] = $this->v["scoresVegSqFtFix"][$ps->PsID];
+                    if (in_array('Lighting', $this->v["showStats"][$ps->ps_id])
+                        && $this->v["scoresVegSqFtFix"][$ps->ps_id] > 0) {
+                        $dat[] = $this->v["scoresVegSqFtFix"][$ps->ps_id];
                     }
-                } elseif (in_array($scr, $this->v["showStats"][$ps->PsID]) 
-                    && isset($ps->{ 'PsEffic' . $scr }) 
-                    && $ps->{ 'PsEffic' . $scr } > 0) {
-                    $dat[] = $ps->{ 'PsEffic' . $scr };
+                } elseif (in_array($scr, $this->v["showStats"][$ps->ps_id]) 
+                    && isset($ps->{ 'ps_effic_' . $scr }) 
+                    && $ps->{ 'ps_effic_' . $scr } > 0) {
+                    $dat[] = $ps->{ 'ps_effic_' . $scr };
                 }
             }
         }
@@ -687,9 +610,8 @@ class ScoreListings
                 -= 1.5*$this->v["stats"][$type][$size][$scr]["iqr"];
             $this->v["stats"][$type][$size][$scr]["q3"] 
                 += 1.5*$this->v["stats"][$type][$size][$scr]["iqr"];
-            $this->v["stats"][$type][$size][$scr]["avg"] 
-                = array_sum($dat)/$cnt;
-            $this->v["stats"][$type][$size][$scr]["sd"]  
+            $this->v["stats"][$type][$size][$scr]["avg"] = array_sum($dat)/$cnt;
+            $this->v["stats"][$type][$size][$scr]["sd"] 
                 = $GLOBALS["SL"]->arrStandardDeviation($dat);
         }
         return true;

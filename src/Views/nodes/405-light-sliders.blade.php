@@ -17,8 +17,8 @@
 		    <div class="row m0 p0">
 		        <div class="col-5">
                     <nobr><input type="number" name="n405r1fld" id="n405r1FldID" data-nid="405" 
-                        @if (isset($psAreas["Mother"]->PsAreaLgtArtifPerc)) 
-                            value="{{ $psAreas['Mother']->PsAreaLgtArtifPerc }}" 
+                        @if (isset($psAreas["Mother"]->ps_area_lgt_artif_perc)) 
+                            value="{{ $psAreas['Mother']->ps_area_lgt_artif_perc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
@@ -28,8 +28,12 @@
             </div>
         </td>
 		<td class="areaNa"><label class="w100 fPerc66 opac50" id="n405r1naLbl">
-			<nobr><input type="checkbox" name="n405r1na" id="n405r1naID" class="mR5" value="N" 
-			    @if (isset($powerScore->PsMotherSeed) && intVal($powerScore->PsMotherSeed) == 1) CHECKED @endif
+			<nobr><input type="checkbox" name="n405r1na" id="n405r1naID" 
+                class="mR5" value="N" 
+			    @if (isset($powerScore->ps_mother_seed) 
+                    && intVal($powerScore->ps_mother_seed) == 1) 
+                    CHECKED 
+                @endif
 			    > No</nobr> Mothers
 		</label></td>
 		</tr>
@@ -40,8 +44,8 @@
 		    <div class="row m0 p0">
 		        <div class="col-5">
                     <nobr><input type="number" name="n405r2fld" id="n405r2FldID" data-nid="405" 
-                        @if (isset($psAreas["Clone"]->PsAreaLgtArtifPerc)) 
-                            value="{{ $psAreas['Clone']->PsAreaLgtArtifPerc }}" 
+                        @if (isset($psAreas["Clone"]->ps_area_lgt_artif_perc)) 
+                            value="{{ $psAreas['Clone']->ps_area_lgt_artif_perc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
@@ -52,7 +56,7 @@
         </td>
 		<td class="areaNa"><label class="w100 fPerc66 opac50" id="n405r2naLbl">
 			<nobr><input type="checkbox" name="n405r2na" id="n405r2naID" class="mR5" value="N" 
-			    @if (isset($powerScore->PsCloneSeed) && intVal($powerScore->PsCloneSeed) == 1) CHECKED @endif
+			    @if (isset($powerScore->ps_clone_seed) && intVal($powerScore->ps_clone_seed) == 1) CHECKED @endif
 			    > No</nobr> Clones
 		</label></td>
 		</tr>
@@ -63,8 +67,8 @@
 		    <div class="row m0 p0">
 		        <div class="col-5">
                     <nobr><input type="number" name="n405r3fld" id="n405r3FldID" data-nid="405" 
-                        @if (isset($psAreas["Veg"]->PsAreaLgtArtifPerc)) 
-                            value="{{ $psAreas['Veg']->PsAreaLgtArtifPerc }}" 
+                        @if (isset($psAreas["Veg"]->ps_area_lgt_artif_perc)) 
+                            value="{{ $psAreas['Veg']->ps_area_lgt_artif_perc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>
@@ -82,8 +86,8 @@
 		    <div class="row m0 p0">
 		        <div class="col-5">
                     <nobr><input type="number" name="n405r4fld" id="n405r4FldID" data-nid="405" 
-                        @if (isset($psAreas["Flower"]->PsAreaLgtArtifPerc)) 
-                            value="{{ $psAreas['Flower']->PsAreaLgtArtifPerc }}" 
+                        @if (isset($psAreas["Flower"]->ps_area_lgt_artif_perc)) 
+                            value="{{ $psAreas['Flower']->ps_area_lgt_artif_perc }}" 
                         @endif class="form-control ntrStp slTab disIn taR slidePercFld"
                         {!! $GLOBALS["SL"]->tabInd() !!}> % Artificial&nbsp;&nbsp;</nobr>
                 </div>

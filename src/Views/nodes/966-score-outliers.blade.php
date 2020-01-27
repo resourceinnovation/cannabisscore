@@ -3,7 +3,8 @@
 <div class="row">
     <div class="col-8">
         <a href="/dash/powerscore-outliers"><h2 class="slBlueDark">
-            PowerScore Outliers</h2></a>
+            PowerScore Outliers
+        </h2></a>
         <p>
             Below each sub-score (Facility, Production, Lighting, and HVAC) 
             are that sub-score's Standard Deviations (SD) from the group's 
@@ -19,24 +20,34 @@
             when each light covers less than 2 sq ft, or greater than 64 sq ft.
         </p>
     </div><div class="col-4 taR"><div class="mT10 pB10">
-        <select name="status" id="statusID" class="form-control w100 filterOutliers">
+        <select name="status" id="statusID" 
+            class="form-control w100 filterOutliers">
             <option value="all" 
-            @if (!$GLOBALS["SL"]->REQ->has('status') 
-                || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') SELECTED @endif
-            >All Complete & Archived</option>
+                @if (!$GLOBALS["SL"]->REQ->has('status') 
+                    || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') 
+                    SELECTED 
+                @endif
+                >All Complete & Archived</option>
             <option value="complete" 
-            @if ($GLOBALS["SL"]->REQ->has('status') 
-                && trim($GLOBALS["SL"]->REQ->get('status')) == 'complete') SELECTED @endif
-            >Ranked Dataset Only</option>
+                @if ($GLOBALS["SL"]->REQ->has('status') 
+                    && trim($GLOBALS["SL"]->REQ->get('status')) == 'complete') 
+                    SELECTED 
+                @endif
+                >Ranked Dataset Only</option>
         </select>
-        <select name="sizes" id="sizesID" class="form-control w100 filterOutliers">
+        <select name="sizes" id="sizesID" 
+            class="form-control w100 filterOutliers">
             <option value="yes" 
-            @if (!$GLOBALS["SL"]->REQ->has('sizes') 
-                || trim($GLOBALS["SL"]->REQ->get('sizes')) == 'yes') SELECTED @endif
-            >Break Down By Flowing Sizes</option>
+                @if (!$GLOBALS["SL"]->REQ->has('sizes') 
+                    || trim($GLOBALS["SL"]->REQ->get('sizes')) == 'yes') 
+                    SELECTED
+                @endif
+                >Break Down By Flowing Sizes</option>
             <option value="no" 
             @if ($GLOBALS["SL"]->REQ->has('sizes') 
-                && trim($GLOBALS["SL"]->REQ->get('sizes')) == 'no') SELECTED @endif
+                && trim($GLOBALS["SL"]->REQ->get('sizes')) == 'no') 
+                SELECTED 
+            @endif
             >Skip Size Break Down</option>
         </select>
     </div></div>
@@ -96,36 +107,43 @@
                 <th>Veg SqFt/Fix</th>
             </tr>
             @foreach ($scores as $ps)
-                @if ($ps->PsCharacterize == $type && ($size == 0 
-                    || $GLOBALS["CUST"]->getSizeDefID($ps->PsAreaSize) == $size))
+                @if ($ps->ps_characterize == $type && ($size == 0 
+                    || $GLOBALS["CUST"]->getSizeDefID($ps->ps_area_size) == $size))
                     <tr>
-                    <td class="brdRgtGrey @if ($ps->PsStatus == 364) slRedDark bld @endif " >
-                        <a href="/calculated/read-{{ $ps->PsID }}" target="_blank" 
-                            @if ($ps->PsStatus == 364) class="slRedDark" @endif 
-                            >#{{ $ps->PsID }}</a><div class="pL5 fPerc80">
-                        {{ $ps->PsCounty }} {{ $ps->PsState }}<br />
-                        {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->PsStatus) }}
-                        @if (isset($ps->PsNotes) && trim($ps->PsNotes) != '')
-                            <a id="hidivBtnPsComment{{ $ps->PsID }}" class="hidivBtn" 
-                                href="javascript:;"
+                    <td class="brdRgtGrey 
+                        @if ($ps->ps_status == 364) slRedDark bld @endif " >
+                        <a href="/calculated/read-{{ $ps->ps_id }}" target="_blank" 
+                            @if ($ps->ps_status == 364) class="slRedDark" @endif 
+                            >#{{ $ps->ps_id }}</a><div class="pL5 fPerc80">
+                        {{ $ps->ps_county }} {{ $ps->ps_state }}<br />
+                        {{ $GLOBALS["SL"]->def->getVal(
+                            'PowerScore Status', 
+                            $ps->ps_status
+                        ) }}
+                        @if (isset($ps->ps_notes) && trim($ps->ps_notes) != '')
+                            <a id="hidivBtnPsComment{{ $ps->ps_id }}" 
+                                class="hidivBtn" href="javascript:;"
                                 ><i class="fa fa-comment-o" aria-hidden="true"></i></a>
-                            <div id="hidivPsComment{{ $ps->PsID }}" class="disNon">
-                                {{ $ps->PsNotes }}
+                            <div id="hidivPsComment{{ $ps->ps_id }}" class="disNon">
+                                {{ $ps->ps_notes }}
                             </div>
                         @endif
                     </div></td>
                     @foreach ($outlierCols as $scr)
                         <td @if ($scr == 'Lighting') class="brdLftGrey" @endif >
-                        {!! view('vendor.cannabisscore.nodes.966-score-outliers-cell', [
-                            "defCmplt"  => $defCmplt,
-                            "stats"     => $stats,
-                            "type"      => $type,
-                            "size"      => $size,
-                            "scr"       => $scr,
-                            "ps"        => $ps,
-                            "showStats" => $showStats,
-                            "scoresVegSqFtFix" => $scoresVegSqFtFix
-                        ])->render() !!}
+                        {!! view(
+                            'vendor.cannabisscore.nodes.966-score-outliers-cell', 
+                            [
+                                "defCmplt"         => $defCmplt,
+                                "stats"            => $stats,
+                                "type"             => $type,
+                                "size"             => $size,
+                                "scr"              => $scr,
+                                "ps"               => $ps,
+                                "showStats"        => $showStats,
+                                "scoresVegSqFtFix" => $scoresVegSqFtFix
+                            ]
+                        )->render() !!}
                         </td>
                     @endforeach
                     </tr>
@@ -135,22 +153,25 @@
     @endforeach
 @endforeach
 </table>
-<center><input type="submit" value="Save All Archive Changes" class="btn btn-xl btn-primary"></center>
+<center><input type="submit" value="Save All Archive Changes" 
+    class="btn btn-xl btn-primary"></center>
 </form>
 
 </div>
 
 <script type="text/javascript"> $(document).ready(function(){
-function filterOutliers() {
-    var url = '';
-    if (document.getElementById('statusID')) {
-        url += '&status='+document.getElementById('statusID').value;
+    function filterOutliers() {
+        var url = '';
+        if (document.getElementById('statusID')) {
+            url += '&status='+document.getElementById('statusID').value;
+        }
+        if (document.getElementById('sizesID')) {
+            url += '&sizes='+document.getElementById('sizesID').value;
+        }
+        window.location='?'+url.substring(1);
+        return true;
     }
-    if (document.getElementById('sizesID')) {
-        url += '&sizes='+document.getElementById('sizesID').value;
-    }
-    window.location='?'+url.substring(1);
-    return true;
-}
-$(document).on("change", "select.filterOutliers", function() { filterOutliers(); });
+    $(document).on("change", "select.filterOutliers", function() {
+        filterOutliers();
+    });
 }); </script>

@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSUtiliLinks extends Model
 {
-    protected $table      = 'RII_PSUtiliLinks';
-    protected $primaryKey = 'PsUtLnkID';
+    protected $table      = 'rii_ps_utili_links';
+    protected $primaryKey = 'ps_ut_lnk_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsUtLnkPSID', 
-		'PsUtLnkUtilityID', 
+		'ps_ut_lnk_psid', 
+		'ps_ut_lnk_utility_id', 
     ];
     
     // END SurvLoop auto-generated portion of Model

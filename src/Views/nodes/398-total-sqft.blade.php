@@ -4,13 +4,16 @@
 <div class="nodeHalfGap"></div>
 <div id="nLabel398" class="nPrompt">
     <label for="n398FldID" class="w100">
-        Average <span class="txtInfo">square footage of flowering canopy</span> under production throughout the 
-        12-month reporting period aligned with your utility bill submissions:
+        Average <span class="txtInfo">square footage of flowering canopy</span> 
+        under production throughout the 12-month reporting period aligned 
+        with your utility bill submissions:
         <span class="red">*required</span>
     </label>
     <div id="nLabel398notes" class="subNote">
-        <p>Please include a reasonable estimate of average canopy under production, not total area available for 
-        planting. Exclude all mother/clone, vegetative, drying/curing, office, storage and other areas.</p>
+        <p>Please include a reasonable estimate of average 
+        canopy under production, not total area available for 
+        planting. Exclude all mother/clone, vegetative, 
+        drying/curing, office, storage and other areas.</p>
         
         <div id="areaCalc">
             <table class="table table-striped" id="arears" >
@@ -49,10 +52,11 @@
     </div>
 </div>
 <div class="nFld" style="font-size: 20px;">
-    <input class="form-control form-control-lg ntrStp slTab slNodeChange" type="number" name="n398fld" id="n398FldID" 
-        onKeyUp="checkMin('398', 0); "  data-nid="398" min="0" 
-        @if (isset($powerScore) && isset($powerScore->PsTotalSize)) value="{{ $powerScore->PsTotalSize }}" @endif 
-        {!! $GLOBALS["SL"]->tabInd() !!}>
+    <input class="form-control form-control-lg ntrStp slTab slNodeChange" type="number" 
+        name="n398fld" id="n398FldID" data-nid="398" min="0" onKeyUp="checkMin('398', 0); "  
+        @if (isset($powerScore) && isset($powerScore->ps_total_size)) 
+            value="{{ $powerScore->ps_total_size }}"
+        @endif {!! $GLOBALS["SL"]->tabInd() !!} >
 </div>
 <div class="nodeHalfGap"></div>
 </div> <!-- end #node398 -->

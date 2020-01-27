@@ -5,15 +5,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSOwners extends Model
 {
-    protected $table      = 'RII_PSOwners';
-    protected $primaryKey = 'PsOwnID';
+    protected $table      = 'rii_ps_owners';
+    protected $primaryKey = 'ps_own_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsOwnPartnerUser', 
-		'PsOwnClientUser', 
-		'PsOwnType', 
-		'PsOwnClientName', 
+		'ps_own_partner_user', 
+		'ps_own_client_user', 
+		'ps_own_type', 
+		'ps_own_client_name', 
     ];
     
     // END SurvLoop auto-generated portion of Model

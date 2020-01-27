@@ -20,9 +20,14 @@
     <tr>
         <th>Score ID# - <i>ALL COMPLETE INDOOR PowerScores</i></th>
         <th>Current (Simple)<div class="slGrey fPerc66">kWh/sqft</div></th>
-        <th>Weighted Stages <nobr>(Formula #2)</nobr><div class="slGrey fPerc66">kWh/sqft</div></th>
-        <th colspan=2 >Sum of Stages <nobr>(Formula #1)</nobr>
-            <div class="slGrey fPerc66"><span class="float-right">MWh</span> kWh</div></th>
+        <th>
+            Weighted Stages <nobr>(Formula #2)</nobr>
+            <div class="slGrey fPerc66">kWh/sqft</div>
+        </th>
+        <th colspan=2 >
+            Sum of Stages <nobr>(Formula #1)</nobr>
+            <div class="slGrey fPerc66"><span class="float-right">MWh</span> kWh</div>
+        </th>
     </tr>
     <tr class="slBlueDark">
         <th>Calculation Average</th>
@@ -33,8 +38,13 @@
     </tr>
     @foreach ($hvcChk as $i => $ps)
         <tr>
-        <td><a href="/calculated/u-{{ $lgtChk[$i][0]->PsID }}" target="_blank">#{{ $lgtChk[$i][0]->PsID }}</a> 
-            @if (isset($lgtChk[$i][0]->PsName)) <span class="slGrey">{{ $lgtChk[$i][0]->PsName }}</span> @endif</td>
+        <td>
+            <a href="/calculated/u-{{ $lgtChk[$i][0]->ps_id }}" 
+                target="_blank">#{{ $lgtChk[$i][0]->ps_id }}</a> 
+            @if (isset($lgtChk[$i][0]->ps_name)) 
+                <span class="slGrey">{{ $lgtChk[$i][0]->ps_name }}</span> 
+            @endif
+        </td>
         <td>{{ $GLOBALS["SL"]->sigFigs($ps[0], 3) }} <span class="slGrey fPerc66">kWh/sqft</span></td>
         <td>{{ number_format($ps[2]) }} <span class="slGrey fPerc66">kWh/sqft</span></td>
         <td>{{ number_format($ps[1]) }} <span class="slGrey fPerc66">kWh</span></td>
@@ -65,7 +75,7 @@
 <iframe id="calcRefresh" src="" class="w100 h50"></iframe>
 <script type="text/javascript">
 @forelse ($allScoreIDs as $i => $id)
-    setTimeout("document.getElementById('calcRefresh').src='/calculated/u-{{ $id->PsID }}?refresh=1'", {{ (1+($i*7000)) }});
+    setTimeout("document.getElementById('calcRefresh').src='/calculated/u-{{ $id->ps_id }}?refresh=1'", {{ (1+($i*7000)) }});
 @empty
 @endforelse
 </script>

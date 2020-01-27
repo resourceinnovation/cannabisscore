@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSOtherPower extends Model
 {
-    protected $table      = 'RII_PSOtherPower';
-    protected $primaryKey = 'PsOthPwrID';
+    protected $table      = 'rii_ps_other_power';
+    protected $primaryKey = 'ps_oth_pwr_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsOthPwrPSID', 
-		'PsOthPwrSource', 
+		'ps_oth_pwr_psid', 
+		'ps_oth_pwr_source', 
     ];
     
     // END SurvLoop auto-generated portion of Model

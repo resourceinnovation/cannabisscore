@@ -4,46 +4,10 @@
     <div class="col-md-8">
 
         <div class="slCard greenline nodeWrap">
-            <h2>Manufacturer Adoption</h2>
-            <p>
-                Out of the Lighting Sub-Scores in the
-                PowerScore's official data set.
-            </p>
-            <div class="row">
-                <div class="col-4 slBlueDark">Manufacturer</div>
-                <div class="col-2 slBlueDark taC">Flower</div>
-                <div class="col-2 slBlueDark taC">Veg</div>
-                <div class="col-2 slBlueDark taC">Clone</div>
-                <div class="col-2 slBlueDark taC">Mother</div>
-            </div>
-            <?php $cnt = 0; ?>
-            @forelse ($manus as $i => $manu)
-                @if ($manu->ManuCntFlower > 0
-                    || $manu->ManuCntVeg > 0
-                    || $manu->ManuCntClone > 0
-                    || $manu->ManuCntMother > 0)
-                    <?php $cnt++; ?>
-                    <div class="w100 pT10 pT10 @if ($cnt%2 > 0) row2 @endif ">
-                        <div class="row">
-                            <div class="col-4">
-                                <a href="/dash/competitive-performance?manu={{
-                                    urlencode($manu->ManuName)
-                                    }}">{{ $manu->ManuName }}</a>
-                            </div>
-                            @foreach (['Flower', 'Veg', 'Clone', 'Mother'] as $nick)
-                            {!! view(
-                                'vendor.cannabisscore.nodes.914-manage-manufacturers-cnt', 
-                                [
-                                    'manu' => $manu,
-                                    'nick' => $nick
-                                ]
-                            )->render() !!}
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            @empty
-            @endforelse
+            {!! view(
+                'vendor.cannabisscore.nodes.914-manage-manufacturers-adoption', 
+                [ 'manus' => $manus ]
+            )->render() !!}
         </div>
 
         <div class="slCard greenline nodeWrap">
@@ -55,7 +19,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     @forelse ($manus as $i => $manu)
-                        {{ $manu->ManuName }}<br />
+                        {{ $manu->manu_name }}<br />
                         @if ($i == ceil(sizeof($manus)/2)) 
                             </div><div class="col-sm-6"> 
                         @endif
@@ -82,18 +46,18 @@
                         <h5 class="mB0">{{ $partner->company }}</h5>
                     @endif
                     @if (sizeof($partner->manufacturers) == 1
-                        && isset($partner->manufacturers[0]->ManuName)
-                        && strtolower($partner->manufacturers[0]->ManuName) 
+                        && isset($partner->manufacturers[0]->manu_name)
+                        && strtolower($partner->manufacturers[0]->manu_name) 
                             != strtolower($partner->company))
                         <a href="/dash/competitive-performance?manu={{
-                            urlencode($partner->manufacturers[0]->ManuName) 
-                            }}">{{ $partner->manufacturers[0]->ManuName 
+                            urlencode($partner->manufacturers[0]->manu_name) 
+                            }}">{{ $partner->manufacturers[0]->manu_name 
                             }}</a><br />
                     @else
                         @foreach ($partner->manufacturers as $manu)
                             <a href="/dash/competitive-performance?manu={{
-                                urlencode($manu->ManuName) }}">{{ 
-                                $manu->ManuName }}</a><br />
+                                urlencode($manu->manu_name) }}">{{ 
+                                $manu->manu_name }}</a><br />
                         @endforeach
                     @endif
                     @if (isset($partner->name) 
@@ -126,8 +90,7 @@
             @forelse ($partners as $partner)
                 @if (isset($partner->name))
                     <option value="{{ $partner->id }}"
-                        >{{ $partner->name }} - {{ 
-                        $partner->email }}</option>
+                        >{{ $partner->name }} - {{ $partner->email }}</option>
                 @endif
             @empty
             @endforelse

@@ -5,14 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSCommunications extends Model
 {
-    protected $table      = 'RII_PSCommunications';
-    protected $primaryKey = 'PsComID';
+    protected $table      = 'rii_ps_communications';
+    protected $primaryKey = 'ps_com_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsComPSID', 
-		'PsComUser', 
-		'PsComDescription', 
+		'ps_com_psid', 
+		'ps_com_user', 
+		'ps_com_description', 
     ];
     
     // END SurvLoop auto-generated portion of Model

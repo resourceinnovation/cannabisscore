@@ -63,15 +63,22 @@
 {!! $statMisc->tblHeaderRow('farm') !!}
 {!! $statSqft->tblPercHas('farm', 'area') !!}
 {!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [ 'PsHarvestBatch', 'PsHasWaterPump', 'PsHeatWater', 
-    'PsControls', 'PsControlsAuto', 'PsVerticalStack' ]) !!}
+{!! $statMisc->tblPercHasDat('farm', [
+    'ps_harvest_batch', 'ps_has_water_pump', 'ps_heat_water', 
+    'ps_controls', 'ps_controls_auto', 'ps_vertical_stack' 
+]) !!}
 {!! $statMisc->tblSpacerRow('farm') !!}
 {!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [ 'rnw149', 'rnw159', 'rnw151', 'rnw150', 'rnw158', 'rnw153', 'rnw154', 'rnw155', 
-    'rnw156', 'rnw157', 'rnw241' ]) !!}
+{!! $statMisc->tblPercHasDat('farm', [
+    'rnw149', 'rnw159', 'rnw151', 'rnw150', 'rnw158', 'rnw153', 
+    'rnw154', 'rnw155', 'rnw156', 'rnw157', 'rnw241'
+]) !!}
 {!! $statMisc->tblSpacerRow('farm') !!}
 {!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [ 'PsConsiderUpgrade', 'PsIncentiveWants', 'PsIncentiveUsed', 'PsNewsletter' ]) !!}
+{!! $statMisc->tblPercHasDat('farm', [ 
+    'ps_consider_upgrade', 'ps_incentive_wants', 
+    'ps_incentive_used', 'ps_newsletter' 
+]) !!}
 </table>
 </div>
 
@@ -116,12 +123,35 @@
 <h3 class="slBlueDark">6. Square Feet per Lighting Fixture</h3>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'sqft', 'lgtfx', 'Square Feet per Fixture') !!}
+{!! $statLgts->tblFltRowsCalcDiv(
+    'area', 
+    'farm', 
+    'sqft', 
+    'lgtfx', 
+    'Square Feet per Fixture'
+) !!}
 {!! $statLgts->tblSpacerRow('area') !!}
 {!! $statLgts->addCurrHide('lgty', 2) !!}
-{!! $statLgts->tblFltRowsCalc('area', 'lgty', 'sqft/lgtfx', 'sum', 'Square Feet per Fixture', false) !!}
-{!! str_replace('Total Square Feet per Fixture', 'Square Feet per Fixture', 
-    $statLgts->tblFltRowsBlksCalc('area', 'lgty', 'farm', 'sqft/lgtfx', 'sum', 'Square Feet per Fixture: ')) !!}
+{!! $statLgts->tblFltRowsCalc(
+    'area', 
+    'lgty', 
+    'sqft/lgtfx', 
+    'sum', 
+    'Square Feet per Fixture', 
+    false
+) !!}
+{!! str_replace(
+    'Total Square Feet per Fixture', 
+    'Square Feet per Fixture', 
+    $statLgts->tblFltRowsBlksCalc(
+        'area', 
+        'lgty', 
+        'farm', 
+        'sqft/lgtfx', 
+        'sum', 
+        'Square Feet per Fixture: '
+    )
+) !!}
 {!! $statLgts->delCurrHide('lgty') !!}
 </table>
 </div>
@@ -130,13 +160,17 @@
 <div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">7. HVAC Adoption</h3>
 <ul>
-<li><b>System A</b> - Conventional Air Conditioning with Supplemental Portable Dehumidification Units 
+<li><b>System A</b> - 
+    Conventional Air Conditioning with Supplemental Portable Dehumidification Units 
     <span class="slGrey">(est. 115 kWh/SqFt)</span></li>
-<li><b>System B</b> - Conventional Air Conditioning with Enhanced Dehumidification 
+<li><b>System B</b> - 
+    Conventional Air Conditioning with Enhanced Dehumidification 
     <span class="slGrey">(est. 77 kWh/SqFt)</span></li>
-<li><b>System C</b> - Conventional Air Conditioning with Split Dehumidification Systems 
+<li><b>System C</b> - 
+    Conventional Air Conditioning with Split Dehumidification Systems 
     <span class="slGrey">(est. 104 kWh/SqFt)</span></li>
-<li><b>System D</b> - Fully Integrated Cooling and Dehumidification System 
+<li><b>System D</b> - 
+    Fully Integrated Cooling and Dehumidification System 
     <span class="slGrey">(est. 65 kWh/SqFt)</span></li>
 <li><b>System E</b> - Chilled Water Dehumidification System</li>
 <li><b>System F</b> - Greenhouse HVAC Systems</li>
@@ -149,12 +183,24 @@
 <div class="slCard greenline nodeWrap">
 <h3 class="slBlueDark">8. On-Site Energy Sources</h3>
 <div class="row">
-    <div class="col-6">Indoor ({{ $enrgys["cmpl"][144][0] }}) {!! $enrgys["pie"][144] !!}</div>
-    <div class="col-6">Greenhouse/Mixed ({{ $enrgys["cmpl"][145][0] }}) {!! $enrgys["pie"][145] !!}</div>
+    <div class="col-6">
+        Indoor ({{ $enrgys["cmpl"][144][0] }}) 
+        {!! $enrgys["pie"][144] !!}
+    </div>
+    <div class="col-6">
+        Greenhouse/Mixed ({{ $enrgys["cmpl"][145][0] }}) 
+        {!! $enrgys["pie"][145] !!}
+    </div>
 </div>
 <div class="row">
-    <div class="col-6">Outdoor ({{ $enrgys["cmpl"][143][0] }}) {!! $enrgys["pie"][143] !!}</div>
-    <div class="col-6">Outdoor Adjusted ({{ sizeof($enrgys["extra"][1]) }}) {!! $enrgys["pie"][143143] !!}</div>
+    <div class="col-6">
+        Outdoor ({{ $enrgys["cmpl"][143][0] }}) 
+        {!! $enrgys["pie"][143] !!}
+    </div>
+    <div class="col-6">
+        Outdoor Adjusted ({{ sizeof($enrgys["extra"][1]) }}) 
+        {!! $enrgys["pie"][143143] !!}
+    </div>
 </div>
 <table border=0 class="table table-striped w100">
     <tr>
@@ -164,13 +210,19 @@
     <th>Outdoor</th>
     <th>Outdoor Adjusted</th>
     </tr>
-@foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') as $j => $renew)
+@foreach ($GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources') 
+    as $j => $renew)
     <tr>
-    <th>{{ $renew->DefValue }}</th>
-    @foreach ([144, 145, 143] as $type) <td>{{ $enrgys["cmpl"][$type][$renew->DefID] }}</td> @endforeach
-    <td>{{ $enrgys["extra"][143][$renew->DefID] }}</td>
+    <th>{{ $renew->def_value }}</th>
+    @foreach ([144, 145, 143] as $type)
+        <td>{{ $enrgys["cmpl"][$type][$renew->def_id] }}</td>
+    @endforeach
+    <td>{{ $enrgys["extra"][143][$renew->def_id] }}</td>
     </tr>
 @endforeach
 </table>
-<div class="slGrey"><i>Outdoor Adjusted PowerScores: #{!! implode(', #', $enrgys["extra"][1]) !!}</i></div>
+<div class="slGrey"><i>
+    Outdoor Adjusted PowerScores: 
+    #{!! implode(', #', $enrgys["extra"][1]) !!}
+</i></div>
 </div>

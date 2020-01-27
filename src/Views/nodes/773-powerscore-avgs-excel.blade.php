@@ -1,9 +1,16 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/773-powerscore-avgs-excel.blade.php -->
 
 <tr>
-<th colspan=10 align="left" >Category Averages @if (trim($fltStateClim) != '') - {!! $GLOBALS["SL"]->states->getZoneOrState($fltStateClim) !!} @endif </th>
+<th colspan=10 align="left" >
+    Category Averages 
+    @if (trim($fltStateClim) != '')
+        - {!! $GLOBALS["SL"]->states->getZoneOrState($fltStateClim) !!}
+    @endif
+</th>
 </tr>
-<tr><td>Under each Lighting Sub-Score (weighted by SqFt) is its breakdown by growth stage.</td></tr>
+<tr><td>
+    Under each Lighting Sub-Score (weighted by SqFt) is its breakdown by growth stage.
+</td></tr>
 
 @foreach ($scoreSets as $i => $set)
     <tr><td></td></tr>

@@ -5,13 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class RIIPSWaterFilter extends Model
 {
-    protected $table      = 'RII_PSWaterFilter';
-    protected $primaryKey = 'PsWtrFltID';
+    protected $table      = 'rii_ps_water_filter';
+    protected $primaryKey = 'ps_wtr_flt_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'PsWtrFltPSID', 
-		'PsWtrFltFilter', 
+		'ps_wtr_flt_psid', 
+		'ps_wtr_flt_filter', 
     ];
     
     // END SurvLoop auto-generated portion of Model
