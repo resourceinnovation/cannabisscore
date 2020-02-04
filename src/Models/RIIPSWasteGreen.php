@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSWasteGreen extends Model
+class RIIPsWasteGreen extends Model
 {
     protected $table      = 'rii_ps_waste_green';
     protected $primaryKey = 'ps_wst_grn_id';

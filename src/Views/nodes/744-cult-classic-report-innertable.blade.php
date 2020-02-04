@@ -9,8 +9,8 @@
 <th>Production Rank</th>
 <th>Lighting Rank</th>
 <th>HVAC Rank</th>
-<th>Facility Score <div class="fPerc66 slGrey">kWh/SqFt</div></th>
-<th>Production Score <div class="fPerc66 slGrey">g/kWh</div></th>
+<th>Facility Score <div class="fPerc66 slGrey">kBtu/SqFt</div></th>
+<th>Production Score <div class="fPerc66 slGrey">g/kBtu</div></th>
 <th>Lighting Score <div class="fPerc66 slGrey">kWh/SqFt</div></th>
 <th>HVAC Score <div class="fPerc66 slGrey">kWh/SqFt</div></th>
 <th>Grams</th>

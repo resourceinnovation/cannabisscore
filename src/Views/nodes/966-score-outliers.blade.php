@@ -139,6 +139,7 @@
                                 "type"             => $type,
                                 "size"             => $size,
                                 "scr"              => $scr,
+                                "scrL"             => strtolower($scr),
                                 "ps"               => $ps,
                                 "showStats"        => $showStats,
                                 "scoresVegSqFtFix" => $scoresVegSqFtFix

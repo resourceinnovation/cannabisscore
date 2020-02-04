@@ -19,26 +19,25 @@
                 @if (isset($currSessData)) value="{{ $currSessData }}" @endif 
                 {!! $GLOBALS["SL"]->tabInd() !!} >
         </div>
-        <div class="col-md-2 col-sm-6">
-            grams
+        <div class="col-md-2 col-sm-6 pT10">
+            <nobr>grams <i class="slGrey mL15">or</i></nobr>
         </div>
-        <div class="col-md-1 col-sm-12 slGrey">
-            <i>or</i>
-        </div>
-        <div class="col-md-2 col-sm-6">
+        <div class="col-md-3 col-sm-6">
             <input type="number" name="n{{ $nID }}fldLb" id="n{{ $nID }}FldLbID"
                 onkeyup="checkMin('{{ $nID }}', 0); 
                 document.getElementById('n{{ $nID }}FldID').value=Math.round(this.value*453.592);" 
                 value="" min="0" autocomplete="off"
                 class="form-control form-control-lg ntrStp slTab slNodeChange disIn mR10 mB5" 
-                {!! $GLOBALS["SL"]->tabInd() !!}>
+                {!! $GLOBALS["SL"]->tabInd() !!} >
         </div>
-        <div class="col-md-2 col-sm-6">
+        <div class="col-md-2 col-sm-6 pT10">
             pounds
         </div>
     </div>
 </div>
-<style> #nLabel{{ $nID }} label { width: 100%; } </style>
+<style>
+#nLabel{{ $nID }} label { width: 100%; }
+</style>
 <div class="nodeHalfGap"></div>
 </div>
 <script type="text/javascript">

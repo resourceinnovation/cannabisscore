@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSForCup extends Model
+class RIIPsForCup extends Model
 {
     protected $table      = 'rii_ps_for_cup';
     protected $primaryKey = 'ps_cup_id';

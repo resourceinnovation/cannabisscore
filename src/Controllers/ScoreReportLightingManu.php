@@ -12,10 +12,10 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSRanks;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSLightTypes;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsRanks;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
 use CannabisScore\Controllers\ScoreListingsGraph;
 
@@ -227,7 +227,7 @@ class ScoreReportLightingManu extends ScoreListingsGraph
     protected function getLightManuScoreIDs($manu = '')
     {
         $areaIDs = $scoreIDs = [];
-        $chk = RIIPSLightTypes::where('ps_lg_typ_make', 'LIKE', '%' . $manu . '%')
+        $chk = RIIPsLightTypes::where('ps_lg_typ_make', 'LIKE', '%' . $manu . '%')
             ->select('ps_lg_typ_area_id')
             ->get();
         if ($chk && sizeof($chk) > 0) {
@@ -237,7 +237,7 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                 }
             }
         }
-        $chk = RIIPSAreas::whereIn('ps_area_id', $areaIDs)
+        $chk = RIIPsAreas::whereIn('ps_area_id', $areaIDs)
             ->select('ps_area_psid')
             ->get();
         if ($chk && sizeof($chk) > 0) {

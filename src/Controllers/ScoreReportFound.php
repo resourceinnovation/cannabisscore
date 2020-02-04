@@ -10,8 +10,8 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreReportStats;
@@ -65,7 +65,7 @@ class ScoreReportFound extends ScoreReportStats
         
         if ($allScores->isNotEmpty()) {
             foreach ($allScores as $cnt => $ps) {
-                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->where('ps_area_type', '>', 0)
                     ->get();
                 if ($areas->isNotEmpty()) {
@@ -98,7 +98,7 @@ class ScoreReportFound extends ScoreReportStats
                         if (isset($ps->ps_vertical_stack)) {
                             $vert = intVal($ps->ps_vertical_stack);
                         }
-                        $area = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                        $area = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                             ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
                             ->first();
                         if ($area && isset($area->ps_area_size) && $area->ps_area_size > 0) {

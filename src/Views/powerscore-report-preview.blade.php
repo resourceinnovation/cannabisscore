@@ -9,13 +9,13 @@
             && $sessData["powerscore"][0]->ps_effic_facility > 0)
             <div class="row"><div class="col-4">Facility:</div><div class="col-3 taR">
             {!! $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_facility, 3) !!}
-            </div><div class="col-5"><nobr>kWh / sq ft</nobr></div></div>
+            </div><div class="col-5"><nobr>kBtu / sq ft</nobr></div></div>
         @endif
         @if (isset($sessData["powerscore"][0]->ps_effic_production) 
             && $sessData["powerscore"][0]->ps_effic_production > 0)
             <div class="row"><div class="col-4">Production:</div><div class="col-3 taR">
             {!! $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_production, 3) !!}
-            </div><div class="col-5"><nobr>grams / kWh</nobr></div></div>
+            </div><div class="col-5"><nobr>grams / kBtu</nobr></div></div>
         @endif
         @if (isset($sessData["powerscore"][0]->ps_effic_hvac) 
             && $sessData["powerscore"][0]->ps_effic_hvac > 0)

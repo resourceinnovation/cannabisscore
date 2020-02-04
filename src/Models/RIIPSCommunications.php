@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSCommunications extends Model
+class RIIPsCommunications extends Model
 {
     protected $table      = 'rii_ps_communications';
     protected $primaryKey = 'ps_com_id';

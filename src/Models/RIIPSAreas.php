@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSAreas extends Model
+class RIIPsAreas extends Model
 {
     protected $table      = 'rii_ps_areas';
     protected $primaryKey = 'ps_area_id';
@@ -15,6 +15,7 @@ class RIIPSAreas extends Model
 		'ps_area_has_stage', 
 		'ps_area_size', 
 		'ps_area_days_cycle', 
+		'ps_area_farm_type',
 		'ps_area_lgt_sun', 
 		'ps_area_lgt_dep', 
 		'ps_area_lgt_artif', 
@@ -33,11 +34,11 @@ class RIIPSAreas extends Model
 		'ps_area_water_freq', 
 		'ps_area_watering_method', 
 		'ps_area_water_effic', 
-        'ps_area_sq_ft_per_fix1', 
-        'ps_area_sq_ft_per_fix2', 
-        'ps_area_commissioning', 
-        'ps_area_temperature', 
-        'ps_area_humidity', 
+		'ps_area_commissioning', 
+		'ps_area_temperature', 
+		'ps_area_humidity', 
+		'ps_area_sq_ft_per_fix1', 
+		'ps_area_sq_ft_per_fix2', 
     ];
     
     // END SurvLoop auto-generated portion of Model

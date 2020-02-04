@@ -54,14 +54,20 @@ $(document).ready(function() {
     function reloadGuages() {
         reloadComplete = false;
         var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}"+gatherFilts();
-        $("#guageReloader").load(""+baseUrl+"&eff=Overall&loadAll=1");
+        var fullUrl = ""+baseUrl+"&eff=Overall&loadAll=1";
+console.log("reloadGuages() "+fullUrl);
+        $("#guageReloader").load(fullUrl);
         setTimeout(function() { chkGuageReload(baseUrl); }, 400);
         return true;
     }
     setTimeout(function() { reloadGuages(); }, 300);
     $(document).on("click", ".updateScoreFilts", function() { reloadGuages(); });
     
-@if (!$isPast) setTimeout(function() { $("#futureForm").load("/ajax/future-look?ps={{ $psid }}"); }, 3000); @endif
+@if (!$isPast) 
+    setTimeout(function() {
+        $("#futureForm").load("/ajax/future-look?ps={{ $psid }}");
+    }, 3000);
+@endif
 @if ($GLOBALS["SL"]->REQ->has('print'))
     setTimeout("window.print()", 3000);
 @endif

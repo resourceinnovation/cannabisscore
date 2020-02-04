@@ -13,11 +13,11 @@ namespace CannabisScore\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSRenewables;
-use App\Models\RIIPSMonthly;
-use App\Models\RIIPSForCup;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsRenewables;
+use App\Models\RIIPsMonthly;
+use App\Models\RIIPsForCup;
 use App\Models\SLZips;
 use CannabisScore\Controllers\ScoreVars;
 
@@ -93,17 +93,17 @@ class ScoreUtils extends ScorePowerUtilities
             if (sizeof($cupList) > 0) {
                 foreach ($cupList as $c) {
                     if (in_array($c->def_id, $cupsIn)) {
-                        $chk = RIIPSForCup::where('ps_cup_psid', $this->coreID)
+                        $chk = RIIPsForCup::where('ps_cup_psid', $this->coreID)
                             ->where('ps_cup_cup_id', $c->def_id)
                             ->first();
                         if (!$chk || !isset($chk->ps_cup_cup_id)) {
-                            $chk = new RIIPSForCup;
+                            $chk = new RIIPsForCup;
                             $chk->ps_cup_psid  = $this->coreID;
                             $chk->ps_cup_cup_id = $c->def_id;
                             $chk->save();
                         }
                     } else {
-                        RIIPSForCup::where('ps_cup_psid', $this->coreID)
+                        RIIPsForCup::where('ps_cup_psid', $this->coreID)
                             ->where('ps_cup_cup_id', $c->def_id)
                             ->delete();
                     }
@@ -288,13 +288,19 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function getLoopItemLabelCustom($loop, $itemRow = [], $itemInd = -3)
     {
+        $ret = '';
         if (in_array($loop, [ 'Growth Stages', 'Harvest Stages', 'Four Growth Stages' ])) {
             switch (intVal($itemRow->ps_area_type)) {
-                case 237: return 'Mother Plants';     break;
-                case 160: return 'Clone Plants';      break;
-                case 161: return 'Vegetating Plants'; break;
-                case 162: return 'Flowering Plants';  break;
-                case 163: return 'Drying / Curing';   break;
+                case 237: return 'Mother Plants';         break; // to be phased out
+                case 160: return 'Clone & Mother Plants'; break;
+                case 161: return 'Vegetating Plants';     break;
+                case 162: return 'Flowering Plants';      break;
+                case 163: return 'Drying / Curing';       break;
+            }
+        } elseif ($loop == 'Room Nicknames') {
+            $ret = 'Room #' . (1+$itemInd);
+            if ($itemRow && isset($itemRow->ps_room_name) && trim($itemRow->ps_room_name) != '') {
+                return trim($itemRow->ps_room_name) . ' (' . $ret . ')';
             }
         } elseif ($loop == 'Types of Light Fixtures') {
             if ($itemRow && isset($itemRow->ps_lg_typ_area_id)) {
@@ -340,7 +346,7 @@ class ScoreUtils extends ScorePowerUtilities
                 return $lgtDesc;
             }
         }
-        return '';
+        return $ret;
     }
     
     protected function nIDgetRenew($nID)
@@ -423,14 +429,14 @@ class ScoreUtils extends ScorePowerUtilities
             || sizeof($this->sessData->dataSets["ps_monthly"]) == 0) {
             $this->sessData->dataSets["ps_monthly"] = [];
             for ($m = 1; $m <= 12; $m++) {
-                $new = new RIIPSMonthly;
+                $new = new RIIPsMonthly;
                 $new->ps_month_psid  = $this->coreID;
                 $new->ps_month_month = $m;
                 $new->save();
                 $this->sessData->dataSets["ps_monthly"][] = $new;
             }
         }
-        return RIIPSMonthly::where('ps_month_psid', $this->coreID)
+        return RIIPsMonthly::where('ps_month_psid', $this->coreID)
             ->orderBy('ps_month_month', 'asc')
             ->get();
     }
@@ -512,11 +518,13 @@ class ScoreUtils extends ScorePowerUtilities
     protected function printReportBlds($nID)
     {
         $deet = '';
-        $blds = $this->sessData->getBranchChildRows('PSAreasBlds');
+        $blds = $this->sessData->getBranchChildRows('ps_areas_blds');
         if (sizeof($blds) > 0) {
             foreach ($blds as $i => $bld) {
-                $deet .= (($i > 0) ? ', ' : '') 
-                    . $GLOBALS["SL"]->def->getVal(
+                if ($i > 0) {
+                    $deet .= ', ';
+                }
+                $deet .= $GLOBALS["SL"]->def->getVal(
                         'PowerScore Building Types', 
                         $bld->ps_ar_bld_type
                     );
@@ -530,19 +538,21 @@ class ScoreUtils extends ScorePowerUtilities
                     $bld->getKey()
                 );
                 if ($cnsts) {
-                    $deet .= ' (';
+                    $deetCnst = '';
                     foreach ($cnsts as $j => $cnst) {
-                        $deet .= (($j > 0) ? ', ' : '') 
+                        $deetCnst .= (($j > 0) ? ', ' : '') 
                             . $GLOBALS["SL"]->def->getVal(
                                 'PowerScore Building Construction', 
                                 $cnst->ps_ar_cns_type
                             );
                         if (isset($cnst->ps_ar_cns_type_other) 
                             && trim($cnst->ps_ar_cns_type_other) != '') {
-                            $deet .= ': ' . $cnst->ps_ar_cns_type_other;
+                            $deetCnst .= ': ' . $cnst->ps_ar_cns_type_other;
                         }
                     }
-                    $deet .= ')';
+                    if (trim($deetCnst) != '') {
+                        $deet .= ' (' . $deetCnst . ')';
+                    }
                 }
             }
         }
@@ -657,7 +667,7 @@ class ScoreUtils extends ScorePowerUtilities
     protected function tmpDebug($str = '')
     {
         $tmp = ' - tmpDebug - ' . $str;
-        $chk = RIIPSAreas::where('ps_area_psid', 169)
+        $chk = RIIPsAreas::where('ps_area_psid', 169)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $row) {

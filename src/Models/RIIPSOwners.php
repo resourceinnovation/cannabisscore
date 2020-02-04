@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSOwners extends Model
+class RIIPsOwners extends Model
 {
     protected $table      = 'rii_ps_owners';
     protected $primaryKey = 'ps_own_id';

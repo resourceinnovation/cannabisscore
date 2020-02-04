@@ -13,10 +13,10 @@ namespace CannabisScore\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSMonthly;
-use App\Models\RIIPSCommunications;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsMonthly;
+use App\Models\RIIPsCommunications;
 use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
 use App\Models\RIIUserInfo;
@@ -31,81 +31,80 @@ class ScoreAdminMisc extends ScorePrintReport
 {
     protected function getTroubleshoot()
     {
-        $this->v["lgtChk"] = $this->v["lgtAvg"] 
-            = $this->v["hvcChk"] = $this->v["hvcAvg"] = [
-            0, 
-            0, 
-            0, 
-            0 
-        ];
-        $this->v["allScoreIDs"] = RIIPowerScore::where('ps_status', $this->v["defCmplt"])
-            ->where('ps_characterize', 144)
-            ->select('ps_id', 'ps_name', 'ps_effic_lighting', 'ps_effic_hvac')
-            ->orderBy('ps_id', 'desc')
-            ->get();
-        if ($this->v["allScoreIDs"]->isNotEmpty()) {
-            foreach ($this->v["allScoreIDs"] as $i => $ps) {
-                $this->v["hvcChk"][$i] = [ $ps->ps_effic_hvac, 0, 0 ];
-                $this->v["lgtChk"][$i] = [ $ps, [], 0, 0, 0, 0, 0, 0, 0, 0 ];
-                $this->v["lgtChk"][$i][1] = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
-                    ->select('ps_area_type', 'ps_area_size', 'ps_area_total_light_watts', 'ps_area_hvac_type')
-                    ->get();
-                if ($this->v["lgtChk"][$i][1]->isNotEmpty()) {
-                    $areaTot = 0;
-                    foreach ($this->v["lgtChk"][$i][1] as $area) {
-                        if (isset($area->ps_area_size)) $areaTot += $area->ps_area_size;
+
+        // Artificial Lighting was being overwritten by false positives during calculations
+        $this->v["artifErrs"] = '';
+        if ($GLOBALS["SL"]->REQ->has('artifChk')) {
+            $this->v["artifChk"] = $this->v["artifRecent"] = [];
+            $chk = RIIPsAreas::select('ps_area_psid', 'ps_area_id', 'ps_area_type',
+                    'ps_area_lgt_artif', 'ps_area_lgt_sun', 'ps_area_lgt_dep')
+                ->get();
+            foreach ($chk as $area) {
+                $psid = $area->ps_area_psid;
+                if (!isset($this->v["artifChk"][$psid])) {
+                    $this->v["artifChk"][$psid] = [];
+                    $this->v["artifChk"][$psid] = [];
+                }
+                $this->v["artifChk"][$psid][$area->ps_area_id] = [
+                    "id"    => $area->ps_area_id,
+                    "type"  => $area->ps_area_type,
+                    "artif" => intVal($area->ps_area_lgt_artif),
+                    "sun"   => intVal($area->ps_area_lgt_sun),
+                    "dep"   => intVal($area->ps_area_lgt_dep)
+                ];
+            }
+            $qman = "SELECT `rii_ps_areas`.`ps_area_psid`, `rii_ps_areas`.`ps_area_id`, 
+                `sl_node_saves`.`node_save_node`, `sl_node_saves`.`node_save_new_val`
+                FROM `sl_node_saves` JOIN `rii_ps_areas` 
+                ON `rii_ps_areas`.`ps_area_id`=`sl_node_saves`.`node_save_loop_item_id` 
+                WHERE `sl_node_saves`.`node_save_node` IN (882, 881, 880);";
+            $chk = DB::select( DB::raw( $qman ) );
+            if ($chk) {
+                foreach ($chk as $i => $save) {
+                    $psid = $save->ps_area_psid;
+                    if (isset($this->v["artifChk"][$psid])) {
+                        if (!isset($this->v["artifRecent"][$psid])) {
+                            $this->v["artifRecent"][$psid] = $this->v["artifChk"][$psid];
+                        }
+                        $areaID = $save->ps_area_id;
+                        $val = 0;
+                        if (isset($save->node_save_new_val) 
+                            && intVal($save->node_save_new_val) == 1) {
+                            $val = 1;
+                        }
+                        if ($save->node_save_node == 882) {
+                            $this->v["artifRecent"][$psid][$areaID]["artifOG"] = $val;
+                        }
+                        if ($save->node_save_node == 880) {
+                            $this->v["artifRecent"][$psid][$areaID]["sunOG"] = $val;
+                        }
+                        if ($save->node_save_node == 881) {
+                            $this->v["artifRecent"][$psid][$areaID]["depOG"] = $val;
+                        }
                     }
-                    foreach ($this->v["lgtChk"][$i][1] as $area) {
-                        foreach ($this->v["areaTypes"] as $typ => $defID) {
-                            if ($area->ps_area_type == $defID && $typ != 'Dry') {
-                                if (isset($area->ps_area_size) 
-                                    && isset($area->ps_area_total_light_watts) 
-                                    && intVal($area->ps_area_size) > 0 
-                                    && intVal($area->ps_area_total_light_watts) > 0) {
-                                    $this->v["lgtChk"][$i][2] += $area->ps_area_size;
-                                    $this->v["lgtChk"][$i][3] += $area->ps_area_total_light_watts
-                                        *$GLOBALS["CUST"]->getTypeHours($typ)*365;
-                                    $this->v["lgtChk"][$i][6] += $area->ps_area_total_light_watts;
-                                    $this->v["lgtChk"][$i][8] += ($area->ps_area_total_light_watts
-                                        /$area->ps_area_size);
-                                    $this->v["lgtChk"][$i][9]++;
-                                }
+                }
+            }
+            if (sizeof($this->v["artifRecent"]) > 0) {
+                foreach ($this->v["artifRecent"] as $psid => $artif) {
+                    foreach ($artif as $areaID => $area) {
+                        foreach (['artif', 'sun', 'dep'] as $type) {
+                            if (isset($area[$type . "OG"]) 
+                                && isset($area[$type]) 
+                                && $area[$type . "OG"] != $area[$type]) {
+                                $this->v["artifErrs"] .= '<b>' . $psid . '</b>: ' . $area["id"] 
+                                    . ', ' . $area["type"] . ', <b>' . $area[$type . "OG"] 
+                                    . '</b> -} <span style="color: red;">' 
+                                    . $area[$type] . '</span><br />';
+                                RIIPsAreas::find($area["id"])
+                                    ->update([ 'ps_area_lgt_' . $type => $area[$type . "OG"] ]);
                             }
                         }
-                        $effic = $GLOBALS["CUST"]->getHvacEffic($area->ps_area_hvac_type);
-                        if (isset($area->ps_area_size) && $area->ps_area_size > 0 && $effic > 0) {
-                            $this->v["hvcChk"][$i][1] += ($area->ps_area_size*$effic);
-                            $this->v["hvcChk"][$i][2] += $effic*($area->ps_area_size/$areaTot);
-                        }
-                    }
-                    if ($this->v["lgtChk"][$i][2] > 0) {
-                        $this->v["lgtChk"][$i][4] = $this->v["lgtChk"][$i][3]
-                            /(1000*$this->v["lgtChk"][$i][2]);
-                        $this->v["lgtChk"][$i][5] = $this->v["lgtChk"][$i][6]
-                            /$this->v["lgtChk"][$i][2];
                     }
                 }
-                if ($this->v["lgtChk"][$i][9] > 0) {
-                    $this->v["lgtChk"][$i][7] = $this->v["lgtChk"][$i][8]
-                        /$this->v["lgtChk"][$i][9];
-                }
-                $this->v["lgtAvg"][0] += $ps->ps_effic_lighting;
-                $this->v["lgtAvg"][1] += $this->v["lgtChk"][$i][4];
-                $this->v["lgtAvg"][2] += $this->v["lgtChk"][$i][5];
-                $this->v["lgtAvg"][3] += $this->v["lgtChk"][$i][7];
-                $this->v["hvcAvg"][0] += $this->v["hvcChk"][$i][0];
-                $this->v["hvcAvg"][1] += $this->v["hvcChk"][$i][1];
-                $this->v["hvcAvg"][2] += $this->v["hvcChk"][$i][2];
             }
-            $this->v["lgtAvg"][0] = $this->v["lgtAvg"][0]/sizeof($this->v["allScoreIDs"]);
-            $this->v["lgtAvg"][1] = $this->v["lgtAvg"][1]/sizeof($this->v["allScoreIDs"]);
-            $this->v["lgtAvg"][2] = $this->v["lgtAvg"][2]/sizeof($this->v["allScoreIDs"]);
-            $this->v["lgtAvg"][3] = $this->v["lgtAvg"][3]/sizeof($this->v["allScoreIDs"]);
-            $this->v["hvcAvg"][0] = $this->v["hvcAvg"][0]/sizeof($this->v["allScoreIDs"]);
-            $this->v["hvcAvg"][1] = $this->v["hvcAvg"][1]/sizeof($this->v["allScoreIDs"]);
-            $this->v["hvcAvg"][2] = $this->v["hvcAvg"][2]/sizeof($this->v["allScoreIDs"]);
         }
-        
+
+
         /*
         $this->v["logOne"] = '';
         $this->v["subTblsPowerScore"] = [
@@ -186,21 +185,6 @@ class ScoreAdminMisc extends ScorePrintReport
         }
         */
         
-        /*
-        $ret = '';
-        foreach ($baks as $b => $bak) {
-            $qman = "SELECT r2.* FROM `RII" . $bak . "_PowerScore` r2 WHERE r2.`ps_status` LIKE " . $this->v["defCmplt"]
-                . " AND r2.`PsID` NOT IN (SELECT r.`PsID` FROM `rii_powerscore` r WHERE r.`ps_status` LIKE " 
-                . $this->v["defCmplt"] . ")";
-            $this->v["chk3"] = DB::select( DB::raw( $qman ) );
-            $this->v["chks4"] = [];
-            if ($this->v["chk3"]->isNotEmpty()) {
-                foreach ($this->v["chk3"] as $i => $ps) {
-                     $ret .= '<h3>' . $ps->ps_id . '</h3><pre>' . print_r($ps) . '</pre><br />';
-                }
-            }
-        }
-        */
         if ($GLOBALS["SL"]->REQ->has('import')) {
             $this->runImport();
         }
@@ -239,7 +223,7 @@ class ScoreAdminMisc extends ScorePrintReport
             && $GLOBALS["SL"]->REQ->has('scores') 
             && sizeof($GLOBALS["SL"]->REQ->scores) > 0
             && $this->v["wchEma"] > 0) {
-            $chk = RIIPowerScore::whereIn('ps_id', $GLOBALS["SL"]->REQ->scores)
+            $chk = RIIPowerscore::whereIn('ps_id', $GLOBALS["SL"]->REQ->scores)
                 ->get();
             if ($chk->isNotEmpty()) {
                 $ajax = '';
@@ -257,7 +241,7 @@ class ScoreAdminMisc extends ScorePrintReport
                 $this->v["sendResults"] .= $GLOBALS["SL"]->opnAjax() . $ajax . $GLOBALS["SL"]->clsAjax();
             }
         }
-        $chk = RIIPowerScore::where('ps_email', 'NOT LIKE', '')
+        $chk = RIIPowerscore::where('ps_email', 'NOT LIKE', '')
             ->orderBy('ps_email', 'asc')
             ->orderBy('ps_id', 'desc')
             ->get();
@@ -323,7 +307,7 @@ class ScoreAdminMisc extends ScorePrintReport
     
     protected function getProccessUploads()
     {
-        $this->v["uploaders"] = RIIPowerScore::where('ps_upload_energy_bills', 'LIKE', 1)
+        $this->v["uploaders"] = RIIPowerscore::where('ps_upload_energy_bills', 'LIKE', 1)
             //->where('ps_status', 'LIKE', $this->v["defCmplt"])
             ->orderBy('ps_id', 'desc')
             ->get();
@@ -331,7 +315,7 @@ class ScoreAdminMisc extends ScorePrintReport
         if ($this->v["uploaders"] && sizeof($this->v["uploaders"]) > 0) {
             foreach ($this->v["uploaders"] as $i => $ps) {
                 $this->v["upMonths"][$ps->ps_id] = [];
-                $chk = RIIPSMonthly::where('ps_month_psid', 'LIKE', $ps->ps_id)
+                $chk = RIIPsMonthly::where('ps_month_psid', 'LIKE', $ps->ps_id)
                     ->get();
                 if ($chk && sizeof($chk) > 0) {
                     foreach ($chk as $mon) {
@@ -353,7 +337,7 @@ class ScoreAdminMisc extends ScorePrintReport
                                 && $GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id . "m" . $mon)) {
                                 $kWh = intVal($GLOBALS["SL"]->REQ->get("kwh" . $ps->ps_id . "m" . $mon));
                                 if (!isset($this->v["upMonths"][$ps->ps_id][$mon])) {
-                                    $this->v["upMonths"][$ps->ps_id][$mon] = new RIIPSMonthly;
+                                    $this->v["upMonths"][$ps->ps_id][$mon] = new RIIPsMonthly;
                                     $this->v["upMonths"][$ps->ps_id][$mon]->ps_month_psid = $ps->ps_id;
                                     $this->v["upMonths"][$ps->ps_id][$mon]->ps_month_month = $mon;
                                 }
@@ -438,7 +422,7 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         $ret = '';
         if ($GLOBALS["SL"]->REQ->has('p')) {
-            $ps = RIIPowerScore::find($GLOBALS["SL"]->REQ->get('p'));
+            $ps = RIIPowerscore::find($GLOBALS["SL"]->REQ->get('p'));
             if ($ps && isset($ps->ps_id) && $this->v["isAdmin"]) {
                 $this->loadTree(1);
                 $this->loadAllSessData('powerscore', $ps->getKey());
@@ -472,7 +456,7 @@ class ScoreAdminMisc extends ScorePrintReport
             '', 
             ''
         ];
-        $this->v["feedbackscores"] = RIIPowerScore::select('ps_feedback1', 'ps_feedback2', 
+        $this->v["feedbackscores"] = RIIPowerscore::select('ps_feedback1', 'ps_feedback2', 
             'ps_feedback3', 'ps_feedback4', 'ps_feedback5', 'ps_feedback6', 'ps_feedback7', 
             'ps_feedback8', 'ps_id', 'ps_status', 'created_at')
             ->orderBy('created_at', 'desc')
@@ -590,7 +574,7 @@ class ScoreAdminMisc extends ScorePrintReport
         $grapher->addDataLineType('archived', 'Archived', '', '#726659', '#726659');
         $grapher->addDataLineType('incomplete', 'Incomplete', '', '#F07B3A', '#F07B3A');
         $cutoffDate = $grapher->getPastStartDate() . ' 00:00:00';
-        $recentAttempts = RIIPowerScore::whereNotNull('ps_zip_code')
+        $recentAttempts = RIIPowerscore::whereNotNull('ps_zip_code')
             ->where('ps_zip_code', 'NOT LIKE', '')
             ->where('created_at', '>=', $cutoffDate)
             ->select('ps_status', 'created_at')
@@ -644,7 +628,7 @@ class ScoreAdminMisc extends ScorePrintReport
             $this->v["ps"] = intVal($request->ps);
             if ($request->has('logCommFld') 
                 && trim($request->logCommFld) != '') {
-                $com = new RIIPSCommunications;
+                $com = new RIIPsCommunications;
                 $com->ps_com_psid = $this->v["ps"];
                 $com->ps_com_user = $this->v["uID"];
                 $com->ps_com_description = trim($request->logCommFld);
@@ -696,9 +680,9 @@ class ScoreAdminMisc extends ScorePrintReport
                     = $this->v["manus"][$m]->manu_cnt_mother = 0;
             }
             $areaIDs = $areaIDsDone = [];
-            $chk = RIIPSAreas::whereIn('ps_area_psid', function($query){
+            $chk = RIIPsAreas::whereIn('ps_area_psid', function($query){
                     $query->select('ps_id')
-                    ->from(with(new RIIPowerScore)->getTable())
+                    ->from(with(new RIIPowerscore)->getTable())
                     ->where('ps_status', 243)
                     ->where('ps_effic_lighting_status', 243);
                 })
@@ -968,7 +952,7 @@ class ScoreAdminMisc extends ScorePrintReport
     protected function tmpDebug($str = '')
     {
         $tmp = ' - tmpDebug - ' . $str;
-        $chk = RIIPSAreas::where('ps_area_psid', 169)
+        $chk = RIIPsAreas::where('ps_area_psid', 169)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $i => $row) {

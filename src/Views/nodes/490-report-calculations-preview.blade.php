@@ -27,7 +27,7 @@
             </td><td>
                 @if (isset($ps->ps_effic_facility)) 
                     {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_facility, 3) }}
-                @else 0 @endif &nbsp;&nbsp;kWh / sq ft
+                @else 0 @endif &nbsp;&nbsp;kBtu / sq ft
             </td><td class="taC">
             @if (isset($rank->ps_rnk_facility))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
@@ -49,7 +49,7 @@
             </td><td>
                 @if (isset($ps->ps_effic_production)) 
                     {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_production, 3) }}
-                @else 0 @endif &nbsp;&nbsp;grams / kWh
+                @else 0 @endif &nbsp;&nbsp;grams / kBtu
             </td><td class="taC">
             @if (isset($rank->ps_rnk_production))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 
@@ -91,7 +91,7 @@
                 <b>Lighting Efficiency:</b>
             </td><td>
                 @if (isset($ps->ps_effic_lighting)) {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }} 
-                @else 0 @endif &nbsp;&nbsp;kWh / sq ft
+                @else 0 @endif &nbsp;&nbsp;W / sq ft
             </td><td class="taC">
             @if (isset($rank->ps_rnk_lighting))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 

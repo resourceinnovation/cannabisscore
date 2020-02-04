@@ -24,14 +24,14 @@
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Facility <br />Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
+            "eng"    => 'Facility <br />Score <div class="fPerc66 slGrey">kBtu/SqFt</div>',
             "srtVal" => 'ps_effic_facility',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Production <br />Score <div class="fPerc66 slGrey">g/kWh</div>',
+            "eng"    => 'Production <br />Score <div class="fPerc66 slGrey">g/kBtu</div>',
             "srtVal" => 'ps_effic_production',
             "sort"   => $sort
         ])->render() !!}

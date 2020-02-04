@@ -76,11 +76,11 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
             @if (isset($s->ps_effic_facility) && $s->ps_effic_facility > 0)
                 <span class="slGrey">F:</span> {{ 
                 $GLOBALS["SL"]->sigFigs($s->ps_effic_facility, 3) 
-                }} kWh / sq ft<br />
+                }} kBtu / sq ft<br />
             @endif
             @if (isset($s->ps_effic_production) && $s->ps_effic_production > 0) 
                 <span class="slGrey">P:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_production, 3) 
-                }} grams / kWh<br />
+                }} grams / kBtu<br />
             @endif
             @if (isset($s->ps_effic_lighting) && $s->ps_effic_lighting > 0)
                 <span class="slGrey">L:</span> {{ 

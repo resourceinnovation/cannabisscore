@@ -12,14 +12,14 @@
 namespace CannabisScore\Controllers;
 
 use App\Models\SLNodeSaves;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSRanks;
-use App\Models\RIIPSRankings;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsRanks;
+use App\Models\RIIPsRankings;
 use SurvLoop\Controllers\Globals\Globals;
-use CannabisScore\Controllers\ScoreUtils;
+use CannabisScore\Controllers\ScoreFormsCustom;
 
-class ScoreCalcs extends ScoreUtils
+class ScoreCalcs extends ScoreFormsCustom
 {
     protected function calcCurrSubScores()
     {
@@ -60,12 +60,14 @@ class ScoreCalcs extends ScoreUtils
                         && intVal($ps->ps_kwh) > 0
                         && isset($ps->ps_grams) 
                         && intVal($ps->ps_grams) > 0) {
-                        $ps->ps_effic_production = $ps->ps_grams/$ps->ps_kwh;
+                        $ps->ps_effic_production = $ps->ps_grams
+                            /$GLOBALS["CUST"]->cnvrtKwh2Kbtu($ps->ps_kwh);
                     }
                     if (isset($this->v["totFlwrSqFt"]) 
                         && intVal($this->v["totFlwrSqFt"]) > 0) {
                         if (isset($ps->ps_kwh) && intVal($ps->ps_kwh) > 0) {
-                            $ps->ps_effic_facility = $ps->ps_kwh/$this->v["totFlwrSqFt"];
+                            $ps->ps_effic_facility = $GLOBALS["CUST"]->cnvrtKwh2Kbtu($ps->ps_kwh)
+                                /$this->v["totFlwrSqFt"];
                         }
                         if (isset($row->ps_green_waste_lbs) 
                             && intVal($row->ps_green_waste_lbs) > 0) {
@@ -94,33 +96,18 @@ class ScoreCalcs extends ScoreUtils
                                     }
                                 }
                                 $area->ps_area_total_light_watts = $watts[$typ];
-                                $area->ps_area_sq_ft_per_fix2 = (($fixCnt > 0) ? $sqft[$typ]/$fixCnt : 0);
-                                if (isset($area->ps_area_lgt_fix_size1) 
-                                    && intVal($area->ps_area_lgt_fix_size1) > 0
-                                    && isset($area->ps_area_lgt_fix_size2) 
-                                    && intVal($area->ps_area_lgt_fix_size2) > 0) {
-                                    $area->ps_area_sq_ft_per_fix1 = intVal($area->ps_area_lgt_fix_size1)
-                                        *intVal($area->ps_area_lgt_fix_size2);
+                                $area->ps_area_sq_ft_per_fix2 = 0;
+                                if ($fixCnt > 0) {
+                                    $area->ps_area_sq_ft_per_fix2 = $sqft[$typ]/$fixCnt;
                                 }
                                 $area->save();
                                 $this->sessData->dataSets["ps_areas"][$a] = $area;
                             }
                         }
                     }
-                    
-                    if (isset($ps[0]->ps_mother_loc)) {
-                        $withClones = $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'With Clones');
-                        $vegRoom = $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'In Veg Room');
-                        if ($ps->ps_mother_loc == $withClones) {
-                            $watts["Clone"] += $watts["Mother"];
-                            $sqft["Clone"]  += $sqft["Mother"];
-                            $watts["Mother"] = $sqft["Mother"] = 0;
-                        } elseif ($ps->ps_mother_loc == $vegRoom) {
-                            $watts["Veg"]   += $watts["Mother"];
-                            $sqft["Veg"]    += $sqft["Mother"];
-                            $watts["Mother"] = $sqft["Mother"] = 0;
-                        }
-                    }
+                    $watts["Clone"] += $watts["Mother"];
+                    $sqft["Clone"]  += $sqft["Mother"];
+                    $watts["Mother"] = $sqft["Mother"] = 0;
                     
                     $hasLights = 0;
                     foreach ($areas as $a => $area) {
@@ -132,16 +119,16 @@ class ScoreCalcs extends ScoreUtils
                                 if (intVal($sqft[$typ]) > 0) {
                                     $sqftWeight = $sqft[$typ]/$ps->ps_total_canopy_size;
                                     if ($watts[$typ] > 0) {
-                                        $area->ps_area_lgt_artif = 1;
+                                        // $area->ps_area_lgt_artif = 1;
                                         $hasLights++;
                                         $area->ps_area_lighting_effic = $watts[$typ]/$sqft[$typ];
-                                        $ps->ps_effic_lighting += $sqftWeight*$area->ps_area_lighting_effic;
+                                        $ps->ps_effic_lighting += $sqftWeight
+                                            *$area->ps_area_lighting_effic;
                                     }
                                     if (isset($area->ps_area_hvac_type) 
                                         && intVal($area->ps_area_hvac_type) > 0) {
-                                        $area->ps_area_hvac_effic = $GLOBALS["CUST"]->getHvacEffic(
-                                            $area->ps_area_hvac_type
-                                        );
+                                        $area->ps_area_hvac_effic = $GLOBALS["CUST"]
+                                            ->getHvacEffic($area->ps_area_hvac_type);
                                         $ps->ps_effic_hvac += $sqftWeight*$area->ps_area_hvac_effic;
                                     }
                                     if (isset($area->ps_area_gallons) && intVal($area->ps_area_gallons) > 0) {
@@ -182,12 +169,20 @@ class ScoreCalcs extends ScoreUtils
             } elseif ($flwrSun == 1) {
                 $flwrOutdoor = true;
             }
-            $areaFlwrBlds = $this->sessData->getChildRows('areas', $areaFlwrID, 'area_blds');
+                $bldTypOut = $GLOBALS["SL"]->def->getID(
+                    'PowerScore Building Types', 
+                    'Outdoor'
+                );
+                $bldTypGrn = $GLOBALS["SL"]->def->getID(
+                    'PowerScore Building Types', 
+                    'Greenhouse'
+                );
+            $areaFlwrBlds = $this->sessData->getChildRows('ps_areas', $areaFlwrID, 'ps_areas_blds');
             if (sizeof($areaFlwrBlds) > 0) {
                 foreach ($areaFlwrBlds as $bld) {
-                    if ($bld->ps_ar_bld_type == $this->frmTypOut) {
+                    if ($bld->ps_ar_bld_type == $bldTypOut) {
                         $flwrOutdoor = true;
-                    } elseif ($bld->ps_ar_bld_type == $this->frmTypGrn) {
+                    } elseif ($bld->ps_ar_bld_type == $bldTypGrn) {
                         $flwrGrnhse = true;
                     }
                 }
@@ -236,10 +231,10 @@ class ScoreCalcs extends ScoreUtils
     protected function calcCurrScoreRanks()
     {
 //echo '<br /><br /><br /><h2>' . $this->searcher->v["urlFlts"] . '</h2>';
-        $this->v["ranksCache"] = RIIPSRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
+        $this->v["ranksCache"] = RIIPsRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
             ->first();
         if (!$this->v["ranksCache"] || !isset($this->v["ranksCache"]->ps_rnk_id)) {
-            $this->v["ranksCache"] = new RIIPSRanks;
+            $this->v["ranksCache"] = new RIIPsRanks;
             $this->v["ranksCache"]->ps_rnk_filters = $this->searcher->v["urlFlts"];
         } /* elseif (!$GLOBALS["SL"]->REQ->has('refresh') && !$GLOBALS["SL"]->REQ->has('recalc')) {
             return $this->v["ranksCache"];
@@ -261,17 +256,18 @@ class ScoreCalcs extends ScoreUtils
             "wste" => []
         ];
         $avg = [
-            "kwh" => 0,
+            "btu" => 0,
             "g"   => 0
         ];
         if ($allscores->isNotEmpty()) {
             foreach ($allscores as $i => $ps) {
-                $sqft = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $sqft = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->where('ps_area_type', $this->v["areaTypes"]["Flower"])
                     ->select('ps_area_size')
                     ->first();
                 if ($sqft && isset($sqft->ps_area_size)) {
-                    $avg["kwh"] += $ps->ps_kwh/$sqft->ps_area_size;
+                    $avg["btu"] += $GLOBALS["CUST"]->cnvrtKwh2Kbtu($ps->ps_kwh)
+                        /$sqft->ps_area_size;
                     $avg["g"] += $ps->ps_grams/$sqft->ps_area_size;
                 }
                 if ($ps->ps_effic_facility > 0 
@@ -365,20 +361,20 @@ class ScoreCalcs extends ScoreUtils
             $allFilts = [ '', '&fltFarm=0' ];
             foreach ($allscores as $i => $ps) {
                 if (in_array($currFlt, $allFilts)) {
-                    RIIPowerScore::find($ps->ps_id)->update([
+                    RIIPowerscore::find($ps->ps_id)->update([
                         'ps_effic_overall' => $r[$ps->ps_id]["over"]
                     ]);
                 }
                 if ($currFlt == '&fltFarm=' . $ps->ps_characterize) {
-                    RIIPowerScore::find($ps->ps_id)->update([
+                    RIIPowerscore::find($ps->ps_id)->update([
                         'ps_effic_over_similar' => $r[$ps->ps_id]["over"]
                     ]);
                 }
-                $tmp = RIIPSRankings::where('ps_rnk_psid', $ps->ps_id)
+                $tmp = RIIPsRankings::where('ps_rnk_psid', $ps->ps_id)
                     ->where('ps_rnk_filters', $currFlt)
                     ->first();
                 if (!$tmp) {
-                    $tmp = new RIIPSRankings;
+                    $tmp = new RIIPsRankings;
                     $tmp->ps_rnk_psid = $ps->ps_id;
                     $tmp->ps_rnk_filters = $currFlt;
                     $tmp->save();
@@ -406,7 +402,7 @@ class ScoreCalcs extends ScoreUtils
         $this->v["ranksCache"]->ps_rnk_water       = implode(',', $l["watr"]);
         $this->v["ranksCache"]->ps_rnk_waste       = implode(',', $l["wste"]);
         if ($this->v["ranksCache"]->ps_rnk_tot_cnt > 0) {
-            $this->v["ranksCache"]->ps_rnk_avg_sqft_kwh = $avg["kwh"]
+            $this->v["ranksCache"]->ps_rnk_avg_sqft_kwh = $avg["btu"]
                 /$this->v["ranksCache"]->ps_rnk_tot_cnt;
             $this->v["ranksCache"]->ps_rnk_avg_sqft_grm = $avg["g"]
                 /$this->v["ranksCache"]->ps_rnk_tot_cnt;
@@ -422,30 +418,30 @@ class ScoreCalcs extends ScoreUtils
         $this->searcher->loadCurrScoreFltParams($this->sessData->dataSets);
         $matches = [
             "flt" => [], 
-            "kwh" => 0, 
+            "btu" => 0, 
             "grm" => 0 
         ];
         if (sizeof($this->searcher->v["futureFlts"]) > 0) {
             foreach ($this->searcher->v["futureFlts"] as $flt) {
-                $chk = RIIPSRanks::where('ps_rnk_filters', 'LIKE', $flt)
+                $chk = RIIPsRanks::where('ps_rnk_filters', 'LIKE', $flt)
                     ->where('ps_rnk_tot_cnt', '>', 3)
                     ->get();
                 if ($chk->isNotEmpty()) {
                     foreach ($chk as $rnk) {
                         $matches["flt"][] = $rnk->ps_rnk_filters;
-                        $matches["kwh"] += $rnk->ps_rnk_avg_sqft_kwh;
+                        $matches["btu"] += $rnk->ps_rnk_avg_sqft_kwh;
                         $matches["grm"] += $rnk->ps_rnk_avg_sqft_grm;
                     }
                 }
             }
         }
         if (sizeof($matches["flt"]) > 0) {
-            $this->sessData->dataSets["powerscore"][0]->ps_effic_facility = $matches["kwh"]
+            $this->sessData->dataSets["powerscore"][0]->ps_effic_facility = $matches["btu"]
                 /sizeof($matches["flt"]);
             $this->sessData->dataSets["powerscore"][0]->ps_kwh = $this->sessData
                 ->dataSets["powerscore"][0]->ps_effic_facility*$this->v["totFlwrSqFt"];
-            $this->sessData->dataSets["powerscore"][0]->ps_grams = ($matches["grm"]/sizeof($matches["flt"]))
-                *$this->v["totFlwrSqFt"];
+            $this->sessData->dataSets["powerscore"][0]->ps_grams = ($matches["grm"]
+                /sizeof($matches["flt"]))*$this->v["totFlwrSqFt"];
             $this->sessData->dataSets["powerscore"][0]->save();
         }
         return $this->sessData->dataSets["powerscore"][0];
@@ -461,7 +457,7 @@ class ScoreCalcs extends ScoreUtils
         $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, $this->dbID, 1);
         $GLOBALS["SL"]->x["pageView"] = $GLOBALS["SL"]->x["dataPerms"] = 'public';
         $this->loadCustLoop($GLOBALS["SL"]->REQ, 1);
-        $all = RIIPowerScore::select('ps_id')
+        $all = RIIPowerscore::select('ps_id')
             ->where('ps_status', 'NOT LIKE', $this->statusIncomplete)
             ->whereNotIn('ps_id', $doneIDs)
             ->get();
@@ -611,12 +607,12 @@ class ScoreCalcs extends ScoreUtils
                         $efficPercs["Waste"][$which]++;
                     }
                 }
-                $this->v["allRnks"][$s->ps_id] = RIIPSRankings::where('ps_rnk_psid', $s->ps_id)
+                $this->v["allRnks"][$s->ps_id] = RIIPsRankings::where('ps_rnk_psid', $s->ps_id)
                     ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
                     ->first();
                 if (!$this->v["allRnks"][$s->ps_id] 
                     || !isset($this->v["allRnks"][$s->ps_id]->ps_rnk_id)) {
-                    $this->v["allRnks"][$s->ps_id] = new RIIPSRankings;
+                    $this->v["allRnks"][$s->ps_id] = new RIIPsRankings;
                     $this->v["allRnks"][$s->ps_id]->ps_rnk_psid = $s->ps_id;
                     $this->v["allRnks"][$s->ps_id]->ps_rnk_filters = $this->searcher->v["urlFlts"];
                     $this->v["allRnks"][$s->ps_id]->ps_rnk_tot_cnt = $allscores->count();
@@ -686,14 +682,14 @@ class ScoreCalcs extends ScoreUtils
             && sizeof($this->sessData->dataSets["powerscore"]) > 0) {
             $ps = $this->sessData->dataSets["powerscore"][0];
         } elseif ($this->coreID > 0) {
-            $ps = RIIPowerScore::find($this->coreID);
+            $ps = RIIPowerscore::find($this->coreID);
         }
         if ($ps && isset($ps->ps_id)) {
-            return RIIPSRankings::where('ps_rnk_psid', $ps->ps_id)
+            return RIIPsRankings::where('ps_rnk_psid', $ps->ps_id)
                 ->where('ps_rnk_filters', '&fltFarm=' . $ps->ps_characterize)
                 ->first();
         }
-        return new RIIPSRankings;
+        return new RIIPsRankings;
     }
     
 }

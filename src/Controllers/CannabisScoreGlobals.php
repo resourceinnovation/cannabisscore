@@ -19,7 +19,7 @@ class CannabisScoreGlobals
             case 'Mother': 
                 return $GLOBALS["SL"]->def->getID($defSet, 'Mother Plants');
             case 'Clone':
-                return $GLOBALS["SL"]->def->getID($defSet, 'Clone Plants');
+                return $GLOBALS["SL"]->def->getID($defSet, 'Clone & Mother Plants');
             case 'Veg':
                 return $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants');
             case 'Flower':
@@ -43,6 +43,21 @@ class CannabisScoreGlobals
     public function cnvrtLbs2Grm($lbs = 0)
     {
         return $lbs*453.59237;
+    }
+    
+    public function cnvrtKwh2Kbtu($kWh = 0)
+    {
+        return $kWh*3.412;
+    }
+    
+    public function cnvrtKwh2Btu($kWh = 0)
+    {
+        return $kWh*3412;
+    }
+    
+    public function cnvrtBtu2Kwh($btu = 0)
+    {
+        return $btu*0.0002931;
     }
     
     public function getTypeHours($typ)

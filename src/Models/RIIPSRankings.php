@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSRankings extends Model
+class RIIPsRankings extends Model
 {
     protected $table      = 'rii_ps_rankings';
     protected $primaryKey = 'ps_rnk_id';
@@ -11,7 +11,7 @@ class RIIPSRankings extends Model
     protected $fillable   = 
     [    
 		'ps_rnk_psid', 
-        'ps_rnk_manu_id',
+		'ps_rnk_manu_id', 
 		'ps_rnk_filters', 
 		'ps_rnk_overall', 
 		'ps_rnk_overall_avg', 
@@ -19,15 +19,15 @@ class RIIPSRankings extends Model
 		'ps_rnk_production', 
 		'ps_rnk_hvac', 
 		'ps_rnk_lighting', 
-        'ps_rnk_water',
-        'ps_rnk_waste',
+		'ps_rnk_water', 
+		'ps_rnk_waste', 
 		'ps_rnk_tot_cnt', 
 		'ps_rnk_facility_cnt', 
 		'ps_rnk_production_cnt', 
 		'ps_rnk_hvac_cnt', 
-        'ps_rnk_lighting_cnt', 
-        'ps_rnk_water_cnt', 
-        'ps_rnk_waste_cnt', 
+		'ps_rnk_lighting_cnt', 
+		'ps_rnk_water_cnt', 
+		'ps_rnk_waste_cnt', 
     ];
     
     // END SurvLoop auto-generated portion of Model

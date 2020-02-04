@@ -107,7 +107,7 @@ ALTER TABLE rii_powerscore CHANGE `PsEfficLightingMother` `ps_effic_lighting_mot
 ALTER TABLE rii_powerscore CHANGE `PsEfficLightingClone` `ps_effic_lighting_clone` double;
 ALTER TABLE rii_powerscore CHANGE `PsEfficLightingVeg` `ps_effic_lighting_veg` double;
 ALTER TABLE rii_powerscore CHANGE `PsEfficLightingFlower` `ps_effic_lighting_flower` double;
-ALTER TABLE rii_powerscore CHANGE `PsHavestsPerYear` `ps_harvests_per_year` int(11);
+ALTER TABLE rii_powerscore CHANGE `PsHavestsPerYear` `ps_harvests_per_year` double;
 ALTER TABLE rii_powerscore CHANGE `PsHarvestBatch` `ps_harvest_batch` varchar(1);
 ALTER TABLE rii_powerscore CHANGE `PsDaysVegetative` `ps_days_vegetative` int(3);
 ALTER TABLE rii_powerscore CHANGE `PsDaysFlowering` `ps_days_flowering` int(3);
@@ -386,7 +386,7 @@ ALTER TABLE rii_ps_other_power CHANGE `PsOthPwrSource` `ps_oth_pwr_source` int(1
 
 
 ALTER TABLE rii_ps_owners CHANGE `PsOwnID` `ps_own_id` int(11);
-ALTER TABLE rii_ps_owners MODIFY COLUMN `_id` int(10) AUTO_INCREMENT;
+ALTER TABLE rii_ps_owners MODIFY COLUMN `ps_own_id` int(10) AUTO_INCREMENT;
 ALTER TABLE rii_ps_owners CHANGE `PsOwnPartnerUser` `ps_own_partner_user` int(11);
 ALTER TABLE rii_ps_owners CHANGE `PsOwnClientUser` `ps_own_client_user` int(11);
 ALTER TABLE rii_ps_owners CHANGE `PsOwnType` `ps_own_type` int(11);

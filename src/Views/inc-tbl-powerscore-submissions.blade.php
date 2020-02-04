@@ -52,10 +52,10 @@
         <td class="psOpen fPerc80" data-psid="{{ $s->ps_id }}">
             @if (isset($s->ps_effic_facility) && $s->ps_effic_facility > 0)
                 <span class="slGrey">F:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_facility, 3) 
-                    }} kWh / sq ft<br /> @endif
+                    }} kBtu / sq ft<br /> @endif
             @if (isset($s->ps_effic_production) && $s->ps_effic_production > 0) 
                 <span class="slGrey">P:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_production, 3) 
-                    }} grams / kWh<br /> @endif
+                    }} grams / kBtu<br /> @endif
             @if (isset($s->ps_effic_lighting) && $s->ps_effic_lighting > 0)
                 <span class="slGrey">L:</span> {{ $GLOBALS["SL"]->sigFigs($s->ps_effic_lighting, 3) 
                     }} W / sq ft<br /> @endif

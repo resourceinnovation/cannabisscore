@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSOtherPower extends Model
+class RIIPsOtherPower extends Model
 {
     protected $table      = 'rii_ps_other_power';
     protected $primaryKey = 'ps_oth_pwr_id';

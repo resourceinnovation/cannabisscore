@@ -9,11 +9,11 @@
   */
 namespace CannabisScore\Controllers;
 
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSForCup;
-use App\Models\RIIPSRenewables;
-use App\Models\RIIPSOwners;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsForCup;
+use App\Models\RIIPsRenewables;
+use App\Models\RIIPsOwners;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
@@ -28,7 +28,7 @@ class CannabisScoreSearcher extends Searcher
         $set = 'PowerScore Growth Stages';
         $this->v["areaTypes"] = [
             'Mother' => $GLOBALS["SL"]->def->getID($set, 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID($set, 'Clone Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID($set, 'Clone & Mother Plants'),
             'Veg'    => $GLOBALS["SL"]->def->getID($set, 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def->getID($set, 'Flowering Plants'),
             'Dry'    => $GLOBALS["SL"]->def->getID($set, 'Drying/Curing')
@@ -45,7 +45,7 @@ class CannabisScoreSearcher extends Searcher
     protected function getArchivedCoreIDs($coreTbl = '')
     {
         $ret = [];
-        $chk = RIIPowerScore::where('ps_status', $this->v["defArch"])
+        $chk = RIIPowerscore::where('ps_status', $this->v["defArch"])
             ->select('ps_id')
             ->get();
         if ($chk->isNotEmpty()) {
@@ -65,7 +65,7 @@ class CannabisScoreSearcher extends Searcher
             ? trim($GLOBALS["SL"]->REQ->get('eff')) : 'Overall');
         $this->v["psid"] = (($GLOBALS["SL"]->REQ->has('ps')) 
             ? intVal($GLOBALS["SL"]->REQ->get('ps')) : 0);
-        $this->v["powerscore"] = RIIPowerScore::find($this->v["psid"]);
+        $this->v["powerscore"] = RIIPowerscore::find($this->v["psid"]);
         $this->v["fltFarm"] = (($GLOBALS["SL"]->REQ->has('fltFarm')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltFarm')) : 0);
         $this->v["fltFut"] = (($GLOBALS["SL"]->REQ->has('fltFut')) 
@@ -251,7 +251,7 @@ class CannabisScoreSearcher extends Searcher
                     ->orderBy('rii_powerscore.ps_id', 'desc')
                     ->get();
             } else {
-                $list = RIIPowerScore::where('ps_status', $this->v["defCmplt"])
+                $list = RIIPowerscore::where('ps_status', $this->v["defCmplt"])
                     ->orderBy('created_at', 'desc')
                     ->get();
             }   
@@ -270,12 +270,12 @@ class CannabisScoreSearcher extends Searcher
             $this->searchResultsXtra();
         }
         $eval = "whereIn('ps_status', [" . (($this->v["fltCmpl"] == 0) 
-            ? (($this->v["isAdmin"]) ? "242, 243, 364" : 243)
+            ? (($GLOBALS["SL"]->isAdmin) ? "242, 243, 364" : 243)
             : $this->v["fltCmpl"]) . "])->where('ps_time_type', " 
             . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")";
         $psidLgtARS = $psidLghts = $psidHvac = $psidRenew 
             = $psidSize = $psidCups = $psidManuLgt = [];
-        foreach (["flt_lgt_art", "flt_lgt_dep", "flt_lgt_sun"] as $flt) {
+        foreach (["fltLgtArt", "fltLgtDep", "fltLgtSun"] as $flt) {
             $psidLgtARS[$flt] = [];
             if (isset($this->v[$flt][1])) {                 
                 eval("\$chk = " . $GLOBALS["SL"]->modelPath('ps_areas') 
@@ -313,7 +313,7 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         if ($this->v["fltHvac"][1] > 0) {                       
-            eval("\$chk = " . $GLOBALS["SL"]->modelPath('PSAreas') . "::where('ps_area_hvac_type', " 
+            eval("\$chk = " . $GLOBALS["SL"]->modelPath('ps_areas') . "::where('ps_area_hvac_type', " 
                 . $this->v["fltHvac"][1] . ")" . (($this->v["fltHvac"][0] > 0) 
                     ? "->where('ps_area_type', " . $this->v["fltHvac"][0] . ")" 
                     : "")
@@ -327,7 +327,7 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         if (sizeof($this->v["fltRenew"]) > 0) {
-            $chk = RIIPSRenewables::whereIn('ps_rnw_renewable', $this->v["fltRenew"])
+            $chk = RIIPsRenewables::whereIn('ps_rnw_renewable', $this->v["fltRenew"])
                 ->where('ps_rnw_psid', '>', 0)
                 ->select('ps_rnw_psid')
                 ->get();
@@ -348,7 +348,7 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         if ($this->v["fltCup"] > 0) {
-            $chk = RIIPSForCup::where('ps_cup_cup_id', $this->v["fltCup"])
+            $chk = RIIPsForCup::where('ps_cup_cup_id', $this->v["fltCup"])
                 ->where('ps_cup_psid', '>', 0)
                 ->select('ps_cup_psid')
                 ->get();
@@ -362,7 +362,7 @@ class CannabisScoreSearcher extends Searcher
         }
         if ($this->v["fltSize"] > 0) {
             $range = $GLOBALS["CUST"]->getSizeDefRange($this->v["fltSize"]);
-            $chk = RIIPSAreas::where('ps_area_type', $this->v["areaTypes"]["Flower"])
+            $chk = RIIPsAreas::where('ps_area_type', $this->v["areaTypes"]["Flower"])
                 ->where('ps_area_size', '>=', $range[0])
                 ->where('ps_area_size', '<', $range[1])
                 ->where('ps_area_psid', '>', 0)
@@ -628,8 +628,8 @@ class CannabisScoreSearcher extends Searcher
             'ps_kwh',
             'ps_total_size'
         ];
-        $this->v["psAvg"] = new RIIPowerScore;
-        $this->v["psCnt"] = new RIIPowerScore;
+        $this->v["psAvg"] = new RIIPowerscore;
+        $this->v["psCnt"] = new RIIPowerscore;
         foreach ($this->v["avgFlds"] as $fld) {
             $this->v["psAvg"]->{ $fld } = $this->v["psCnt"]->{ $fld } = 0;
         }
@@ -662,7 +662,7 @@ class CannabisScoreSearcher extends Searcher
     {
         $this->v["cultClassicIds"] = $this->v["emeraldIds"] = [];
         $cupDef = $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic');
-        $chk = RIIPSForCup::where('ps_cup_cup_id', $cupDef)
+        $chk = RIIPsForCup::where('ps_cup_cup_id', $cupDef)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {
@@ -670,7 +670,7 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         $cupDef = $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Emerald Cup Regenerative Award');
-        $chk = RIIPSForCup::where('ps_cup_cup_id', $cupDef)
+        $chk = RIIPsForCup::where('ps_cup_cup_id', $cupDef)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {

@@ -384,7 +384,7 @@
     function applyFilts() {
         var params = "&sSort={{ $sort[0] }}&ps={{ $psid }}";
         var newUrl = document.getElementById('tblBaseUrlID').value+params+gatherFilts();
-        console.log(newUrl);
+        console.log("applyFilts: "+newUrl);
         window.location=newUrl;
         return true;
     }

@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSWaterFilter extends Model
+class RIIPsWaterFilter extends Model
 {
     protected $table      = 'rii_ps_water_filter';
     protected $primaryKey = 'ps_wtr_flt_id';

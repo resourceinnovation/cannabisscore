@@ -12,22 +12,23 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
+use App\Models\RIIPowerscore;
 use CannabisScore\Controllers\ScoreListings;
 
 class ScoreReports extends ScoreListings
 {
-	public function printBasicStats($nID = -3)
-	{
-		$this->v["completionStats"] = [ "ALL" => [ 0, 0, 0 ] ];
-		$GLOBALS["SL"]->loadStates();
-		foreach ($GLOBALS["SL"]->states->stateList as $abbr => $state) {
-			$this->v["completionStats"][$abbr] = [ 0, 0, 0 ];
-		}
-		foreach ($GLOBALS["SL"]->states->stateListCa as $abbr => $state) {
-			$this->v["completionStats"][$abbr] = [ 0, 0, 0 ];
-		}
-		$all = RIIPowerScore::get();
+    
+    public function printBasicStats($nID = -3)
+    {
+      	$this->v["completionStats"] = [ "ALL" => [ 0, 0, 0 ] ];
+      	$GLOBALS["SL"]->loadStates();
+      	foreach ($GLOBALS["SL"]->states->stateList as $abbr => $state) {
+      		$this->v["completionStats"][$abbr] = [ 0, 0, 0 ];
+      	}
+      	foreach ($GLOBALS["SL"]->states->stateListCa as $abbr => $state) {
+      		$this->v["completionStats"][$abbr] = [ 0, 0, 0 ];
+      	}
+      	$all = RIIPowerscore::get();
         if ($all->isNotEmpty()) {
           	foreach ($all as $score) {
             		if (isset($score->ps_state) 
@@ -59,7 +60,10 @@ class ScoreReports extends ScoreListings
           	    unset($this->v["completionStats"][$abbr]);
           	}
         }
-        return view('vendor.cannabisscore.nodes.976-basic-score-stats', $this->v)->render();
-	}
+        return view(
+            'vendor.cannabisscore.nodes.976-basic-score-stats', 
+            $this->v
+        )->render();
+    }
     
 }

@@ -21,7 +21,7 @@
          </th>         </tr>
     <tr>
              <th>
-        <nobr>Facility <sup class="slBlueDark">kWh/SqFt</sup></nobr>
+        <nobr>Facility <sup class="slBlueDark">kBtu/SqFt</sup></nobr>
          </th>              <td class="brdRgt">
         204<sub class="slGrey">76</sub>
          </td>              <td>
@@ -35,7 +35,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr>Production <sup class="slBlueDark">g/kWh</sup></nobr>
+        <nobr>Production <sup class="slBlueDark">g/kBtu</sup></nobr>
          </th>              <td class="brdRgt">
         2.71<sub class="slGrey">76</sub>
          </td>              <td>

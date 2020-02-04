@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSRanks extends Model
+class RIIPsRanks extends Model
 {
     protected $table      = 'rii_ps_ranks';
     protected $primaryKey = 'ps_rnk_id';

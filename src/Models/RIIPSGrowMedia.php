@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSGrowMedia extends Model
+class RIIPsGrowMedia extends Model
 {
     protected $table      = 'rii_ps_grow_media';
     protected $primaryKey = 'ps_grw_med_id';

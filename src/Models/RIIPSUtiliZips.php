@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSUtiliZips extends Model
+class RIIPsUtiliZips extends Model
 {
     protected $table      = 'rii_ps_utili_zips';
     protected $primaryKey = 'ps_ut_zp_id';

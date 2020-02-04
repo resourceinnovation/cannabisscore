@@ -12,8 +12,8 @@ namespace CannabisScore\Controllers;
 
 use Illuminate\Support\Facades\Storage;
 use App\Models\SLZips;
-use App\Models\RIIPSUtilities;
-use App\Models\RIIPSUtiliZips;
+use App\Models\RIIPsUtilities;
+use App\Models\RIIPsUtiliZips;
 use CannabisScore\Controllers\ScoreLightModels;
 
 class ScorePowerUtilities extends ScoreLightModels
@@ -42,7 +42,7 @@ class ScorePowerUtilities extends ScoreLightModels
             eval($cache);
         } else {
             $cache = '';
-            $chk = RIIPSUtilities::orderBy('ps_ut_name', 'asc')
+            $chk = RIIPsUtilities::orderBy('ps_ut_name', 'asc')
                 ->get();
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $i => $u) {
@@ -76,7 +76,7 @@ class ScorePowerUtilities extends ScoreLightModels
             eval($cache);
         } else {
             $cache = '';
-            $chk = RIIPSUtiliZips::get();
+            $chk = RIIPsUtiliZips::get();
             if ($chk->isNotEmpty()) {
                 foreach ($chk as $i => $uz) {
                     if (isset($uz->ps_ut_zp_zip_code) 

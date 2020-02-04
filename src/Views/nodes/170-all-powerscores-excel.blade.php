@@ -4,8 +4,8 @@
 @if (isset($fltCmpl) && $fltCmpl != 243) <th>Status</th> @endif
 @if (isset($showFarmNames) && $showFarmNames) <th>Farm Name</th> @endif
 <th>Overall</th>
-<th>Facility Score (kWh/SqFt)</th>
-<th>Production Score (g/kWh)</th>
+<th>Facility Score (kBtu/SqFt)</th>
+<th>Production Score (g/kBtu)</th>
 <th>Lighting Score (W/SqFt)</th>
 <th>HVAC Score (kWh/SqFt)</th>
 <th>Grams</th>

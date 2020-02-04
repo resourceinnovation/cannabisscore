@@ -3,13 +3,14 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSLightTypes extends Model
+class RIIPsLightTypes extends Model
 {
     protected $table      = 'rii_ps_light_types';
     protected $primaryKey = 'ps_lg_typ_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
+		'ps_lg_typ_psid', 
 		'ps_lg_typ_area_id', 
 		'ps_lg_typ_light', 
 		'ps_lg_typ_count', 

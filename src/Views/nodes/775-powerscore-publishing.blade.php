@@ -8,8 +8,8 @@ Should all of these be removed from the list of 'published' scores which others 
 <th>Score ID#</th>
 <th>Farm Name</th>
 <th>Overall</th>
-<th class="taR">Facility Score <sup class="slBlueDark">kWh/SqFt</sup></th>
-<th class="taR">Production Score <sup class="slBlueDark">g/kWh</sup></th>
+<th class="taR">Facility Score <sup class="slBlueDark">kBtu/SqFt</sup></th>
+<th class="taR">Production Score <sup class="slBlueDark">g/kBtu</sup></th>
 <th class="taR">Lighting Score <sup class="slBlueDark">kWh/SqFt</sup></th>
 <th class="taR">HVAC Score <sup class="slBlueDark">kWh/SqFt</sup></th>
 <th class="taR">Grams</th>

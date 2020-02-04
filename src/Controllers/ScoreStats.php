@@ -10,7 +10,7 @@
 namespace CannabisScore\Controllers;
 
 use Auth;
-use App\Models\RIIPSAreas;
+use App\Models\RIIPsAreas;
 use SurvLoop\Controllers\Stats\SurvStatsTbl;
 use SurvLoop\Controllers\Stats\SurvStatTh;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
@@ -233,11 +233,11 @@ class ScoreStats extends SurvStatsGraph
     {
         $this->addDataType( // stat var 'a'
             'fac',  
-            '<nobr>Facility <sup class="slBlueDark">kWh/SqFt</sup></nobr>'
+            '<nobr>Facility <sup class="slBlueDark">kBtu/SqFt</sup></nobr>'
         );
         $this->addDataType( // stat var 'b'
             'pro',  
-            '<nobr>Production <sup class="slBlueDark">g/kWh</sup></nobr>'
+            '<nobr>Production <sup class="slBlueDark">g/kBtu</sup></nobr>'
         );
         $this->addDataType( // stat var 'c'
             'hvc',  
@@ -377,7 +377,7 @@ class ScoreStats extends SurvStatsGraph
             if (isset($ps->ps_effic_lighting_status)
                 && intVal($ps->ps_effic_lighting_status) == $this->v["psComplete"]) {
                 foreach ([ 'Mother', 'Clone', 'Veg', 'Flower' ] as $type) {
-                    $area = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                    $area = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                         ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
                         ->first();
                     if ($area && isset($area->ps_area_size) && $area->ps_area_size > 0) {

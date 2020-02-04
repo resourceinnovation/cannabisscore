@@ -12,10 +12,10 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSRanks;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSLightTypes;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsRanks;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
 
 class ScoreListingsGraph
@@ -114,7 +114,7 @@ class ScoreListingsGraph
     protected function cntValidScoreIn($scoreIDs = [])
     {
         $cnt = 0;
-        $chk = RIIPowerScore::whereIn('ps_id', $scoreIDs)
+        $chk = RIIPowerscore::whereIn('ps_id', $scoreIDs)
             ->where('ps_status', $this->v["defCmplt"])
             ->select('ps_effic_facility_status', 'ps_effic_production_status',
                 'ps_effic_lighting_status', 'ps_effic_hvac_status')
@@ -151,7 +151,7 @@ class ScoreListingsGraph
         } elseif ($fltFarm == 143) {
             $type = 'Outdoor';
         }
-        $this->v["averageRanks"] = RIIPSRanks::where('ps_rnk_filters', '&fltFarm=' . $fltFarm)
+        $this->v["averageRanks"] = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $fltFarm)
             ->first(); 
         $this->v["lgtCompetData"]->addLineFromRanking(
             $type . ' Average', 
@@ -238,8 +238,8 @@ class ScoreLgtManuData
     {
         //  prod, fac, hvac, light, water, waste // number of records analyzed
         $this->dataLegend = [
-            ['facility',   'Facility Efficiency',   'kWh / sq ft',     0, 0],
-            ['production', 'Production Efficiency', 'g / kWh',         0, 0],
+            ['facility',   'Facility Efficiency',   'kBtu / sq ft',    0, 0],
+            ['production', 'Production Efficiency', 'g / kBtu',        0, 0],
             ['lighting',   'Lighting Efficiency',   'W / sq ft',       0, 0],
             ['hvac',       'HVAC Efficiency',       'kWh / sq ft',     0, 0],
             ['water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
@@ -358,23 +358,23 @@ class ScoreLgtManuData
      * Add all sub-scores fit to include into each line of data.
      *
      * @param string $title
-     * @param App\Models\RIIPowerScore $ps
+     * @param App\Models\RIIPowerscore $ps
      * @return int
      */
     public function addPowerScore($title, $ps, $defCmplt)
     {
         $ind = $this->getIndFromTitle($title);
-        $rankRow = RIIPSRanks::where('ps_rnk_filters', '&fltFarm=' . $ps->ps_characterize)
+        $rankRow = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $ps->ps_characterize)
             ->first();
         foreach ($this->dataLegend as $l => $leg) {
-            $fld = 'ps_effic_' . $leg[0];
+            $fld = 'ps_effic_' . strtolower($leg[0]);
             if (isset($ps->{ $fld }) 
                 && $ps->{ $fld } > 0
                 && $ps->{ $fld . '_status' } == $defCmplt) {
                 $score = $ps->{ $fld };
                 $this->dataLines[$ind]->scores[$l] += $score;
                 $this->dataLines[$ind]->ids[$l][] = $ps->ps_id;
-                $fldRnk = 'ps_rnk_' . $leg[0];
+                $fldRnk = 'ps_rnk_' . strtolower($leg[0]);
                 if ($rankRow && isset($rankRow->{ $fldRnk })) {
                     $rnk = $rankRow->{ $fldRnk };
                     $r = $this->calcScoreRank($score, $rnk);

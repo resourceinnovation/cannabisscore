@@ -10,12 +10,12 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSLightTypes;
-use App\Models\RIIPSRenewables;
-use App\Models\RIIPSForCup;
-use App\Models\RIIPSLicenses;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsLightTypes;
+use App\Models\RIIPsRenewables;
+use App\Models\RIIPsForCup;
+use App\Models\RIIPsLicenses;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\CannabisScoreSearcher;
@@ -73,7 +73,7 @@ class ScoreReportAvgs extends ScoreReportStats
         $psTags = [];
         foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
             $psTags[$ps->ps_id] 
-                = $this->loadPsTags($ps, RIIPSAreas::where('ps_area_psid', $ps->ps_id)->get());
+                = $this->loadPsTags($ps, RIIPsAreas::where('ps_area_psid', $ps->ps_id)->get());
         }
         $this->v["scoreSets"] = [
             ['farm',     'PowerScore Averages by Type of Farm'],
@@ -199,7 +199,7 @@ class ScoreReportAvgs extends ScoreReportStats
                         $this->v["statMisc"]->addRecDat($fld, 1, $ps->ps_id);
                     }
                 }
-                $chk = RIIPSRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
+                $chk = RIIPsRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
                 if ($chk->isNotEmpty()) {
                     $this->v["enrgys"]["cmpl"][0]++;
                     $this->v["enrgys"]["cmpl"][$char][0]++;
@@ -209,7 +209,7 @@ class ScoreReportAvgs extends ScoreReportStats
                         $this->v["enrgys"]["cmpl"][$char][$type]++;
                     }
                 }
-                $chk = RIIPSLicenses::where('ps_lic_psid', $ps->ps_id)->get();
+                $chk = RIIPsLicenses::where('ps_lic_psid', $ps->ps_id)->get();
                 if ($chk->isNotEmpty()) {
                     foreach ($chk as $lic) {
                         $type = 'lic' . $lic->ps_lic_license;
@@ -223,7 +223,7 @@ class ScoreReportAvgs extends ScoreReportStats
                 $this->v["statLgts"]->resetRecFilt();
                 $this->v["statLgts"]->addRecFilt('farm', $char, $ps->ps_id);
                 $hasArtifLgt = false;
-                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->get();
                 if ($areas->isNotEmpty()) {
                     foreach ($areas as $area) {
@@ -283,7 +283,7 @@ class ScoreReportAvgs extends ScoreReportStats
                             $this->v["statLgts"]->addRecDat('kWh', $w, $aID);
                             $foundLights = $foundHID = $foundLED = false;
                             $fixtureCnt = 0;
-                            $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->getKey())
+                            $lgts = RIIPsLightTypes::where('ps_lg_typ_area_id', $area->getKey())
                                 ->get();
                             if ($lgts->isNotEmpty()) {
                                 foreach ($lgts as $lgt) {
@@ -400,7 +400,7 @@ class ScoreReportAvgs extends ScoreReportStats
             
         }
         
-        $chk = RIIPSRenewables::whereIn('ps_rnw_psid', [1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 1725, 1756, 
+        $chk = RIIPsRenewables::whereIn('ps_rnw_psid', [1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 1725, 1756, 
                 2101, 878, 881, 884, 914, 922, 929, 934])
             ->get();
         if ($chk->isNotEmpty()) {
@@ -463,7 +463,7 @@ class ScoreReportAvgs extends ScoreReportStats
     {
         $psTags = [];
         $psTags[] = ['farm', $ps->ps_characterize];
-        $chk = RIIPSForCup::where('ps_cup_psid', $ps->ps_id)
+        $chk = RIIPsForCup::where('ps_cup_psid', $ps->ps_id)
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $c) {
@@ -475,7 +475,7 @@ class ScoreReportAvgs extends ScoreReportStats
                 $psTags[] = ['tech', $fld];
             }
         }
-        $chk = RIIPSRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
+        $chk = RIIPsRenewables::where('ps_rnw_psid', $ps->ps_id)->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $renew) {
                 $psTags[] = ['powr', $renew->ps_rnw_renewable];
@@ -490,7 +490,7 @@ class ScoreReportAvgs extends ScoreReportStats
                         if (intVal($area->ps_area_hvac_type) > 0) {
                             $psTags[] = [ $aTyp . '-hvac', $area->ps_area_hvac_type ];
                         }
-                        $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->getKey())
+                        $lgts = RIIPsLightTypes::where('ps_lg_typ_area_id', $area->getKey())
                             ->get();
                         if ($lgts->isNotEmpty()) {
                             foreach ($lgts as $lgt) {

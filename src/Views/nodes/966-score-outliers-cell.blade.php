@@ -2,8 +2,8 @@
 
 <?php
 $currVal = -1; 
-if (isset($ps->{ 'ps_effic_' . $scr }) && $ps->{ 'ps_effic_' . $scr } > 0) {
-    $currVal = $ps->{ 'ps_effic_' . $scr };
+if (isset($ps->{ 'ps_effic_' . $scrL }) && $ps->{ 'ps_effic_' . $scrL } > 0) {
+    $currVal = $ps->{ 'ps_effic_' . $scrL };
 } elseif ($scr == 'Flow SqFt/Fix') {
     $currVal = $ps->ps_area_sq_ft_per_fix2;
 } elseif ($scr == 'Veg SqFt/Fix' && isset($scoresVegSqFtFix[$ps->ps_id])) {
@@ -17,12 +17,12 @@ if (isset($ps->{ 'ps_effic_' . $scr }) && $ps->{ 'ps_effic_' . $scr } > 0) {
 
 @elseif ($currVal >= 0)
 
-    @if (isset($ps->{ 'ps_effic_' . $scr }) && $ps->{ 'ps_effic_' . $scr } > 0)
+    @if (isset($ps->{ 'ps_effic_' . $scrL }) && $ps->{ 'ps_effic_' . $scrL } > 0)
         <label>
         <input type="checkbox" name="goodScores[]" class="mLn10 mR0" autocomplete="off" 
             value="p{{ $ps->ps_id }}s{{ str_replace(' SqFt/Fix', 'SqFix', $scr) }}"
-            @if (isset($ps->{ 'ps_effic_' . $scr . '_status' }) 
-                && intVal($ps->{ 'ps_effic_' . $scr . '_status' }) == 243) 
+            @if (isset($ps->{ 'ps_effic_' . $scrL . '_status' }) 
+                && intVal($ps->{ 'ps_effic_' . $scrL . '_status' }) == 243) 
                 CHECKED
             @endif >
         {{ $GLOBALS["SL"]->sigFigs($currVal, 3) }}

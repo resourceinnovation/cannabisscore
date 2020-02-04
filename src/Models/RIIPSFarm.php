@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSFarm extends Model
+class RIIPsFarm extends Model
 {
     protected $table      = 'rii_ps_farm';
     protected $primaryKey = 'ps_frm_id';

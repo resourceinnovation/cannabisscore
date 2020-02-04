@@ -59,12 +59,16 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Cultivation Classic'
                         ),
                         $this->admMenuLnk(
-                            '/dash/raw-lighting-calculations',
-                            'Raw Lighting Data'
+                            '/dash/powerscore-outliers',
+                            'Process Outliers', 
                         ),
                         $this->admMenuLnk(
-                            '/dash/powerscore-outliers',
-                            'Outliers'
+                            '/dash/process-uploads', 
+                            'Process Uploads'
+                        ),
+                        $this->admMenuLnk(
+                            '/dash/raw-lighting-calculations',
+                            'Raw Lighting Data'
                         )
                     ]
                 ),
@@ -105,13 +109,6 @@ class CannabisScoreAdminMenu extends AdminMenu
                     ]
                 ),
                 $this->admMenuLnk(
-                    '/dash/process-uploads', 
-                    'Process Uploads', 
-                    '', 
-                    1, 
-                    []
-                ),
-                $this->admMenuLnk(
                     '/dash/manage-manufacturers', 
                     'Manufacturers', 
                     '', 
@@ -132,11 +129,15 @@ class CannabisScoreAdminMenu extends AdminMenu
                     ]
                 ),
                 $this->admMenuLnk(
-                    '/dash/powerscore-software-troubleshooting', 
+                    '/dash/handbook', 
                     'More Tools', 
                     '', 
                     1, 
                     [
+                        $this->admMenuLnk(
+                            '/dash/handbook',
+                            'Handbook'
+                        ),
                         $this->admMenuLnk(
                             '/dash/powerscore-software-troubleshooting', 
                             'Troubleshooting'
@@ -152,10 +153,6 @@ class CannabisScoreAdminMenu extends AdminMenu
                         $this->admMenuLnk(
                             '/dash/export-emails',
                             'Emails Export'
-                        ),
-                        $this->admMenuLnk(
-                            '/dash/nwpcc-import',
-                            'NWPCC Import'
                         )
                     ]
                 )

@@ -13,8 +13,8 @@
 <th>Production Rank</th>
 <th>Lighting Rank</th>
 <th>HVAC Rank</th>
-<th>Facility Score kWh/SqFt</th>
-<th>Production Score g/kWh</th>
+<th>Facility Score kBtu/SqFt</th>
+<th>Production Score g/kBtu</th>
 <th>Lighting Score kWh/SqFt</th>
 <th>HVAC Score kWh/SqFt</th>
 <th>Grams</th>

@@ -10,9 +10,9 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
-use App\Models\RIIPSLightTypes;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsLightTypes;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreReportStats;
@@ -74,7 +74,7 @@ class ScoreReportLighting extends ScoreReportStats
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->whereIn('ps_area_type', [
                         $this->v["areaTypes"]["Flower"],
                         $this->v["areaTypes"]["Veg"],
@@ -97,7 +97,7 @@ class ScoreReportLighting extends ScoreReportStats
                         }
                         $set .= $ps->ps_characterize;
                         if (isset($this->v["scoreSets"][$set])) {
-                            $lgts = RIIPSLightTypes::where(
+                            $lgts = RIIPsLightTypes::where(
                                 'ps_lg_typ_area_id', $area->ps_area_id)
                                 ->get();
                             if ($lgts->isNotEmpty()) {
@@ -181,7 +181,7 @@ class ScoreReportLighting extends ScoreReportStats
                 ];
                 $totSqFt = 0;
                 $areaCols = $areaSqFtEffic[] = $areaSqFtPercs[] = $areaSqFtWeighted[] = [];
-                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->where('ps_area_type', '>', 0)
                     ->where('ps_area_type', 'NOT LIKE', 163)
                     ->get();
@@ -200,7 +200,7 @@ class ScoreReportLighting extends ScoreReportStats
                             ''
                         ];
                         $areaSqFtEffic[$area->ps_area_type] = $area->ps_area_lighting_effic;
-                        $lgts = RIIPSLightTypes::where('ps_lg_typ_area_id', $area->ps_area_id)
+                        $lgts = RIIPsLightTypes::where('ps_lg_typ_area_id', $area->ps_area_id)
                             ->get();
                         if ($lgts->isNotEmpty()) {
                             $lgtInd = 0;

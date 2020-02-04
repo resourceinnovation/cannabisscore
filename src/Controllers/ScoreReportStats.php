@@ -10,8 +10,8 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreLookups;
 use CannabisScore\Controllers\ScoreStats;
@@ -52,14 +52,14 @@ class ScoreReportStats
             ['System A', 'System B', 'System C', 'System D', 'System E', 'System F', 'Other System', 'None']
         ];
         $this->v["scoreRowLabs"] = [
-            [ 'Facility Score',   'kWh/SqFt' ], 
-            [ 'Production Score', 'g/kWh'    ], 
+            [ 'Facility Score',   'kBtu/SqFt' ], 
+            [ 'Production Score', 'g/kBtu'    ], 
             [ 'Lighting Score',   'W/SqFt'   ], 
             [ 'HVAC Score',       'kWh/SqFt' ]
         ];
         $this->v["areaTypes"] = [
             'Mother' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone & Mother Plants'),
             'Veg'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'),
             'Dry'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing')

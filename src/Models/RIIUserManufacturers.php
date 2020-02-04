@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 class RIIUserManufacturers extends Model
 {
     protected $table      = 'rii_user_manufacturers';
-    protected $primaryKey = 'usr_manu_id';
+    protected $primaryKey = 'usr_man_id';
     public $timestamps    = true;
     protected $fillable   = 
     [    
-		'usr_manu_user_id', 
+		'usr_man_user_id', 
 		'usr_man_manu_id', 
     ];
     

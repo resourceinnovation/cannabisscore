@@ -10,8 +10,8 @@
 namespace CannabisScore\Controllers;
 
 use DB;
-use App\Models\RIIPowerScore;
-use App\Models\RIIPSAreas;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsAreas;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreReportStats;
@@ -66,7 +66,7 @@ class ScoreReportHvac extends ScoreReportStats
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             $this->v["totCnt"] = $this->searcher->v["allscores"]->count();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                $areas = RIIPSAreas::where('ps_area_psid', $ps->ps_id)
+                $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                     ->where('ps_area_type', '>', 0)
                     ->get();
                 if ($areas->isNotEmpty()) {

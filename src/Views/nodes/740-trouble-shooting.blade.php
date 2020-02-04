@@ -1,59 +1,51 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/740-trouble-shooting.blade.php -->
 <div class="slCard nodeWrap">
-@if (isset($importResult)) {!! $importResult !!} @endif
-<div class="float-right mT5 mB5">
-    <a href="?recalc=1" class="btn btn-secondary btn-sm">Recalc Sub-Scores</a>
-    <a href="?refresh=1" class="btn btn-secondary btn-sm">Recalc Rankings</a>
-</div>
-<h2>Troubleshooting</h2>
+    <h2>Troubleshooting</h2>
+    @if (isset($importResult)) {!! $importResult !!} @endif
+
+    <p>&nbsp;</p>
+    <h4>Recalculate All Sub-Scores</h4>
+    <p>
+        This process wipes all PowerScore calculations clean, and re-performs them fresh.
+        This is useful for anything cases of any changes to our scoring logic, big or small.
+        It is also a fine method to ensure that [manual] record changes to one or more 
+        PowerScores are reflected in the calculations.
+        Occasionally good for mysterious problems.
+    </p>
+    <p>
+        <a href="?recalc=1" class="btn btn-primary btn-lg">Recalculate All Sub-Scores</a>
+    </p>
+
+    <p>&nbsp;</p>
+    <h4>Recalculate All PowerScore Rankings</h4>
+    <p>
+        This process wipes all PowerScore rankings clean, and re-performs them fresh.
+        This happens every time a PowerScore is completed, and should be run after
+        any manual record changes, or score logic changes, etc. 
+        Occasionally good for mysterious problems.
+    </p>
+    <p>
+        <a href="?refresh=1" class="btn btn-primary btn-lg">Recalculate All Rankings</a>
+    </p>
 </div>
 
 <div class="slCard nodeWrap">
-@if (isset($hvcChk) && sizeof($hvcChk) > 0)
-    <h3 class="slBlueDark">HVAC Efficiency Score</h3>
-    <p class="slGrey"><b>New Formula #2:</b> multiplying each growth stage's HVAC kWh/score estimate
-    by the stage's canopy square feet divided by total canopies square feet (including drying), 
-    and taking the sum of all stages.</p>
-    <p class="slGrey"><b>New Formula #1:</b> multiplying each growth stage's HVAC kWh/score estimate
-    by the stage's canopy square feet, and taking the sum of all stages.</p>
-    <table class="table table-striped mT10">
-    <tr>
-        <th>Score ID# - <i>ALL COMPLETE INDOOR PowerScores</i></th>
-        <th>Current (Simple)<div class="slGrey fPerc66">kWh/sqft</div></th>
-        <th>
-            Weighted Stages <nobr>(Formula #2)</nobr>
-            <div class="slGrey fPerc66">kWh/sqft</div>
-        </th>
-        <th colspan=2 >
-            Sum of Stages <nobr>(Formula #1)</nobr>
-            <div class="slGrey fPerc66"><span class="float-right">MWh</span> kWh</div>
-        </th>
-    </tr>
-    <tr class="slBlueDark">
-        <th>Calculation Average</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($hvcAvg[0], 3) }} kWh/sqft</th>
-        <th>{{ number_format($hvcAvg[2]) }} kWh/sqft</th>
-        <th>{{ number_format($hvcAvg[1]) }} kWh</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($hvcAvg[1]/1000, 3) }} MWh</th>
-    </tr>
-    @foreach ($hvcChk as $i => $ps)
-        <tr>
-        <td>
-            <a href="/calculated/u-{{ $lgtChk[$i][0]->ps_id }}" 
-                target="_blank">#{{ $lgtChk[$i][0]->ps_id }}</a> 
-            @if (isset($lgtChk[$i][0]->ps_name)) 
-                <span class="slGrey">{{ $lgtChk[$i][0]->ps_name }}</span> 
-            @endif
-        </td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps[0], 3) }} <span class="slGrey fPerc66">kWh/sqft</span></td>
-        <td>{{ number_format($ps[2]) }} <span class="slGrey fPerc66">kWh/sqft</span></td>
-        <td>{{ number_format($ps[1]) }} <span class="slGrey fPerc66">kWh</span></td>
-        <td>{{ $GLOBALS["SL"]->sigFigs($ps[1]/1000, 3) }} <span class="slGrey fPerc66">MWh</span></td>
-        </tr>
-    @endforeach
-    </table>
-@endif
+    <h4>Temporary Trouble</h4>
+    <p>
+        <a href="?artifChk=1" class="btn btn-primary btn-lg"
+            >Check Bad Artificial Lighting Data</a>
+    </p>
+    @if ($GLOBALS["SL"]->REQ->has('artifChk'))
+        @if (isset($artifErrs) && trim($artifErrs) != '')
+            {!! $artifErrs !!}
+        @else
+            <i>No artificial lighting data errors detected.</i>
+        @endif
+    @endif
+    </div>
 </div>
+
+
 
 @if (isset($logOne) && trim($logOne) != '')
     <div class="jumbotron">{!! $logOne !!}</div>

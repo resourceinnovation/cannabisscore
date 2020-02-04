@@ -51,7 +51,7 @@
                     @if (isset($sessData["powerscore"][0]->ps_effic_facility)) 
                         {{ $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_facility, 3) }}
                     @else 0 @endif
-                    <nobr>kWh / sq ft</nobr>
+                    <nobr>kBtu / sq ft</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreFacility">
                     <iframe id="guageFrameFacility" class="guageFrame" src="" 
@@ -66,9 +66,15 @@
                 && isset($totFlwrSqFt) 
                 && $totFlwrSqFt > 0)
                 <div class="pL10 slGrey">
-                    = {{ number_format($sessData["powerscore"][0]->ps_kwh) }} 
-                        Total Annual Kilowatt Hours &nbsp;&nbsp;/&nbsp;&nbsp;
-                        {{ number_format($totFlwrSqFt) }} Square Feet of Flowering Canopy
+                    = {{ number_format($GLOBALS["CUST"]
+                        ->cnvrtKwh2Kbtu($sessData["powerscore"][0]->ps_kwh)) }} 
+                        Total Annual kBtu &nbsp;&nbsp;/&nbsp;&nbsp;
+                        {{ number_format($totFlwrSqFt) }} Square Feet of Flowering Canopy<br />
+                </div>
+                <div class="pL10 pT15 slGrey">
+                    Total Annual kBtu = 3.412 x ( {{ 
+                        number_format($sessData["powerscore"][0]->ps_kwh)
+                        }} Total Kilowatt Hours )
                 </div>
             @endif
             </div>
@@ -88,7 +94,7 @@
                     @if (isset($sessData["powerscore"][0]->ps_effic_production)) 
                         {{ $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_production, 3) }}
                     @else 0 @endif
-                    <nobr>g / kWh</nobr>
+                    <nobr>g / kBtu</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreProduction">
                     <iframe id="guageFrameProduction" class="guageFrame" src="" frameborder="0" width="190" height="30" ></iframe>
@@ -104,15 +110,22 @@
                     = {{ number_format($sessData["powerscore"][0]->ps_grams) }} 
                         Annual Grams of Dried Flower Produced
                         &nbsp;&nbsp;/&nbsp;&nbsp;
-                        {{ number_format($sessData["powerscore"][0]->ps_kwh) }} 
-                        Total Annual Kilowatt Hours
+                        {{ number_format($GLOBALS["CUST"]->cnvrtKwh2Kbtu(
+                            $sessData["powerscore"][0]->ps_kwh)) }} 
+                        Total Annual kBtu
+                </div>
+                <div class="pL10 pT15 slGrey">
+                    Total Annual kBtu = 3.412 x ( {{ 
+                        number_format($sessData["powerscore"][0]->ps_kwh)
+                        }} Total Kilowatt Hours )
                 </div>
             @endif
             </div>
         </div></td></tr>
     @endif
 
-    @if (isset($sessData["powerscore"][0]->ps_effic_hvac) && $sessData["powerscore"][0]->ps_effic_hvac > 0)
+    @if (isset($sessData["powerscore"][0]->ps_effic_hvac) 
+        && $sessData["powerscore"][0]->ps_effic_hvac > 0)
         <tr id="scoreRowHvac"><td><div class="efficBlock">
             <div class="row">
                 <div class="col-lg-3 col-md-3 col-6 efficHeadLabel">
@@ -322,7 +335,7 @@
                     @if (isset($sessData["powerscore"][0]->ps_effic_waste)) 
                         {{ $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_waste, 3) }}
                     @else 0 @endif
-                    <nobr>g / kWh</nobr>
+                    <nobr>lbs / sq ft</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreWaste">
                     <iframe id="guageFrameWaste" class="guageFrame" src="" 

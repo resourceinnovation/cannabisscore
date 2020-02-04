@@ -10,7 +10,11 @@
 
 @forelse ($areas as $a => $area)
     @if (isset($area->ps_area_has_stage) 
-        && intVal($area->ps_area_has_stage) == 1)
+        && intVal($area->ps_area_has_stage) == 1
+        && isset($area->ps_area_size) 
+        && intVal($area->ps_area_size) > 0
+        && isset($area->ps_area_lgt_artif) 
+        && intVal($area->ps_area_lgt_artif) == 1)
         <div class="row mB10">
             <div class="col-3">{!! $GLOBALS["SL"]->def->getVal(
                 'PowerScore Growth Stages', 
@@ -27,8 +31,8 @@
             @if (isset($areaCnts[$area->ps_area_id]) 
                 && $areaCnts[$area->ps_area_id] > 0 
                 && isset($area->ps_area_sq_ft_per_fix2))
-                @if ($area->ps_area_sq_ft_per_fix2 < 9
-                    || $area->ps_area_sq_ft_per_fix2 > 49) 
+                @if ($area->ps_area_sq_ft_per_fix2 < 4
+                    || $area->ps_area_sq_ft_per_fix2 > 81) 
                     <div class="col-3 red bld">
                         <nobr>
                         <i class="fa fa-exclamation-triangle mR5"

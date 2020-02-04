@@ -3,7 +3,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class RIIPSHvac extends Model
+class RIIPsHvac extends Model
 {
     protected $table      = 'rii_ps_hvac';
     protected $primaryKey = 'ps_hvc_id';

@@ -12,6 +12,7 @@ class RIIUserInfo extends Model
     [    
 		'usr_user_id', 
 		'usr_company_name', 
+        'usr_membership_expiration',
     ];
     
     // END SurvLoop auto-generated portion of Model

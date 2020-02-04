@@ -10,7 +10,7 @@
   */
 namespace CannabisScore\Controllers;
 
-use App\Models\RIIPSAreasBlds;
+use App\Models\RIIPsAreasBlds;
 use SurvLoop\Controllers\Stats\SurvStatsTbl;
 use SurvLoop\Controllers\Stats\SurvStatsGraph;
 
@@ -54,7 +54,7 @@ class ScoreStatEnvs extends SurvStatsGraph
     {
         $this->addRecFilt('area', $areaType, $areaID);
         $farmType = $ps->ps_characterize;
-        $blds = RIIPSAreasBlds::where('ps_ar_bld_area_id', $areaID)
+        $blds = RIIPsAreasBlds::where('ps_ar_bld_area_id', $areaID)
             ->get();
         if ($blds->isNotEmpty() && isset($this->cmpl[$farmType][$areaType])) {
             if (!in_array($ps->ps_id, $this->envIDs[0])) {

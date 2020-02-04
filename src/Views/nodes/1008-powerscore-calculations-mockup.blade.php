@@ -34,7 +34,7 @@
                     <a id="hidivBtnCalcsFac" class="hidivBtn fPerc66" href="javascript:;"><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
-                    236 <nobr>Btu / sq ft</nobr>
+                    236 <nobr>kBtu / sq ft</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreFacility">
                     <iframe id="guageFrameFacility" class="guageFrame" src="/frame/animate/meter/95/1?bg=" frameborder="0" width="190" height="30" style=""></iframe>
@@ -43,7 +43,7 @@
             </div>
             <div id="hidivCalcsFac" class="scoreCalcs">
                 <div class="pL10 slGrey">
-                    = 125,000 Total Annual Btu
+                    = 125,000 Total Annual kWh
                     <div class="pL10">/ 530 Square Feet of Flowering Canopy</div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
                     54.4
-                    <nobr>g / Btu</nobr>
+                    <nobr>g / kBtu</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreProduction">
                     <iframe id="guageFrameProduction" class="guageFrame" src="/frame/animate/meter/98/2?bg=" frameborder="0" width="190" height="30" style=""></iframe>
