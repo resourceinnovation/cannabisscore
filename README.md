@@ -2,13 +2,13 @@
 # resourceinnovation/cannabisscore
 
 [![Laravel](https://img.shields.io/badge/Laravel-5.8-orange.svg?style=flat-square)](http://laravel.com)
-[![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/wikiworldorder/survloop)
+[![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/rockhopsoft/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis 
 community, and the industry, to prepare, track, and grow in ever more sustainable directions. 
 The Cannabis PowerScore database is built using 
-<a href="https://github.com/wikiworldorder/survloop" target="_blank">SurvLoop</a>, atop 
+<a href="https://github.com/rockhopsoft/survloop" target="_blank">SurvLoop</a>, atop 
 <a href="https://laravel.com/" target="_blank">Laravel</a>. <br />
 <a href="http://ResourceInnovation.org" target="_blank">ResourceInnovation.org</a><br />
 <a href="http://CannabisPowerScore.org" target="_blank">CannabisPowerScore.org</a><br />
@@ -28,7 +28,7 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 
 * php: >=7.2.15
 * <a href="https://packagist.org/packages/laravel/laravel" target="_blank">laravel/laravel</a>: 5.8.*
-* <a href="https://packagist.org/packages/wikiworldorder/survloop" target="_blank">wikiworldorder/survloop</a>: >=0.2.1
+* <a href="https://packagist.org/packages/rockhopsoft/survloop" target="_blank">rockhopsoft/survloop</a>: >=0.2.1
 
 
 # <a name="getting-started"></a>Getting Started

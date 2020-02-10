@@ -47,10 +47,7 @@ class ScoreCalcs extends ScoreFormsCustom
                 if ($GLOBALS["SL"]->REQ->has('fixLightingErrors')) {
                     $ps->ps_effic_lighting_status = $this->statusComplete;
                 }
-                if ($this->v["totFlwrSqFt"] > 0 
-                    && (!isset($ps->ps_total_size) || intVal($ps->ps_total_size) == 0)) {
-                    $ps->ps_total_size = $this->v["totFlwrSqFt"];
-                }
+                $ps->ps_total_size = $this->v["totFlwrSqFt"];
                 
                 if ($ps->ps_time_type == $GLOBALS["SL"]->def
                     ->getID('PowerScore Submission Type', 'Future')) {
@@ -105,10 +102,12 @@ class ScoreCalcs extends ScoreFormsCustom
                             }
                         }
                     }
-                    $watts["Clone"] += $watts["Mother"];
-                    $sqft["Clone"]  += $sqft["Mother"];
-                    $watts["Mother"] = $sqft["Mother"] = 0;
-                    
+                    if (isset($watts["Mother"]) && intVal($watts["Mother"]) > 0) {
+                        $watts["Clone"] += $watts["Mother"];
+                        $sqft["Clone"]  += $sqft["Mother"];
+                        $watts["Mother"] = $sqft["Mother"] = 0;
+                    }
+
                     $hasLights = 0;
                     foreach ($areas as $a => $area) {
                         foreach ($this->v["areaTypes"] as $typ => $defID) {

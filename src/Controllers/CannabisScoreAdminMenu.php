@@ -59,16 +59,16 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Cultivation Classic'
                         ),
                         $this->admMenuLnk(
+                            '/dash/raw-lighting-calculations',
+                            'Raw Lighting Data'
+                        ),
+                        $this->admMenuLnk(
                             '/dash/powerscore-outliers',
                             'Process Outliers', 
                         ),
                         $this->admMenuLnk(
                             '/dash/process-uploads', 
                             'Process Uploads'
-                        ),
-                        $this->admMenuLnk(
-                            '/dash/raw-lighting-calculations',
-                            'Raw Lighting Data'
                         )
                     ]
                 ),
@@ -109,8 +109,8 @@ class CannabisScoreAdminMenu extends AdminMenu
                     ]
                 ),
                 $this->admMenuLnk(
-                    '/dash/manage-manufacturers', 
-                    'Manufacturers', 
+                    '/dash/manage-partners',
+                    'Manage Partners',
                     '', 
                     1, 
                     [
@@ -119,8 +119,8 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Competitive Performance'
                         ),
                         $this->admMenuLnk(
-                            '/dash/manage-manufacturers',
-                            'Manufacturers'
+                            '/dash/manage-manufacturers', 
+                            'Manufacturers', 
                         ),
                         $this->admMenuLnk(
                             '/dash/manage-lighting-models',
@@ -255,11 +255,15 @@ class CannabisScoreAdminMenu extends AdminMenu
             ]
         );
         $treeMenu[] = $this->admMenuLnk(
-            '/dash/powerscore-software-troubleshooting', 
+            '/dash/handbook', 
             'More Tools', 
             '<i class="fa fa-life-ring" aria-hidden="true"></i>', 
             1, 
             [
+                $this->admMenuLnk(
+                    '/dash/handbook',
+                    'Handbook'
+                ),
                 $this->admMenuLnk(
                     '/dash/powerscore-software-troubleshooting',
                     'Troubleshooting'

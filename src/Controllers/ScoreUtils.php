@@ -140,6 +140,27 @@ class ScoreUtils extends ScorePowerUtilities
         return true;
     }
     
+    protected function loadRoomLights()
+    {
+        $this->v["roomLights"] = [];
+        if (isset($this->sessData->dataSets["ps_light_types"]) 
+            && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_light_types"] as $lgt) {
+                if (isset($lgt->ps_lg_typ_room_id) && intVal($lgt->ps_lg_typ_room_id) > 0) {
+                    if (!isset($this->v["roomLights"][$lgt->ps_lg_typ_room_id])) {
+                        $this->v["roomLights"][$lgt->ps_lg_typ_room_id] = [];
+                    }
+                    $ind = 0;
+                    if (isset($lgt->ps_lg_typ_room_ord) && intVal($lgt->ps_lg_typ_room_ord) >= 0) {
+                        $ind = intVal($lgt->ps_lg_typ_room_ord);
+                    }
+                    $this->v["roomLights"][$lgt->ps_lg_typ_room_id][$ind] = $lgt;
+                }
+            }
+        }
+        return $this->v["roomLights"];
+    }
+    
     protected function prepPrintEfficLgt()
     {
         $this->loadTotFlwrSqFt();
@@ -267,6 +288,22 @@ class ScoreUtils extends ScorePowerUtilities
             $areaSq = number_format($area->ps_area_size);
             $swap = $areaSq . ' sf of <span class="txtInfo">' . $areaLab . ' space</span>';
             $str = str_replace('100 sf of Vegetation space', $swap, $str);
+        } elseif ($nIDtxt == '1088res1') {
+            $str = str_replace('HVAC System 0', 'HVAC System A', $str);
+        } elseif ($nIDtxt == '1088res2') {
+            $str = str_replace('HVAC System 0', 'HVAC System B', $str);
+        } elseif ($nIDtxt == '1088res3') {
+            $str = str_replace('HVAC System 0', 'HVAC System C', $str);
+        } elseif ($nIDtxt == '1088res4') {
+            $str = str_replace('HVAC System 0', 'HVAC System D', $str);
+        } elseif ($nIDtxt == '1088res5') {
+            $str = str_replace('HVAC System 0', 'HVAC System E', $str);
+        } elseif ($nIDtxt == '1088res6') {
+            $str = str_replace('HVAC System 0', 'HVAC System F', $str);
+        } elseif ($nIDtxt == '1088res7') {
+            $str = str_replace('HVAC System 0', 'HVAC System G', $str);
+        } elseif ($nIDtxt == '1088res8') {
+            $str = str_replace('HVAC System 0', 'Other HVAC System', $str);
         }
         return $str;
     }
@@ -288,62 +325,106 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function getLoopItemLabelCustom($loop, $itemRow = [], $itemInd = -3)
     {
-        $ret = '';
         if (in_array($loop, [ 'Growth Stages', 'Harvest Stages', 'Four Growth Stages' ])) {
-            switch (intVal($itemRow->ps_area_type)) {
-                case 237: return 'Mother Plants';         break; // to be phased out
-                case 160: return 'Clone & Mother Plants'; break;
-                case 161: return 'Vegetating Plants';     break;
-                case 162: return 'Flowering Plants';      break;
-                case 163: return 'Drying / Curing';       break;
-            }
+            return $this->getStageName($itemRow, $itemInd);
         } elseif ($loop == 'Room Nicknames') {
-            $ret = 'Room #' . (1+$itemInd);
-            if ($itemRow && isset($itemRow->ps_room_name) && trim($itemRow->ps_room_name) != '') {
-                return trim($itemRow->ps_room_name) . ' (' . $ret . ')';
-            }
+            return $this->getRoomName($itemRow, $itemInd);
+        } elseif ($loop == 'Types of Room Light Fixtures') {
+            return $this->getRoomLightDesc($loop, $itemRow, $itemInd);
         } elseif ($loop == 'Types of Light Fixtures') {
-            if ($itemRow && isset($itemRow->ps_lg_typ_area_id)) {
-                $lgtDesc = '<b>' . $this->getAreaIdTypeName($itemRow->ps_lg_typ_area_id) 
-                    . ':</b> ';
-                if (isset($itemRow->ps_lg_typ_count) 
-                    && trim($itemRow->ps_lg_typ_count) != '') {
-                    $lgtDesc .= number_format($itemRow->ps_lg_typ_count) 
-                        . ' fixtures, ';
+            return $this->getLightDesc($loop, $itemRow, $itemInd, true);
+        }
+        return '';
+    }
+    
+    private function getStageName($itemRow = [], $itemInd = 0)
+    {
+        switch (intVal($itemRow->ps_area_type)) {
+            case 237: return 'Mother Plants';         break; // to be phased out
+            case 160: return 'Clone & Mother Plants'; break;
+            case 161: return 'Vegetating Plants';     break;
+            case 162: return 'Flowering Plants';      break;
+            case 163: return 'Drying / Curing';       break;
+        }
+        return '';
+    }
+    
+    private function getRoomName($itemRow = [], $itemInd = 0)
+    {
+        if ($itemInd < 0) {
+            $itemInd = 0;
+        }
+        $ret = 'Room #' . (1+$itemInd);
+        if ($itemRow && isset($itemRow->ps_room_name) && trim($itemRow->ps_room_name) != '') {
+            return trim($itemRow->ps_room_name) . ' (' . $ret . ')';
+        }
+        return $ret;
+    }
+    
+    private function getLightDesc($loop, $itemRow = [], $itemInd = 0, $headers = false)
+    {
+        $ret = '';
+        if ($itemRow && isset($itemRow->ps_lg_typ_id)) {
+            $hasKeyDeets = 0;
+            if (isset($itemRow->ps_lg_typ_area_id) && intVal($itemRow->ps_lg_typ_area_id) > 0) {
+                $ret .= '<b>' . $this->getAreaIdTypeName($itemRow->ps_lg_typ_area_id) . ':</b> ';
+            } else {
+                $ret .= 'Light Type #' . (1+$itemInd) . ': ';
+            }
+            if (isset($itemRow->ps_lg_typ_count) && trim($itemRow->ps_lg_typ_count) != '') {
+                $ret .= number_format($itemRow->ps_lg_typ_count) . ' fixtures, ';
+                $hasKeyDeets++;
+            }
+            if (isset($itemRow->ps_lg_typ_wattage) && trim($itemRow->ps_lg_typ_wattage) != '') {
+                $ret .= number_format($itemRow->ps_lg_typ_wattage) . 'W each';
+                $hasKeyDeets++;
+            }
+            if ($headers) {
+                $ret .= '</h4>';
+            } elseif ($hasKeyDeets > 0) {
+                $ret .= ', ';
+            }
+            if (isset($itemRow->ps_lg_typ_light) && intVal($itemRow->ps_lg_typ_light) > 0) {
+                $ret .= $GLOBALS["SL"]->def->getVal(
+                    'PowerScore Light Types', 
+                    $itemRow->ps_lg_typ_light
+                );
+                if ((isset($itemRow->ps_lg_typ_make) && trim($itemRow->ps_lg_typ_make) != '') 
+                    || (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '')) {
+                    $ret .= ', ';
                 }
-                if (isset($itemRow->ps_lg_typ_wattage) 
-                    && trim($itemRow->ps_lg_typ_wattage) != '') {
-                    $lgtDesc .= number_format($itemRow->ps_lg_typ_wattage) 
-                        . 'W each';
+            }
+            if (isset($itemRow->ps_lg_typ_make) && trim($itemRow->ps_lg_typ_make) != '') {
+                $ret .= $itemRow->ps_lg_typ_make;
+                if (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '') {
+                    $ret .= ', ';
                 }
-                $lgtDesc .= '</h4>';
-                if (isset($itemRow->ps_lg_typ_light)
-                    && intVal($itemRow->ps_lg_typ_light) > 0) {
-                    $lgtDesc .= $GLOBALS["SL"]->def->getVal(
-                        'PowerScore Light Types', 
-                        $itemRow->ps_lg_typ_light
-                    );
-                    if ((isset($itemRow->ps_lg_typ_make) 
-                            && trim($itemRow->ps_lg_typ_make) != '') 
-                        || (isset($itemRow->ps_lg_typ_model) 
-                            && trim($itemRow->ps_lg_typ_model) != '')) {
-                        $lgtDesc .= ', ';
-                    }
-                }
-                if (isset($itemRow->ps_lg_typ_make) 
-                    && trim($itemRow->ps_lg_typ_make) != '') {
-                    $lgtDesc .= $itemRow->ps_lg_typ_make;
-                    if (isset($itemRow->ps_lg_typ_model) 
-                        && trim($itemRow->ps_lg_typ_model) != '') {
-                        $lgtDesc .= ', ';
-                    }
-                }
-                if (isset($itemRow->ps_lg_typ_model) 
-                    && trim($itemRow->ps_lg_typ_model) != '') {
-                    $lgtDesc .= $itemRow->ps_lg_typ_model;
-                }
-                $lgtDesc .= '<h4 class="disNon">';
-                return $lgtDesc;
+            }
+            if (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '') {
+                $ret .= $itemRow->ps_lg_typ_model;
+            }
+            if ($headers) {
+                $ret .= '<h4 class="disNon">';
+            }
+            return $ret;
+        }
+    }
+    
+    private function getRoomLightDesc($loop, $itemRow = [], $itemInd = 0)
+    {
+        $ret = '';
+        if (isset($itemRow->ps_lg_typ_room_id) && intVal($itemRow->ps_lg_typ_room_id) > 0) {
+            $roomID = intVal($itemRow->ps_lg_typ_room_id);
+            $roomRow = $this->sessData->getRowById('ps_growing_rooms', $roomID);
+            $roomInd = $this->sessData->getRowInd('ps_growing_rooms', $roomID);
+            $ret = $this->getRoomName($roomRow, $roomInd);
+            $lgtDesc = trim($this->getLightDesc($loop, $itemRow, $itemInd));
+            if ($lgtDesc != '') {
+                $ret .= ': ' . $lgtDesc;
+            }
+            if (!isset($itemRow->ps_lg_typ_count) || intVal($itemRow->ps_lg_typ_count) <= 0
+                || !isset($itemRow->ps_lg_typ_wattage) || intVal($itemRow->ps_lg_typ_wattage) <= 0) {
+                $ret .= ' <nobr><span class="red">To Do</span></nobr>';
             }
         }
         return $ret;
@@ -495,8 +576,8 @@ class ScoreUtils extends ScorePowerUtilities
             $this->v["psOwner"] = session()->get('PowerScoreOwner');
         } elseif (isset($this->sessData->dataSets["ps_feedback"]) 
             && isset($this->sessData->dataSets["ps_feedback"][0])
-            && isset($this->sessData->dataSets["ps_feedback"][0]->psf_ps_id)) {
-            $this->v["psOwner"] = $this->sessData->dataSets["ps_feedback"][0]->psf_ps_id;
+            && isset($this->sessData->dataSets["ps_feedback"][0]->psf_psid)) {
+            $this->v["psOwner"] = $this->sessData->dataSets["ps_feedback"][0]->psf_psid;
         }
         return true;
     }
@@ -650,10 +731,11 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function getTableRecLabelCustom($tbl, $rec = [], $ind = -3)
     {
+        $ret = '';
         if ($tbl == 'powerscore' && isset($rec->ps_name)) {
             return $rec->ps_name;
         }
-        return '';
+        return $ret;
     }
     
     protected function slimLgtType($defValue = '')

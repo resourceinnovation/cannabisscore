@@ -34,6 +34,7 @@ use CannabisScore\Controllers\ScoreReportHvac;
 use CannabisScore\Controllers\ScoreReportLighting;
 use CannabisScore\Controllers\ScoreListings;
 use CannabisScore\Controllers\ScoreReports;
+use CannabisScore\Controllers\ScoreAdminManageManu;
 use CannabisScore\Controllers\ScoreImports;
 
 class CannabisScore extends ScoreImports
@@ -98,8 +99,10 @@ class CannabisScore extends ScoreImports
             )->render();
         } elseif ($nID == 946) {
             $ret .= $this->printPsRankingFilters($nID);
-        } elseif ($nID == 878) {
-            $this->auditLgtAlerts();
+        } elseif (in_array($nID, [878])) { // , 1273
+            $this->auditLgtAlerts($nID);
+        } elseif (in_array($nID, [1089, 1090, 1091, 1092, 1093])) {
+            return $this->printHvacInfoAccord($nID, $nIDtxt);
         } elseif ($nID == 860) {
             return $this->printReportForCompetition($nID);
         } elseif ($nID == 861) {
@@ -182,7 +185,15 @@ class CannabisScore extends ScoreImports
             
         // Admin Tools
         } elseif ($nID == 914) {
-            $ret .= $this->printMgmtManufacturers($nID);
+            if (!isset($this->v["manuAdmin"])) {
+                $this->v["manuAdmin"] = new ScoreAdminManageManu;
+            }
+            $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
+        } elseif ($nID == 915) {
+            if (!isset($this->v["manuAdmin"])) {
+                $this->v["manuAdmin"] = new ScoreAdminManageManu;
+            }
+            $ret .= $this->v["manuAdmin"]->printMgmtPartners($nID);
         } elseif ($nID == 917) {
             $ret .= $this->printMgmtLightModels($nID);
         } elseif ($nID == 845) {
@@ -266,6 +277,14 @@ class CannabisScore extends ScoreImports
             $this->postZipCode($nID);
         } elseif ($nID == 1244) {
             $this->postRoomCnt($nID);
+        } elseif (in_array($nID, [1259, 1260])) {
+            $this->postRoomLightCnt($nID, $nIDtxt);
+        } elseif ($nID == 1274) {
+            return $this->postRoomLightTypeComplete($nID, $nIDtxt);
+        } elseif ($nID == 1086) {
+            return $this->postRoomHvacType($nID, $nIDtxt);
+        } elseif ($nID == 1083) {
+            $this->sessData->refreshDataSets();
         } elseif ($nID == 74) { // dump monthly grams
             $this->postMonthlies($nIDtxt, 'ps_month_grams');
         } elseif ($nID == 70) { // dump monthly energy
@@ -285,12 +304,6 @@ class CannabisScore extends ScoreImports
                 'ps_source_utility_other' => $foundOther
             ]);
             $this->sessData->dataSets["powerscore"][0]->save();
-        } elseif ($nID == 398) {
-            if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')) {
-                $this->sessData->dataSets["powerscore"][0]->update([
-                    'ps_total_size' => $GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')
-                ]);
-            }
         } elseif (in_array($nID, [59, 80, 60, 61, 81])) {
             $sourceID = $this->nIDgetRenew($nID);
             if (isset($this->sessData->dataSets["ps_renewables"]) 

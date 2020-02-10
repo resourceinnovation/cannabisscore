@@ -28,6 +28,8 @@ class RIIPsGrowingRooms extends Model
         'ps_room_water_effic', 
         'ps_room_temperature', 
         'ps_room_humidity', 
+        'ps_room_hvac_type',
+        'ps_room_hvac_other',
     ];
     
     // END SurvLoop auto-generated portion of Model

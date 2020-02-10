@@ -12,12 +12,14 @@ class RIIPsLightTypes extends Model
     [    
 		'ps_lg_typ_psid', 
 		'ps_lg_typ_area_id', 
+        'ps_lg_typ_room_id',
 		'ps_lg_typ_light', 
 		'ps_lg_typ_count', 
 		'ps_lg_typ_wattage', 
 		'ps_lg_typ_hours', 
 		'ps_lg_typ_make', 
 		'ps_lg_typ_model', 
+        'ps_lg_typ_complete',
     ];
     
     // END SurvLoop auto-generated portion of Model

@@ -109,6 +109,15 @@ class ScoreLightModels extends ScoreVars
     {
         $this->loadManufactIDs();
         $this->loadLightImportTypeConverts();
+        $this->ajaxLightSearchReqs($request);
+        return view(
+            'vendor.cannabisscore.nodes.894-light-search-ajax', 
+            $this->v
+        )->render();
+    }
+    
+    protected function ajaxLightSearchReqs(Request $request)
+    {
         $this->v["results"] = [
             "ids"   => [],
             "set"   => [],
@@ -195,10 +204,7 @@ class ScoreLightModels extends ScoreVars
                 }
             }
         }
-        return view(
-            'vendor.cannabisscore.nodes.894-light-search-ajax', 
-            $this->v
-        )->render();
+        return true;
     }
     
     protected function addMakeSearch($make = '')

@@ -41,14 +41,7 @@ class ScoreCondsCustom extends ScoreUtils
         } elseif ($condition == '#FlowerArtificialLight') {
             return $this->runCondArtifArea('Flower');
         } elseif ($condition == '#HasArtificialLight') {
-            // could be replaced by OR functionality
-            if ($this->runCondArtifArea('Mother') == 1 
-                || $this->runCondArtifArea('Clone') == 1
-                || $this->runCondArtifArea('Veg') == 1 
-                || $this->runCondArtifArea('Flower') == 1) {
-                return 1;
-            }
-            return 0;
+            return $this->runCondArtifLight();
 
         } elseif ($condition == '#MotherSunlight') {
             return $this->runCondSunArea('Mother');
@@ -115,6 +108,25 @@ class ScoreCondsCustom extends ScoreUtils
             return 0;
         }
         return intVal($area->ps_area_lgt_artif);
+    }
+    
+    private function runCondArtifLight()
+    {
+        if (isset($this->sessData->dataSets["ps_growing_rooms"])
+            && sizeof($this->sessData->dataSets["ps_growing_rooms"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_growing_rooms"] as $room) {
+                if (isset($room->ps_room_lgt_artif) && intVal($room->ps_room_lgt_artif) == 1) {
+                    return 1;
+                }
+            }
+        } elseif ($this->runCondArtifArea('Mother') == 1 
+            || $this->runCondArtifArea('Clone') == 1
+            || $this->runCondArtifArea('Veg') == 1 
+            || $this->runCondArtifArea('Flower') == 1) {
+            // could be replaced by OR functionality
+            return 1;
+        }
+        return 0;
     }
 
     private function runCondHasFeedback($type = 'feedback')

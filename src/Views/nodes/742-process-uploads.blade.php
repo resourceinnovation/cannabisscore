@@ -18,7 +18,7 @@
     <td>
         <div class="nodeAnchor"><a name="ps{{ $ps->ps_id }}"></a></div>
         <a href="/calculated/u-{{ $ps->ps_id }}" target="_blank"
-            ><h3 class="disIn mB0 mR20 slGrey">PowerScore #{{ $ps->ps_id }}</h3></a>
+            ><h4 class="disIn mB0 mR20 slBlueDark">PowerScore #{{ $ps->ps_id }}</h4></a>
         Status: 
         <select name="status{{ $ps->ps_id }}" >
             <option value="242" @if ($ps->ps_status == 242) SELECTED @endif 
@@ -29,7 +29,7 @@
                 >Archived</option>
         </select>
         @if (isset($ps->ps_name) && trim($ps->ps_name) != '') 
-            <h3 class="m0 slGrey">{{ $ps->ps_name }}</h3> 
+            <h5 class="m0">{{ $ps->ps_name }}</h5> 
         @endif
         <div id="upPrevs{{ $ps->ps_id }}" class="w100"></div>
     </td>

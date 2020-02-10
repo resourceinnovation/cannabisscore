@@ -40,11 +40,16 @@
         {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback5) !!} 
     @endif 
 </td>
+<td> 
+    @if (isset($row->psf_feedback6)) 
+        {!! $GLOBALS["SL"]->plainLineBreaks($row->psf_feedback6) !!} 
+    @endif 
+</td>
 <td>
     @if (isset($row->ps_effic_overall)) {{ round($row->ps_effic_overall) }}% @endif
 </td>
 <td>
-    <a href="/calculated/u-{{ $row->psf_ps_id }}" target="_blank">#{{ $row->psf_ps_id }} 
+    <a href="/calculated/u-{{ $row->psf_psid }}" target="_blank">#{{ $row->psf_psid }} 
         @if (isset($row->ps_name)) <br />{{ $row->ps_name }} @endif </a>
 </td>
 <td>

@@ -259,7 +259,7 @@ class ScorePrintReport extends ScoreCalcs
                 ->where('ps_rnk_psid', $this->searcher->v["powerscore"]->ps_id)
                 ->first();
             if ($GLOBALS["SL"]->REQ->has('refresh') 
-                || !$this->searcher->v["currRanks"]->ps_rnk_overall
+                || !isset($this->searcher->v["currRanks"]->ps_rnk_overall)
                 || !isset($this->searcher->v["currRanks"]->ps_rnk_overall->ps_rnk_overall)) {
                 if (isset($this->searcher->v["powerscore"]->ps_time_type) 
                     && $this->searcher->v["powerscore"]->ps_time_type 

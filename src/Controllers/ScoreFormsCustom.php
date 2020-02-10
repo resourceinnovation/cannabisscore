@@ -11,10 +11,19 @@
 namespace CannabisScore\Controllers;
 
 use App\Models\RIIPsGrowingRooms;
+use App\Models\RIIPsLightTypes;
 use CannabisScore\Controllers\ScoreCondsCustom;
 
 class ScoreFormsCustom extends ScoreCondsCustom
 {
+    
+    protected function getLoopItemNextLabelCustom($singular)
+    {
+        if ($singular == 'Types of Room Light Fixture') {
+            return 'Next Light Type To Do';
+        }
+        return '';
+    }
     
     protected function postZipCode($nID)
     {
@@ -35,8 +44,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
     protected function postRoomCnt($nID)
     {
         $roomCnt = $currCnt = 0;
-        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld') 
-            && intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) > 0) {
+        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')) {
             $roomCnt = intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld'));
         }
         if (isset($this->sessData->dataSets["ps_growing_rooms"])) {
@@ -56,6 +64,143 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         $this->sessData->refreshDataSets();
         return false;
+    }
+    
+    protected function postRoomLightCnt($nID, $nIDtxt)
+    {
+        $this->loadRoomLights();
+        $roomID = $lgtCnt = $currCnt = 0;
+        if ($GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'fld')
+            && $GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'Visible')
+            && intVal($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'Visible')) == 1) {
+            $lgtCnt = intVal($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld'));
+        }
+        $room = $this->sessData->getDataBranchRow('ps_growing_rooms');
+        if ($room && isset($room->ps_room_id)) {
+            $roomID = $room->ps_room_id;
+            if (isset($this->v["roomLights"][$roomID])) {
+                $currCnt = sizeof($this->v["roomLights"][$roomID]);
+            }
+//if ($nIDtxt == '1260cyc1') { echo 'lgtCnt: ' . $lgtCnt . ', > currCnt: ' . $currCnt . ' <pre>'; print_r($this->v["roomLights"][$roomID]); echo '</pre>'; exit; }
+            if ($lgtCnt > $currCnt) {
+                for ($i = 0; $i < ($lgtCnt-$currCnt); $i++) {
+                    $newLgt = new RIIPsLightTypes;
+                    $newLgt->ps_lg_typ_psid     = $this->coreID;
+                    $newLgt->ps_lg_typ_room_id  = $roomID;
+                    $newLgt->ps_lg_typ_room_ord = $i;
+                    $newLgt->ps_lg_typ_complete = 0;
+                    $newLgt->save();
+                    $this->sessData->dataSets["ps_light_types"][] = $newLgt;
+                }
+            } elseif ($lgtCnt < $currCnt) {
+                for ($i = ($currCnt-1); $i >= $lgtCnt; $i--) {
+                    $this->v["roomLights"][$roomID][$i]->delete();
+                }
+            }
+        }
+        return false;
+    }
+    
+    protected function getLoopDoneItemsCustom($loopName)
+    {
+        if ($loopName == 'Types of Room Light Fixtures') {
+            $this->sessData->loopItemIDsDone = [];
+            if (isset($this->sessData->dataSets["ps_light_types"])
+                && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
+                foreach ($this->sessData->dataSets["ps_light_types"] as $i => $lgt) {
+                    if (isset($lgt->ps_lg_typ_count) && intVal($lgt->ps_lg_typ_count) > 0
+                        && isset($lgt->ps_lg_typ_wattage) && intVal($lgt->ps_lg_typ_wattage) > 0) {
+                        $this->sessData->loopItemIDsDone[] = $lgt->ps_lg_typ_id;
+                        $this->sessData->dataSets["ps_light_types"][$i]->ps_lg_typ_complete = 1;
+                    } else {
+                        $this->sessData->dataSets["ps_light_types"][$i]->ps_lg_typ_complete = 0;
+                    }
+                    $this->sessData->dataSets["ps_light_types"][$i]->save();
+                }
+            }
+            $this->sessData->getLoopDoneNextItemID($loopName);
+            return true;
+        }
+        return false;
+    }
+
+    protected function postRoomLightTypeComplete($nID, $nIDtxt)
+    {
+        $lgt = $this->sessData->getDataBranchRow('ps_light_types');
+        if ($lgt && isset($lgt->ps_lg_typ_id)) {
+            if (!isset($lgt->ps_lg_typ_count) || intVal($lgt->ps_lg_typ_count) <= 0
+                || !isset($lgt->ps_lg_typ_wattage) || intVal($lgt->ps_lg_typ_wattage) <= 0) {
+                $lgt->ps_lg_typ_complete = 0;
+            } else {
+                $lgt->ps_lg_typ_complete = 1;
+            }
+            $lgt->save();
+            $this->logDataSave(
+                $nID, 
+                'ps_light_types', 
+                $lgt->getKey(), 
+                'complete', 
+                $lgt->ps_lg_typ_complete
+            );
+        }
+        return true;
+    }
+
+    protected function printHvacInfoAccord($nID, $nIDtxt)
+    {
+        $title = '';
+        switch ($nIDtxt) {
+            case '1089res0': $title .= 'HVAC System 0 energy flow summary'; break;
+            case '1090res1': $title .= 'HVAC System A energy flow summary'; break;
+            case '1091res2': $title .= 'HVAC System B energy flow summary'; break;
+            case '1092res3': $title .= 'HVAC System C energy flow summary'; break;
+            case '1093res4': $title .= 'HVAC System D energy flow summary'; break;
+        }
+        if ($title != ''
+            && isset($this->allNodes[$nID]) 
+            && isset($this->allNodes[$nID]->nodeRow->node_prompt_text)
+            && trim($this->allNodes[$nID]->nodeRow->node_prompt_text) != '') {
+            $title = ' <i class="fa fa-info-circle mL3 mR3" aria-hidden="true"></i> ' . $title;
+            $body = trim($this->allNodes[$nID]->nodeRow->node_prompt_text) 
+                . '<div class="p20"></div>';
+            return '<div class="row2 p15 pB30">' 
+                . $GLOBALS["SL"]->printAccordian($title, $body, false, false, 'text') 
+                . '</div>';
+        }
+        return '<!-- no energy summary -->';
+    }
+
+    protected function postRoomHvacType($nID, $nIDtxt)
+    {
+        $typesReq = $roomTypes = [];
+        if ($GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'fld')
+            && in_array($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld'))) {
+            $typesReq = $GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld');
+        }
+        if (sizeof($typesReq) > 0) {
+            foreach ($typesReq as $type) {
+                $fld = '';
+                switch (intVal($type)) {
+                    case 519: $fld = 'n1088res0fld'; break;
+                    case 510: $fld = 'n1088res1fld'; break;
+                    case 511: $fld = 'n1088res2fld'; break;
+                    case 512: $fld = 'n1088res3fld'; break;
+                    case 513: $fld = 'n1088res4fld'; break;
+                    case 514: $fld = 'n1088res5fld'; break;
+                    case 515: $fld = 'n1088res6fld'; break;
+                    case 516: $fld = 'n1088res7fld'; break;
+                    //case 517: $fld = 'n1088res8fld'; break;
+                    case 518: $fld = 'n1088res8fld'; break;
+                }
+                if ($fld != '') {
+                    if ($GLOBALS["SL"]->REQ->has($fld) && in_array($GLOBALS["SL"]->REQ->get($fld))) {
+
+                    }
+                }
+
+            }
+        }
+        return false; // store top-level system checkboxes as normal
     }
     
     protected function postMonthlies($nIDtxt, $fld2)
@@ -119,7 +264,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         if (intVal($this->v["psOwner"]) > 0 
             && isset($this->sessData->dataSets["ps_feedback"])
             && isset($this->sessData->dataSets["ps_feedback"][0])) {
-            $this->sessData->dataSets["ps_feedback"][0]->psf_ps_id = $this->v["psOwner"];
+            $this->sessData->dataSets["ps_feedback"][0]->psf_psid = $this->v["psOwner"];
             $this->sessData->dataSets["ps_feedback"][0]->save();
         }
         return true;
@@ -165,7 +310,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return true;
     }
 
-    protected function auditLgtAlerts()
+    protected function auditLgtAlerts($nID)
     {
         $auditFailed = false;
         $auditAreas = $lgts = $watts = $this->v["areaCnts"] = [];
