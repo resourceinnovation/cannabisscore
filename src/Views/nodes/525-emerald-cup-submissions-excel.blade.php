@@ -13,10 +13,10 @@
 <th>Production Rank</th>
 <th>Lighting Rank</th>
 <th>HVAC Rank</th>
-<th>Facility Score kBtu/SqFt</th>
-<th>Production Score g/kBtu</th>
-<th>Lighting Score kWh/SqFt</th>
-<th>HVAC Score kWh/SqFt</th>
+<th>Facility Score kBtu / sq ft</th>
+<th>Production Score g / kBtu</th>
+<th>Lighting Score kBtu / sq ft</th>
+<th>HVAC Score kBtu / sq ft</th>
 <th>Grams</th>
 <th>kWh</th>
 <th>Sq Ft</th>
@@ -45,7 +45,7 @@
         <td>{{ $s->ps_effic_hvac }}</td>
         <td>{{ number_format($s->ps_grams) }}</td>
         <td>{{ number_format($s->ps_kwh) }}</td>
-        <td>{{ number_format($s->ps_total_size) }}</td>
+        <td>{{ number_format($s->ps_flower_canopy_size) }}</td>
     @else 
         <td colspan=12 >{!! $GLOBALS["SL"]->getNodePageName($s->ps_submission_progress) !!}</td>
     @endif

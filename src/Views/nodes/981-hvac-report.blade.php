@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/981-hvac-report.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         @if (trim($fltStateClim) != '') 
             href="?excel=1&fltStateClim={{ $fltStateClim }}"
@@ -37,7 +37,7 @@
 <div class="nodeAnchor"><a name="hvac"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h2 class="slBlueDark">
         @if ($typeID == 144) 1a. 
         @elseif ($typeID == 145) 1b. 
@@ -54,7 +54,7 @@
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h2 class="slBlueDark">
         @if ($typeID == 144) 2a. 
         @elseif ($typeID == 145) 2b. 
@@ -71,7 +71,7 @@
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h2 class="slBlueDark">
         @if ($typeID == 144) 3a. 
         @elseif ($typeID == 145) 3b. 
@@ -89,7 +89,7 @@
 
 @foreach ($sfFarms[0] as $i => $farmDef)
     @if ($sfFarms[1][$i] != 'Outdoor')
-        <div class="slCard greenline nodeWrap">
+        <div class="slCard nodeWrap">
             <h2 class="slBlueDark">
                 @if ($sfFarms[0][$i] == 144) 4a. 
                 @elseif ($sfFarms[0][$i] == 145) 4b. 

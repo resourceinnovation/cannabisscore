@@ -6,7 +6,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -22,9 +22,9 @@ use App\Models\RIIPsUtiliZips;
 use App\Models\RIIPsForCup;
 use App\Models\RIIPsLicenses;
 use App\Models\RIIPsPageFeedback;
-use CannabisScore\Controllers\ScoreAdminMisc;
+use CannabisScore\Controllers\ScorePartners;
 
-class ScoreImports extends ScoreAdminMisc
+class ScoreImports extends ScorePartners
 {
     protected function runImport()
     {
@@ -153,7 +153,7 @@ class ScoreImports extends ScoreAdminMisc
                             if (isset($row[31]) && intVal($row[31]) > 0) {
                                 $this->v["nwpcc"][$id]["PowerScore"]->ps_grams 
                                     = $this->v["nwpcc"][$id]["PowerScore"]->ps_harvests_per_year
-                                        *$GLOBALS["CUST"]->cnvrtLbs2Grm(intVal($row[31]));
+                                        *$GLOBALS["SL"]->cnvrtLbs2Grm(intVal($row[31]));
                             }
                             $this->v["nwpcc"][$id]["PowerScore"]->save();
                             $this->v["nwpcc"][$id]["ps_for_cup"] = new RIIPsForCup;

@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/983-lighting-report.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     <input type="hidden" name="toExcel" id="toExcelID" value="0" >
     <!--- <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         href="javascript:;" onClick="return loadExcel();"
@@ -66,6 +66,7 @@
             @endif
                 <th class="brdLft">Overall Similar Percentile</th>
                 <th>Lighting Efficiency <nobr>Sub-Score</nobr></th>
+                <th>LPD</th>
                 <th class="brdLft">Flower Weighted</th>
                 <th>Veg Weighted</th>
                 <th>Clone Weighted</th>
@@ -85,6 +86,7 @@
                     <th>{{ $sfAreasGrow[1][$a] }} Size</th>
                     <th>{{ $sfAreasGrow[1][$a] }} Watts</th>
                     <th>{{ $sfAreasGrow[1][$a] }} <nobr>Sq Ft</nobr> / Fixture</th>
+                    <th>{{ $sfAreasGrow[1][$a] }} LPD</th>
                     <th>{{ $sfAreasGrow[1][$a] }} System #1</th>
                     <th>{{ $sfAreasGrow[1][$a] }} System #2</th>
                     <th>{{ $sfAreasGrow[1][$a] }} System #3</th>
@@ -95,7 +97,7 @@
             <tr>
             @foreach ($row as $c => $col)
                 @if ($c != 3 || !$GLOBALS["SL"]->REQ->has('fltNoLgtError'))
-                    <?php $cls = ((in_array($c, [4, 6, 10, 14, 18, 27, 36, 45, 56])) 
+                    <?php $cls = ((in_array($c, [4, 7, 11, 15, 19, 29, 39, 49, 61])) 
                         ? 'class="brdLft"' : ''); ?>
                     @if ($c == 0) <th {!! $cls !!} >{!! $col !!}</th>
                     @else <td {!! $cls !!} >{!! $col !!}</td> 

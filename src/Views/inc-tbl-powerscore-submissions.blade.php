@@ -66,7 +66,7 @@
         <td class="psOpen" data-psid="{{ $s->ps_id }}">
             {{ number_format($s->ps_grams) }} g<br />
             {{ number_format($s->ps_kwh) }} kWh<br />
-            {{ number_format($s->ps_total_size) }} sq ft
+            {{ number_format($s->ps_flower_canopy_size) }} sq ft
         </td>
     @else 
         <td colspan=4 class="psOpen" data-psid="{{ $s->ps_id }}" ><i class="txtDanger">

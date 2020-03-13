@@ -5,7 +5,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -21,15 +21,8 @@ class ScoreLightModels extends ScoreVars
     protected function loadManufactIDs()
     {
         if (!isset($this->v["manufacts"])) {
-            $this->v["manufacts"] = [];
-            $chk = RIIManufacturers::get();
-            if ($chk->isNotEmpty()) {
-                foreach ($chk as $manu) {
-                    $this->v["manufacts"][$manu->manu_id] = $manu->manu_name;
-                }
-            }
+            $this->v["manufacts"] = $GLOBALS["CUST"]->loadManufactIDs();
         }
-        asort($this->v["manufacts"]);
         return $this->v["manufacts"];
     }
     

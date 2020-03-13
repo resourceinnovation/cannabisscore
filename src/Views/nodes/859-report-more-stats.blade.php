@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/859-report-more-stats.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     <?php /*
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         @if (trim($fltStateClim) != '') href="?excel=1&fltStateClim={{ $fltStateClim }}"
@@ -34,7 +34,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="sqft"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h3 class="slBlueDark">1. Square Footage by Growth Stage</h3>
 <table border=0 class="table table-striped w100">
 {!! $statSqft->tblHeaderRow('area') !!}
@@ -50,7 +50,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="prod"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h3 class="slBlueDark">2. Stats & Techniques by Production Types</h3>
 <table border=0 class="table table-striped w100">
 {!! $statMisc->tblHeaderRow('farm') !!}
@@ -83,7 +83,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="lighting"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">3. Lighting Techniques By Growth Stage</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -91,7 +91,7 @@
 </table>
 </div>
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h1 class="slBlueDark">4. Lighting Kilowatt Hours (kWh)</h1>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -112,14 +112,14 @@
 </div>
 
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <?php /* <h3 class="slBlueDark">5. Lighting Adoption: All Farms</h3>
 {!! $statLgts->pieTblPercHas('area', 'lgty') !!} */ ?>
 {!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', '5. Lighting Adoption: ') !!}
 </div>
 
 <div class="nodeAnchor"><a name="sqftFixture"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h3 class="slBlueDark">6. Square Feet per Lighting Fixture</h3>
 <table border=0 class="table table-striped w100">
 {!! $statLgts->tblHeaderRow('area') !!}
@@ -157,7 +157,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="hvac"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h3 class="slBlueDark">7. HVAC Adoption</h3>
 <ul>
 <li><b>System A</b> - 
@@ -180,7 +180,7 @@
 </div>
 
 <div class="nodeAnchor"><a name="sources"></a></div>
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
 <h3 class="slBlueDark">8. On-Site Energy Sources</h3>
 <div class="row">
     <div class="col-6">

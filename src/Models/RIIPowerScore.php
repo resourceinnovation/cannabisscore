@@ -31,6 +31,7 @@ class RIIPowerscore extends Model
 		'ps_effic_production', 
 		'ps_effic_lighting', 
 		'ps_effic_hvac', 
+		'ps_effic_hvac_orig', 
 		'ps_grams', 
 		'ps_kwh', 
 		'ps_total_size', 
@@ -68,6 +69,9 @@ class RIIPowerscore extends Model
 		'ps_crop_other', 
 		'ps_effic_water', 
 		'ps_effic_waste', 
+		'ps_avg_ceiling_height',
+		'ps_lighting_power_density',
+		'ps_flower_canopy_size',
     ];
     
     // END SurvLoop auto-generated portion of Model

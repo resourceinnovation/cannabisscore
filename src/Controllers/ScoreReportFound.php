@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -42,8 +42,18 @@ class ScoreReportFound extends ScoreReportStats
 
         $this->v["bldDats"] = [];
         $this->v["statEnv"] = new ScoreStatEnvs;
-        $this->v["statEnv"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]);
-        $this->v["statEnv"]->addFilt('area', 'Growth Stage', $this->v["sfAreasAlt"][0], $this->v["sfAreasAlt"][1]);
+        $this->v["statEnv"]->addFilt(
+            'farm', 
+            'Farm Type', 
+            $this->v["sfFarms"][0], 
+            $this->v["sfFarms"][1]
+        );
+        $this->v["statEnv"]->addFilt(
+            'area', 
+            'Growth Stage', 
+            $this->v["sfAreasAlt"][0], 
+            $this->v["sfAreasAlt"][1]
+        );
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
             $this->v["statEnv"]->addDataType('bld' . $bld->def_id, $bld->def_value);
             $this->v["bldDats"][] = 'bld' . $bld->def_id;
@@ -52,15 +62,34 @@ class ScoreReportFound extends ScoreReportStats
         $this->v["statEnv"]->initEnvs();
         
         $this->v["statLeads"] = new SurvStatsGraph;
-        $this->v["statLeads"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]);
-        $this->v["statLeads"]->addDataType('count', 'Total count of records');
-        $this->v["statLeads"]->addDataType('nonfarm', 'Reported electricity consumption includes non-farm usage, 
-            such as a residential dwelling or unrelated business');
-        $this->v["statLeads"]->addDataType('upgrade', 
-            'Considering a lighting, HVAC and/or dehumidification upgrade over the next 12 months');
-        $this->v["statLeads"]->addDataType('incent',  'Have used incentives from a utility program');
-        $this->v["statLeads"]->addDataType('contact', 'Would like to be contacted by their utility to 
-            learn more about incentives for which they may be eligible');
+        $this->v["statLeads"]->addFilt(
+            'farm', 
+            'Farm Type', 
+            $this->v["sfFarms"][0], 
+            $this->v["sfFarms"][1]
+        );
+        $this->v["statLeads"]->addDataType(
+            'count', 
+            'Total count of records'
+        );
+        $this->v["statLeads"]->addDataType(
+            'nonfarm', 
+            'Reported electricity consumption includes non-farm usage, 
+            such as a residential dwelling or unrelated business'
+        );
+        $this->v["statLeads"]->addDataType(
+            'upgrade', 
+            'Considering a lighting, HVAC and/or dehumidification 
+            upgrade over the next 12 months');
+        $this->v["statLeads"]->addDataType(
+            'incent',  
+            'Have used incentives from a utility program'
+        );
+        $this->v["statLeads"]->addDataType(
+            'contact', 
+            'Would like to be contacted by their utility to 
+            learn more about incentives for which they may be eligible'
+        );
         $this->v["statLeads"]->loadMap();
         
         if ($allScores->isNotEmpty()) {
@@ -87,37 +116,48 @@ class ScoreReportFound extends ScoreReportStats
                                 $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                                 $this->v["scoreSets"][$set[0]]->resetRecFilt();
                             }
-                        } elseif (intVal(substr($set[0], strlen($set[0])-3)) == $ps->ps_characterize) {
+                        } elseif (intVal(substr($set[0], strlen($set[0])-3)) 
+                            == $ps->ps_characterize) {
                             $this->v["scoreSets"][$set[0]]->addScoreData($ps);
                             $this->v["scoreSets"][$set[0]]->resetRecFilt();
                         }
                     }
 
-                    if ($ps->ps_characterize == 144 && isset($ps->ps_effic_production) && $ps->ps_effic_production > 0) {
+                    if ($ps->ps_characterize == 144 
+                        && isset($ps->ps_effic_production) 
+                        && $ps->ps_effic_production > 0) {
                         $vert = 0;
                         if (isset($ps->ps_vertical_stack)) {
                             $vert = intVal($ps->ps_vertical_stack);
                         }
                         $area = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
-                            ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
+                            ->where('ps_area_type', 
+                                $GLOBALS["CUST"]->getAreaTypeFromNick('Flower'))
                             ->first();
-                        if ($area && isset($area->ps_area_size) && $area->ps_area_size > 0) {
-                            $this->v["vertDense"][$vert][1][] = $ps->ps_effic_production/$area->ps_area_size;
+                        if ($area 
+                            && isset($area->ps_area_size) 
+                            && $area->ps_area_size > 0) {
+                            $this->v["vertDense"][$vert][1][] = $ps->ps_effic_production
+                                /$area->ps_area_size;
                         }
                     }
 
                     $this->v["statLeads"]->addRecFilt('farm', $ps->ps_characterize, $ps->ps_id);
                     $this->v["statLeads"]->addRecDat('count', 1, $ps->ps_id);
-                    if (isset($ps->ps_energy_non_farm) && intVal($ps->ps_energy_non_farm) == 1) {
+                    if (isset($ps->ps_energy_non_farm) 
+                        && intVal($ps->ps_energy_non_farm) == 1) {
                         $this->v["statLeads"]->addRecDat('nonfarm', 1, $ps->ps_id);
                     }
-                    if (isset($ps->ps_consider_upgrade) && intVal($ps->ps_consider_upgrade) == 1) {
+                    if (isset($ps->ps_consider_upgrade) 
+                        && intVal($ps->ps_consider_upgrade) == 1) {
                         $this->v["statLeads"]->addRecDat('upgrade', 1, $ps->ps_id);
                     }
-                    if (isset($ps->ps_incentive_used) && intVal($ps->ps_incentive_used) == 1) {
+                    if (isset($ps->ps_incentive_used) 
+                        && intVal($ps->ps_incentive_used) == 1) {
                         $this->v["statLeads"]->addRecDat('incent', 1, $ps->ps_id);
                     }
-                    if (isset($ps->ps_incentive_wants) && intVal($ps->ps_incentive_wants) == 1) {
+                    if (isset($ps->ps_incentive_wants) 
+                        && intVal($ps->ps_incentive_wants) == 1) {
                         $this->v["statLeads"]->addRecDat('contact', 1, $ps->ps_id);
                     }
                     $this->v["statLeads"]->resetRecFilt();
@@ -139,13 +179,17 @@ class ScoreReportFound extends ScoreReportStats
                     $this->v["vertDense"][$vert][0] += $val;
                     $this->v["vertDense"][2] += $val;
                 }
-                $this->v["vertDense"][$vert][0] = $this->v["vertDense"][$vert][0]/sizeof($this->v["vertDense"][$vert][1]);
+                $this->v["vertDense"][$vert][0] = $this->v["vertDense"][$vert][0]
+                    /sizeof($this->v["vertDense"][$vert][1]);
             }
         }
         $this->v["vertDense"][2] = $this->v["vertDense"][2]
             /(sizeof($this->v["vertDense"][0][1])+sizeof($this->v["vertDense"][1][1]));
 
         $GLOBALS["SL"]->x["needsCharts"] = true;
-        return view('vendor.cannabisscore.nodes.853-founders-circle-report', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.853-founders-circle-report', 
+            $this->v
+        )->render();
     }
 }

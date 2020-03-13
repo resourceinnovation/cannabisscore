@@ -9,11 +9,13 @@
             "sort"   => $sort
         ])->render() !!}<br />
     @endif */ ?>
+    @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4)
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Score <br />ID#',
             "srtVal" => 'ps_id',
             "sort"   => $sort
         ])->render() !!}
+    @endif
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
@@ -24,29 +26,36 @@
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Facility <br />Score <div class="fPerc66 slGrey">kBtu/SqFt</div>',
+            "eng"    => 'Facility <br />Score <div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_facility',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Production <br />Score <div class="fPerc66 slGrey">g/kBtu</div>',
+            "eng"    => 'Production <br />Score <div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_production',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Lighting <br />Score <div class="fPerc66 slGrey">W/SqFt</div>',
+            "eng"    => 'HVAC <br />Score <div class="fPerc66 slGrey">kBtu / sq ft</div>',
+            "srtVal" => 'ps_effic_hvac',
+            "sort"   => $sort
+        ])->render() !!}
+    </th>
+    <th>
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Lighting <br />Score <div class="fPerc66 slGrey">kWh / day</div>',
             "srtVal" => 'ps_effic_lighting',
             "sort"   => $sort
         ])->render() !!}
     </th>
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'HVAC <br />Score <div class="fPerc66 slGrey">kWh/SqFt</div>',
-            "srtVal" => 'ps_effic_hvac',
+            "eng"    => 'LPD <div class="fPerc66 slGrey">W / sq ft</div>',
+            "srtVal" => 'ps_lighting_power_density',
             "sort"   => $sort
         ])->render() !!}
     </th>

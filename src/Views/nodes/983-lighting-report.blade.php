@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/983-lighting-report.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     <input type="hidden" name="toExcel" id="toExcelID" value="0" >
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         href="javascript:;" onClick="return loadExcel();"
@@ -58,7 +58,7 @@
 <div class="nodeAnchor"><a name="flowers"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h3>
         @if ($typeID == 144) 1a. 
         @else 1b. 
@@ -75,7 +75,7 @@
 <div class="nodeAnchor"><a name="veg"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h3>
         @if ($typeID == 144) 2a. 
         @elseif ($typeID == 145) 2b. 
@@ -93,7 +93,7 @@
 <div class="nodeAnchor"><a name="clones"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h3>
         @if ($typeID == 144) 3a. 
         @elseif ($typeID == 145) 3b. 
@@ -111,7 +111,7 @@
 <div class="nodeAnchor"><a name="mothers"></a></div>
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
     as $typeID => $typeName)
-    <div class="slCard greenline nodeWrap">
+    <div class="slCard nodeWrap">
     <h3>
         @if ($typeID == 144) 4a. 
         @elseif ($typeID == 145) 4b. 
@@ -171,7 +171,7 @@ function gatherFilts() {
 <?php /*
 @foreach ($sfFarms[0] as $i => $farmDef)
     @if ($sfFarms[1][$i] != 'Outdoor')
-        <div class="slCard greenline nodeWrap">
+        <div class="slCard nodeWrap">
             <h2 class="slBlueDark">@if ($sfFarms[0][$i] == 144) 4a. @elseif ($sfFarms[0][$i] == 145) 4b. @else 4c. @endif 
             {{ $sfFarms[1][$i] }} Square Footage</h2>
 

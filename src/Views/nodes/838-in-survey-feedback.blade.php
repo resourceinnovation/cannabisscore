@@ -8,15 +8,20 @@
 </div>
 
 @forelse ($feedbackPages as $p => $page)
-    @if (trim($page) != '')
     <div class="slCard nodeWrap">
         <h3 class="mT0 slBlueDark">
-            Feedback on Page {{ (1+$p) }}: {{ $feedbackPName[$p] }}
+            Feedback on Page {{ (1+$p) }}
         </h3>
         {!! $page !!}
     </div>
-    @endif
-@empty @endforelse
+    <div class="slCard nodeWrap">
+        <h3 class="mT0 slBlueDark">
+            Uniqueness on Page {{ (1+$p) }}
+        </h3>
+        {!! $uniquePages[$p] !!}
+    </div>
+@empty 
+@endforelse
 
 </div>
 </div>

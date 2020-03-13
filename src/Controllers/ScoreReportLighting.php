@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.3
   */
 namespace CannabisScore\Controllers;
@@ -162,22 +162,37 @@ class ScoreReportLighting extends ScoreReportStats
         $blank = '<span class="slGrey">-</span>';
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-
+                $id = '<a href="/calculated/u-' . $ps->ps_id 
+                    . '" target="_blank">#' . $ps->ps_id . '</a>';
+                $farmType = $GLOBALS["SL"]->def->getVal(
+                    'PowerScore Farm Types', 
+                    $ps->ps_characterize
+                );
+                $farmType = str_replace(
+                    'Greenhouse/Hybrid/Mixed Light', 
+                    'Greenhouse', 
+                    $farmType
+                );
+                $lgtErr = '<span class="slGrey">-</span>';
+                if ($ps->ps_lighting_error > 0) {
+                    $lgtErr = '<span class="red">' . $ps->ps_lighting_error . '</span>';
+                }
+                $lgtRank = round($ps->ps_effic_over_similar) 
+                    . $GLOBALS["SL"]->numSupscript(round($ps->ps_effic_over_similar));
+                $lgtScore = '0';
+                if ($ps->ps_effic_lighting > 0.00001) {
+                    $lgtScore = $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3);
+                } elseif ($ps->ps_effic_lighting > 0) {
+                    $lgtScore = '<span class="slGrey">-</span>';
+                }
                 $row = [
-                    '<a href="/calculated/u-' . $ps->ps_id . '" target="_blank">#'
-                        . $ps->ps_id . '</a>',
+                    $id,
                     $ps->ps_state,
-                    str_replace(
-                        'Greenhouse/Hybrid/Mixed Light', 'Greenhouse', 
-                        $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)
-                    ),
-                    (($ps->ps_lighting_error > 0) ? '<span class="red">' 
-                        . $ps->ps_lighting_error . '</span>'
-                        : '<span class="slGrey">-</span>'),
-                    round($ps->ps_effic_over_similar) 
-                        . $GLOBALS["SL"]->numSupscript(round($ps->ps_effic_over_similar)),
-                    (($ps->ps_effic_lighting > 0.00001) 
-                        ? number_format($ps->ps_effic_lighting) : $blank)
+                    $farmType,
+                    $lgtErr,
+                    $lgtRank,
+                    $lgtScore,
+                    $GLOBALS["SL"]->sigFigs($ps->ps_lighting_power_density, 3)
                 ];
                 $totSqFt = 0;
                 $areaCols = $areaSqFtEffic[] = $areaSqFtPercs[] = $areaSqFtWeighted[] = [];
@@ -194,6 +209,7 @@ class ScoreReportLighting extends ScoreReportStats
                             $area->ps_area_size,
                             number_format($area->ps_area_calc_watts),
                             number_format($area->ps_area_sq_ft_per_fix2),
+                            $GLOBALS["SL"]->sigFigs($area->ps_area_lpd, 3),
                             '',
                             '',
                             '',
@@ -209,7 +225,7 @@ class ScoreReportLighting extends ScoreReportStats
                                     && intVal($lgt->ps_lg_typ_count) > 0 
                                     && isset($lgt->ps_lg_typ_wattage) 
                                     && intVal($lgt->ps_lg_typ_wattage) > 0) {
-                                    $areaCols[$area->ps_area_type][(5+$lgtInd)] 
+                                    $areaCols[$area->ps_area_type][(6+$lgtInd)] 
                                         .= '<nobr>' . $lgt->ps_lg_typ_count . ' * ' 
                                         . number_format($lgt->ps_lg_typ_wattage) 
                                         . '<span class="slGrey fPerc66">W</span> ' 
@@ -227,35 +243,54 @@ class ScoreReportLighting extends ScoreReportStats
                 }
 
                 foreach ($this->v["sfAreasGrow"][0] as $areaType) {
-                    $areaSqFtPercs[$areaType] 
-                        = (($totSqFt > 0) ? ($areaCols[$areaType][2]/$totSqFt) : 0);
-                    $areaSqFtWeighted[$areaType] 
-                        = $areaSqFtPercs[$areaType]*$areaSqFtEffic[$areaType];
+                    $areaSqFtPercs[$areaType] = 0;
+                    if ($totSqFt > 0 && isset($areaCols[$areaType])) {
+                        $areaSqFtPercs[$areaType] = $areaCols[$areaType][2]/$totSqFt;
+                    }
+                    if (isset($areaSqFtPercs[$areaType])
+                        && isset($areaSqFtEffic[$areaType])) {
+                        $areaSqFtWeighted[$areaType] = $areaSqFtPercs[$areaType]
+                            *$areaSqFtEffic[$areaType];
+                    }
                 }
                 foreach ($this->v["sfAreasGrow"][0] as $areaType) {
-                    $row[] = (($areaSqFtWeighted[$areaType] > 0.00001) 
-                        ? number_format($areaSqFtWeighted[$areaType]) : $blank);
+                    if (isset($areaSqFtWeighted[$areaType])
+                        && $areaSqFtWeighted[$areaType] > 0.00001) {
+                        $row[] = number_format($areaSqFtWeighted[$areaType]);
+                    } else {
+                        $row[] = $blank;
+                    }
                 }
                 foreach ($this->v["sfAreasGrow"][0] as $areaType) {
-                    $row[] = '<nobr>' . round(100*$areaSqFtPercs[$areaType]) 
-                        . '<span class="slGrey fPerc66">%</span></nobr>';
+                    if (isset($areaSqFtPercs[$areaType])) {
+                        $row[] = '<nobr>' . round(100*$areaSqFtPercs[$areaType]) 
+                            . '<span class="slGrey fPerc66">%</span></nobr>';
+                    } else {
+                        $row[] = '<span class="slGrey fPerc66">-</span>';
+                    }
                 }
                 foreach ($this->v["sfAreasGrow"][0] as $areaType) {
-                    $row[] = (($areaSqFtEffic[$areaType] > 0.00001) 
-                        ? number_format($areaSqFtEffic[$areaType]) : $blank);
+                    if (isset($areaSqFtEffic[$areaType])
+                        && $areaSqFtEffic[$areaType] > 0.00001) {
+                        $row[] = number_format($areaSqFtEffic[$areaType]);
+                    } else {
+                        $row[] = $blank;
+                    }
                 }
                 foreach ($this->v["sfAreasGrow"][0] as $a => $areaType) {
-                    foreach ($areaCols[$areaType] as $c => $col) {
-                        if ($c == 2) {
-                            if ($a == 3) {
-                                $row[] = $GLOBALS["SL"]->def->getVal(
-                                    'PowerScore Mother Location', 
-                                    $ps->ps_mother_loc
-                                );
+                    if (isset($areaCols[$areaType])) {
+                        foreach ($areaCols[$areaType] as $c => $col) {
+                            if ($c == 2) {
+                                if ($a == 3) {
+                                    $row[] = $GLOBALS["SL"]->def->getVal(
+                                        'PowerScore Mother Location', 
+                                        $ps->ps_mother_loc
+                                    );
+                                }
+                                $row[] = number_format($col);
+                            } else {
+                                $row[] = $col;
                             }
-                            $row[] = number_format($col);
-                        } else {
-                            $row[] = $col;
                         }
                     }
                 }
@@ -285,16 +320,19 @@ class ScoreReportLighting extends ScoreReportStats
 
     protected function getExportFilename($extra = '')
     {
-        return 'PowerScore_Averages-Lighting' . $extra
-            . ((trim($this->v["fltStateClim"]) != '') 
-                ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')
-            . ((isset($this->searcher->v["fltNoNWPCC"]) 
-                && trim($this->searcher->v["fltNoNWPCC"]) != '')
-                ? '-No_NWPCC' : '')
-            . ((isset($this->searcher->v["fltNoLgtError"]) 
-                && trim($this->searcher->v["fltNoLgtError"]) != '')
-                ? '-No_Obvious_Lighting_Errors' : '')
-            . '-' . date("ymd");
+        $ret = 'PowerScore_Averages-Lighting' . $extra;
+        if (trim($this->v["fltStateClim"]) != '') {
+            $ret .= '-' . str_replace(' ', '_', $this->v["fltStateClim"]);
+        }
+        if (isset($this->searcher->v["fltNoNWPCC"]) 
+            && trim($this->searcher->v["fltNoNWPCC"]) != '') {
+            $ret .= '-No_NWPCC';
+        }
+        if (isset($this->searcher->v["fltNoLgtError"]) 
+            && trim($this->searcher->v["fltNoLgtError"]) != '') {
+            $ret .= '-No_Obvious_Lighting_Errors';
+        }
+        return $ret . '-' . date("ymd");
     }
 
 

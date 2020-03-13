@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabis
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -115,8 +115,8 @@ class CannabisScoreAdminMenu extends AdminMenu
                     1, 
                     [
                         $this->admMenuLnk(
-                            '/dash/competitive-performance', 
-                            'Competitive Performance'
+                            '/dash/manage-partners',
+                            'Manage Partners',
                         ),
                         $this->admMenuLnk(
                             '/dash/manage-manufacturers', 
@@ -125,6 +125,10 @@ class CannabisScoreAdminMenu extends AdminMenu
                         $this->admMenuLnk(
                             '/dash/manage-lighting-models',
                             'Lighting Models'
+                        ),
+                        $this->admMenuLnk(
+                            '/dash/competitive-performance', 
+                            'Competitive Performance'
                         )
                     ]
                 ),
@@ -295,30 +299,21 @@ class CannabisScoreAdminMenu extends AdminMenu
         $treeMenu[] = $this->addAdmMenuCollapse();
         $treeMenu[] = $this->addAdmMenuHome();
         $treeMenu[] = $this->admMenuLnk(
-            'javascript:;', 
-            'My Scores', 
-            '<i class="fa fa-star"></i>', 
-            1, 
-            [
-                $this->admMenuLnk(
-                    '/dash/competitive-performance',
-                    'Competition'
-                ),
-                $this->admMenuLnk(
-                    '/dash/partner-compare-powerscores',
-                    'Individual Scores'
-                ) /* ,
-                $this->admMenuLnk(
-                    '/dash/partner-compare-powerscore-averages',
-                    'My Averages'
-                ),
-                $this->admMenuLnk(
-                    '/dash/founders-circle-report',
-                    'Founders Report'
-                )
-                */
-            ]
+            '/dash/partner-compare-powerscores', 
+            'Individual Scores', 
+            '<i class="fa fa-star"></i>'
         );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/partner-compare-powerscore-averages', 
+            'Score Averages', 
+            '<i class="fa fa-area-chart" aria-hidden="true"></i>'
+        );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/competitive-performance', 
+            'Competition', 
+            '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
+        );
+        /*
         $treeMenu[] = $this->admMenuLnk(
             'javascript:;', 
             'All PowerScores', 
@@ -343,6 +338,7 @@ class CannabisScoreAdminMenu extends AdminMenu
                 )
             ]
         );
+        */
         return $treeMenu;
     }
     

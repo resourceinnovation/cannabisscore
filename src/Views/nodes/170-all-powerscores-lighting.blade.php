@@ -95,7 +95,7 @@
             @if (!$isExcel) </nobr></span><span class="mR10"><nbor> @else </th><th> @endif
             {{ number_format($psAvg->ps_kwh) }} kWh
             @if (!$isExcel) </nbor></span><nbor> @else </th><th> @endif
-            {{ number_format($psAvg->ps_total_size) }} sq ft
+            {{ number_format($psAvg->ps_flower_canopy_size) }} sq ft
             @if (!$isExcel) </nbor> @endif
         </th>
     </tr>

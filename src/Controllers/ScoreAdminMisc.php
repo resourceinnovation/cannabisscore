@@ -6,7 +6,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -19,7 +19,6 @@ use App\Models\RIIPsMonthly;
 use App\Models\RIIPsCommunications;
 use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
-use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
 use App\Models\SLUsersRoles;
 use App\Models\SLUploads;
@@ -193,7 +192,10 @@ class ScoreAdminMisc extends ScorePrintReport
         } elseif ($GLOBALS["SL"]->REQ->has('recalc')) {
             return $this->recalc2AllSubScores();
         } else {
-            return view('vendor.cannabisscore.nodes.740-trouble-shooting', $this->v)->render();
+            return view(
+                'vendor.cannabisscore.nodes.740-trouble-shooting', 
+                $this->v
+            )->render();
         }
     }
     
@@ -451,39 +453,48 @@ class ScoreAdminMisc extends ScorePrintReport
     {
         $this->v["nID"] = 838;
         $this->v["feedbackPages"] = ['', '', '', '', '', '', '', '', ''];
+        $this->v["uniquePages"] = ['', '', '', '', '', '', '', '', ''];
         $this->v["feedbackPName"] = [
-            'Your Farm', 
-            'Your Growing Environments', 
-            'Your Lighting', 
-            'Your HVAC', 
-            'Your Annual Totals', 
-            'Other Techniques & Energy', 
-            'Contact & Options', 
-            '', 
+            'Page 1', 
+            'Page 2', 
+            'Page 3', 
+            'Page 4', 
+            'Page 5', 
+            'Page 6', 
+            'Page 7', 
+            'Page 8', 
             ''
         ];
         $this->v["feedbackscores"] = DB::table('rii_ps_page_feedback')
-            ->join('rii_powerscore', 'rii_ps_page_feedback.ps_pag_feed_id', 
+            ->join('rii_powerscore', 'rii_ps_page_feedback.ps_pag_feed_psid', 
                 '=', 'rii_powerscore.ps_id')
-            ->select('rii_ps_page_feedback.ps_pag_feed_feedback1', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback2', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback3', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback4', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback5', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback6', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback7', 
-                'rii_ps_page_feedback.ps_pag_feed_feedback8', 
+            ->select('rii_ps_page_feedback.*', 
                 'rii_powerscore.ps_id', 'rii_powerscore.ps_status', 
                 'rii_powerscore.created_at')
+            ->orderBy('rii_powerscore.created_at', 'desc')
             ->get();
         if ($this->v["feedbackscores"]->isNotEmpty()) {
             foreach ($this->v["feedbackscores"] as $ps) {
+                $status = $GLOBALS["SL"]->def->getVal(
+                    'PowerScore Status', 
+                    $ps->ps_status
+                );
                 for ($page = 1; $page < 9; $page++) {
                     $fld = 'ps_pag_feed_feedback' . $page;
                     if (isset($ps->{ $fld }) && trim($ps->{ $fld }) != '') {
-                        $status = $GLOBALS["SL"]->def->getVal('PowerScore1 Status', $ps->ps_status);
                         $this->v["feedbackPages"][($page-1)] .= '<div class="pT5 pB10">'
-                            . strip_tags($ps->{ $fld }) . '<div class="pL5"><a href="/calculated/read-' 
+                            . strip_tags($ps->{ $fld }) 
+                            . '<div class="pL5"><a href="/calculated/read-' 
+                            . $ps->ps_id . '" target="_blank" class="fPerc80 ' 
+                            . (($status == 'Archived') ? 'red' : 'slBlueDark') . '">' 
+                            . date("n/j/y", strtotime($ps->created_at)) . ' '
+                            . $status . ' #' . $ps->ps_id . '</a></div></div>';
+                    }
+                    $fld = 'ps_pag_feed_uniqueness' . $page;
+                    if (isset($ps->{ $fld }) && trim($ps->{ $fld }) != '') {
+                        $this->v["uniquePages"][($page-1)] .= '<div class="pT5 pB10">'
+                            . strip_tags($ps->{ $fld }) 
+                            . '<div class="pL5"><a href="/calculated/read-' 
                             . $ps->ps_id . '" target="_blank" class="fPerc80 ' 
                             . (($status == 'Archived') ? 'red' : 'slBlueDark') . '">' 
                             . date("n/j/y", strtotime($ps->created_at)) . ' '
@@ -492,7 +503,10 @@ class ScoreAdminMisc extends ScorePrintReport
                 }
             }
         }
-        return view('vendor.cannabisscore.nodes.838-in-survey-feedback', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.838-in-survey-feedback', 
+            $this->v
+        )->render();
     }
     
     protected function reportPowerScoreFeedback()
@@ -718,59 +732,6 @@ class ScoreAdminMisc extends ScorePrintReport
             }
         }
         return true;
-    }
-    
-    public function printPartnerProfileDashHead($nID)
-    {
-        $title = 'Partner Members Dashboard';
-        $company = $this->getPartnerCompany();
-        if (trim($company) != '') {
-            $title = $company . ' Dashboard';
-        }
-        $ret = '<div class="pL15 pR15"><h2>' . $title . '</h2>';
-        if (isset($this->v["usrInfo"])) {
-            if (isset($this->v["usrInfo"]->manufacturers)
-                && sizeof($this->v["usrInfo"]->manufacturers) > 0) {
-                foreach ($this->v["usrInfo"]->manufacturers as $manu) {
-                    $ret .= '<div class="row mT10">
-                            <div class="col-6">
-                                <a href="/dash/competitive-performance?manu=' 
-                                    . urlencode($manu->manu_name) . '" '
-                                    . 'class="btn btn-xl btn-primary btn-block">' 
-                                    . $manu->manu_name . ' Competitive Performance</a>
-                            </div><div class="col-6 pT10">
-                                <p>Compare the competitive advantage of 
-                                growers who use <b>' . $manu->manu_name 
-                                . '</b> during at least one growth stage.</p>
-                            </div>
-                        </div>';
-                }
-            } else {
-                $ret .= '<div class="row mT10">
-                        <div class="col-6">
-                            <a href="/dash/competitive-performance" '
-                                . 'class="btn btn-xl btn-primary btn-block"'
-                                . '>Competitive Performance Report</a>
-                        </div><div class="col-6 pT10">
-                            <p>Compare the competitive advantage of 
-                            growers who use a partner\'s equipment during at least one growth stage. (Demo)</p>
-                        </div>
-                    </div>';
-            }
-            if ($company != '') {
-                $ret .= '<p>&nbsp;</p><div class="row mT10">
-                    <div class="col-6">
-                        <a href="/dash/partner-compare-powerscores" 
-                            class="btn btn-xl btn-primary btn-block"
-                            >' . $company . ' Individual Scores</a>
-                    </div><div class="col-6 pT10">
-                        <p>List <b>all of your</b> individual PowerScores with sub-score
-                        averages, plus dozens of different filter options.</p>
-                    </div>
-                </div>';
-            }
-        }
-        return $ret . '</div>';
     }
     
     protected function tmpDebug($str = '')

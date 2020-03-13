@@ -6,7 +6,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.3
   */
 namespace CannabisScore\Controllers;
@@ -35,10 +35,11 @@ class ScoreListingsGraph
         $this->v["defArch"]  = 364;
         $this->v["defInc"]   = 242;
 
-        $this->v["frmTypOut"] = $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Outdoor');
-        $this->v["frmTypIn"]  = $GLOBALS["SL"]->def->getID('PowerScore Farm Types', 'Indoor');
+        $defSet = 'PowerScore Farm Types';
+        $this->v["frmTypOut"] = $GLOBALS["SL"]->def->getID($defSet, 'Outdoor');
+        $this->v["frmTypIn"]  = $GLOBALS["SL"]->def->getID($defSet, 'Indoor');
         $this->v["frmTypGrn"] = $GLOBALS["SL"]->def->getID(
-            'PowerScore Farm Types', 
+            $defSet, 
             'Greenhouse/Hybrid/Mixed Light'
         );
 
@@ -151,7 +152,8 @@ class ScoreListingsGraph
         } elseif ($fltFarm == 143) {
             $type = 'Outdoor';
         }
-        $this->v["averageRanks"] = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $fltFarm)
+        $flt = '&fltFarm=' . $fltFarm;
+        $this->v["averageRanks"] = RIIPsRanks::where('ps_rnk_filters', $flt)
             ->first(); 
         $this->v["lgtCompetData"]->addLineFromRanking(
             $type . ' Average', 
@@ -240,8 +242,8 @@ class ScoreLgtManuData
         $this->dataLegend = [
             ['facility',   'Facility Efficiency',   'kBtu / sq ft',    0, 0],
             ['production', 'Production Efficiency', 'g / kBtu',        0, 0],
-            ['lighting',   'Lighting Efficiency',   'W / sq ft',       0, 0],
-            ['hvac',       'HVAC Efficiency',       'kWh / sq ft',     0, 0],
+            ['lighting',   'Lighting Efficiency',   'kWh / day',       0, 0],
+            ['hvac',       'HVAC Efficiency',       'kBtu / sq ft',    0, 0],
             ['water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
             ['waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0]
         ];
@@ -364,7 +366,8 @@ class ScoreLgtManuData
     public function addPowerScore($title, $ps, $defCmplt)
     {
         $ind = $this->getIndFromTitle($title);
-        $rankRow = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $ps->ps_characterize)
+        $flt = '&fltFarm=' . $ps->ps_characterize;
+        $rankRow = RIIPsRanks::where('ps_rnk_filters', $flt)
             ->first();
         foreach ($this->dataLegend as $l => $leg) {
             $fld = 'ps_effic_' . strtolower($leg[0]);

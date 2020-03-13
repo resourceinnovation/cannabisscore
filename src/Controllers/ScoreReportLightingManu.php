@@ -6,21 +6,210 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.3
   */
 namespace CannabisScore\Controllers;
 
 use DB;
+use Auth;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
+use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreListingsGraph;
 
 class ScoreReportLightingManu extends ScoreListingsGraph
 {
+    /**
+     * Print lighting competitor report comparing their customers to 
+     * their competitors, and broader averages.
+     *
+     * Example: A partner lighting manufacturer can login to see how they rank.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function printCompetitiveReport($nID = -3)
+    {
+        $uID = 0;
+        if (Auth::user() && isset(Auth::user()->id)) {
+            $uID = Auth::user()->id;
+        }
+        if (isset($GLOBALS["SL"]->x["partnerManuIDs"])
+            && sizeof($GLOBALS["SL"]->x["partnerManuIDs"]) > 0) {
+            return $this->printCompareLightManu($nID);
+        }
+        return $this->printPartnerCompetitive($nID, $uID);
+    }
+
+    /**
+     * Print partner competitor report comparing their customers to 
+     * their competitors, and broader averages.
+     *
+     * @param int $nID
+     * @param int $uID
+     * @return string
+     */
+    protected function printPartnerCompetitive($nID, $uID)
+    {
+        $this->v["statCompete"] = new ScoreStats;
+        $this->searcher = new CannabisScoreSearcher;
+        $this->v["partnerPSIDs"] = $this->searcher->getPartnerPSIDs($uID);
+        $this->searcher->getSearchFilts(1);
+        $this->searcher->loadAllScoresPublic(
+            "->whereIn('ps_id', [" 
+                . implode(", ", $this->v["partnerPSIDs"]) 
+            . "])"
+        );
+        $this->v["fltClimate"] = $this->searcher->v["fltClimate"];
+        $this->v["fltSize"] = $this->searcher->v["fltSize"];
+        $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
+        $this->initPartnerCompeteData();
+        if ($this->v["totCnt"] > 0) {
+            foreach ($this->searcher->v["allscores"] as $i => $ps) {
+
+                $char = $ps->ps_characterize;
+                $this->v["statCompete"]->resetRecFilt();
+                $this->v["statCompete"]->addRecFilt('farm', $char, $ps->ps_id);
+                foreach ($this->v["dataLegend"] as $leg) {
+                    $fld = 'ps_effic_' . $leg[1];
+                    if (isset($ps->{ $fld }) && $ps->{ $fld } > 0) {
+                        $this->v["statCompete"]->addRecDat(
+                            $leg[0], 
+                            $ps->{ $fld }, 
+                            $ps->ps_id
+                        );
+                    }
+                }
+
+            }
+        }
+        $this->v["statCompete"]->resetRecFilt();
+        $this->v["statCompete"]->calcStats(); 
+
+        $this->v["graphData"] = [];
+        foreach ($this->v["dataLegend"] as $l => $leg) {
+            $datLet = $this->v["statCompete"]->dAbr($leg[0]);
+            $this->v["graphData"][$l] = [
+                $leg[0],
+                [], 
+                0, 
+            ];
+            foreach ($this->v["farmTypes"] as $label => $farm) {
+                $this->v["graphData"][$l][1][$farm] = [];
+                if (isset($this->v["statCompete"]->dat["a" . $farm])
+                    && isset($this->v["statCompete"]->dat["a" . $farm]["cnt"])
+                    && $this->v["statCompete"]->dat["a" . $farm]["cnt"] > 0) {
+                    $avg = $this->v["statCompete"]->dat["a" . $farm]["dat"][$datLet]["avg"];
+                    $this->v["graphData"][$l][1][$farm][] = [
+                        $avg,
+                        $this->v["statCompete"]->dat["a" . $farm]["cnt"],
+                        'Your ' . $label . ' Customers'
+                    ];
+                    if ($this->v["graphData"][$l][2] < $avg) {
+                        $this->v["graphData"][$l][2] = $avg;
+                    }
+                }
+            }
+        }
+
+        foreach ($this->v["farmTypes"] as $label => $farm) {
+            $rank = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $farm)
+                ->first();
+            if ($rank && isset($rank->ps_rnk_tot_cnt)) {
+                foreach ($this->v["dataLegend"] as $l => $leg) {
+                    $fld = 'ps_rnk_' . $leg[1];
+                    if (isset($rank->{ $fld }) && trim($rank->{ $fld }) != '') {
+                        $arr = $GLOBALS["SL"]->mexplode(',', $rank->{ $fld });
+                        if (sizeof($arr) > 0) {
+                            $avg = $GLOBALS["SL"]->arrAvg($arr);
+                            $this->v["graphData"][$l][1][$farm][] = [
+                                $avg,
+                                sizeof($arr),
+                                $label . ' Average'
+                            ];
+                            if ($this->v["graphData"][$l][2] < $avg) {
+                                $this->v["graphData"][$l][2] = $avg;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+//echo '<pre>'; print_r($this->v["graphData"]); echo '</pre>'; exit;
+//echo 'statComplete: <pre>'; print_r($this->v["statCompete"]); echo '</pre>'; exit;
+
+
+        $GLOBALS["SL"]->x["needsCharts"] = true;
+        return view(
+            'vendor.cannabisscore.nodes.979-partner-competitive', 
+            $this->v
+        )->render();
+    }
+
+    /**
+     * Initialize the data calculator.
+     *
+     * @return boolean
+     */
+    protected function initPartnerCompeteData()
+    {
+        $this->v["dataLegend"] = [
+            ['fac', 'facility',   'Facility Efficiency',   'kBtu / sq ft',    0, 0],
+            ['pro', 'production', 'Production Efficiency', 'g / kBtu',        0, 0],
+            ['lgt', 'lighting',   'Lighting Efficiency',   'kWh / day',       0, 0],
+            ['hvc', 'hvac',       'HVAC Efficiency',       'kBtu / sq ft',    0, 0],
+            ['wtr', 'water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
+            ['wst', 'waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0]
+        ];
+        $this->v["farmTypes"] = [
+            'Indoor'           => $GLOBALS["SL"]->def
+                ->getID('PowerScore Farm Types', 'Indoor'),
+            'Greenhouse' => $GLOBALS["SL"]->def
+                ->getID('PowerScore Farm Types', 'Greenhouse/Hybrid/Mixed Light'),
+            'Outdoor'          => $GLOBALS["SL"]->def
+                ->getID('PowerScore Farm Types', 'Outdoor')
+        ];
+        /*
+        $this->v["statCompete"]->addFilt( // a
+            'farm', 
+            'Farm Type', 
+            [144, 145, 143],
+            ['Indoor', 'Greenhouse/Mixed', 'Outdoor']
+        );
+
+        $this->v["statCompete"]->addDataType( // stat var 'a'
+            'fac',  
+            '<nobr>Facility <sup class="slBlueDark">kBtu / sq ft</sup></nobr>'
+        );
+        $this->v["statCompete"]->addDataType( // stat var 'b'
+            'pro',  
+            '<nobr>Production <sup class="slBlueDark">g / kBtu</sup></nobr>'
+        );
+        $this->v["statCompete"]->addDataType( // stat var 'c'
+            'hvc',  
+            '<nobr>HVAC <sup class="slBlueDark">kBtu / sq ft</sup></nobr>'
+        );
+        $this->v["statCompete"]->addDataType( // stat var 'd'
+            'lgt',  
+            '<nobr>Lighting <sup class="slBlueDark">kWh / day</sup></nobr>'
+        );
+        $this->v["statCompete"]->addDataType( // stat var 'e'
+            'wtr',  
+            '<nobr>Water <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
+        );
+        $this->v["statCompete"]->addDataType( // stat var 'f'
+            'wst',  
+            '<nobr>Waste <sup class="slBlueDark">lbs / sq ft</sup></nobr>'
+        );
+        */
+        $this->v["statCompete"]->loadMap();
+        return true;
+    }
+
     /**
      * Print lighting competitor report comparing their customers to 
      * their competitors, and broader averages.
@@ -98,13 +287,10 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         foreach ($this->v["lgtCompetData"]->dataLegend as $l => $leg) {
             $fld = 'ps_rnk_' . $leg[0];
             if (isset( $this->v["averageRanks"]->{ $fld })) {
-                $this->v["lgtCompetData"]->dataLegend[$l][3] = $GLOBALS["SL"]->mexplodeSize(
-                    ',', 
-                    $this->v["averageRanks"]->{ $fld }
-                );
+                $this->v["lgtCompetData"]->dataLegend[$l][3] = $GLOBALS["SL"]
+                    ->mexplodeSize(',', $this->v["averageRanks"]->{ $fld });
             }
         }
-
         $allManus = $this->getTopLightManuIDs(10, $manu);
         if (sizeof($allManus) > 0) {
             foreach ($allManus as $t => $currManu) {

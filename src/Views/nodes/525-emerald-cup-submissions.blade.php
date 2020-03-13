@@ -85,18 +85,18 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
             @if (isset($s->ps_effic_lighting) && $s->ps_effic_lighting > 0)
                 <span class="slGrey">L:</span> {{ 
                 $GLOBALS["SL"]->sigFigs($s->ps_effic_lighting, 3) 
-                }} kWh / sq ft<br /> 
+                }} kWh / day<br /> 
             @endif
             @if (isset($s->ps_effic_hvac) && $s->ps_effic_hvac > 0) 
                 <span class="slGrey">H:</span> {{ 
                 $GLOBALS["SL"]->sigFigs($s->ps_effic_hvac, 3) 
-                }} kWh / sq ft<br /> 
+                }} kBtu / sq ft<br /> 
             @endif
         </td>
         <td class="psOpen" data-psid="{{ $s->ps_id }}">
             {{ number_format($s->ps_grams) }} g<br />
             {{ number_format($s->ps_kwh) }} kWh<br />
-            {{ number_format($s->ps_total_size) }} sq ft
+            {{ number_format($s->ps_flower_canopy_size) }} sq ft
         </td>
     @else 
         <td colspan=4 class="psOpen" data-psid="{{ $s->ps_id }}" ><i class="txtDanger">

@@ -29,7 +29,7 @@ upon which each calculated average is based.
     @endif 
     {{ $typeName }} Scores by Area of Flowering Canopy</h2>
     <p>{{ $typeName }} cultivation Electricity Intensity 
-    (kWh/sf of flowering canopy) by area of flowering canopy</p>
+    (kBtu / sq ft of flowering canopy) by area of flowering canopy</p>
     <?php $scoreSets["statScorSize" . $typeID]->addCurrFilt('farm', $typeID); ?>
     {!! $scoreSets["statScorSize" . $typeID]->printScoreAvgsTbl('size') !!}
     <?php $scoreSets["statScorSize" . $typeID]->resetRecFilt(); ?>

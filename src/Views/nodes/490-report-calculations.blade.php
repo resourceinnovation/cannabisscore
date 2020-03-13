@@ -6,7 +6,8 @@
         <h3 id="efficBlockOverTitle" class="m0 scoreBig">
         @if ($isPast) Calculated PowerScore @else PowerScore Estimate @endif </h3>
         @if (isset($sessData["powerscore"][0]->ps_characterize))
-            {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $sessData["powerscore"][0]->ps_characterize) }}
+            {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
+                $sessData["powerscore"][0]->ps_characterize) }}
             <input type="hidden" id="filtFarmID" name="filtFarm" value="{{ 
                 $sessData['powerscore'][0]->ps_characterize }}">
         @endif #{{ $psid }},
@@ -21,7 +22,8 @@
         @endif
         </nobr>
         @if (isset($sessData["powerscore"][0]->ps_ashrae)) 
-            <nobr> @if ($sessData["powerscore"][0]->ps_ashrae != 'Canada') Climate Zone @endif 
+            <nobr> 
+            @if ($sessData["powerscore"][0]->ps_ashrae != 'Canada') Climate Zone @endif 
             {{ $sessData["powerscore"][0]->ps_ashrae }}</nobr>
         @endif
     </div>
@@ -65,16 +67,24 @@
             @if (isset($sessData["powerscore"][0]->ps_kwh) 
                 && isset($totFlwrSqFt) 
                 && $totFlwrSqFt > 0)
-                <div class="pL10 slGrey">
-                    = {{ number_format($GLOBALS["CUST"]
+                <div class="pL10 slBlueDark">
+                    = {{ 
+                    $GLOBALS["SL"]->sigFigs($GLOBALS["SL"]->cnvrtKbtu2Kwh(
+                        $sessData["powerscore"][0]->ps_effic_facility
+                    ), 3) }}
+                    <nobr>kWh / sq ft</nobr>
+                </div>
+                <div class="pL10 pT15 slGrey">
+                    = {{ number_format($GLOBALS["SL"]
                         ->cnvrtKwh2Kbtu($sessData["powerscore"][0]->ps_kwh)) }} 
                         Total Annual kBtu &nbsp;&nbsp;/&nbsp;&nbsp;
-                        {{ number_format($totFlwrSqFt) }} Square Feet of Flowering Canopy<br />
+                        {{ number_format($totFlwrSqFt) }} 
+                        Square Feet of Flowering Canopy<br />
                 </div>
                 <div class="pL10 pT15 slGrey">
                     Total Annual kBtu = 3.412 x ( {{ 
                         number_format($sessData["powerscore"][0]->ps_kwh)
-                        }} Total Kilowatt Hours )
+                    }} Total Kilowatt Hours )
                 </div>
             @endif
             </div>
@@ -106,11 +116,18 @@
             <div id="hidivCalcsProd" class="scoreCalcs">
             @if (isset($sessData["powerscore"][0]->ps_grams) 
                 && isset($sessData["powerscore"][0]->ps_kwh))
-                <div class="pL10 slGrey">
+                <div class="pL10 slBlueDark">
+                    = {{ $GLOBALS["SL"]->sigFigs(
+                        $sessData["powerscore"][0]->ps_grams
+                            /$sessData["powerscore"][0]->ps_kwh, 
+                        3
+                    ) }} <nobr>g / kWh</nobr>
+                </div>
+                <div class="pL10 pT15 slGrey">
                     = {{ number_format($sessData["powerscore"][0]->ps_grams) }} 
                         Annual Grams of Dried Flower Produced
                         &nbsp;&nbsp;/&nbsp;&nbsp;
-                        {{ number_format($GLOBALS["CUST"]->cnvrtKwh2Kbtu(
+                        {{ number_format($GLOBALS["SL"]->cnvrtKwh2Kbtu(
                             $sessData["powerscore"][0]->ps_kwh)) }} 
                         Total Annual kBtu
                 </div>
@@ -124,6 +141,43 @@
         </div></td></tr>
     @endif
 
+    @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
+        && $sessData["powerscore"][0]->ps_effic_lighting > 0)
+        <tr id="scoreRowLight"><td><div class="efficBlock">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-6 efficHeadLabel">
+                    <nobr>Lighting Efficiency
+                    @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
+                        <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"
+                            ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
+                    @endif
+                </div>
+                <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
+                    @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
+                        && $sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
+                        {{ $GLOBALS["SL"]->sigFigs(
+                            $sessData["powerscore"][0]->ps_effic_lighting, 
+                            3
+                        ) }}
+                    @else 0 @endif
+                    <nobr>kWh / day</nobr>
+                </div>
+                <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreLighting">
+                    <iframe id="guageFrameLighting" class="guageFrame" src="" 
+                        frameborder="0" width="190" height="30" ></iframe>
+                </div>
+                <div class="col-lg-3 col-md-3 col-6 efficHeadGuageLabel">
+                    <div id="efficGuageTxtLighting" class="efficGuageTxt"></div>
+                </div>
+            </div>
+        @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
+            <div id="hidivCalcsLgt" class="scoreCalcs">
+                {!! $printEfficLgt !!}
+            </div>
+        @endif
+        </div></td></tr>
+    @endif
+
     @if (isset($sessData["powerscore"][0]->ps_effic_hvac) 
         && $sessData["powerscore"][0]->ps_effic_hvac > 0)
         <tr id="scoreRowHvac"><td><div class="efficBlock">
@@ -134,11 +188,13 @@
                         ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
-                    @if (isset($sessData["powerscore"][0]->ps_effic_hvac)
-                        && $sessData["powerscore"][0]->ps_effic_hvac > 0.000001) 
-                        {{ $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_hvac, 3) }}
+                    @if (isset($sessData["powerscore"][0]->ps_effic_hvac_orig)
+                        && $sessData["powerscore"][0]->ps_effic_hvac_orig > 0.00001) 
+                        {{ $GLOBALS["SL"]->sigFigs($GLOBALS["SL"]->cnvrtKwh2Kbtu(
+                            $sessData["powerscore"][0]->ps_effic_hvac_orig
+                        ), 3) }}
                     @else 0 @endif
-                    <nobr>kWh / sq ft</nobr>
+                    <nobr>kBtu / sq ft</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreHvac">
                     <iframe id="guageFrameHvac" class="guageFrame" src="" 
@@ -149,110 +205,8 @@
                 </div>
             </div>
             <div id="hidivCalcsHvac" class="scoreCalcs">
-                <div class="row">
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                        @if (sizeof($printEfficHvac) > 0)
-                            @foreach ($printEfficHvac as $i => $calcRow)
-                                @if ($i == 0) 
-                                    = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
-                                @else 
-                                    + {!! $calcRow["eng"] !!} 
-                                    @if ($i < sizeof($printEfficHvac)-1) <br /> @endif
-                                @endif
-                            @endforeach
-                        @endif </div>
-                    </div></div>
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                    @if (sizeof($printEfficHvac) > 0)
-                        @foreach ($printEfficHvac as $i => $calcRow)
-                            @if ($i == 0) 
-                                = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
-                            @else 
-                                + {!! $calcRow["num"] !!} 
-                                @if ($i < sizeof($printEfficHvac)-1) <br /> @endif
-                            @endif
-                        @endforeach </div>
-                    @endif
-                    </div></div>
-                </div>
+                {!! $printEfficHvac !!}
             </div>
-        </div></td></tr>
-    @endif
-
-    @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
-        && $sessData["powerscore"][0]->ps_effic_lighting > 0)
-        <tr id="scoreRowLight"><td><div class="efficBlock">
-            <div class="row">
-                <div class="col-lg-3 col-md-3 col-6 efficHeadLabel">
-                    <nobr>Lighting Efficiency
-                    @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.000001)
-                        <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"
-                            ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
-                    @endif
-                </div>
-                <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
-                    @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
-                        && $sessData["powerscore"][0]->ps_effic_lighting > 0.000001)
-                        {{ $GLOBALS["SL"]->sigFigs($sessData["powerscore"][0]->ps_effic_lighting, 3) }}
-                    @else 0 @endif
-                    <nobr>W / sq ft</nobr>
-                </div>
-                <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreLighting">
-                    <iframe id="guageFrameLighting" class="guageFrame" src="" 
-                        frameborder="0" width="190" height="30" ></iframe>
-                </div>
-                <div class="col-lg-3 col-md-3 col-6 efficHeadGuageLabel">
-                    <div id="efficGuageTxtLighting" class="efficGuageTxt"></div>
-                </div>
-            </div>
-        @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.000001)
-            <div id="hidivCalcsLgt" class="scoreCalcs">
-                <div class="row">
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                        @if (sizeof($printEfficLgt) > 0)
-                            @foreach ($printEfficLgt as $i => $calcRow)
-                                @if ($i == 0) 
-                                    = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
-                                @else 
-                                    + {!! $calcRow["eng"] !!} 
-                                    @if ($i < sizeof($printEfficLgt)-1) <br /> @endif 
-                                @endif
-                            @endforeach
-                        @endif </div>
-                    </div></div>
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                        @if (sizeof($printEfficLgt) > 0)
-                            @foreach ($printEfficLgt as $i => $calcRow)
-                                @if ($i == 0) 
-                                    = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
-                                @else 
-                                    + {!! $calcRow["num"] !!} 
-                                    @if ($i < sizeof($printEfficLgt)-1) <br /> @endif
-                                @endif
-                            @endforeach </div>
-                        @endif
-                    </div></div>
-                    @if ($GLOBALS["SL"]->REQ->has('print'))
-                        <div class="col-md-6"><div class="slGrey">
-                        @if (sizeof($printEfficLgt) > 0)
-                            @foreach ($printEfficLgt as $i => $calcRow) 
-                                {!! $calcRow["lgt"] !!}<br />
-                            @endforeach
-                        @endif
-                        </div></div>
-                    @endif
-                </div>
-            @if (!$GLOBALS["SL"]->REQ->has('print'))
-                <div class="pL10 pT15 slGrey">
-                @if (sizeof($printEfficLgt) > 0)
-                    @foreach ($printEfficLgt as $i => $calcRow)
-                        {!! $calcRow["lgt"] !!}<br />
-                    @endforeach
-                @endif
-                </div>
-            @endif
-            </div>
-        @endif
         </div></td></tr>
     @endif
 
@@ -285,35 +239,7 @@
                 </div>
             </div>
             <div id="hidivCalcsWater" class="scoreCalcs">
-                <div class="row">
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                        @if (sizeof($printEfficWtr) > 0)
-                            @foreach ($printEfficWtr as $i => $calcRow)
-                                @if ($i == 0) 
-                                    = {!! $calcRow["eng"] !!} <div class="pL10 slGrey">
-                                @else 
-                                    + {!! $calcRow["eng"] !!} 
-                                    @if ($i < sizeof($printEfficWtr)-1) <br /> @endif 
-                                @endif
-                            @endforeach
-                        @endif </div>
-                    </div></div>
-                    <div class="col-md-6 col-sm-12"><div class="pL10 slGrey">
-                    @if (sizeof($printEfficWtr) > 0)
-                        @foreach ($printEfficWtr as $i => $calcRow)
-                            @if ($i == 0) 
-                                = {!! $calcRow["num"] !!} <div class="pL10 slGrey">
-                            @else 
-                                + {!! $calcRow["num"] !!} 
-                                @if ($i < sizeof($printEfficWtr)-1) <br /> @endif 
-                            @endif
-                        @endforeach </div>
-                    @endif
-                    </div></div>
-                </div>
-                <div class="pT20 fPerc66"><i>
-                    Water score is not yet being factored into each Overal PowerScore.
-                </i></div>
+                {!! $printEfficWtr !!}
             </div>
         </div></td></tr>
     @endif

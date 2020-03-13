@@ -69,8 +69,11 @@
             <td>
                 <b>HVAC Efficiency:</b>
             </td><td>
-                @if (isset($ps->ps_effic_hvac)) {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
-                @else 0 @endif &nbsp;&nbsp;kWh / sq ft
+                @if (isset($ps->ps_effic_hvac)) 
+                    {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
+                @else 
+                    0 
+                @endif &nbsp;&nbsp;kBtu / sq ft
             </td><td class="taC">
             @if (isset($rank->ps_rnk_hvac))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] 
@@ -80,7 +83,8 @@
             </td><td>
             @if (isset($rank->ps_rnk_hvac))
                 {!! round($rank->ps_rnk_hvac) 
-                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_hvac)) !!} percentile
+                    . $GLOBALS["SL"]->numSupscript(round($rank->ps_rnk_hvac)) 
+                !!} percentile
             @endif
             </td>
         </tr>
@@ -91,7 +95,7 @@
                 <b>Lighting Efficiency:</b>
             </td><td>
                 @if (isset($ps->ps_effic_lighting)) {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }} 
-                @else 0 @endif &nbsp;&nbsp;W / sq ft
+                @else 0 @endif &nbsp;&nbsp;kWh / day
             </td><td class="taC">
             @if (isset($rank->ps_rnk_lighting))
                 <img src="{{ $GLOBALS['SL']->sysOpts['app-url'] }}/cannabisscore/uploads/greenometer-anim-{{ 

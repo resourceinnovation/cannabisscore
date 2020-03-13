@@ -6,7 +6,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -39,10 +39,24 @@ class ScoreAdminManageManu
      */
     public function printMgmtManufacturers($nID = -3)
     {
-        $this->addManufacturers($nID);
         $this->cntManufacturerAdoption();
         return view(
             'vendor.cannabisscore.nodes.914-manage-manufacturers', 
+            $this->v
+        )->render();
+    }
+    
+    /**
+     * Print admin tool to add one or more lighting manufacturers.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function printAddManufacturers($nID = -3)
+    {
+        $this->addManufacturers($nID);
+        return view(
+            'vendor.cannabisscore.nodes.1293-add-manufacturers', 
             $this->v
         )->render();
     }
@@ -55,11 +69,77 @@ class ScoreAdminManageManu
      */
     public function printMgmtPartners($nID = -3)
     {
+        if ($GLOBALS["SL"]->REQ->has('addPartnerManu')
+            && intVal($GLOBALS["SL"]->REQ->addPartnerManu) == 1) {
+            $this->addNewPartnerInvite();
+        }
         $this->loadPartnerUsers();
+        $this->loadPartnerInvites();
         return view(
             'vendor.cannabisscore.nodes.915-manage-partners', 
             $this->v
         )->render();
+    }
+
+    /**
+     * Process the custom admin form to add a new partner user.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function addNewPartnerInvite()
+    {
+        $userID = $manu = 0;
+        $user = $userInfo = null;
+        $inviteEmail = '';
+        if ($GLOBALS["SL"]->REQ->has('partnerUser')) {
+            $userID = intVal($GLOBALS["SL"]->REQ->partnerUser);
+            if ($userID > 0) {
+                $user = User::find($userID);
+            }
+        }
+        if ((!$user || !isset($user->id)) 
+            && $GLOBALS["SL"]->REQ->has('partnerInviteEmail')) {
+            $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
+            $user = User::where('email', 'LIKE', $inviteEmail)
+                ->orderBy('id', 'asc')
+                ->first();
+        }
+        if ($user && isset($user->id)) {
+            $userID = $user->id;
+            $userInfo = RIIUserInfo::where('usr_user_id', $userID)
+                ->first();
+            if (!$userInfo || !isset($userInfo->usr_id)) {
+                $userInfo = RIIUserInfo::where('usr_invite_email', $user->email)
+                    ->first();
+            }
+        } elseif ($inviteEmail != '') {
+            $userInfo = RIIUserInfo::where('usr_invite_email', $inviteEmail)
+                ->first();
+        }
+        if (!$userInfo || !isset($userInfo->usr_id)) {
+            $userInfo = new RIIUserInfo;
+            $userInfo->usr_user_id = $userID;
+        }
+        $userInfo->usr_invite_email = $inviteEmail;
+        if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')
+            && trim($GLOBALS["SL"]->REQ->partnerCompanyName) != '') {
+            $userInfo->usr_company_name = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
+        }
+        if ($GLOBALS["SL"]->REQ->has('partnerManu')
+            && intVal($GLOBALS["SL"]->REQ->partnerManu) > 0) {
+            $userInfo->usr_manu_ids = intVal($GLOBALS["SL"]->REQ->partnerManu);
+        }
+        if ($GLOBALS["SL"]->REQ->has('partnerLevel')
+            && trim($GLOBALS["SL"]->REQ->partnerLevel) != '') {
+            $userInfo->usr_level = trim($GLOBALS["SL"]->REQ->partnerLevel);
+        }
+        if ($GLOBALS["SL"]->REQ->has('partnerExpire')
+            && trim($GLOBALS["SL"]->REQ->partnerExpire) != '') {
+            $userInfo->usr_membership_expiration = trim($GLOBALS["SL"]->REQ->partnerExpire);
+        }
+        $userInfo->save();
+        return true;
     }
     
     /**
@@ -121,7 +201,9 @@ class ScoreAdminManageManu
      */
     protected function loadPartnerUsers()
     {
-        $GLOBALS["SL"]->x["partners"] = [];
+        $GLOBALS["SL"]->x["partners"] 
+            = $GLOBALS["SL"]->x["partnerLookup"] 
+            = [];
         $chk = User::whereIn('id', function($query){
                 $query->select('role_user_uid')
                 ->from(with(new SLUsersRoles)->getTable())
@@ -134,9 +216,23 @@ class ScoreAdminManageManu
             foreach ($chk as $ind => $usr) {
                 $GLOBALS["SL"]->x["partners"][$ind] = new ScoreUserInfo;
                 $GLOBALS["SL"]->x["partners"][$ind]->loadUser($usr->id, $usr);
+                $GLOBALS["SL"]->x["partnerLookup"][$usr->id] = $ind;
             }
         }
-        $this->loadManufactIDs();
+        $this->v["manufacts"] = $GLOBALS["CUST"]->loadManufactIDs();
+        return true;
+    }
+    
+    /**
+     * Load list of pending partner ivites.
+     *
+     * @return boolean
+     */
+    protected function loadPartnerInvites()
+    {
+        $GLOBALS["SL"]->x["partnerInvites"] = RIIUserInfo::where('usr_user_id', 0)
+            ->whereNotNull('usr_invite_email')
+            ->get();
         return true;
     }
     
@@ -182,7 +278,7 @@ class ScoreAdminManageManu
      * @param  int $nID
      * @return boolean
      */
-    protected function addManufacturers($nID = -3)
+    public function addManufacturers($nID = -3)
     {
         if ($GLOBALS["SL"]->REQ->has('addManu') 
             && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
@@ -201,36 +297,74 @@ class ScoreAdminManageManu
                     }
                 }
             }
-        } elseif ($GLOBALS["SL"]->REQ->has('partnerUser')
-            && intVal($GLOBALS["SL"]->REQ->get('partnerUser')) > 0
-            && $GLOBALS["SL"]->REQ->has('partnerManu') 
-            && intVal($GLOBALS["SL"]->REQ->get('partnerManu')) > 0) {
-            $usr = intVal($GLOBALS["SL"]->REQ->partnerUser);
-            $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
-            $chk = SLUsersRoles::where('role_user_uid', $usr)
-                ->where('role_user_rid', 368) // partner def ID
-                ->first();
-            if ($chk) {
-                $usrInfo = RIIUserInfo::where('usr_user_id', $usr)
-                    ->first();
-                if (!$usrInfo || !isset($usrInfo->usr_user_id)) {
-                    $usrInfo = new RIIUserInfo;
-                    $usrInfo->usr_user_id = $usr;
+        } elseif ($GLOBALS["SL"]->REQ->has('partnerCompanyName')) {
+            $usrInfo = null;
+            $company = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
+            if ($company != '') {
+                $usr = $manu = 0;
+                if ($GLOBALS["SL"]->REQ->has('partnerUser')
+                    && intVal($GLOBALS["SL"]->REQ->get('partnerUser')) > 0) {
+                    $usr = intVal($GLOBALS["SL"]->REQ->get('partnerUser'));
                 }
-                if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')) {
-                    $usrInfo->usr_company_name = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
+                if ($GLOBALS["SL"]->REQ->has('partnerManu') 
+                    && intVal($GLOBALS["SL"]->REQ->get('partnerManu')) > 0) {
+                    $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
                 }
-                $usrInfo->save();
+                $inviteEmail = '';
+                if ($GLOBALS["SL"]->REQ->has('partnerInviteEmail') 
+                    && trim($GLOBALS["SL"]->REQ->partnerInviteEmail) != '') {
+                    $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
+                }
+                if ($usr < 0 && $inviteEmail != '') {
+                    $usrChk = User::where('email', 'LIKE', $inviteEmail)
+                        ->first();
+                    if ($usrChk && isset($usrChk->id) && intVal($usrChk->id) > 0) {
+                        $usr = $usrChk->id;
+                    }
+                }
+                if ($usr > 0) {
+                    $role = SLUsersRoles::where('role_user_uid', $usr)
+                        ->where('role_user_rid', 368) // partner def ID
+                        ->first();
+                    if (!$role || !isset($role->role_user_rid)) {
+                        $role = new SLUsersRoles;
+                        $role->role_user_uid = $usr;
+                        $role->role_user_rid = 368;
+                        $role->save();
+                    }
+                    $usrInfo = RIIUserInfo::where('usr_user_id', $usr)
+                        ->first();
+                    if (!$usrInfo || !isset($usrInfo->usr_user_id)) {
+                        $usrInfo = new RIIUserInfo;
+                        $usrInfo->usr_user_id = $usr;
+                    }
+
+                    $usrInfo->usr_company_name = $company;
+                    $usrInfo->save();
+                    $this->addManuUserLink($usr, $manu);
+                }
             }
-            $chk = RIIUserManufacturers::where('usr_man_user_id', $usr)
-                ->where('usr_man_manu_id', $manu)
-                ->first();
-            if (!$chk || !isset($chk->usr_man_manu_id)) {
-                $chk = new RIIUserManufacturers;
-                $chk->usr_man_user_id = $usr;
-                $chk->usr_man_manu_id = $manu;
-                $chk->save();
-            }
+        }
+        return true;
+    }
+    
+    /**
+     * Add a link between a user and a manufacturer.
+     *
+     * @param  int $usr
+     * @param  int $manu
+     * @return boolean
+     */
+    protected function addManuUserLink($usr, $manu)
+    {
+        $chk = RIIUserManufacturers::where('usr_man_user_id', $usr)
+            ->where('usr_man_manu_id', $manu)
+            ->first();
+        if (!$chk || !isset($chk->usr_man_manu_id)) {
+            $chk = new RIIUserManufacturers;
+            $chk->usr_man_user_id = $usr;
+            $chk->usr_man_manu_id = $manu;
+            $chk->save();
         }
         return true;
     }

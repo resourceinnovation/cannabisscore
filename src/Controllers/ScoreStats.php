@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -233,43 +233,67 @@ class ScoreStats extends SurvStatsGraph
     {
         $this->addDataType( // stat var 'a'
             'fac',  
-            '<nobr>Facility <sup class="slBlueDark">kBtu/SqFt</sup></nobr>'
+            '<nobr>Facility <sup class="slBlueDark">kBtu / sq ft</sup></nobr>'
+        );
+        $this->addDataType( // stat var 'a'
+            'facW',  
+            '<nobr>Facility <sup class="slBlueDark">kWh / sq ft</sup></nobr>'
         );
         $this->addDataType( // stat var 'b'
             'pro',  
-            '<nobr>Production <sup class="slBlueDark">g/kBtu</sup></nobr>'
+            '<nobr>Production <sup class="slBlueDark">g / kBtu</sup></nobr>'
+        );
+        $this->addDataType( // stat var 'b'
+            'proW',  
+            '<nobr>Production <sup class="slBlueDark">g / kWh</sup></nobr>'
         );
         $this->addDataType( // stat var 'c'
             'hvc',  
-            '<nobr>HVAC <sup class="slBlueDark">kWh/SqFt</sup></nobr>'
+            '<nobr>HVAC <sup class="slBlueDark">kBtu / sq ft</sup></nobr>'
+        );
+        $this->addDataType( // stat var 'c'
+            'hvcW',  
+            '<nobr>HVAC <sup class="slBlueDark">kWh / sq ft</sup></nobr>'
         );
         $this->addDataType( // stat var 'd'
             'lgt',  
-            '<nobr>Lighting <sup class="slBlueDark">W/SqFt</sup></nobr>'
+            '<nobr>Lighting <sup class="slBlueDark">kWh / day</sup></nobr>'
+        );
+        $this->addDataType( // stat var 'd'
+            'lgtW',  
+            '<nobr>Lighting <sup class="slBlueDark">kBtu / day</sup></nobr>'
         );
         $this->addDataType(
             'lgtM', 
             '<nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5"'
             . ' aria-hidden="true"></i>'
-            . 'Mother <sup class="slBlueDark">W/SqFt</sub>'
+            . 'Mother <sup class="slBlueDark">kWh / day</sub>'
         );
         $this->addDataType(
             'lgtC', 
             '<nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5"'
             . ' aria-hidden="true"></i>'
-            . 'Clone <sup class="slBlueDark">W/SqFt</sup></nobr>'
+            . 'Clone <sup class="slBlueDark">kWh / day</sup></nobr>'
         );
         $this->addDataType(
             'lgtV', 
             '<nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5"'
             . ' aria-hidden="true"></i>'
-            . 'Veg <sup class="slBlueDark">W/SqFt</sup></nobr>'
+            . 'Veg <sup class="slBlueDark">kWh / day</sup></nobr>'
         );
         $this->addDataType(
             'lgtF', 
             '<nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5"'
             . ' aria-hidden="true"></i>'
-            . 'Flower <sup class="slBlueDark">W/SqFt</sup></nobr>'
+            . 'Flower <sup class="slBlueDark">kWh / day</sup></nobr>'
+        );
+        $this->addDataType(
+            'wtr',  
+            '<nobr>Water <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
+        );
+        $this->addDataType(
+            'wst',  
+            '<nobr>Waste <sup class="slBlueDark">lbs / sq ft</sup></nobr>'
         );
         return true;
     }
@@ -371,7 +395,14 @@ class ScoreStats extends SurvStatsGraph
                 $fld = 'ps_effic_' . $type[1];
                 if (isset($ps->{ $fld . '_status' })
                     && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"]) {
-                    $this->addRecDat($type[0], $ps->{ $fld }, $ps->ps_id);
+                    $val = $ps->{ $fld };
+                    $this->addRecDat($type[0], $val, $ps->ps_id);
+                    if ($type[0] == 'pro') {
+                        $val *= 3.412;
+                    } else {
+                        $val /= 3.412;
+                    }
+                    $this->addRecDat($type[0] . 'W', $val, $ps->ps_id);
                 }
             }
             if (isset($ps->ps_effic_lighting_status)
@@ -399,7 +430,7 @@ class ScoreStats extends SurvStatsGraph
     public function printScoreAvgsTblPrep($fltAbbr = '', $lnk = '')
     {
         $fLet = $this->fAbr($fltAbbr);
-        $tbl = new SurvStatsTbl('', [0, 3], [1]);
+        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
         if ($fLet != '' && !isset($this->filts[$fLet])) {
             echo 'error in printScoreAvgsTblPrep(' . $fltAbbr;
             exit;
@@ -449,7 +480,7 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsTbl2Prep($lnk = '', $only = [])
     {
-        $tbl = new SurvStatsTbl('', [0, 3], [1]);
+        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
         foreach ($this->filts as $fLet => $filt) {
             if (sizeof($only) == 0 || in_array($fLet, $only)) {
                 $tbl->addHeaderCol($filt["lab"], $this->getDatCnt($fLet . '1'));
@@ -469,7 +500,10 @@ class ScoreStats extends SurvStatsGraph
                 }
             }
         }
-        $tbl->rows[0][1] = new SurvStatTh('Averages', $this->getDatCntForDatLet('1', 'a'));
+        $tbl->rows[0][1] = new SurvStatTh(
+            'Averages', 
+            $this->getDatCntForDatLet('1', 'a')
+        );
         return $tbl;
     }
     

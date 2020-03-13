@@ -12,22 +12,25 @@
     <th colspan=2 ><b>Averages</b></th>
     <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</b></th>
     <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
     <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</b></th>
+    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
+    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_lighting_power_density, 3) }}</b></th>
     <th><b>{{ number_format($psAvg->ps_grams) }}</b></th>
     <th><b>{{ number_format($psAvg->ps_kwh) }}</b></th>
-    <th><b>{{ number_format($psAvg->ps_total_size) }}</b></th>
+    <th><b>{{ number_format($psAvg->ps_flower_canopy_size) }}</b></th>
     <th colspan=2 >&nbsp;</th>
 </tr>
 
-<tr>
-    <th colspan=2 ><b>{{ number_format($allscores->count()) }} Found</b></th>
-    <td class="slGrey">{{ number_format($psCnt->ps_effic_facility) }}</td>
-    <td class="slGrey">{{ number_format($psCnt->ps_effic_production) }}</td>
-    <td class="slGrey">{{ number_format($psCnt->ps_effic_lighting) }}</td>
-    <td class="slGrey">{{ number_format($psCnt->ps_effic_hvac) }}</td>
-    <th colspan=5 >
-</tr>
+@if (!isset($fltPartner) || $fltPartner <= 0)
+    <tr>
+        <th colspan=2 ><b>{{ number_format($allscores->count()) }} Found</b></th>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_facility) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_production) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_lighting) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_hvac) }}</td>
+        <th colspan=6 >
+    </tr>
+@endif
 
 @if ($allscores && $allscores->isNotEmpty())
     @foreach ($allscores as $i => $ps)
@@ -36,7 +39,7 @@
             && isset($GLOBALS["SL"]->x["fakeSites"])
             && isset($GLOBALS["SL"]->x["fakeSites"][$i])
             && trim($GLOBALS["SL"]->x["fakeSites"][$i]) != '')
-            <tr><td colspan=11 >
+            <tr><td colspan=12 >
                 <h4>{!! $GLOBALS["SL"]->x["fakeSites"][$i] !!}</h4>
             </td></tr>
         @endif
@@ -46,8 +49,14 @@
             <tr @if ($i%2 == 0) class="row2" @endif >
 
             <td>
+            @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4)
                 <a href="/calculated/u-{{ $ps->ps_id }}" target="_blank">
-                @if ($nID == 808) {{ $ps->ps_name }} @else #{{ $ps->ps_id }} @endif </a>
+                    @if ($nID == 808) {{ $ps->ps_name }} 
+                    @else #{{ $ps->ps_id }} 
+                    @endif </a>
+            @else
+                <b>{{ (1+$i) }})</b>
+            @endif
             </td>
             <td>
                 {{ round($ps->ps_effic_overall) }}%
@@ -61,8 +70,9 @@
                 @endif
             </td>
             <td>
-            @if (isset($ps->ps_effic_facility_status) 
+            @if ((isset($ps->ps_effic_facility_status) 
                 && intVal($ps->ps_effic_facility_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
                 @if ($ps->ps_effic_facility < 0.000001) 0
                 @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_facility, 3) }}
                 @endif
@@ -76,8 +86,9 @@
             @endif
             </td>
             <td>
-            @if (isset($ps->ps_effic_production_status) 
+            @if ((isset($ps->ps_effic_production_status) 
                 && intVal($ps->ps_effic_production_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
                 @if ($ps->ps_effic_production < 0.000001) 0
                 @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_production, 3) }}
                 @endif
@@ -92,8 +103,26 @@
             @endif
             </td>
             <td>
-            @if (isset($ps->ps_effic_lighting_status) 
+            @if ((isset($ps->ps_effic_hvac_status) 
+                && intVal($ps->ps_effic_hvac_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
+                @if ($ps->ps_effic_hvac < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
+                @endif
+                @if (!$isExcel 
+                    && isset($allranks) 
+                    && isset($allranks[$ps->ps_id]) 
+                    && isset($allranks[$ps->ps_id]->ps_rnk_hvac)) 
+                    <div class="slGrey fPerc66">
+                        {{ $GLOBALS["SL"]->sigFigs($allranks[$ps->ps_id]->ps_rnk_hvac) }}%
+                    </div>
+                @endif
+            @endif 
+            </td>
+            <td>
+            @if ((isset($ps->ps_effic_lighting_status) 
                 && intVal($ps->ps_effic_lighting_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
                 @if ($ps->ps_effic_lighting < 0.000001) 0
                 @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }}
                 @endif
@@ -108,33 +137,29 @@
             @endif
             </td>
             <td>
-            @if (isset($ps->ps_effic_hvac_status) 
-                && intVal($ps->ps_effic_hvac_status) == $defCmplt)
-                @if ($ps->ps_effic_hvac < 0.000001) 0
-                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}
-                @endif
-                @if (!$isExcel 
-                    && isset($allranks) 
-                    && isset($allranks[$ps->ps_id]) 
-                    && isset($allranks[$ps->ps_id]->ps_rnk_hvac)) 
-                    <div class="slGrey fPerc66">
-                        {{ $GLOBALS["SL"]->sigFigs($allranks[$ps->ps_id]->ps_rnk_hvac) }}%
-                    </div>
-                @endif
-            @endif 
+            @if (isset($ps->ps_lighting_power_density) && $ps->ps_lighting_power_density > 0.00001)
+                {{ $GLOBALS["SL"]->sigFigs($ps->ps_lighting_power_density, 3) }}
+            @else 0
+            @endif
             </td>
             @if (!$isExcel)
                 <td> @if ($ps->ps_grams > 0) {{ number_format($ps->ps_grams) }} @endif </td>
                 <td> @if ($ps->ps_kwh > 0) {{ number_format($ps->ps_kwh) }} @endif </td>
-                <td> @if ($ps->ps_total_size > 0) {{ number_format($ps->ps_total_size) }} @endif </td>
+                <td> @if ($ps->ps_flower_canopy_size > 0) 
+                    {{ number_format($ps->ps_flower_canopy_size) }} 
+                @endif </td>
             @else
                 <td>{{ number_format($ps->ps_grams) }}</td>
                 <td>{{ number_format($ps->ps_kwh) }}</td>
-                <td>{{ number_format($ps->ps_total_size) }}</td>
+                <td>{{ number_format($ps->ps_flower_canopy_size) }}</td>
             @endif 
             <td>
                 {{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
-                    $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)) }}
+                    $GLOBALS["SL"]->def->getVal(
+                        'PowerScore Farm Types', 
+                        $ps->ps_characterize
+                    )) 
+                }}
                 @if (isset($fltCmpl) 
                     && $fltCmpl == 0 
                     && Auth::user()->hasRole('administrator|staff'))
@@ -143,7 +168,11 @@
                         <span class="slBlueDark">Complete</span>
                     @elseif ($ps->ps_status == 364) 
                         <span class="txtDanger">Archived</span>
-                    @else {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $ps->ps_status) }}
+                    @else 
+                        {{ $GLOBALS["SL"]->def->getVal(
+                            'PowerScore Status', 
+                            $ps->ps_status
+                        ) }}
                     @endif
                 @endif
             </td>
@@ -171,8 +200,12 @@
             @if ($GLOBALS["SL"]->REQ->has('review') 
                 && Auth::user()->hasRole('administrator|staff'))
                 <tr class="brdTopNon @if ($i%2 == 0) row2 @endif " >
-                    <td class="taR"><div class="mTn10 slGrey fPerc66">Review Notes:</div></td>
-                    <td colspan=9 ><div class="mTn15"><i>{!! $ps->ps_notes !!}</i></div></td>
+                    <td class="taR">
+                        <div class="mTn10 slGrey fPerc66">Review Notes:</div>
+                    </td>
+                    <td colspan=9 >
+                        <div class="mTn15"><i>{!! $ps->ps_notes !!}</i></div>
+                    </td>
                 </tr>
             @endif
 

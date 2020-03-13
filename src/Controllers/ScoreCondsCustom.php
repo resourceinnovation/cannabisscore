@@ -5,7 +5,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -21,6 +21,8 @@ class ScoreCondsCustom extends ScoreUtils
             if ($GLOBALS["SL"]->REQ->has('cups')) {
                 return 1;
             }
+        } elseif ($condition == '#GeneratesRenewable') {
+            return $this->hasRenewable();
         } elseif ($condition == '#MotherHas') {
             return $this->runCondHasArea('Mother');
         } elseif ($condition == '#CloneHas') {
@@ -81,6 +83,23 @@ class ScoreCondsCustom extends ScoreUtils
 
         }
         return -1;
+    }
+    
+    private function hasRenewable()
+    {
+        if (isset($this->sessData->dataSets["ps_renewables"])
+            && sizeof($this->sessData->dataSets["ps_renewables"]) > 0) {
+            $renewables = $this->getRenewableDefs();
+            foreach ($this->sessData->dataSets["ps_renewables"] as $renew) {
+                if (isset($renew->ps_rnw_renewable)) {
+                    $renewDef = intVal($renew->ps_rnw_renewable);
+                    if (in_array($renewDef, $renewables)) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        return 0;
     }
     
     private function runCondHasArea($areaName)

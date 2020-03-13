@@ -1,6 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/773-powerscore-avgs.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         @if (trim($fltStateClim) != '') href="?excel=1&fltStateClim={{ $fltStateClim }}"
         @else href="?excel=1"
@@ -11,8 +11,8 @@
         <div class="col-8">
             <p>
             &darr; <a href="#farm" class="mL5 mR5">Farm Types</a> - 
-            <a href="#cups" class="mL5 mR5">Competitions</a> - 
-            <a href="#flw-lgty" class="mL5 mR5">Lighting by Growth Stage</a>
+            <!-- <a href="#cups" class="mL5 mR5">Competitions</a> - -->
+            <a href="#flw-lgty" class="mL5 mR5">Lighting by Growth Stage</a> - 
             <a href="#tech" class="mL5 mR5">Techniques</a> - 
             <a href="#powr" class="mL5 mR5">Power Sources</a>
             </p>
@@ -31,9 +31,11 @@
 
 @foreach ($scoreSets as $i => $set)
     <a name="{{ $set[0] }}"></a>
-    <div id="tblCard{{ $i }}" class="slCard greenline nodeWrap">
+    <div id="tblCard{{ $i }}" class="slCard nodeWrap">
     <h3 id="tblTitle{{ $i }}">{{ (1+$i) }}. {{ $set[1] }}</h3>
-    {!! $set[2] !!}
+    @if (isset($set[2])) {!! $set[2] !!} 
+    @else <i>No completed records found.</i>
+    @endif
     </div>
 @endforeach
 

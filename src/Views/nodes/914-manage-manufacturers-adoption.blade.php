@@ -19,7 +19,7 @@
         || $manu->manu_cnt_clone > 0
         || $manu->manu_cnt_mother > 0)
         <?php $cnt++; ?>
-        <div class="w100 pT10 pT10 @if ($cnt%2 > 0) row2 @endif ">
+        <div class="w100 pT10 pB10 @if ($cnt%2 > 0) row2 @endif ">
             <div class="row">
                 <div class="col-4">
                     <a href="/dash/competitive-performance?manu={{

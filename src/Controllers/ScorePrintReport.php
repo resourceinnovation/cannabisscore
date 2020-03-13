@@ -5,7 +5,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.4
   */
 namespace CannabisScore\Controllers;
@@ -13,9 +13,10 @@ namespace CannabisScore\Controllers;
 use Illuminate\Http\Request;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
-use CannabisScore\Controllers\ScoreCalcs;
+use SurvLoop\Controllers\Globals\Globals;
+use CannabisScore\Controllers\ScoreCalcsPrint;
 
-class ScorePrintReport extends ScoreCalcs
+class ScorePrintReport extends ScoreCalcsPrint
 {
     public function printPreviewReport($isAdmin = false)
     {
@@ -97,9 +98,7 @@ class ScorePrintReport extends ScoreCalcs
         if ($GLOBALS["SL"]->REQ->has('refresh')) {
             $ret .= view(
                 'vendor.cannabisscore.nodes.490-report-calculations-top-refresh', 
-                [
-                    "psid" => $this->coreID
-                ]
+                [ "psid" => $this->coreID ]
             )->render();
         } else {
             $ret .= $this->printReport490();
@@ -134,7 +133,8 @@ class ScorePrintReport extends ScoreCalcs
             'vendor.cannabisscore.nodes.490-report-calculations', 
             $this->v
         )->render();
-        return ' <!-- printReport490.start --> ' . $ret . ' <!-- printReport490.end --> ';
+        return ' <!-- printReport490.start --> ' 
+            . $ret . ' <!-- printReport490.end --> ';
     }
 
 
@@ -294,11 +294,13 @@ class ScorePrintReport extends ScoreCalcs
                 && isset($this->searcher->v["powerscore"]->ps_effic_lighting) 
                 && $this->searcher->v["powerscore"]->ps_effic_facility > 0
                 && $this->searcher->v["powerscore"]->ps_effic_production > 0);
-            $superscript = $GLOBALS["SL"]->numSupscript(round(
-                $this->searcher->v["currRanks"]->ps_rnk_overall));
+            $overRank = round($this->searcher->v["currRanks"]->ps_rnk_overall);
+            if ($overRank == 0) {
+                $overRank = 1;
+            }
+            $superscript = $GLOBALS["SL"]->numSupscript($overRank);
             $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' 
-                . round($this->searcher->v["currRanks"]->ps_rnk_overall) .  $superscript
-                . '</h1><b>percentile</b></center>';
+                . $overRank . $superscript . '</h1><b>percentile</b></center>';
 // number_format($ranksCache->ps_rnk_tot_cnt) }} past growing @if ($ranksCache->ps_rnk_tot_cnt > 1) years @else year @endif of
             $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle">' 
                 . '<h5>Overall: '
@@ -395,6 +397,32 @@ class ScorePrintReport extends ScoreCalcs
             $currRanks->save();
         }
         return $currRanks;
+    }
+
+    protected function excelExportMyScores($nID)
+    {
+        if ($GLOBALS["SL"]->REQ->has('myExport')
+            && $GLOBALS["SL"]->REQ->has('excel')
+            && $GLOBALS["SL"]->REQ->has('mine')
+            && intVal($GLOBALS["SL"]->REQ->myExport) == 1
+            && intVal($GLOBALS["SL"]->REQ->excel) == 1
+            && intVal($GLOBALS["SL"]->REQ->mine) == 1) {
+            $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, 1, 1);
+            $this->initSearcher();
+            $this->searcher->getSearchFilts(1);
+            $this->searcher->v["fltCmpl"] = 1;
+            $this->searcher->loadAllScoresPublic();
+            $this->searcher->processSearchFilts();
+            $this->searcher->v["allPublicFiltIDs"] = $this->searcher->allPublicFiltIDs;
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.1276-all-my-powerscores-excel', 
+                $this->searcher->v
+            )->render();
+            $exportFile = 'My_PowerScores-' . date("Y-m-d") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $exportFile);
+            exit;
+        }
+        return true;
     }
 
 }

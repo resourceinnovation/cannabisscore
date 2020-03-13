@@ -59,5 +59,8 @@ function gatherFilts() {
     if (document.getElementById("fltCupID") && document.getElementById("fltCupID").value > 0) {
         baseUrl += "&fltCup="+document.getElementById("fltCupID").value;
     }
+    if (document.getElementById("fltPartnerID") && document.getElementById("fltPartnerID").value > 0) {
+        baseUrl += "&fltPartner="+document.getElementById("fltPartnerID").value;
+    }
     return baseUrl;
 }

@@ -1,8 +1,8 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/979-compare-lighting-manufacturers.blade.php -->
-<div class="nodeAnchor"><a name="n976"></a></div>
+<div class="nodeAnchor"><a name="n979"></a></div>
 <div id="node979" class="nodeWrap">
 
-<div class="slCard greenline">
+<div class="slCard mT15 mB30">
     <a class="btn btn-secondary btn-sm pull-right"
         href="#raw">&darr; Raw Data</a>
     <h3 class="slBlueDark">
@@ -16,7 +16,7 @@
         </b></p>
     @endif
     <div class="row">
-        <div class="col-4">
+        <div class="col-md-4">
             <select name="growthStage" class="form-control" autocomplete="off"
                 onChange="alert('Coming Soon!');">
                 <option value="" SELECTED >Using your lights during any stage</option>
@@ -26,7 +26,7 @@
                 <option value="mother" >Using your lights for mothers</option>
             </select>
         </div>
-        <div class="col-4">
+        <div class="col-md-4">
             <select name="fltFarm" id="filtFarmID" autocomplete="off" 
                 class="form-control" 
                 onChange="alert('Coming Soon!');">
@@ -36,7 +36,7 @@
                 <option value="145">Greenhouse/Hybrid/Mixed Light</option>
             </select>
         </div>
-        <div class="col-4">
+        <div class="col-md-4">
             <select name="climateZone" class="form-control" autocomplete="off"
                 onChange="alert('Coming Soon!');">
                 <option value="" SELECTED >All climate zones</option>
@@ -49,20 +49,18 @@
         </div>
     </div>
 </div>
-<div class="mB10">&nbsp;</div>
-
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-lg-6">
     @foreach ($lgtCompetData->dataLegend as $l => $leg)
-        <div class="slCard greenline">
+        <div class="slCard">
             <h5>{{ $leg[1] }} ( {{ $leg[2] }} )</h5>
             <canvas id="chartDiv{{ $l }}" width="100%"></canvas>
         </div>
         <div class="mB10">&nbsp;</div>
         </div>
         @if ($l > 0 && $l%2 == 1) </div><div class="row"> @endif
-        <div class="col-md-6">
+        <div class="col-lg-6">
     @endforeach
     </div>
 </div>
@@ -70,8 +68,8 @@
 <div class="nodeAnchor"><a name="raw"></a></div>
 <p>&nbsp;</p>
 <div class="row">
-    <div class="col-md-6">
-        <div class="slCard greenline">
+    <div class="col-lg-6">
+        <div class="slCard">
             <div style="min-height: 84px;">
                 <h5>{{ $lgtCompetData->dataLines[0]->title }}</h5>
             </div>
@@ -99,8 +97,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="slCard greenline">
+    <div class="col-lg-6">
+        <div class="slCard">
             <div style="min-height: 84px;">
                 <h5>{{ $lgtCompetData->dataLines[1]->title }}</h5>
             </div>
@@ -132,8 +130,8 @@
 <div class="row">
 @foreach ($lgtCompetData->dataLines as $d => $dat)
     @if ($d > 1)
-    <div class="col-md-4">
-        <div class="slCard greenline">
+    <div class="col-lg-4">
+        <div class="slCard">
             <div style="min-height: 84px;">
                 <h5>{{ $dat->title }}</h5>
             </div>
@@ -170,7 +168,7 @@
 </div>
 
 <div class="mB10">&nbsp;</div>
-<div class="slCard greenline">
+<div class="slCard">
     <p><b>Your Individual PowerScore Records:</b><br />
     @forelse ($yourPsIDs as $l => $psid) 
         @if ($l > 0) , @endif

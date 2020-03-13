@@ -21,7 +21,7 @@
          </th>         </tr>
     <tr>
              <th>
-        <nobr>Facility <sup class="slBlueDark">kBtu/SqFt</sup></nobr>
+        <nobr>Facility <sup class="slBlueDark">kBtu / sq ft</sup></nobr>
          </th>              <td class="brdRgt">
         204<sub class="slGrey">76</sub>
          </td>              <td>
@@ -35,7 +35,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr>Production <sup class="slBlueDark">g/kBtu</sup></nobr>
+        <nobr>Production <sup class="slBlueDark">g / kBtu</sup></nobr>
          </th>              <td class="brdRgt">
         2.71<sub class="slGrey">76</sub>
          </td>              <td>
@@ -49,7 +49,7 @@
          </td>         </tr>
     <tr class="brdBot">
              <th>
-        <nobr>HVAC <sup class="slBlueDark">kWh/SqFt</sup></nobr>
+        <nobr>HVAC <sup class="slBlueDark">kBtu / sq ft</sup></nobr>
          </th>              <td class="brdRgt">
         96.1<sub class="slGrey">76</sub>
          </td>              <td>
@@ -63,7 +63,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr>Lighting <sup class="slBlueDark">W/SqFt</sup></nobr>
+        <nobr>Lighting <sup class="slBlueDark">kWh / day</sup></nobr>
          </th>              <td class="brdRgt">
         33.6<sub class="slGrey">76</sub>
          </td>              <td>
@@ -77,7 +77,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Mother <sup class="slBlueDark">W/SqFt
+        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Mother <sup class="slBlueDark">kWh / day
          </sup></nobr></th>              <td class="brdRgt">
         24.6<sub class="slGrey">7</sub>
          </td>              <td>
@@ -91,7 +91,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Clone <sup class="slBlueDark">W/SqFt</sup></nobr>
+        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Clone <sup class="slBlueDark">kWh / day</sup></nobr>
          </th>              <td class="brdRgt">
         34.5<sub class="slGrey">44</sub>
          </td>              <td>
@@ -105,7 +105,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Veg <sup class="slBlueDark">W/SqFt</sup></nobr>
+        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Veg <sup class="slBlueDark">kWh / day</sup></nobr>
          </th>              <td class="brdRgt">
         30.6<sub class="slGrey">58</sub>
          </td>              <td>
@@ -119,7 +119,7 @@
          </td>         </tr>
     <tr>
              <th>
-        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Flower <sup class="slBlueDark">W/SqFt</sup></nobr>
+        <nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5" aria-hidden="true"></i>Flower <sup class="slBlueDark">kWh / day</sup></nobr>
          </th>              <td class="brdRgt">
         45.1<sub class="slGrey">62</sub>
          </td>              <td>

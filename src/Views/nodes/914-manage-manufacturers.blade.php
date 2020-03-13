@@ -1,14 +1,14 @@
 <!-- resources/views/vendor/cannabisscore/nodes/914-manage-manufacturers.blade.php -->
 
-<div class="slCard greenline nodeWrap">
+<div class="slCard nodeWrap">
     {!! view(
         'vendor.cannabisscore.nodes.914-manage-manufacturers-adoption', 
         [ 'manus' => $manus ]
     )->render() !!}
 </div>
 
-<div class="slCard greenline nodeWrap">
-    <h2>All Manufacturers</h2>
+<div class="slCard nodeWrap">
+    <h3>All Manufacturers</h3>
     <p>
         Of lighting and/or HVAC 
         equipment used by growers.

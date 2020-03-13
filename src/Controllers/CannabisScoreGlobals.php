@@ -5,10 +5,12 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
+
+use App\Models\RIIManufacturers;
 
 class CannabisScoreGlobals
 {
@@ -30,36 +32,6 @@ class CannabisScoreGlobals
         return '';
     }
     
-    public function cnvrtSqFt2Acr($squareFeet = 0)
-    {
-        return $squareFeet*0.000022956841138659;
-    }
-    
-    public function cnvrtAcr2SqFt($acres = 0)
-    {
-        return $acres*43560;
-    }
-    
-    public function cnvrtLbs2Grm($lbs = 0)
-    {
-        return $lbs*453.59237;
-    }
-    
-    public function cnvrtKwh2Kbtu($kWh = 0)
-    {
-        return $kWh*3.412;
-    }
-    
-    public function cnvrtKwh2Btu($kWh = 0)
-    {
-        return $kWh*3412;
-    }
-    
-    public function cnvrtBtu2Kwh($btu = 0)
-    {
-        return $btu*0.0002931;
-    }
-    
     public function getTypeHours($typ)
     {
         return (($typ == 'Veg') 
@@ -69,14 +41,32 @@ class CannabisScoreGlobals
     public function getHvacEffic($defID)
     {
         switch ($defID) {
-            case 247: return 115; // System A
-            case 248: return 77;  // System B
-            case 249: return 104; // System C
-            case 250: return 65;  // System D
-            case 356: return 90;  // System E (average of A-D)
-            case 357: return 90;  // System F
-            case 251: return 90;  // Other System
-            case 360: return 0.0000001; // None
+            case 247:
+            case 510:
+                return 115; // System A
+            case 248:
+            case 511:
+                return 77;  // System B
+            case 249:
+            case 512:
+                return 104; // System C
+            case 250:
+            case 513:
+                return 65;  // System D
+            case 356:
+            case 514:
+                return 90;  // System E (average of A-D)
+            case 357:
+            case 515: // 3.0 System F: Chilled Water System with Enhanced Dehumid
+            case 516: // 3.0 System G: Chilled Water Systems with Integrated Dehumid
+            case 517: // 3.0 System H: Greenhouse HVAC Systems
+                return 90;  // System F
+            case 251:
+            case 518:
+                return 90;  // Other System
+            case 360:
+            case 519:
+                return 0.0000001; // None
         }
         return 0;
     }
@@ -285,6 +275,21 @@ class CannabisScoreGlobals
             return $GLOBALS["SL"]->def->getID($defSet, '50,000+ sf');
         }
         return 0;
+    }
+
+    public function loadManufactIDs()
+    {
+        if (!isset($this->v["manufacts"])) {
+            $this->v["manufacts"] = [];
+            $chk = RIIManufacturers::get();
+            if ($chk->isNotEmpty()) {
+                foreach ($chk as $manu) {
+                    $this->v["manufacts"][$manu->manu_id] = $manu->manu_name;
+                }
+            }
+        }
+        asort($this->v["manufacts"]);
+        return $this->v["manufacts"];
     }
     
     

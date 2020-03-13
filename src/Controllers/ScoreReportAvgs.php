@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -28,15 +28,25 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->initClimateFilts();
         $this->calcAllPowerScoreAvgs();
         $this->v["psTechs"] = $GLOBALS["CUST"]->psTechs();
-        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
-            $innerTable = view('vendor.cannabisscore.nodes.773-powerscore-avgs-excel', $this->v)->render();
-            $filename = 'PowerScore_Averages' . ((trim($this->v["fltStateClim"]) != '') 
-                ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')
+        if ($GLOBALS["SL"]->REQ->has('excel') 
+            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.773-powerscore-avgs-excel', 
+                $this->v
+            )->render();
+            $filename = 'PowerScore_Averages' 
+                . ((trim($this->v["fltStateClim"]) != '') 
+                    ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) 
+                    : '')
                 . '-' . date("ymd") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
             exit;
         }
-        return view('vendor.cannabisscore.nodes.773-powerscore-avgs', $this->v)->render();
+//echo '<pre>'; print_r($this->v); echo '</pre>'; exit;
+        return view(
+            'vendor.cannabisscore.nodes.773-powerscore-avgs', 
+            $this->v
+        )->render();
     }
     
     public function getMorePowerStats()
@@ -67,6 +77,16 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function calcAllPowerScoreAvgs()
     {
         $this->initClimateFilts();
+        $this->v["scoreSets"] = [
+            ['farm',     'PowerScore Averages by Type of Farm'],
+            //['cups',     'PowerScore Averages by Competition / Data Set'],
+            ['flw-lgty', 'Indoor PowerScore Averages by Type of Flowering Lights'],
+            ['veg-lgty', 'Indoor PowerScore Averages by Type of Veg Lights'],
+            ['cln-lgty', 'Indoor PowerScore Averages by Type of Cloning/Mother Lights'],
+            ['tech',     'PowerScore Averages by Technique'],
+            ['pow1',     'PowerScore Averages by Other Power Sources'],
+            ['pow2',     'PowerScore Averages by Other Power Sources']
+            ];
         if ($this->searcher->v["allscores"]->isEmpty()) {
             return false;
         }
@@ -75,28 +95,18 @@ class ScoreReportAvgs extends ScoreReportStats
             $psTags[$ps->ps_id] 
                 = $this->loadPsTags($ps, RIIPsAreas::where('ps_area_psid', $ps->ps_id)->get());
         }
-        $this->v["scoreSets"] = [
-            ['farm',     'PowerScore Averages by Type of Farm'],
-            ['cups',     'PowerScore Averages by Competition / Data Set'],
-            ['flw-lgty', 'Indoor PowerScore Averages by Type of Flowering Lights'],
-            ['veg-lgty', 'Indoor PowerScore Averages by Type of Veg Lights'],
-            ['cln-lgty', 'Indoor PowerScore Averages by Type of Cloning/Mother Lights'],
-            ['tech',     'PowerScore Averages by Technique'],
-            ['pow1',     'PowerScore Averages by Other Power Sources'],
-            ['pow2',     'PowerScore Averages by Other Power Sources']
-            ];
         foreach ($this->v["scoreSets"] as $i => $set) {
             $tmp = new ScoreStats([$set[0]]);
             $tmp->loadMap();
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-                if (!in_array($i, [2, 3, 4]) || $ps->ps_characterize == 144) {
+                if (!in_array($i, [1, 2, 3]) || $ps->ps_characterize == 144) {
                     $tmp->applyScoreFilts($ps, 0, $psTags[$ps->ps_id]);
                     $tmp->addScoreData($ps);
                     $tmp->resetRecFilt();
                 }
             }
             $tmp->calcStats();
-            if (in_array($i, [0, 1])) {
+            if (in_array($i, [0])) { // , 1
                 $this->v["scoreSets"][$i][2] = $tmp->printScoreAvgsTbl($set[0]);
             } else {
                 $this->v["scoreSets"][$i][2] = $tmp->printScoreAvgsTbl2();
@@ -156,7 +166,7 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->v["statHvac"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
         $this->v["statHvac"]->addFilt('area', 'Growth Stage', $this->v["sfAreasGrow"][0], $this->v["sfAreasGrow"][1]); // stat filter b
         $this->v["statHvac"]->addFilt('hvac', 'HVAC System', $this->v["sfHvac"][0], $this->v["sfHvac"][1]); // stat filter c
-        $this->v["statHvac"]->addDataType('kWh/sqft', 'kWh/sqft', 'kWh/sqft');                     // stat var a
+        $this->v["statHvac"]->addDataType('kBtu/sqft', 'kBtu/sqft', 'kBtu/sqft');                     // stat var a
         $this->v["statHvac"]->addDataType('sqft', 'Square foot', 'sqft');                          // stat var b
         $this->v["statHvac"]->loadMap();
 
@@ -206,7 +216,10 @@ class ScoreReportAvgs extends ScoreReportStats
                     foreach ($chk as $renew) {
                         $type = $renew->ps_rnw_renewable;
                         $this->v["statMisc"]->addRecDat('rnw' . $type, 1, $ps->ps_id);
-                        $this->v["enrgys"]["cmpl"][$char][$type]++;
+                        if (isset($this->v["enrgys"]["cmpl"][$char])
+                            && isset($this->v["enrgys"]["cmpl"][$char][$type])) {
+                            $this->v["enrgys"]["cmpl"][$char][$type]++;
+                        }
                     }
                 }
                 $chk = RIIPsLicenses::where('ps_lic_psid', $ps->ps_id)->get();
@@ -261,7 +274,10 @@ class ScoreReportAvgs extends ScoreReportStats
                             $this->v["statHvac"]->addRecFilt('area', $area->ps_area_type, $ps->ps_id);
                             $this->v["statHvac"]->addRecFilt('hvac', $hvac, $aID);
                             $this->v["statHvac"]->addRecDat('sqft', intVal($area->ps_area_size), $aID);
-                            $this->v["statHvac"]->addRecDat('kWh/sqft', $GLOBALS["CUST"]->getHvacEffic($hvac), $aID);
+                            $this->v["statHvac"]->addRecDat(
+                                'kBtu/sqft', 
+                                $GLOBALS["CUST"]->getHvacEffic($hvac), $aID
+                            );
                             $this->v["statHvac"]->delRecFilt('hvac');
                             $this->v["statHvac"]->delRecFilt('area');
                             
@@ -410,7 +426,9 @@ class ScoreReportAvgs extends ScoreReportStats
                     $this->v["enrgys"]["extra"][0]++;
                     $this->v["enrgys"]["extra"][143][0]++;
                 }
-                $this->v["enrgys"]["extra"][143][$renew->ps_rnw_renewable]++;
+                if (isset($this->v["enrgys"]["extra"][143][$renew->ps_rnw_renewable])) {
+                    $this->v["enrgys"]["extra"][143][$renew->ps_rnw_renewable]++;
+                }
             }
         }
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Farm Types') as $i => $type) {

@@ -6,7 +6,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -27,7 +27,9 @@ class ScoreUtils extends ScorePowerUtilities
     public function multiRecordCheckIntro($cnt = 1)
     {
         return '<p>&nbsp;</p><h4>You Have ' 
-            . (($cnt == 1) ? 'An Unfinished PowerScore' : 'Unfinished PowerScores')
+            . (($cnt == 1) 
+                ? 'An Unfinished PowerScore' 
+                : 'Unfinished PowerScores')
             . '</h4>';
     }
     
@@ -87,7 +89,8 @@ class ScoreUtils extends ScorePowerUtilities
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 0;
             $this->sessData->dataSets["powerscore"][0]->save();
         }
-        if ($GLOBALS["SL"]->REQ->has('cups') && trim($GLOBALS["SL"]->REQ->get('cups')) != '') {
+        if ($GLOBALS["SL"]->REQ->has('cups') 
+            && trim($GLOBALS["SL"]->REQ->get('cups')) != '') {
             $cupsIn = $GLOBALS["SL"]->mexplode(',', urldecode($GLOBALS["SL"]->REQ->get('cups')));
             $cupList = $GLOBALS["SL"]->def->getSet('PowerScore Competitions');
             if (sizeof($cupList) > 0) {
@@ -140,142 +143,101 @@ class ScoreUtils extends ScorePowerUtilities
         return true;
     }
     
+    public function hasRooms()
+    {
+        $this->v["hasRooms"] = (isset($this->sessData->dataSets["ps_growing_rooms"]) 
+            && sizeof($this->sessData->dataSets["ps_growing_rooms"]) > 0);
+        return $this->v["hasRooms"];
+    }
+    
+    protected function getRoomIDs()
+    {
+        if (!isset($this->v["roomIDs"])) {
+            $this->v["roomIDs"] = [];
+            if ($this->hasRooms()) {
+                foreach ($this->sessData->dataSets["ps_growing_rooms"] as $room) {
+                    $this->v["roomIDs"][] = $room->ps_room_id;
+                }
+            }
+        }
+        return $this->v["roomIDs"];
+    }
+    
+    protected function getLookupRoomIDs()
+    {
+        if (!isset($this->v["roomsByID"])) {
+            $this->v["roomsByID"] = [];
+            if ($this->hasRooms()) {
+                foreach ($this->sessData->dataSets["ps_growing_rooms"] as $room) {
+                    $this->v["roomsByID"][$room->ps_room_id] = $room;
+                }
+            }
+        }
+        return $this->v["roomsByID"];
+    }
+    
+    protected function loadRoomIndsByStage()
+    {
+        if (!isset($this->v["stageRooms"])) {
+            $this->v["stageRooms"] = [];
+            foreach ($this->v["areaTypes"] as $typ => $defID) {
+                $this->v["stageRooms"][$typ] = [];
+            }
+            if ($this->hasRooms()) {
+                foreach ($this->sessData->dataSets["ps_growing_rooms"] as $roomInd => $room) {
+                    $areas = $this->sessData->getChildRows(
+                        'ps_growing_rooms', 
+                        $room->ps_room_id, 
+                        'ps_link_room_area'
+                    );
+                    foreach ($areas as $areaLnk) {
+                        $area = $this->sessData->getRowById(
+                            'ps_areas', 
+                            $areaLnk->ps_lnk_rm_ar_area_id
+                        );
+                        foreach ($this->v["areaTypes"] as $typ => $defID) {
+                            if ($area->ps_area_type == $defID) {
+                                $this->v["stageRooms"][$typ][] = $roomInd;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $this->v["stageRooms"];
+    }
+    
+    protected function getRoomIndLightHours($roomInd)
+    {
+        $this->loadRoomIndsByStage();
+        if (isset($this->v["stageRooms"]["Flower"]) 
+            && in_array($roomInd, $this->v["stageRooms"]["Flower"])) {
+            return 12;
+        }
+        return 18;
+    }
+    
     protected function loadRoomLights()
     {
-        $this->v["roomLights"] = [];
-        if (isset($this->sessData->dataSets["ps_light_types"]) 
-            && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
-            foreach ($this->sessData->dataSets["ps_light_types"] as $lgt) {
-                if (isset($lgt->ps_lg_typ_room_id) && intVal($lgt->ps_lg_typ_room_id) > 0) {
-                    if (!isset($this->v["roomLights"][$lgt->ps_lg_typ_room_id])) {
-                        $this->v["roomLights"][$lgt->ps_lg_typ_room_id] = [];
+        if (!isset($this->v["roomLights"])) {
+            $this->v["roomLights"] = [];
+            if (isset($this->sessData->dataSets["ps_light_types"]) 
+                && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
+                foreach ($this->sessData->dataSets["ps_light_types"] as $lgt) {
+                    if (isset($lgt->ps_lg_typ_room_id) && intVal($lgt->ps_lg_typ_room_id) > 0) {
+                        if (!isset($this->v["roomLights"][$lgt->ps_lg_typ_room_id])) {
+                            $this->v["roomLights"][$lgt->ps_lg_typ_room_id] = [];
+                        }
+                        $ind = 0;
+                        if (isset($lgt->ps_lg_typ_room_ord) && intVal($lgt->ps_lg_typ_room_ord) >= 0) {
+                            $ind = intVal($lgt->ps_lg_typ_room_ord);
+                        }
+                        $this->v["roomLights"][$lgt->ps_lg_typ_room_id][$ind] = $lgt;
                     }
-                    $ind = 0;
-                    if (isset($lgt->ps_lg_typ_room_ord) && intVal($lgt->ps_lg_typ_room_ord) >= 0) {
-                        $ind = intVal($lgt->ps_lg_typ_room_ord);
-                    }
-                    $this->v["roomLights"][$lgt->ps_lg_typ_room_id][$ind] = $lgt;
                 }
             }
         }
         return $this->v["roomLights"];
-    }
-    
-    protected function prepPrintEfficLgt()
-    {
-        $this->loadTotFlwrSqFt();
-        $this->v["printEfficLgt"] = $sqft = $watt = $lightBreakdown = [];
-        $this->v["printEfficHvac"] = $wattHvac = $hvacBreakdown = [];
-        $this->v["printEfficWtr"] = $gal = $waterBreakdown = [];
-        $ps = $this->sessData->dataSets["powerscore"][0];
-        $mothClone = $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'With Clones');
-        $mothVeg = $GLOBALS["SL"]->def->getID('PowerScore Mother Location', 'In Veg Room');
-        if (isset($this->sessData->dataSets["ps_areas"])) {
-            foreach ($this->sessData->dataSets["ps_areas"] as $i => $area) {
-                foreach ($this->v["areaTypes"] as $typ => $defID) {
-                    if ($area->ps_area_type == $defID && $typ != 'Dry') {
-                        $sqft[$typ] = $area->ps_area_size;
-                        $watt[$typ] = $area->ps_area_total_light_watts;
-                        $wattHvac[$typ] = $GLOBALS["CUST"]->getHvacEffic($area->ps_area_hvac_type);
-                        $gal[$typ] = $area->ps_area_total_light_watts;
-                    }
-                }
-            }
-
-            foreach ($this->sessData->dataSets["ps_areas"] as $i => $area) {
-                foreach ($this->v["areaTypes"] as $typ => $defID) {
-                    if ($area->ps_area_type == $defID && $typ != 'Dry') {
-                        $lightBreakdown[$typ] = $hvacBreakdown[$typ] = $waterBreakdown[$typ] = '';
-                        if (isset($area->ps_area_lighting_effic) 
-                            && $area->ps_area_lighting_effic > 0) {
-                            //  (Clone watts x # of lights x 24 hrs) / Clone sq ft)
-                            if (isset($this->sessData->dataSets["ps_light_types"]) 
-                                && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
-                                foreach ($this->sessData->dataSets["ps_light_types"] as $lgt) {
-                                    $areaIDs = [ $area->getKey() ];
-                                    if (isset($ps->ps_mother_loc)
-                                        && (($ps->ps_mother_loc == $mothClone && $typ == 'Clone') 
-                                        || ($ps->ps_mother_loc == $mothVeg && $typ == 'Veg'))) {
-                                        $areaIDs[] = $this->getAreaFld('Mother', 'ps_area_id');
-                                    }
-                                    if (in_array($lgt->ps_lg_typ_area_id, $areaIDs) 
-                                        && isset($lgt->ps_lg_typ_count) 
-                                        && intVal($lgt->ps_lg_typ_count) > 0 
-                                        && isset($lgt->ps_lg_typ_wattage) 
-                                        && intVal($lgt->ps_lg_typ_wattage) > 0) {
-                                        if ($lightBreakdown[$typ] != '') {
-                                            $lightBreakdown[$typ] .= ' + ';
-                                        }
-                                        $lightBreakdown[$typ] .= '<nobr>( ' 
-                                            . number_format($lgt->ps_lg_typ_count) . ' fixtures x '
-                                            . number_format($lgt->ps_lg_typ_wattage) . ' W )</nobr>';
-                                    }
-                                }
-                            }
-                            if (strpos($lightBreakdown[$typ], '+') === false) {
-                                $lightBreakdown[$typ] = str_replace('(', '', 
-                                    str_replace(')', '', $lightBreakdown[$typ]));
-                            }
-                            $curr = $typ;
-                            if (isset($ps->ps_mother_loc)) {
-                                switch ($ps->ps_mother_loc) {
-                                    case $mothClone:
-                                        if (in_array($typ, ['Mother', 'Clone'])) {
-                                            $curr = 'Mother & Clones';
-                                        }
-                                        break;
-                                    case $mothVeg:
-                                        if (in_array($typ, ['Mother', 'Veg'])) {
-                                            $curr = 'Mother & Veg';
-                                        }
-                                        break;
-                                }
-                            }
-                            $perc = $area->ps_area_calc_size/$ps->ps_total_canopy_size;
-                            $eng = '( (' . $curr . ' <nobr>' . number_format($area->ps_area_calc_watts) 
-                                . ' W</nobr> / <nobr>' . number_format($area->ps_area_calc_size) 
-                                . ' sq ft )</nobr> <nobr>x ' . round(100*($perc)) . '% grow area</nobr>';
-                            $num = '<nobr>' . $curr . ' ' 
-                                . $GLOBALS["SL"]->sigFigs($area->ps_area_lighting_effic*$perc, 3) 
-                                . ' W / sq ft</nobr>';
-                            $this->v["printEfficLgt"][] = [
-                                "typ" => $typ,
-                                "eng" => $eng,
-                                "lgt" => $curr . ': ' . $lightBreakdown[$typ],
-                                "num" => $num
-                            ];
-                            $eng = '( (' . $curr . ' <nobr>' 
-                                . $GLOBALS["CUST"]->getHvacEffic($area->ps_area_hvac_type) 
-                                . ' kWh / sq ft</nobr> )</nobr> <nobr>x ' 
-                                . round(100*($perc)) . '% grow area</nobr>';
-                            $num = '<nobr>' . $curr . ' ' 
-                                . $GLOBALS["SL"]->sigFigs($area->ps_area_hvac_effic*$perc, 3) 
-                                . ' kWh / sq ft</nobr>';
-                            $this->v["printEfficHvac"][] = [
-                                "typ" => $typ,
-                                "eng" => $eng,
-                                "num" => $num
-                            ];
-                            $eng = '( (' . $curr . ' <nobr>' . $area->ps_area_gallons 
-                                . ' Gallons</nobr> / <nobr>' 
-                                . number_format($area->ps_area_calc_size) 
-                                . ' sq ft )</nobr> <nobr>x ' . round(100*($perc)) 
-                                . '% grow area</nobr>';
-                            $num = '<nobr>' . $curr . ' ' 
-                                . $GLOBALS["SL"]->sigFigs($area->ps_area_water_effic*$perc, 3) 
-                                . ' Gallons / sq ft</nobr>';
-                            $this->v["printEfficWtr"][] = [
-                                "typ" => $typ,
-                                "eng" => $eng,
-                                "num" => $num
-                            ];
-                        }
-                        
-                    }
-                }
-            }
-        }
-        return $this->v["printEfficLgt"];
     }
     
     protected function customLabels($nIDtxt = '', $str = '')
@@ -327,7 +289,7 @@ class ScoreUtils extends ScorePowerUtilities
     {
         if (in_array($loop, [ 'Growth Stages', 'Harvest Stages', 'Four Growth Stages' ])) {
             return $this->getStageName($itemRow, $itemInd);
-        } elseif ($loop == 'Room Nicknames') {
+        } elseif (in_array($loop, ['Room Nicknames', 'Room Environments'])) {
             return $this->getRoomName($itemRow, $itemInd);
         } elseif ($loop == 'Types of Room Light Fixtures') {
             return $this->getRoomLightDesc($loop, $itemRow, $itemInd);
@@ -349,7 +311,7 @@ class ScoreUtils extends ScorePowerUtilities
         return '';
     }
     
-    private function getRoomName($itemRow = [], $itemInd = 0)
+    protected function getRoomName($itemRow = [], $itemInd = 0)
     {
         if ($itemInd < 0) {
             $itemInd = 0;
@@ -429,6 +391,19 @@ class ScoreUtils extends ScorePowerUtilities
         }
         return $ret;
     }
+
+    protected function getRenewableDefs()
+    {
+        $defSet = 'PowerScore Onsite Power Sources';
+        return [
+            $GLOBALS["SL"]->def->getID($defSet, 'Solar PV'),
+            $GLOBALS["SL"]->def->getID($defSet, 'Wind'),
+            $GLOBALS["SL"]->def->getID($defSet, 'Other renewable'),
+            $GLOBALS["SL"]->def->getID($defSet, 'Geothermal'),
+            $GLOBALS["SL"]->def->getID($defSet, 'Direct use geothermal'),
+            $GLOBALS["SL"]->def->getID($defSet, 'Pelton wheel')
+        ];
+    }
     
     protected function nIDgetRenew($nID)
     {
@@ -441,6 +416,74 @@ class ScoreUtils extends ScorePowerUtilities
             case 81: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Pelton Wheel');
         }
         return -3;
+    }
+
+    protected function getLookupLgtNicknames()
+    {
+        $this->getLookupAreaIDs();
+        if (!isset($this->v["lgtNicknames"])) {
+            $this->v["lgtNicknames"] = $this->v["lgtHours"] = $this->v["lgtTotKwh"] = [];
+            if (!isset($this->sessData->dataSets["ps_light_types"])) {
+                return $this->v["lgtNicknames"];
+            }
+            foreach ($this->sessData->dataSets["ps_light_types"] as $l => $lgt) {
+                $this->v["lgtNicknames"][$lgt->ps_lg_typ_id] = 'Light #' . (1+$l);
+                $this->v["lgtTotKwh"][$lgt->ps_lg_typ_id] = 0;
+                if (isset($lgt->ps_lg_typ_area_id) 
+                    && intVal($lgt->ps_lg_typ_area_id) > 0
+                    && isset($this->v["areasByID"][$lgt->ps_lg_typ_area_id])
+                    && isset($this->v["areasByID"][$lgt->ps_lg_typ_area_id]->ps_area_type)) {
+                    $areaType = $this->v["areasByID"][$lgt->ps_lg_typ_area_id]->ps_area_type;
+                    $areaAbbr = $this->getAreaAbbr($areaType);
+                    $this->v["lgtNicknames"][$lgt->ps_lg_typ_id] .= ' ' . $areaAbbr;
+                    $this->v["lgtHours"][$lgt->ps_lg_typ_id] = 18;
+                    if ($areaAbbr == 'Flower') {
+                        $this->v["lgtHours"][$lgt->ps_lg_typ_id] = 12;
+                    }
+                    if (isset($lgt->ps_lg_typ_count) 
+                        && intVal($lgt->ps_lg_typ_count) > 0
+                        && isset($lgt->ps_lg_typ_wattage)
+                        && intVal($lgt->ps_lg_typ_wattage) > 0) {
+                        $this->v["lgtTotKwh"][$lgt->ps_lg_typ_id] = ($lgt->ps_lg_typ_count
+                            *$lgt->ps_lg_typ_wattage*$this->v["lgtHours"][$lgt->ps_lg_typ_id])
+                            /1000;
+                    }
+                } elseif ($this->hasRooms()
+                    && isset($lgt->ps_lg_typ_room_id) 
+                    && intVal($lgt->ps_lg_typ_room_id) > 0) {
+                    foreach ($this->sessData->dataSets["ps_growing_rooms"] as $r => $room) {
+                        if ($room->ps_room_id == $lgt->ps_lg_typ_room_id) {
+                            $this->v["lgtHours"][$lgt->ps_lg_typ_id] = $this->getRoomIndLightHours($r);
+                            $this->v["lgtNicknames"][$lgt->ps_lg_typ_id] .= ', ' 
+                                . str_replace(' (', ', ', str_replace(')', '', 
+                                    $this->getRoomName($room, $r)));
+                            if (isset($lgt->ps_lg_typ_wattage)) {
+                                $watts = intVal($lgt->ps_lg_typ_wattage);
+                                $watts *= $this->v["lgtHours"][$lgt->ps_lg_typ_id]/1000; // now kWh
+                                if (isset($lgt->ps_lg_typ_count)) {
+                                    $watts *= intVal($lgt->ps_lg_typ_count); // light type's total kWh
+                                    $this->v["lgtTotKwh"][$lgt->ps_lg_typ_id] += $watts;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $this->v["lgtNicknames"];
+    }
+
+    protected function getLookupAreaIDs()
+    {
+        if (!isset($this->v["areasByID"])) {
+            $this->v["areasByID"] = [];
+            if (isset($this->sessData->dataSets["ps_areas"])) {
+                foreach ($this->sessData->dataSets["ps_areas"] as $area) {
+                    $this->v["areasByID"][$area->ps_area_id] = $area;
+                }
+            }
+        }
+        return $this->v["areasByID"];
     }
     
     protected function getArea($type = 'Mother') 
@@ -500,7 +543,53 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function loadTotFlwrSqFt()
     {
-        $this->v["totFlwrSqFt"] = $this->getAreaFld('Flower', 'ps_area_size');
+        $this->v["totFlwrSqFt"] = 0;
+        if (isset($this->sessData->dataSets["powerscore"])
+            && isset($this->sessData->dataSets["powerscore"][0])
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size)
+            && $this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size > 0) {
+            if (!$GLOBALS["SL"]->REQ->has('refresh') 
+                && !$GLOBALS["SL"]->REQ->has('recalc')) {
+                $this->v["totFlwrSqFt"] = $this->sessData
+                    ->dataSets["powerscore"][0]->ps_flower_canopy_size;
+                return $this->v["totFlwrSqFt"];
+            }
+        }
+
+        if ($this->hasRooms()) { // post-3.0
+            $this->loadRoomIndsByStage();
+            foreach (['Flower', 'Veg', 'Clone'] as $typ) {
+                if ($this->v["totFlwrSqFt"] == 0) {
+                    if (isset($this->v["stageRooms"][$typ]) 
+                        && sizeof($this->v["stageRooms"][$typ]) > 0) {
+                        foreach ($this->v["stageRooms"][$typ] as $roomInd) {
+                            if (isset($this->sessData->dataSets["ps_growing_rooms"][$roomInd])) {
+                                $room = $this->sessData->dataSets["ps_growing_rooms"][$roomInd];
+                                if (isset($room->ps_room_canopy_sqft)) {
+                                    $this->v["totFlwrSqFt"] += intVal($room->ps_room_canopy_sqft);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else { // pre-3.0 method
+            $this->v["totFlwrSqFt"] = $this->getAreaFld('Flower', 'ps_area_size');
+            if (intVal($this->v["totFlwrSqFt"]) == 0) {
+                $veg = intVal($this->getAreaFld('Veg', 'ps_area_size'));
+                if ($veg > 0) {
+                    $this->v["totFlwrSqFt"] = $veg;
+                } else {
+                    $clone = intVal($this->getAreaFld('Clone', 'ps_area_size'));
+                    if ($clone > 0) {
+                        $this->v["totFlwrSqFt"] = $clone;
+                    }
+                }
+            }
+        }
+        $this->sessData->dataSets["powerscore"][0]
+            ->ps_flower_canopy_size = $this->v["totFlwrSqFt"];
+        $this->sessData->dataSets["powerscore"][0]->save();
         return $this->v["totFlwrSqFt"];
     }
     
@@ -535,12 +624,6 @@ class ScoreUtils extends ScorePowerUtilities
         return $this->sessData->getRowIDsByFldVal('ps_light_types', $areaArr, true);
     }
     
-    public function printPartnerProfileDashBtn($nID)
-    {
-        return '<a href="/dashboard" class="btn btn-xl btn-primary btn-block">'
-            . $this->getPartnerCompany() . ' Dashboard</a>';
-    }
-    
     public function printProfileExtraBtns()
     {
         if (isset($this->v["profileUser"]) && isset($this->v["uID"])
@@ -560,9 +643,13 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function isUserPastCultClassic($uID)
     {
-        $ccDef = $GLOBALS["SL"]->def->getID('PowerScore Competitions', 'Cultivation Classic');
+        $ccDef = $GLOBALS["SL"]->def->getID(
+            'PowerScore Competitions', 
+            'Cultivation Classic'
+        );
         $chk = DB::table('rii_powerscore')
-            ->join('rii_ps_for_cup', 'rii_ps_for_cup.ps_cup_psid', '=', 'rii_powerscore.ps_id')
+            ->join('rii_ps_for_cup', 'rii_ps_for_cup.ps_cup_psid', 
+                '=', 'rii_powerscore.ps_id')
             ->where('rii_powerscore.ps_user_id', $uID)
             ->where('rii_ps_for_cup.ps_cup_cup_id', $ccDef)
             ->get();
@@ -606,9 +693,9 @@ class ScoreUtils extends ScorePowerUtilities
                     $deet .= ', ';
                 }
                 $deet .= $GLOBALS["SL"]->def->getVal(
-                        'PowerScore Building Types', 
-                        $bld->ps_ar_bld_type
-                    );
+                    'PowerScore Building Types', 
+                    $bld->ps_ar_bld_type
+                );
                 if (isset($bld->ps_ar_bld_type_other) 
                     && trim($bld->ps_ar_bld_type_other) != '') {
                     $deet .= ': ' . $bld->ps_ar_bld_type_other;

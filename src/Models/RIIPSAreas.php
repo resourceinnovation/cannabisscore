@@ -39,6 +39,8 @@ class RIIPsAreas extends Model
 		'ps_area_humidity', 
 		'ps_area_sq_ft_per_fix1', 
 		'ps_area_sq_ft_per_fix2', 
+		'ps_area_lpd',
+		'ps_area_wst_wtr_method',
     ];
     
     // END SurvLoop auto-generated portion of Model

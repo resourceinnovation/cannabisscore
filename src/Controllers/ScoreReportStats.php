@@ -4,7 +4,7 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
@@ -49,20 +49,36 @@ class ScoreReportStats
         ];
         $this->v["sfHvac"] = [
             [247, 248, 249, 250, 356, 357, 251, 360], 
-            ['System A', 'System B', 'System C', 'System D', 'System E', 'System F', 'Other System', 'None']
+            [
+                'System A', 
+                'System B', 
+                'System C', 
+                'System D', 
+                'System E', 
+                'System F', 
+                'Other System', 
+                'None'
+            ]
         ];
         $this->v["scoreRowLabs"] = [
-            [ 'Facility Score',   'kBtu/SqFt' ], 
-            [ 'Production Score', 'g/kBtu'    ], 
-            [ 'Lighting Score',   'W/SqFt'   ], 
-            [ 'HVAC Score',       'kWh/SqFt' ]
+            [ 'Facility Score',   'kBtu / sq ft'    ], 
+            [ 'Facility Score',   'kWh / sq ft'     ], 
+            [ 'Production Score', 'g / kBtu'        ], 
+            [ 'Production Score', 'g / kWh'         ], 
+            [ 'Lighting Score',   'kWh / day'       ], 
+            [ 'Lighting Score',   'kBtu / day'      ], 
+            [ 'HVAC Score',       'kBtu / sq ft'    ], 
+            [ 'HVAC Score',       'kWh / sq ft'     ], 
+            [ 'Water Score',      'gallons / sq ft' ], 
+            [ 'Waste Score',      'lbs / sq ft'     ]
         ];
+        $defSet = 'PowerScore Growth Stages';
         $this->v["areaTypes"] = [
-            'Mother' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone & Mother Plants'),
-            'Veg'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'),
-            'Flower' => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'),
-            'Dry'    => $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing')
+            'Mother' => $GLOBALS["SL"]->def->getID($defSet, 'Mother Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID($defSet, 'Clone & Mother Plants'),
+            'Veg'    => $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants'),
+            'Flower' => $GLOBALS["SL"]->def->getID($defSet, 'Flowering Plants'),
+            'Dry'    => $GLOBALS["SL"]->def->getID($defSet, 'Drying/Curing')
         ];
         $this->v["sfLgts"] = [ [], [] ];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Light Types') as $l) {
@@ -77,8 +93,10 @@ class ScoreReportStats
     
     protected function motherToClone($type)
     {
-        return (($type == $this->v["areaTypes"]["Mother"]) 
-            ? $this->v["areaTypes"]["Clone"] : $type);
+        if ($type == $this->v["areaTypes"]["Mother"]) {
+            return $this->v["areaTypes"]["Clone"];
+        }
+        return $type;
     }
     
     protected function getFlowerSize($areas = null)
@@ -106,8 +124,11 @@ class ScoreReportStats
     {
         $GLOBALS["SL"]->loadStates();
         $this->initSearcher();
-        $this->v["fltStateClim"] = ((isset($this->searcher->searchFilts["fltStateClim"]))
-            ? trim($this->searcher->searchFilts["fltStateClim"]) : '');
+        $this->v["fltStateClim"] = '';
+        if (isset($this->searcher->searchFilts["fltStateClim"])) {
+            $this->v["fltStateClim"] = trim($this->searcher
+                ->searchFilts["fltStateClim"]);
+        }
         $this->prepStatFilts();
         return true;
     }

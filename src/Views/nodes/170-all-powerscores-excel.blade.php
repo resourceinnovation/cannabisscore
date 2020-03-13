@@ -4,10 +4,10 @@
 @if (isset($fltCmpl) && $fltCmpl != 243) <th>Status</th> @endif
 @if (isset($showFarmNames) && $showFarmNames) <th>Farm Name</th> @endif
 <th>Overall</th>
-<th>Facility Score (kBtu/SqFt)</th>
-<th>Production Score (g/kBtu)</th>
-<th>Lighting Score (W/SqFt)</th>
-<th>HVAC Score (kWh/SqFt)</th>
+<th>Facility Score (kBtu / sq ft)</th>
+<th>Production Score (g / kBtu)</th>
+<th>Lighting Score (kWh / day)</th>
+<th>HVAC Score (kBtu / sq ft)</th>
 <th>Grams</th>
 <th>kWh</th>
 <th>Sq Ft</th>
@@ -47,7 +47,7 @@
     <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</th>
     <th>{{ number_format($psAvg->ps_grams) }}</th>
     <th>{{ number_format($psAvg->ps_kwh) }}</th>
-    <th>{{ number_format($psAvg->ps_total_size) }}</th>
+    <th>{{ number_format($psAvg->ps_flower_canopy_size) }}</th>
     <th>&nbsp;</th><th>&nbsp;</th>
     @foreach ($GLOBALS["SL"]->def->getSet('PowerScore Growth Stages') as $def)
         <th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th>
@@ -74,7 +74,7 @@
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}</td>
     <td>{{ number_format($ps->ps_grams) }}</td>
     <td>{{ number_format($ps->ps_kwh) }}</td>
-    <td>{{ number_format($ps->ps_total_size) }}</td>
+    <td>{{ number_format($ps->ps_flower_canopy_size) }}</td>
     <td>{{ str_replace('Multiple Environments', 'Multiple Env', 
         $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)) }}</td>
     <td> @if (isset($ps->ps_heat_water) && intVal($ps->ps_heat_water) == 1) Y @else N @endif </td>

@@ -125,7 +125,7 @@
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadScore">
                     91.3
-                    <nobr>kWh / sq ft</nobr>
+                    <nobr>kBtu / sq ft</nobr>
                 </div>
                 <div class="col-lg-3 col-md-3 col-6 efficHeadGuage" id="psScoreHvac">
                     <iframe id="guageFrameHvac" class="guageFrame" src="/frame/animate/meter/47/3?bg=" frameborder="0" width="190" height="30" style=""></iframe>

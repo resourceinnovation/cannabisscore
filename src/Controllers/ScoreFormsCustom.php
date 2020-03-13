@@ -5,13 +5,14 @@
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
-  * @author  Morgan Lesko <wikiworldorder@protonmail.com>
+  * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
 namespace CannabisScore\Controllers;
 
 use App\Models\RIIPsGrowingRooms;
 use App\Models\RIIPsLightTypes;
+use App\Models\RIIPsLinkHvacRoom;
 use CannabisScore\Controllers\ScoreCondsCustom;
 
 class ScoreFormsCustom extends ScoreCondsCustom
@@ -66,38 +67,56 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return false;
     }
     
-    protected function postRoomLightCnt($nID, $nIDtxt)
+    protected function postRoomLightCnt($nID)
     {
-        $this->loadRoomLights();
-        $roomID = $lgtCnt = $currCnt = 0;
-        if ($GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'fld')
-            && $GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'Visible')
-            && intVal($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'Visible')) == 1) {
-            $lgtCnt = intVal($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld'));
-        }
-        $room = $this->sessData->getDataBranchRow('ps_growing_rooms');
-        if ($room && isset($room->ps_room_id)) {
-            $roomID = $room->ps_room_id;
-            if (isset($this->v["roomLights"][$roomID])) {
-                $currCnt = sizeof($this->v["roomLights"][$roomID]);
-            }
-//if ($nIDtxt == '1260cyc1') { echo 'lgtCnt: ' . $lgtCnt . ', > currCnt: ' . $currCnt . ' <pre>'; print_r($this->v["roomLights"][$roomID]); echo '</pre>'; exit; }
-            if ($lgtCnt > $currCnt) {
-                for ($i = 0; $i < ($lgtCnt-$currCnt); $i++) {
-                    $newLgt = new RIIPsLightTypes;
-                    $newLgt->ps_lg_typ_psid     = $this->coreID;
-                    $newLgt->ps_lg_typ_room_id  = $roomID;
-                    $newLgt->ps_lg_typ_room_ord = $i;
-                    $newLgt->ps_lg_typ_complete = 0;
-                    $newLgt->save();
-                    $this->sessData->dataSets["ps_light_types"][] = $newLgt;
+        $rooms = RIIPsGrowingRooms::where('ps_room_psid', $this->coreID)
+            ->orderBy('ps_room_id', 'asc')
+            ->get();
+        if ($rooms->isNotEmpty()) {
+            foreach ($rooms as $r => $room) {
+                if (isset($room->ps_room_farm_type)) {
+                    if ($room->ps_room_farm_type == $this->frmTypOut) {
+                        $room->ps_room_lgt_sun = 1;
+                        $room->ps_room_lgt_artif = 0;
+                        $room->ps_room_lgt_types_count = 0;
+                        $room->save();
+                    } elseif ($room->ps_room_farm_type == $this->frmTypIn) {
+                        $room->ps_room_lgt_sun = 0;
+                        $room->ps_room_lgt_artif = 1;
+                        $room->save();
+                    }
                 }
-            } elseif ($lgtCnt < $currCnt) {
-                for ($i = ($currCnt-1); $i >= $lgtCnt; $i--) {
-                    $this->v["roomLights"][$roomID][$i]->delete();
+                $lgtCnt = 0;
+                if (isset($room->ps_room_lgt_artif)
+                    && intVal($room->ps_room_lgt_artif) == 1) {
+                    if (isset($room->ps_room_lgt_types_count)) {
+                        $lgtCnt = intVal($room->ps_room_lgt_types_count);
+                    }
+                }
+                $roomLights = RIIPsLightTypes::where('ps_lg_typ_psid', $this->coreID)
+                    ->where('ps_lg_typ_room_id', $room->ps_room_id)
+                    ->orderBy('ps_lg_typ_room_ord', 'asc')
+                    ->get();
+                $currCnt = $roomLights->count();
+                if ($lgtCnt > $currCnt) {
+                    for ($i = 0; $i < ($lgtCnt-$currCnt); $i++) {
+                        $newLgt = new RIIPsLightTypes;
+                        $newLgt->ps_lg_typ_psid     = $this->coreID;
+                        $newLgt->ps_lg_typ_room_id  = $room->ps_room_id;
+                        $newLgt->ps_lg_typ_room_ord = $i;
+                        $newLgt->ps_lg_typ_complete = 0;
+                        $newLgt->save();
+                    }
+                } elseif ($lgtCnt < $currCnt) {
+                    RIIPsLightTypes::where('ps_lg_typ_psid', $this->coreID)
+                        ->where('ps_lg_typ_room_id', $room->ps_room_id)
+                        ->orderBy('ps_lg_typ_room_ord', 'desc')
+                        ->limit($currCnt-$lgtCnt)
+                        ->delete();
                 }
             }
         }
+        $this->sessData->refreshDataSets();
         return false;
     }
     
@@ -170,37 +189,83 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return '<!-- no energy summary -->';
     }
 
+    protected function getRoomHvacTypeFromInd($ind)
+    {
+        $hvacDefID = 519;
+        switch ($ind) {
+            case 0: $hvacDefID = 519; break;
+            case 1: $hvacDefID = 510; break;
+            case 2: $hvacDefID = 511; break;
+            case 3: $hvacDefID = 512; break;
+            case 4: $hvacDefID = 513; break;
+            case 5: $hvacDefID = 514; break;
+            case 6: $hvacDefID = 515; break;
+            case 7: $hvacDefID = 516; break;
+            case 8: $hvacDefID = 518; break;
+        }
+        return $hvacDefID;
+    }
+
     protected function postRoomHvacType($nID, $nIDtxt)
     {
-        $typesReq = $roomTypes = [];
-        if ($GLOBALS["SL"]->REQ->has('n' . $nIDtxt . 'fld')
-            && in_array($GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld'))) {
-            $typesReq = $GLOBALS["SL"]->REQ->get('n' . $nIDtxt . 'fld');
-        }
-        if (sizeof($typesReq) > 0) {
-            foreach ($typesReq as $type) {
-                $fld = '';
-                switch (intVal($type)) {
-                    case 519: $fld = 'n1088res0fld'; break;
-                    case 510: $fld = 'n1088res1fld'; break;
-                    case 511: $fld = 'n1088res2fld'; break;
-                    case 512: $fld = 'n1088res3fld'; break;
-                    case 513: $fld = 'n1088res4fld'; break;
-                    case 514: $fld = 'n1088res5fld'; break;
-                    case 515: $fld = 'n1088res6fld'; break;
-                    case 516: $fld = 'n1088res7fld'; break;
-                    //case 517: $fld = 'n1088res8fld'; break;
-                    case 518: $fld = 'n1088res8fld'; break;
-                }
-                if ($fld != '') {
-                    if ($GLOBALS["SL"]->REQ->has($fld) && in_array($GLOBALS["SL"]->REQ->get($fld))) {
-
+        $hvacTypes = [];
+        for ($ind = 0; $ind < 9; $ind++) {
+            $hvacDefID = $this->getRoomHvacTypeFromInd($ind);
+            $hvacTypes[$hvacDefID] = [
+                "old" => [],
+                "new" => []
+            ];
+            $fld = 'n1088res' . $ind . 'fld';
+            if ($GLOBALS["SL"]->REQ->has($fld)) {
+                $newHvacs = $GLOBALS["SL"]->REQ->get($fld);
+                if (is_array($newHvacs) && sizeof($newHvacs) > 0) {
+                    foreach ($newHvacs as $roomID) {
+                        $hvacTypes[$hvacDefID]["new"][] = $roomID;
                     }
                 }
-
+            }
+        }
+        $hvacLnks = RIIPsLinkHvacRoom::whereIn('ps_lnk_hv_rm_room_id', $this->getRoomIDs())
+            ->get();
+        if ($hvacLnks->isNotEmpty()) {
+            foreach ($hvacLnks as $lnk) {
+                $roomID = $lnk->ps_lnk_hv_rm_room_id;
+                $hvacTypes[$lnk->ps_lnk_hv_rm_hvac]["old"][] = $roomID;
+                if (!in_array($roomID, $hvacTypes[$lnk->ps_lnk_hv_rm_hvac]["new"])) {
+                    $lnk->delete();
+                }
+            }
+        }
+        for ($ind = 0; $ind < 9; $ind++) {
+            $hvacDefID = $this->getRoomHvacTypeFromInd($ind);
+            if (sizeof($hvacTypes[$hvacDefID]["new"]) > 0) {
+                foreach ($hvacTypes[$hvacDefID]["new"] as $new) {
+                    if (!in_array($new, $hvacTypes[$hvacDefID]["old"])) {
+                        $hvacLnk = new RIIPsLinkHvacRoom;
+                        $hvacLnk->ps_lnk_hv_rm_room_id = $new;
+                        $hvacLnk->ps_lnk_hv_rm_hvac = $hvacDefID;
+                        $hvacLnk->save();
+                    }
+                }
             }
         }
         return false; // store top-level system checkboxes as normal
+    }
+
+    protected function printNodeSessRoomHvacType($nID, $nIDtxt)
+    {
+        $ret = [];
+        $ind = intVal(str_replace('1088res', '', $nIDtxt));
+        $hvacDefID = $this->getRoomHvacTypeFromInd($ind);
+        $rooms = RIIPsLinkHvacRoom::select('ps_lnk_hv_rm_room_id')
+            ->where('ps_lnk_hv_rm_hvac', $hvacDefID)
+            ->get();
+        if ($rooms->isNotEmpty()) {
+            foreach ($rooms as $room) {
+                $ret[] = $room->ps_lnk_hv_rm_room_id;
+            }
+        }
+        return $ret;
     }
     
     protected function postMonthlies($nIDtxt, $fld2)
