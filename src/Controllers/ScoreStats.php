@@ -382,7 +382,7 @@ class ScoreStats extends SurvStatsGraph
         return true;
     }
     
-    public function addScoreData($ps = null, $area = null)
+    public function addScoreData($ps = null, $area = null, $fltCmpl = 243)
     {
         if ($ps && isset($ps->ps_id)) {
             $dataPoints = [
@@ -393,8 +393,9 @@ class ScoreStats extends SurvStatsGraph
             ];
             foreach ($dataPoints as $type) {
                 $fld = 'ps_effic_' . $type[1];
-                if (isset($ps->{ $fld . '_status' })
-                    && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"]) {
+                if ($fltCmpl == 1 
+                    || (isset($ps->{ $fld . '_status' })
+                        && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"])) {
                     $val = $ps->{ $fld };
                     $this->addRecDat($type[0], $val, $ps->ps_id);
                     if ($type[0] == 'pro') {
@@ -405,8 +406,9 @@ class ScoreStats extends SurvStatsGraph
                     $this->addRecDat($type[0] . 'W', $val, $ps->ps_id);
                 }
             }
-            if (isset($ps->ps_effic_lighting_status)
-                && intVal($ps->ps_effic_lighting_status) == $this->v["psComplete"]) {
+            if ($fltCmpl == 1 
+                || (isset($ps->ps_effic_lighting_status)
+                    && intVal($ps->ps_effic_lighting_status) == $this->v["psComplete"])) {
                 foreach ([ 'Mother', 'Clone', 'Veg', 'Flower' ] as $type) {
                     $area = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
                         ->where('ps_area_type', $GLOBALS["CUST"]->getAreaTypeFromNick($type))
@@ -449,6 +451,8 @@ class ScoreStats extends SurvStatsGraph
                 $this->getDatLetAvg($dLet), 
                 $this->getDatCntForDatLet('1', $dLet)
             );
+//            $tbl->addRowCell($this->getDatLetMin($dLet));
+//            $tbl->addRowCell($this->getDatLetMax($dLet));
             foreach ($this->filts[$fLet]["val"] as $v => $val) {
                 $cnt = $this->getDatCntForDatLet($fLet . $val, $dLet);
                 $avg = $this->getDatLetAvg($dLet, $fLet . $val);
@@ -459,6 +463,8 @@ class ScoreStats extends SurvStatsGraph
             'Averages', 
             $this->getDatCntForDatLet('1', 'a')
         );
+//        $tbl->rows[0][2] = new SurvStatTh('Min');
+//        $tbl->rows[0][3] = new SurvStatTh('Max');
         return $tbl;
     }
     
@@ -492,6 +498,8 @@ class ScoreStats extends SurvStatsGraph
                 $this->getDatLetAvg($dLet), 
                 $this->getDatCntForDatLet('1', $dLet)
             );
+//            $tbl->addRowCell($this->getDatLetMin($dLet));
+//            $tbl->addRowCell($this->getDatLetMax($dLet));
             foreach ($this->filts as $fLet => $filt) {
                 if (sizeof($only) == 0 || in_array($fLet, $only)) {
                     $cnt = $this->getDatCntForDatLet($fLet . '1', $dLet);
@@ -504,6 +512,8 @@ class ScoreStats extends SurvStatsGraph
             'Averages', 
             $this->getDatCntForDatLet('1', 'a')
         );
+//        $tbl->rows[0][2] = new SurvStatTh('Min');
+//        $tbl->rows[0][3] = new SurvStatTh('Max');
         return $tbl;
     }
     

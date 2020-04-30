@@ -3,6 +3,7 @@
 {!! view(
     'vendor.cannabisscore.nodes.170-powerscore-listings-header',
     [
+        "nID"     => $nID,
         "sort"    => $sort,
         "fltCmpl" => $fltCmpl
     ]
@@ -49,14 +50,16 @@
             <tr @if ($i%2 == 0) class="row2" @endif >
 
             <td>
-            @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4)
-                <a href="/calculated/u-{{ $ps->ps_id }}" target="_blank">
-                    @if ($nID == 808) {{ $ps->ps_name }} 
-                    @else #{{ $ps->ps_id }} 
-                    @endif </a>
-            @else
-                <b>{{ (1+$i) }})</b>
-            @endif
+                @if ($nID == 1373
+                    && $GLOBALS["SL"]->x["partnerLevel"] < 5)
+                    {{ (1+$i) }})
+                @else
+                    <a href="/calculated/read-{{ $ps->ps_id }}" 
+                        target="_blank">
+                        @if ($nID == 808) {{ $ps->ps_name }} 
+                        @else #{{ $ps->ps_id }} 
+                        @endif </a>
+                @endif
             </td>
             <td>
                 {{ round($ps->ps_effic_overall) }}%
@@ -65,7 +68,9 @@
                     && isset($allranks[$ps->ps_id]) 
                     && isset($allranks[$ps->ps_id]->ps_rnk_overall_avg))
                     <div class="slGrey fPerc66">
-                        {{ $GLOBALS["SL"]->sigFigs($allranks[$ps->ps_id]->ps_rnk_overall_avg) }}%
+                        {{ $GLOBALS["SL"]->sigFigs(
+                            $allranks[$ps->ps_id]->ps_rnk_overall_avg
+                        ) }}%
                     </div>
                 @endif
             </td>
@@ -177,10 +182,12 @@
                 @endif
             </td>
             <td>
+            @if (Auth::user()->hasRole('administrator|staff'))
                 {{ $GLOBALS["SL"]->allCapsToUp1stChars($ps->ps_county) }}
                 {{ $ps->ps_state }}
-            @if (Auth::user()->hasRole('administrator|staff'))
                 {{ $ps->ps_zip_code }}
+            @elseif (Auth::user()->hasRole('partner'))
+                {{ $ps->ps_state }}
             @endif
             </td>
             <?php /* 

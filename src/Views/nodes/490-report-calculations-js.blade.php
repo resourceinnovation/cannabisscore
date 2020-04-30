@@ -1,6 +1,6 @@
 /* generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations-js.blade.php */
 
-var spn = '<i class="fa-li fa fa-spinner fa-spin mL20 mT15"></i>';
+var spn = '<i class="fa-li fa fa-spinner fa-spin mL30 mT20"></i>';
 var guageList = new Array();
 guageList[guageList.length] = new Array('Overall',    2800, 0, '', '', '');
 guageList[guageList.length] = new Array('Facility',   2400, 0, '', '', '');
@@ -41,7 +41,6 @@ $(document).ready(function() {
         if (reloadComplete) {
             for (g = 0; g < guageList.length; g++) {
                 if (document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
-                    document.getElementById("efficGuageTxt"+guageList[g][0]+"").innerHTML = spn;
                     setTimeout(guageLoad, guageList[g][1], g);
                 }
             }
@@ -53,6 +52,11 @@ $(document).ready(function() {
     
     function reloadGuages() {
         reloadComplete = false;
+        for (g = 0; g < guageList.length; g++) {
+            if (document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
+                document.getElementById("efficGuageTxt"+guageList[g][0]+"").innerHTML = spn;
+            }
+        }
         var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}"+gatherFilts();
         var fullUrl = ""+baseUrl+"&eff=Overall&loadAll=1";
 console.log("reloadGuages() "+fullUrl);

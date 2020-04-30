@@ -1,4 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/744-cult-classic-report.blade.php -->
+
 <div class="slCard nodeWrap">
     <h1 class="slBlueDark">Cultivation Classic Final Report</h1>
     <h4>

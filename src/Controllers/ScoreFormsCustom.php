@@ -154,7 +154,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
                 $lgt->ps_lg_typ_complete = 1;
             }
             $lgt->save();
-            $this->logDataSave(
+            $this->sessData->logDataSave(
                 $nID, 
                 'ps_light_types', 
                 $lgt->getKey(), 
@@ -303,6 +303,9 @@ class ScoreFormsCustom extends ScoreCondsCustom
             && isset($this->sessData->dataSets["powerscore"][0])
             && isset($this->sessData->dataSets["powerscore"][0]->ps_grams)) {
             $this->v["currSessData"] = $this->sessData->dataSets["powerscore"][0]->ps_grams;
+        } elseif (isset($this->sessData->dataSets["compliance_ma"]) 
+            && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_grams)) {
+            $this->v["currSessData"] = $this->sessData->dataSets["compliance_ma"][0]->com_ma_grams;
         }
         $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt 
             . "', 'reqFormFldGreater', 0.00000001);\n";

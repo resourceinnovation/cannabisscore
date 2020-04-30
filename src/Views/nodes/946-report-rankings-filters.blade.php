@@ -4,7 +4,7 @@
 <div id="scoreRankFiltWrap">{!! $psFilters !!}</div>
 
 <style>
-#scoreRankFiltWrap { background: #8dc63f; }
+#scoreRankFiltWrap { background: #8dc63f; margin: 60px -15px 0px -15px; }
 #scoreBottomBuffer { padding-top: 100px; }
 #blockWrap151 { margin-top: 40px; }
 #reportTitleWrap { margin: 20px 0px 15px 0px; }

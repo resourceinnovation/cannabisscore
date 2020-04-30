@@ -1,4 +1,5 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/744-cult-classic-report-innertable.blade.php -->
+
 <tr><b>
 <th>Farm Name</th>
 <th>Points</th>
@@ -23,6 +24,7 @@
 <th>Submitted</th>
 <th>URL</th>
 </b></tr>
+
 @forelse ($farms as $i => $f)
     <tr>
     <td class=" 

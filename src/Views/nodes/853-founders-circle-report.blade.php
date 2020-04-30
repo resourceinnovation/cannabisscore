@@ -1,9 +1,10 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/853-founders-circle-report.blade.php -->
 
 <!--- <a class="float-right btn btn-secondary mT5" href="/dash/compare-powerscore-averages?excel=1"
-    ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a> --->
+    ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+    Excel</a> --->
 <div class="slCard nodeWrap">
-<h1 class="slBlueDark">Founders Circle Report</h1>
+<h1 class="slBlueDark">Resource Benchmarking Report</h1>
 <p>
 Many columns are clickable to load the report listing all 
 individual reports matching the filter (when possible).
@@ -30,9 +31,12 @@ upon which each calculated average is based.
     {{ $typeName }} Scores by Area of Flowering Canopy</h2>
     <p>{{ $typeName }} cultivation Electricity Intensity 
     (kBtu / sq ft of flowering canopy) by area of flowering canopy</p>
-    <?php $scoreSets["statScorSize" . $typeID]->addCurrFilt('farm', $typeID); ?>
-    {!! $scoreSets["statScorSize" . $typeID]->printScoreAvgsTbl('size') !!}
-    <?php $scoreSets["statScorSize" . $typeID]->resetRecFilt(); ?>
+    <?php $scoreSets["statScorSize" 
+        . $typeID]->addCurrFilt('farm', $typeID); ?>
+    {!! $scoreSets["statScorSize" 
+        . $typeID]->printScoreAvgsTbl('size') !!}
+    <?php $scoreSets["statScorSize" 
+        . $typeID]->resetRecFilt(); ?>
     </div>
 @endforeach
 
@@ -88,7 +92,8 @@ square feet of flowering canopy (for each farm).</p>
         {{ $typeName }} Growing Environments
     </h2>
     <p><span class="slGrey">
-        Commercial/Warehouse, House/Garage, Barn, Greenhouse, Outdoor, Other
+        Commercial/Warehouse, House/Garage, 
+        Barn, Greenhouse, Outdoor, Other
     </span></p>
     <div class="row mB10">
         <div class="col-6">
@@ -124,6 +129,13 @@ square feet of flowering canopy (for each farm).</p>
 <h2 class="slBlueDark">5. Leads</h2>
 <table border=0 class="table table-striped w100">
 {!! $statLeads->tblHeaderRow('farm', '/dash/compare-powerscores?fltFarm=[[val]]') !!}
-{!! $statLeads->tblPercHasDat('farm', ['nonfarm', 'upgrade', 'incent', 'contact']) !!}
+{!! $statLeads->tblPercHasDat(
+    'farm', 
+    ['nonfarm', 'upgrade', 'incent', 'contact']
+) !!}
 </table>
 </div>
+
+<style>
+body { overflow-x: visible; }
+</style>

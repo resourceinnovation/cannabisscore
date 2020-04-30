@@ -74,7 +74,12 @@ class CannabisScoreSearcher extends Searcher
             ? intVal($GLOBALS["SL"]->REQ->get('fltPartner')) : 0);
         if (Auth::user() && (Auth::user()->hasRole('partner')
             && !Auth::user()->hasRole('administrator|staff'))) {
-            $this->v["fltPartner"] = Auth::user()->id;
+            if ((!isset($GLOBALS["SL"]->x["officialSet"]) 
+                    || !$GLOBALS["SL"]->x["officialSet"])
+                && (!isset($GLOBALS["SL"]->x["indivFilters"])
+                    || !$GLOBALS["SL"]->x["indivFilters"])) {
+                $this->v["fltPartner"] = Auth::user()->id;
+            }
         }
         if ($this->v["fltPartner"] > 0) {
             if (Auth::user() 
@@ -133,7 +138,7 @@ class CannabisScoreSearcher extends Searcher
             ? $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('fltRenew')) 
             : []);
         $this->v["fltManuLgt"] = (($GLOBALS["SL"]->REQ->has('fltManuLgt')) 
-            ? trim($GLOBALS["SL"]->REQ->get('fltManuLgt')) : '');
+            ? intVal($GLOBALS["SL"]->REQ->get('fltManuLgt')) : 0);
         $this->v["fltCup"] = (($GLOBALS["SL"]->REQ->has('fltCup')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltCup')) : 0);
         $this->v["prtnOwn"] = 0;
@@ -207,10 +212,9 @@ class CannabisScoreSearcher extends Searcher
                 . '-' . $this->v["fltHvac"][1];
         }
         if ($this->v["fltSize"] > 0) {
-            $this->v["xtraFltsDesc"] .= ', ' . (($this->v["fltSize"] > 0) 
-                ? strtolower($GLOBALS["SL"]->def->getVal('Indoor Size Groups', 
-                    $this->v["fltSize"])) 
-                : '');
+            $desc = 'Indoor Size Groups';
+            $desc = $GLOBALS["SL"]->def->getVal($desc, $this->v["fltSize"]);
+            $this->v["xtraFltsDesc"] .= ', ' . strtolower($desc);
             $this->v["urlFlts"] .= '&fltSize=' . $this->v["fltSize"];
         }
         if ($this->v["fltPerp"] > 0) {
@@ -238,17 +242,83 @@ class CannabisScoreSearcher extends Searcher
             $this->v["urlFlts"] .= '&fltVert=' . $this->v["fltVert"];
         }
         if (sizeof($this->v["fltRenew"]) > 0) {
+            $defSet = 'PowerScore Onsite Power Sources';
             foreach ($this->v["fltRenew"] as $renew) {
                 $this->v["xtraFltsDesc"] .= ', ' 
-                    . $GLOBALS["SL"]->def->getVal('PowerScore Onsite Power Sources', $renew);
+                    . $GLOBALS["SL"]->def->getVal($defSet, $renew);
             }
             $this->v["urlFlts"] .= '&fltRenew=' . implode(',', $this->v["fltRenew"]);
         }
         if ($this->v["xtraFltsDesc"] != '') {
-            $this->v["xtraFltsDesc"] = ' using <span class="wht">' 
+            $this->v["xtraFltsDesc"] = ' using <span class="slBlueDark">' 
                 . substr($this->v["xtraFltsDesc"], 2) . '</span>';
         }
+//echo 'descccc: ' . $this->v["xtraFltsDesc"] . '<br />';
         return '';
+    }
+
+    public function loadFiltersDesc()
+    {
+        if (trim($this->v["urlFlts"]) == '' 
+            || !isset($this->v["xtraFltsDesc"])
+                || trim($this->v["xtraFltsDesc"]) == '') {
+            //$this->searchFiltsURL(true);
+            $this->searchFiltsURLXtra();
+        }
+        $this->v["withinFilters"] = '<div id="efficBlockOverGuageTitle">' 
+            . '<h5>Overall: '
+            . (($this->v["currRanks"]->ps_rnk_overall > 66) 
+                ? 'Leader' 
+                : (($this->v["currRanks"]->ps_rnk_overall > 33) 
+                    ? 'Middle-of-the-Pack' 
+                    : 'Upgrade Candidate')) 
+            . '</h5></div><div class="efficGuageTxtOverall4">'
+            . 'Your farm\'s overall performance within the data set of ';
+        if ($this->v["fltFarm"] == 0) {
+            $this->v["withinFilters"] .= 'all farm types';
+        } else {
+            $farmType = $GLOBALS["SL"]->def->getVal(
+                'PowerScore Farm Types', 
+                $this->v["fltFarm"]
+            );
+            $farmType = str_replace(
+                'Greenhouse/Hybrid/Mixed Light', 
+                'Greenhouse/ Hybrid', 
+                $farmType
+            );
+            $this->v["withinFilters"] .= strtolower($farmType) . ' farms';
+        }
+        $this->v["withinFilters"] .= $this->v["xtraFltsDesc"];
+        if ($this->v["fltStateClim"] != '') {
+            $state = $GLOBALS["SL"]->getState($this->v["fltStateClim"]);
+            if ($state == '') {
+                $state = 'the ' . $this->v["fltStateClim"] . ' Climates:';
+            }
+            $this->v["withinFilters"] .= ' in ' . $state;
+        } elseif ($this->v["fltState"] == '' 
+            && $this->v["fltClimate"] == '') {
+            $this->v["withinFilters"] .= ' in the U.S. and Canada:';
+        } elseif ($this->v["fltState"] != '') {
+            if ($this->v["fltState"] == 'US') {
+                $this->v["withinFilters"] .= ' in the United States.';
+            } elseif ($this->v["fltState"] == 'Canada') {
+                $this->v["withinFilters"] .= ' in Canada:';
+            } else {
+                $this->v["withinFilters"] .= ' in <span class="slBlueDark">' 
+                    . $GLOBALS["SL"]->getState($this->v["fltState"]) . ':';
+            }
+        } else {
+            if ($this->v["fltClimate"] == 'US') {
+                $this->v["withinFilters"] .= ' in the United States.';
+            } elseif ($this->v["fltClimate"] == 'Canada') {
+                $this->v["withinFilters"] .= ' in Canada:.';
+            } else {
+                $this->v["withinFilters"] .= ' in <span class="slBlueDark">'
+                    . 'ASHRAE Climate Zone ' . $this->v["fltClimate"] . ':';
+            }
+        }
+        $this->v["withinFilters"] .= '</div>';
+        return true;
     }
     
     public function getAllPublicCoreIDs($coreTbl = '')
@@ -340,7 +410,8 @@ class CannabisScoreSearcher extends Searcher
         if ($this->v["fltLght"][1] > 0) {
             eval("\$chk = DB::table('rii_ps_areas')"
                 . "->join('rii_ps_light_types', function (\$join) {
-                    \$join->on('rii_ps_areas.ps_area_id', '=', 'rii_ps_light_types.ps_lg_typ_area_id')
+                    \$join->on('rii_ps_areas.ps_area_id', '=', 
+                            'rii_ps_light_types.ps_lg_typ_area_id')
                         ->where('rii_ps_light_types.ps_lg_typ_light', " 
                             . $this->v["fltLght"][1] . ");
                 })" . (($this->v["fltLght"][0] > 0) 
@@ -357,8 +428,9 @@ class CannabisScoreSearcher extends Searcher
             }
         }
         if ($this->v["fltHvac"][1] > 0) {                       
-            eval("\$chk = " . $GLOBALS["SL"]->modelPath('ps_areas') . "::where('ps_area_hvac_type', " 
-                . $this->v["fltHvac"][1] . ")" . (($this->v["fltHvac"][0] > 0) 
+            eval("\$chk = " . $GLOBALS["SL"]->modelPath('ps_areas') 
+                . "::where('ps_area_hvac_type', " . $this->v["fltHvac"][1] . ")"
+                . (($this->v["fltHvac"][0] > 0) 
                     ? "->where('ps_area_type', " . $this->v["fltHvac"][0] . ")" 
                     : "")
                 . "->where('ps_area_psid', '>', 0)->select('ps_area_psid')->get();");
@@ -383,7 +455,7 @@ class CannabisScoreSearcher extends Searcher
                 }
             }
         }
-        if (trim($this->v["fltManuLgt"]) != '') {
+        if (intVal($this->v["fltManuLgt"]) > 0) {
             $chk = RIIManufacturers::find($this->v["fltManuLgt"]);
             if ($chk && isset($chk->manu_name)) {
                 $this->addManuPSIDs($psidManuLgt, $chk);
@@ -494,7 +566,7 @@ class CannabisScoreSearcher extends Searcher
             $eval .= "->whereIn('ps_id', [" . ((sizeof($psidRenew) > 0) 
                 ? implode(', ', $psidRenew) : 0) . "])";
         }
-        if (trim($this->v["fltManuLgt"]) != '') {
+        if (intVal($this->v["fltManuLgt"]) > 0) {
             $eval .= "->whereIn('ps_id', [" . ((sizeof($psidManuLgt) > 0) 
                 ? implode(', ', $psidManuLgt) : 0) . "])";
         }
@@ -545,8 +617,13 @@ class CannabisScoreSearcher extends Searcher
         return true;
     }
 
-    protected function getUsrCompanyManuLnks($company = '')
+    protected function getUsrCompanyManuLnks($fltManuLgt = 0)
     {
+        $company = '';
+        $chk = RIIManufacturers::find($this->v["fltManuLgt"]);
+        if ($chk && isset($chk->manu_name)) {
+            $company = $chk->manu_name;
+        }
         $chk = RIIUserInfo::where('usr_company_name', 'LIKE', $company)
             ->first();
         if ($chk && isset($chk->usr_user_id)) {
@@ -573,8 +650,9 @@ class CannabisScoreSearcher extends Searcher
     protected function addManuPSIDs(&$psidManuLgt, $manu)
     {
         foreach ($this->v["areaTypes"] as $area => $areaType) {
-            if (isset($manu->{ 'manu_ids' . $area })) {
-                $tmpIDs = $GLOBALS["SL"]->mexplode(',', $manu->{ 'manu_ids' . $area });
+            $fld = 'manu_ids_' . strtolower($area);
+            if (isset($manu->{ $fld })) {
+                $tmpIDs = $GLOBALS["SL"]->mexplode(',', $manu->{ $fld });
                 if (sizeof($tmpIDs) > 0) {
                     foreach ($tmpIDs as $ps) {
                         $psidManuLgt[] = $ps;
@@ -768,5 +846,15 @@ class CannabisScoreSearcher extends Searcher
         return true;
     }
     
+    public function loadFilterCheckboxes()
+    {
+        $this->v["psFiltChks"] = view(
+            'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
+            $this->v
+        )->render();
+        return true;
+    }
+
+
     
 }

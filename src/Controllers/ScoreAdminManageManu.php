@@ -265,8 +265,10 @@ class ScoreAdminManageManu
         }
         $stages = ['Flower', 'Veg', 'Clone', 'Mother'];
         foreach ($stages as $nick) {
-            $this->v["manus"][$m]->{ 'manu_cnt_' . strtolower($nick) } += sizeof($found[$nick]);
-            $this->v["manus"][$m]->{ 'manu_ids_' . strtolower($nick) } = ','
+            $fld = 'manu_cnt_' . strtolower($nick);
+            $this->v["manus"][$m]->{ $fld } += sizeof($found[$nick]);
+            $fld = 'manu_ids_' . strtolower($nick);
+            $this->v["manus"][$m]->{ $fld } = ',' 
                 . implode(',', $found[$nick]) . ',';
         }
         return true;
@@ -282,12 +284,16 @@ class ScoreAdminManageManu
     {
         if ($GLOBALS["SL"]->REQ->has('addManu') 
             && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
-            $lines = $GLOBALS["SL"]->mexplode("\n", $GLOBALS["SL"]->REQ->get('addManu'));
+            $lines = $GLOBALS["SL"]->mexplode(
+                "\n", 
+                $GLOBALS["SL"]->REQ->get('addManu')
+            );
             if (sizeof($lines) > 0) {
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
                     if ($line != '') {
-                        $chk = RIIManufacturers::where('manu_name', 'LIKE', $line)
+                        $chk = RIIManufacturers::where('manu_name', 
+                                'LIKE', $line)
                             ->first();
                         if (!$chk || !isset($chk->manu_id)) {
                             $chk = new RIIManufacturers;
@@ -373,16 +379,17 @@ class ScoreAdminManageManu
 // Bad duplicate function
     public function getStageNick($defID)
     {
+        $detSet = 'PowerScore Growth Stages';
         switch ($defID) {
-            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Mother Plants'):
+            case $GLOBALS["SL"]->def->getID($detSet, 'Mother Plants'):
                 return 'Mother';
-            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Clone & Mother Plants'):
+            case $GLOBALS["SL"]->def->getID($detSet, 'Clone & Mother Plants'):
                 return 'Clone';
-            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Vegetating Plants'): 
+            case $GLOBALS["SL"]->def->getID($detSet, 'Vegetating Plants'): 
                 return 'Veg';
-            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Flowering Plants'):
+            case $GLOBALS["SL"]->def->getID($detSet, 'Flowering Plants'):
                 return 'Flower';
-            case $GLOBALS["SL"]->def->getID('PowerScore Growth Stages', 'Drying/Curing'):
+            case $GLOBALS["SL"]->def->getID($detSet, 'Drying/Curing'):
                 return 'Dry';
         }
         return '';

@@ -1,6 +1,7 @@
 <?php
 /**
-  * ScoreReportFound generates the entire PowerScore Founders Report, using ScoreStats and SurvStats.
+  * ScoreReportFound generates the entire PowerScore Resource Benchmarking Report, 
+  * using ScoreStats and SurvStats.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
@@ -183,9 +184,10 @@ class ScoreReportFound extends ScoreReportStats
                     /sizeof($this->v["vertDense"][$vert][1]);
             }
         }
-        $this->v["vertDense"][2] = $this->v["vertDense"][2]
-            /(sizeof($this->v["vertDense"][0][1])+sizeof($this->v["vertDense"][1][1]));
-
+        $cnt = sizeof($this->v["vertDense"][0][1])+sizeof($this->v["vertDense"][1][1]);
+        if ($cnt > 0) {
+            $this->v["vertDense"][2] = $this->v["vertDense"][2]/$cnt;
+        }
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view(
             'vendor.cannabisscore.nodes.853-founders-circle-report', 

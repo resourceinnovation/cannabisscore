@@ -11,8 +11,7 @@
 <div class="nFld" style="font-size: 20px;">
     <div class="row">
         <div class="col-md-3 col-sm-6">
-            <input type="number" 
-                name="n{{ $nID }}fld" id="n{{ $nID }}FldID" 
+            <input type="number" name="n{{ $nID }}fld" id="n{{ $nID }}FldID" 
                 onkeyup="checkMin('{{ $nID }}', 0); convertGrams();" 
                 data-nid="{{ $nID }}" step="any" autocomplete="off"
                 class="form-control form-control-lg ntrStp slTab slNodeChange disIn mR10 mB5" 

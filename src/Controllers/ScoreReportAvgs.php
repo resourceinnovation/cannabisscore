@@ -42,7 +42,6 @@ class ScoreReportAvgs extends ScoreReportStats
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
             exit;
         }
-//echo '<pre>'; print_r($this->v); echo '</pre>'; exit;
         return view(
             'vendor.cannabisscore.nodes.773-powerscore-avgs', 
             $this->v
@@ -77,6 +76,7 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function calcAllPowerScoreAvgs()
     {
         $this->initClimateFilts();
+        $this->searcher->loadAllScoresPublic();
         $this->v["scoreSets"] = [
             ['farm',     'PowerScore Averages by Type of Farm'],
             //['cups',     'PowerScore Averages by Competition / Data Set'],
@@ -86,14 +86,16 @@ class ScoreReportAvgs extends ScoreReportStats
             ['tech',     'PowerScore Averages by Technique'],
             ['pow1',     'PowerScore Averages by Other Power Sources'],
             ['pow2',     'PowerScore Averages by Other Power Sources']
-            ];
+        ];
+//echo 'calcAllPowerScoreAvgs()<pre>'; print_r($this->searcher->v["allscores"]); echo '</pre>'; exit;
         if ($this->searcher->v["allscores"]->isEmpty()) {
             return false;
         }
         $psTags = [];
         foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
-            $psTags[$ps->ps_id] 
-                = $this->loadPsTags($ps, RIIPsAreas::where('ps_area_psid', $ps->ps_id)->get());
+            $areas = RIIPsAreas::where('ps_area_psid', $ps->ps_id)
+                ->get();
+            $psTags[$ps->ps_id] = $this->loadPsTags($ps, $areas);
         }
         foreach ($this->v["scoreSets"] as $i => $set) {
             $tmp = new ScoreStats([$set[0]]);
@@ -101,7 +103,7 @@ class ScoreReportAvgs extends ScoreReportStats
             foreach ($this->searcher->v["allscores"] as $cnt => $ps) {
                 if (!in_array($i, [1, 2, 3]) || $ps->ps_characterize == 144) {
                     $tmp->applyScoreFilts($ps, 0, $psTags[$ps->ps_id]);
-                    $tmp->addScoreData($ps);
+                    $tmp->addScoreData($ps, null, $this->searcher->v["fltCmpl"]);
                     $tmp->resetRecFilt();
                 }
             }
@@ -120,9 +122,14 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function calcMorePowerStats()
     {
         $this->v["statMisc"] = new SurvStatsGraph;
-        $this->v["statMisc"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
-        $this->v["statMisc"]->addDataType('g', 'Grams', 'g');                           // stat var a
-        $this->v["statMisc"]->addDataType('kWh', 'Facility Kilowatt Hours', 'kWh');     // stat var b
+        $this->v["statMisc"]->addFilt(
+            'farm', 
+            'Farm Type', 
+            $this->v["sfFarms"][0], 
+            $this->v["sfFarms"][1]
+        ); // a
+        $this->v["statMisc"]->addDataType('g', 'Grams', 'g');                       // stat var a
+        $this->v["statMisc"]->addDataType('kWh', 'Facility Kilowatt Hours', 'kWh'); // stat var b
         foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
             $this->v["statMisc"]->addDataType($fld, $name);
         }
@@ -140,7 +147,7 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->v["statSqft"] = new SurvStatsGraph;
         $this->v["statSqft"]->addFilt('farm', 'Farm Type', $this->v["sfFarms"][0], $this->v["sfFarms"][1]); // a
         $this->v["statSqft"]->addFilt('area', 'Growth Stage', $this->v["sfAreasAll"][0], $this->v["sfAreasAll"][1]); // stat filter b
-        $this->v["statSqft"]->addDataType('sqft', 'Square Feet', 'sqft');                        // stat var a
+        $this->v["statSqft"]->addDataType('sqft', 'Square Feet', 'sqft'); // stat var a
         $this->v["statSqft"]->loadMap();
         
         $this->v["statLgts"] = new SurvStatsGraph;

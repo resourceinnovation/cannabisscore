@@ -19,7 +19,8 @@
         <div class="col-md-4">
             <select name="growthStage" class="form-control" autocomplete="off"
                 onChange="alert('Coming Soon!');">
-                <option value="" SELECTED >Using your lights during any stage</option>
+                <option value="" SELECTED 
+                    >Using your lights during any stage</option>
                 <option value="flower" >Using your lights for flowering</option>
                 <option value="veg" >Using your lights for vegetative</option>
                 <option value="clone" >Using your lights for clones</option>
@@ -146,16 +147,16 @@
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
                     <p><nobr>
-                        {{ $GLOBALS["SL"]->sigFigs($dat->scores[$l], 3) }} 
-                        <span class="fPerc66 slGrey">{{ $leg[2] }}</span>
+                    {{ $GLOBALS["SL"]->sigFigs($dat->scores[$l], 3) }} 
+                    <span class="fPerc66 slGrey">{{ $leg[2] }}</span>
                     </nobr></p>
                 @endforeach
                 </div>
                 <div class="col-4">
                 @foreach ($lgtCompetData->dataLegend as $l => $leg)
-                    <p><nobr>{{ round($dat->ranks[$l]) }} 
-                      {!! $GLOBALS["SL"]->numSupscript(round($dat->ranks[$l])) !!}
-                      <span class="fPerc66 slGrey">percentile</span>
+                    <p><nobr>{{ round($dat->ranks[$l]) }} {!! 
+                    $GLOBALS["SL"]->numSupscript(round($dat->ranks[$l]))
+                    !!} <span class="fPerc66 slGrey">percentile</span>
                     </nobr></p>
                 @endforeach
                 </div>

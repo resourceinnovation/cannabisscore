@@ -10,6 +10,7 @@
   */
 namespace CannabisScore\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
@@ -31,6 +32,9 @@ class ScorePrintReport extends ScoreCalcsPrint
     
     public function printPsRankingFilters($nID)
     {
+        if (Auth::user() && Auth::user()->hasRole('partner')) {
+            $GLOBALS["SL"]->x["partnerVersion"] = true;
+        }
         $this->initSearcher();
         $this->searcher->getSearchFilts();
         $this->searcher->v["nID"] = $nID;
@@ -42,8 +46,9 @@ class ScorePrintReport extends ScoreCalcsPrint
             'vendor.cannabisscore.inc-filter-powerscores', 
             $this->searcher->v
         )->render();
-        return '<div id="scoreRankFiltWrap">'
-            . '<h5 class="mT0">Compare to other farms</h5>'
+        return '<div id="scoreRankFiltWrap" '
+            . 'style="margin: 20px -15px 0px -15px;">'
+            . '<h5 class="mT5">Compare to other farms</h5>'
             . '<div class="pT5"></div>' . $ret . '</div>';
     }
 
@@ -95,6 +100,7 @@ class ScorePrintReport extends ScoreCalcsPrint
         }
         $ret = '';
         $this->v["nID"] = $nID;
+        $GLOBALS["SL"]->addHshoo('#');
         if ($GLOBALS["SL"]->REQ->has('refresh')) {
             $ret .= view(
                 'vendor.cannabisscore.nodes.490-report-calculations-top-refresh', 
@@ -124,6 +130,10 @@ class ScorePrintReport extends ScoreCalcsPrint
         $this->searcher->v["nID"] = 490;
         $this->v["isPast"] = ($this->sessData->dataSets["powerscore"][0]->ps_time_type 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
+        $this->v["usr"] = null;
+        if (Auth::user()) {
+            $this->v["usr"] = Auth::user();
+        }
 
         $GLOBALS["SL"]->pageJAVA .= view(
             'vendor.cannabisscore.nodes.490-report-calculations-js',
@@ -168,6 +178,9 @@ class ScorePrintReport extends ScoreCalcsPrint
     
     protected function ajaxFutureYields()
     {
+        if (Auth::user() && Auth::user()->hasRole('partner')) {
+            $GLOBALS["SL"]->x["partnerVersion"] = true;
+        }
         $this->v["nID"] = 20202020;
         $this->initSearcher();
         $this->searcher->getSearchFilts();
@@ -247,9 +260,11 @@ class ScorePrintReport extends ScoreCalcsPrint
             || !in_array(trim($GLOBALS["SL"]->REQ->get('eff')), $effTypes)) {
             return '';
         }
+
+        $GLOBALS["SL"]->x["indivFilters"] = true;
         $this->initSearcher();
         $this->searcher->searchResultsXtra(1);
-        $this->searcher->searchFiltsURLXtra();
+        $this->searcher->searchFiltsURL();
         if ($this->searcher->v["powerscore"] 
             && isset($this->searcher->v["powerscore"]->ps_id)) {
             $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->ps_time_type 
@@ -261,31 +276,7 @@ class ScorePrintReport extends ScoreCalcsPrint
             if ($GLOBALS["SL"]->REQ->has('refresh') 
                 || !isset($this->searcher->v["currRanks"]->ps_rnk_overall)
                 || !isset($this->searcher->v["currRanks"]->ps_rnk_overall->ps_rnk_overall)) {
-                if (isset($this->searcher->v["powerscore"]->ps_time_type) 
-                    && $this->searcher->v["powerscore"]->ps_time_type 
-                        == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
-                    $ranks = RIIPsRanks::where('ps_rnk_filters', '')
-                        ->first();
-                    $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
-                    $this->searcher->v["powerscore"]->ps_effic_overall = $this->searcher
-                        ->v["currRanks"]->ps_rnk_overall;
-                    $this->searcher->v["powerscore"]->save();
-                } else {
-                    $urlFlts = $this->searcher->v["urlFlts"];
-                    //$this->calcAllScoreRanks();
-                    $this->searcher->v["urlFlts"] = $urlFlts;
-                    $this->searcher->v["currRanks"] = RIIPsRankings::where(
-                            'ps_rnk_psid', 
-                            $this->searcher->v["powerscore"]->ps_id
-                        )
-                        ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
-                        ->first();
-                    if (!$this->searcher->v["currRanks"]) {
-                        $ranks = RIIPsRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
-                            ->first();
-                        $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
-                    }
-                }
+                $this->ajaxScorePercentilesCalcRanks();
             }
             $this->searcher->v["currGuage"] = 0;
             $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->ps_effic_facility) 
@@ -302,53 +293,46 @@ class ScorePrintReport extends ScoreCalcsPrint
             $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' 
                 . $overRank . $superscript . '</h1><b>percentile</b></center>';
 // number_format($ranksCache->ps_rnk_tot_cnt) }} past growing @if ($ranksCache->ps_rnk_tot_cnt > 1) years @else year @endif of
-            $this->searcher->v["withinFilters"] = '<div id="efficBlockOverGuageTitle">' 
-                . '<h5>Overall: '
-                . (($this->searcher->v["currRanks"]->ps_rnk_overall > 66) ? 'Leader' 
-                    : (($this->searcher->v["currRanks"]->ps_rnk_overall > 33) 
-                        ? 'Middle-of-the-Pack' : 'Upgrade Candidate')) 
-                . '</h5></div><div class="efficGuageTxtOverall4">'
-                . 'Your farm\'s overall performance within the data set of ';
-            if ($this->searcher->v["fltFarm"] == 0) {
-                $this->searcher->v["withinFilters"] .= 'all farm types';
-            } else {
-                $farmType = $GLOBALS["SL"]->def->getVal(
-                    'PowerScore Farm Types', 
-                    $this->searcher->v["fltFarm"]
-                );
-                $farmType = str_replace('Greenhouse/Hybrid/Mixed Light', 'Greenhouse/ Hybrid', $farmType);
-                $this->searcher->v["withinFilters"] .= strtolower($farmType) . ' farms';
-            }
-            $this->searcher->v["withinFilters"] .= $this->searcher->v["xtraFltsDesc"];
-            if ($this->searcher->v["fltState"] == '' 
-                && $this->searcher->v["fltClimate"] == '') {
-                $this->searcher->v["withinFilters"] .= ' in the U.S. and Canada:';
-            } elseif ($this->searcher->v["fltState"] != '') {
-                if ($this->searcher->v["fltState"] == 'US') {
-                    $this->searcher->v["withinFilters"] .= ' in the United States.';
-                } elseif ($this->searcher->v["fltState"] == 'Canada') {
-                    $this->searcher->v["withinFilters"] .= ' in Canada:';
-                } else {
-                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">' 
-                        . $GLOBALS["SL"]->getState($this->searcher->v["fltState"]) . ':';
-                }
-            } else {
-                if ($this->searcher->v["fltClimate"] == 'US') {
-                    $this->searcher->v["withinFilters"] .= ' in the United States.';
-                } elseif ($this->searcher->v["fltClimate"] == 'Canada') {
-                    $this->searcher->v["withinFilters"] .= ' in Canada:.';
-                } else {
-                    $this->searcher->v["withinFilters"] .= ' in <span class="slBlueDark">'
-                        . 'ASHRAE Climate Zone ' . $this->searcher->v["fltClimate"] . ':';
-                }
-            }
-            $this->searcher->v["withinFilters"] .= '</div>';
+            $this->searcher->searchResultsXtra(1);
+            $this->searcher->searchFiltsURL();
+            $this->searcher->loadFiltersDesc();
             return view(
                 'vendor.cannabisscore.nodes.490-report-calculations-load-all-js', 
                 $this->searcher->v
             )->render();
         }
         return '';
+    }
+    
+    protected function ajaxScorePercentilesCalcRanks()
+    {
+        if (isset($this->searcher->v["powerscore"]->ps_time_type) 
+            && $this->searcher->v["powerscore"]->ps_time_type 
+                == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
+            $ranks = RIIPsRanks::where('ps_rnk_filters', '')
+                ->first();
+            $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
+            $this->searcher->v["powerscore"]->ps_effic_overall = $this->searcher
+                ->v["currRanks"]->ps_rnk_overall;
+            $this->searcher->v["powerscore"]->save();
+        } else {
+            $urlFlts = $this->searcher->v["urlFlts"];
+            $this->calcAllScoreRanks();
+            $this->searcher->v["urlFlts"] = $urlFlts;
+            $this->searcher->v["currRanks"] = RIIPsRankings::where(
+                    'ps_rnk_psid', 
+                    $this->searcher->v["powerscore"]->ps_id
+                )
+                ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
+                ->first();
+            if (!$this->searcher->v["currRanks"]) {
+                $ranks = RIIPsRanks::where('ps_rnk_filters', 
+                        $this->searcher->v["urlFlts"])
+                    ->first();
+                $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
+            }
+        }
+        return true;
     }
     
     // returns an array of overrides for ($currNodeSessionData, ???... 
@@ -423,6 +407,25 @@ class ScorePrintReport extends ScoreCalcsPrint
             exit;
         }
         return true;
+    }
+
+    protected function reportMaMonths($nID)
+    {
+        return view(
+            'vendor.cannabisscore.nodes.1420-ma-compliance-monthly', 
+            [
+                "rec"    => $this->sessData->dataSets["compliance_ma"][0],
+                "months" => $this->sessData->dataSets["compliance_ma_months"]
+            ]
+        )->render();
+    }
+
+    protected function reportMaNextPro($nID)
+    {
+        return view(
+            'vendor.cannabisscore.nodes.1436-ma-compliance-next-go-pro', 
+            [ "rec" => $this->sessData->dataSets["compliance_ma"][0] ]
+        )->render();
     }
 
 }

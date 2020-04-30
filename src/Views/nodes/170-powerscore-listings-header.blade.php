@@ -9,12 +9,14 @@
             "sort"   => $sort
         ])->render() !!}<br />
     @endif */ ?>
-    @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4)
+    @if ($nID != 1373 && $GLOBALS["SL"]->x["partnerLevel"] >= 4)
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Score <br />ID#',
             "srtVal" => 'ps_id',
             "sort"   => $sort
         ])->render() !!}
+    @else
+        Score
     @endif
     </th>
     <th>
@@ -96,15 +98,21 @@
     @endif
     </th>
     <th>
+    @if (Auth::user()->hasRole('administrator|staff'))
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'County State',
             "srtVal" => 'ps_county',
             "sort"   => $sort
         ])->render() !!}
-    @if (Auth::user()->hasRole('administrator|staff'))
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Zip',
             "srtVal" => 'ps_zip_code',
+            "sort"   => $sort
+        ])->render() !!}
+    @elseif (Auth::user()->hasRole('partner'))
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'State',
+            "srtVal" => 'ps_state',
             "sort"   => $sort
         ])->render() !!}
     @endif

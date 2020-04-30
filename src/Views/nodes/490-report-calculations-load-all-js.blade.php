@@ -18,8 +18,9 @@ function updateRanks() {
             guageList[{{ $i }}][3] = '';
         @else
             guageList[{{ $i }}][3] = {!! json_encode(
-                "We did not have enough information to calculate this farm's Overall PowerScore "
-                . $withinFilters) !!};
+                "<span class='red'>We did not have enough information to calculate this "
+                    . "farm's PowerScore rankings with the current filters.</span>"
+            ) !!};
         @endif
         @if (in_array($eff, ['Overall', 'Production', 'Lighting', 'Waste']))
             guageList[{{ $i }}][5] = 'f5f5f3';

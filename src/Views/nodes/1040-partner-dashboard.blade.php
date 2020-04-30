@@ -106,7 +106,8 @@
             </div>
             <div class="col-lg-10 pB10">
                 <input id="prtnerRefURL" type="text" class="form-control" 
-                    value="https://powerscore.resourceinnovation.org/start-for-{{ $usrInfo->slug }}">
+                    value="https://powerscore.resourceinnovation.org/start-for-{{ 
+                    $usrInfo->slug }}">
             </div>
         </div>
         <div id="prtnerRefURLalert">
@@ -115,3 +116,22 @@
 
     </div>
 @endif
+
+
+<div class="slCard nodeWrap">
+    <h3>Official <nobr>Data Set</nobr> of <nobr>Completed PowerScores</nobr></h3>
+    <div class="row mT30">
+        <div class="col-lg-6 pB10">
+            <a href="/dash/partner-compare-official-powerscores" 
+                class="btn btn-lg btn-primary btn-block"
+                >Compare Individual Scores</a>
+        </div>
+        <div class="col-lg-6 pB10">
+            <p>
+                List all the individual PowerScores within the
+                official data set used for analysis.
+            </p>
+        </div>
+    </div>
+</div>
+

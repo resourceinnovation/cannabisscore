@@ -2,7 +2,7 @@
 
 <div class="row">
 
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltPerp) && intVal($fltPerp) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltPerp" id="fltPerpID" 
@@ -12,7 +12,7 @@
         </label>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltPump) && intVal($fltPump) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltPump" id="fltPumpID" 
@@ -22,7 +22,7 @@
         </label>
     </div>
 
-<?php /*    <div class="col-md-4">
+<?php /*    <div class="col-lg-6">
         <label class=" @if (isset($fltWtrh) && intVal($fltWtrh) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltWtrh" id="fltWtrhID" 
@@ -32,7 +32,7 @@
         </label>
     </div> */ ?>
 
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltManu) && intVal($fltManu) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltManu" id="fltManuID" 
@@ -42,7 +42,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltAuto) && intVal($fltAuto) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltAuto" id="fltAutoID" 
@@ -52,7 +52,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltVert) && intVal($fltVert) == 1) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltVert" id="fltVertID" 
@@ -62,7 +62,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(149, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew1" 
@@ -72,7 +72,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(159, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew2" 
@@ -82,7 +82,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(151, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew3" 
@@ -92,7 +92,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(150, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew4" 
@@ -102,7 +102,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(158, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew5" 
@@ -112,7 +112,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(153, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew6" 
@@ -122,7 +122,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(154, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew7" 
@@ -132,7 +132,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(155, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew8" 
@@ -142,7 +142,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(156, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew9" 
@@ -152,7 +152,7 @@
         </label>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <label class=" @if (isset($fltRenew) && in_array(157, $fltRenew)) fingerAct 
             @else finger @endif ">
             <input type="checkbox" name="fltRenew[]" id="fltRenew10" 

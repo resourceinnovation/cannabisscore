@@ -2,11 +2,17 @@
 
 <div class="slCard nodeWrap">
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
-        @if (trim($fltStateClim) != '') href="?excel=1&fltStateClim={{ $fltStateClim }}"
-        @else href="?excel=1"
+        @if (trim($fltStateClim) != '') 
+            href="?excel=1&fltStateClim={{ $fltStateClim }}"
+        @else 
+            href="?excel=1"
         @endif
-        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
-    <h1 class="slBlueDark">Category Averages</h1>
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+        Excel</a>
+    <h1 class="slBlueDark">Ranked Data Set Averages by Category</h1>
+
+    {!! view('vendor.cannabisscore.inc-partner-ref-disclaim')->render() !!}
+
     <div class="row">
         <div class="col-8">
             <p>
@@ -18,8 +24,9 @@
             </p>
         </div>
         <div class="col-4">
-            <select name="fltStateClim" id="fltStateClimID" class="form-control form-control-lg"
-                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
+            <select name="fltStateClim" id="fltStateClimID" 
+                class="form-control form-control-lg" autocomplete="off"
+                onChange="window.location='?fltStateClim='+this.value;">
                 <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
                     >All Climates and States</option>
                 <option disabled ></option>
@@ -40,6 +47,7 @@
 @endforeach
 
 <style>
+body { overflow-x: visible; }
 #tblTitle7 { display: none; }
 #tblCard7 { border-top: 0px none; }
 </style>

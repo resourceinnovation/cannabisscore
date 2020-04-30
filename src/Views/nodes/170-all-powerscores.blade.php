@@ -5,16 +5,34 @@
     <a href="?refresh=1"><h2 class="slBlueDark">
     @if (isset($GLOBALS["SL"]->x["partnerVersion"])
         && $GLOBALS["SL"]->x["partnerVersion"])
-        @if (isset($usrInfo) && isset($usrInfo->company))
+        @if (isset($GLOBALS["SL"]->x["officialSet"]) 
+            && $GLOBALS["SL"]->x["officialSet"])
+            Official Data Set of PowerScores
+        @elseif (isset($usrInfo) && isset($usrInfo->company))
             {{ $usrInfo->company }}
         @else Largely Lumens, Inc. PowerScores
         @endif
     @else   
         @if ($nID == 808) NWPCC Data Import 
-        @else Compare All PowerScores 
+        @else Ranked Data Set Individual Rankings
         @endif
     @endif
     </h2></a>
+
+@if (isset($GLOBALS["SL"]->x["partnerVersion"])
+    && $GLOBALS["SL"]->x["partnerVersion"])
+    @if (isset($GLOBALS["SL"]->x["officialSet"]) 
+        && $GLOBALS["SL"]->x["officialSet"])
+        <p>
+            This report lists the completed PowerScores used for
+            analysis by RII. PowerScores completed through your 
+            custom referral link may or may not appear here.
+        </p>
+    @else 
+        {!! view('vendor.cannabisscore.inc-partner-ref-disclaim')->render() !!}
+    @endif
+@endif
+
     <?php /* <pre>{!! print_r($usrInfo) !!}</pre> */ ?>
 
     <div id="filtWrap">
@@ -69,6 +87,7 @@
 @endif
 
 <style>
+body { overflow-x: visible; }
 #filtWrap { width: 100%; max-width: 100%; }
 @media screen and (max-width: 768px) {
     #filtWrap { width: 100%; max-width: 370px; }

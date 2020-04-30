@@ -2,7 +2,7 @@
 
 <tr>
 <th colspan=10 align="left" >
-    Category Averages 
+    Ranked Data Set Averages by Category
     @if (trim($fltStateClim) != '')
         - {!! $GLOBALS["SL"]->states->getZoneOrState($fltStateClim) !!}
     @endif

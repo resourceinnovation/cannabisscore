@@ -1,7 +1,8 @@
 /* generated from resources/views/vendor/cannabisscore/inc-filter-powerscores-js.blade.php */
 
 function gatherFilts() {
-    var baseUrl = @if ($GLOBALS["SL"]->REQ->has('lighting')) "&lighting=1"; @else ""; @endif
+    var baseUrl = "";
+    @if ($GLOBALS["SL"]->REQ->has('lighting')) baseUrl += "&lighting=1"; @endif
     if (document.getElementById("filtFarmID")) {
         baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }

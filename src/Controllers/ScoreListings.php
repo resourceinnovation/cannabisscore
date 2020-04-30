@@ -11,6 +11,7 @@
 namespace CannabisScore\Controllers;
 
 use DB;
+use Auth;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
@@ -43,6 +44,7 @@ class ScoreListings extends ScoreReportLightingManu
             return $this->getRandomPowerScores();
         }
         $GLOBALS["SL"]->loadStates();
+        $this->searcher->getSearchFilts();
         $this->searcher->v["allListings"] = '';
         $this->searcher->v["fltStateClim"] = '';
 
@@ -51,14 +53,21 @@ class ScoreListings extends ScoreReportLightingManu
             && $this->v["user"]->hasRole('partner')
             && isset($this->v["usrInfo"]) 
             && isset($this->v["usrInfo"]->company)
-            && trim($this->v["usrInfo"]->company) != '') {
+            && trim($this->v["usrInfo"]->company) != ''
+            && (!isset($GLOBALS["SL"]->x["officialSet"])
+                || !$GLOBALS["SL"]->x["officialSet"])) {
             $usrCompany = trim($this->searcher->v["usrInfo"]->company);
         }
 
         $origFltManuLgt = '';
         if ($GLOBALS["SL"]->REQ->has('fltManuLgt')) {
-            $origFltManuLgt = trim($GLOBALS["SL"]->REQ->fltManuLgt);
-            if ($this->v["isAdmin"] || $origFltManuLgt == $usrCompany) {
+            $origFltManuLgt = '';
+            $chk = RIIManufacturers::find($GLOBALS["SL"]->REQ->fltManuLgt);
+            if ($chk && isset($chk->manu_name)) {
+                $origFltManuLgt = $chk->manu_name;
+            }
+            if (Auth::user()->hasRole('administrator|staff')
+                || $origFltManuLgt == $usrCompany) {
                 $psidManuLgt = [];
                 $this->searcher->addAllManuPSIDs($psidManuLgt);
                 if (sizeof($psidManuLgt) == 0) {
@@ -78,7 +87,6 @@ class ScoreListings extends ScoreReportLightingManu
 
         if (in_array($origFltManuLgt, ['', '0'])) {
 
-            $this->searcher->getSearchFilts();
             //$this->searcher->searchResultsXtra();
             $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID);
 
@@ -96,8 +104,9 @@ class ScoreListings extends ScoreReportLightingManu
                     $this->searcher->v["fltManuLgt"] = $manu->manu_id;
                     $this->searcher->v["allListings"] .= '<a target="_blank" '
                         . 'href="/dash/competitive-performance?manu='
-                        . urlencode($manu->manu_name) . '"><h4>' . $manu->manu_name 
-                        . '</h4></a>' . $this->getPowerScoresPublic($nID);
+                        . urlencode($manu->manu_name) . '"><h4>' 
+                        . $manu->manu_name . '</h4></a>' 
+                        . $this->getPowerScoresPublic($nID);
                 }
             }
 
@@ -115,10 +124,15 @@ class ScoreListings extends ScoreReportLightingManu
                 );
             }
             if ($this->searcher->v["fltClimate"] != '') {
-                $exportFile .= ' Climate Zone ' . $this->searcher->v["fltClimate"];
+                $exportFile .= ' Climate Zone ' 
+                    . $this->searcher->v["fltClimate"];
             }
-            $exportFile = str_replace(' ', '_', $exportFile) . '-' . date("Y-m-d") . '.xls';
-            $GLOBALS["SL"]->exportExcelOldSchool($this->searcher->v["allListings"], $exportFile);
+            $exportFile = str_replace(' ', '_', $exportFile) 
+                . '-' . date("Y-m-d") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool(
+                $this->searcher->v["allListings"], 
+                $exportFile
+            );
         }
 
         $this->searcher->v["manuList"] = RIIManufacturers::orderBy('manu_name', 'asc')
@@ -126,10 +140,7 @@ class ScoreListings extends ScoreReportLightingManu
         $this->searcher->v["usrCompanies"] = RIIUserInfo::whereNotNull('usr_company_name')
             ->orderBy('usr_company_name', 'asc')
             ->get();
-        $this->searcher->v["psFiltChks"] = view(
-            'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
-            $this->searcher->v
-        )->render();
+        $this->searcher->loadFilterCheckboxes();
         $this->searcher->v["psFilters"] = view(
             'vendor.cannabisscore.inc-filter-powerscores', 
             $this->searcher->v
@@ -163,7 +174,8 @@ class ScoreListings extends ScoreReportLightingManu
         $xtra = "";
         if ($GLOBALS["SL"]->REQ->has('review')) {
             $this->v["fltCmpl"] = 0;
-            $xtra = "->whereNotNull('ps_notes')->where('ps_notes', 'NOT LIKE', '')";
+            $xtra = "->whereNotNull('ps_notes')"
+                . "->where('ps_notes', 'NOT LIKE', '')";
         }
         $this->searcher->loadAllScoresPublic($xtra);
         $this->searcher->v["allmores"] = [];
@@ -302,13 +314,13 @@ class ScoreListings extends ScoreReportLightingManu
         return true;
     }
     
-    public function getCultClassicReport()
+    public function getCultClassicReportInit()
     {
         $this->v["farms"] 
             = $this->v["psAdded"] 
             = $this->v["namesChecked"] 
             = [];
-        $defCC = $GLOBALS["SL"]->def->getID(
+        $this->v["defCC"] = $GLOBALS["SL"]->def->getID(
             'PowerScore Competitions',
             'Cultivation Classic'
         );
@@ -316,8 +328,14 @@ class ScoreListings extends ScoreReportLightingManu
             "Y-m-j", 
             mktime(0, 0, 0, date("m")-9, date("d"), date("Y"))
         );
+        return true;
+    }
+    
+    public function getCultClassicReport()
+    {
+        $this->getCultClassicReportInit();
         $chk = RIICompetitors::where('cmpt_year', '=', date("Y"))
-            ->where('cmpt_competition', '=', $defCC)
+            ->where('cmpt_competition', '=', $this->v["defCC"])
             ->orderBy('cmpt_name', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
@@ -327,9 +345,9 @@ class ScoreListings extends ScoreReportLightingManu
         }
         /*
         $chk = DB::table('rii_powerscore')
-            ->join('rii_ps_for_cup', function ($join) use ($defCC) {
+            ->join('rii_ps_for_cup', function ($join) use ($this->v["defCC"]) {
                 $join->on('rii_ps_for_cup.ps_cup_psid', '=', 'rii_powerscore.ps_id')
-                    ->where('rii_ps_for_cup.ps_cup_cup_id', $defCC);
+                    ->where('rii_ps_for_cup.ps_cup_cup_id', $this->v["defCC"]);
             })
             //->leftJoin('rii_ps_rankings', function ($join) {
             //    $join->on('rii_ps_rankings.ps_rnk_psid', '=', 'rii_powerscore.ps_id')
@@ -345,6 +363,28 @@ class ScoreListings extends ScoreReportLightingManu
             }
         }
         */
+        $this->calcCultClassicFarmTots();
+        //$chk = RIIPowerscore::get();
+        //$this->v["entryFarmNames"] = $this->listSimilarNames($chk);
+//echo '<pre>'; print_r($this->v["farms"]); echo '</pre>'; exit;
+        if ($GLOBALS["SL"]->REQ->has('excel') 
+            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.744-cult-classic-report-innertable', 
+                $this->v
+            )->render();
+            $filename = 'CultClassic-PowerScoreReport-' . date("Y-m-d") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
+        }
+        $GLOBALS["SL"]->pageBodyOverflowX();
+        return view(
+            'vendor.cannabisscore.nodes.744-cult-classic-report', 
+            $this->v
+        )->render();
+    }
+    
+    protected function calcCultClassicFarmTots()
+    {
         $this->v["farmTots"] = [ 0, 0 ];
         if (sizeof($this->v["farms"]) > 0) {
             foreach ($this->v["farms"] as $i => $f) {
@@ -358,25 +398,7 @@ class ScoreListings extends ScoreReportLightingManu
                 }
             }
         }
-        //$chk = RIIPowerscore::get();
-        //$this->v["entryFarmNames"] = $this->listSimilarNames($chk);
-//echo '<pre>'; print_r($this->v["farms"]); echo '</pre>'; exit;
-        if ($GLOBALS["SL"]->REQ->has('excel') 
-            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
-            $innerTable = view(
-                'vendor.cannabisscore.nodes.744-cult-classic-report-innertable', 
-                $this->v
-            )->render();
-            $GLOBALS["SL"]->exportExcelOldSchool(
-                $innerTable, 
-                'CultClassic-PowerScoreReport-' . date("Y-m-d") . '.xls'
-            );
-        }
-        $GLOBALS["SL"]->pageBodyOverflowX();
-        return view(
-            'vendor.cannabisscore.nodes.744-cult-classic-report', 
-            $this->v
-        )->render();
+        return true;
     }
     
     protected function loadCultClassicFarmName($i, $farmName = '')
@@ -402,9 +424,9 @@ class ScoreListings extends ScoreReportLightingManu
         if ($chk2->isNotEmpty()) {
             foreach ($chk2 as $j => $ps) {
                 if ($j == 0) {
-                    $this->v["farms"][$i]["ps"] = $ps;
+                    $this->v["farms"][$i]["ps"]    = $ps;
                     $this->v["farms"][$i]["ranks"] = $this->getCurrSimilarRanks($ps);
-                    $this->v["psAdded"][] = $ps->ps_id;
+                    $this->v["psAdded"][]          = $ps->ps_id;
                 }
             }
         } else {
@@ -417,10 +439,9 @@ class ScoreListings extends ScoreReportLightingManu
             if ($chk2->isNotEmpty()) {
                 foreach ($chk2 as $j => $ps) {
                     if ($j == 0) {
-                        $this->v["farms"][$i]["ps"] = $ps;
-                        $this->v["farms"][$i]["ranks"] 
-                            = $this->getCurrSimilarRanks($ps);
-                        $this->v["psAdded"][] = $ps->ps_id;
+                        $this->v["farms"][$i]["ps"]    = $ps;
+                        $this->v["farms"][$i]["ranks"] = $this->getCurrSimilarRanks($ps);
+                        $this->v["psAdded"][]          = $ps->ps_id;
                     }
                 }
             } else {
@@ -449,7 +470,8 @@ class ScoreListings extends ScoreReportLightingManu
     
     protected function loadCultClassicID($ps)
     {
-        if (!isset($ps->ps_name) || !in_array($ps->ps_name, $this->v["namesChecked"])) {
+        if (!isset($ps->ps_name) 
+            || !in_array($ps->ps_name, $this->v["namesChecked"])) {
             $this->v["psAdded"][] = $ps->ps_id;
             $this->v["farms"][] = [
                 "name"  => ((isset($ps->ps_name)) ? trim($ps->ps_name) : ''),
@@ -459,6 +481,50 @@ class ScoreListings extends ScoreReportLightingManu
             ];
         }
         return true;
+    }
+
+    public function getCultClassicMultiYearReport()
+    {
+        $this->getCultClassicReportInit();
+        $chk = RIICompetitors::where('cmpt_competition', 
+                '=', $this->v["defCC"])
+            ->orderBy('cmpt_name', 'asc')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            $status = [ $this->v["defCmplt"], 364 ];
+            foreach ($chk as $i => $farm) {
+                $name = $farm->cmpt_name;
+                $chk2 = DB::table('rii_powerscore')
+                    ->where('rii_powerscore.ps_name', 'LIKE', $name)
+                    ->whereIn('rii_powerscore.ps_status', $status)
+                    ->orderBy('rii_powerscore.ps_year', 'asc')
+                    ->orderBy('rii_powerscore.ps_id', 'desc')
+                    ->get();
+                if ($chk2->isNotEmpty()) {
+                    foreach ($chk2 as $j => $ps) {
+                        $y = intVal($ps->ps_year);
+                        if (!isset($this->v["farms"][$name])) {
+                            $this->v["farms"][$name] = [];
+                        }
+                        if (!isset($this->v["farms"][$name][$y])) {
+                            $this->v["farms"][$name][$y] = [
+                                "ps"  => $ps,
+                                "rnk" => $this->getCurrSimilarRanks($ps)
+                            ];
+                        }
+                    }
+                }
+
+
+
+
+            }
+        }
+        $GLOBALS["SL"]->pageBodyOverflowX();
+        return view(
+            'vendor.cannabisscore.nodes.1381-cult-classic-multi-year', 
+            $this->v
+        )->render();
     }
     
     public function getCurrSimilarRanks($ps)

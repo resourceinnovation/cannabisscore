@@ -126,8 +126,7 @@ class ScoreReportStats
         $this->initSearcher();
         $this->v["fltStateClim"] = '';
         if (isset($this->searcher->searchFilts["fltStateClim"])) {
-            $this->v["fltStateClim"] = trim($this->searcher
-                ->searchFilts["fltStateClim"]);
+            $this->v["fltStateClim"] = trim($this->searcher->searchFilts["fltStateClim"]);
         }
         $this->prepStatFilts();
         return true;

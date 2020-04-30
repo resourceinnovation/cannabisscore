@@ -2,10 +2,14 @@
 
 <div class="slCard nodeWrap">
 
+    <div class="float-right">
+        <a href="?refresh=1" class="btn btn-secondary btn-sm"
+            ><i class="fa fa-refresh" aria-hidden="true"></i></a>
+    </div>
     <h2 class="mT0 slBlueDark">Invite & Manage Partners</h2>
     <p>
-        If you want to invite a new partner, just put their email into
-        this form and click the button to Add them. 
+        If you want to invite a new partner, just put their 
+        email into this form and click the button to Add them. 
         Then let them know to sign in (draft sample email below).
         For happy software, each record here should be linked to 
         <b>an Invite Email Address or a User Account</b>.

@@ -38,8 +38,11 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         if (Auth::user() && isset(Auth::user()->id)) {
             $uID = Auth::user()->id;
         }
-        if (isset($GLOBALS["SL"]->x["partnerManuIDs"])
-            && sizeof($GLOBALS["SL"]->x["partnerManuIDs"]) > 0) {
+        if ((isset($GLOBALS["SL"]->x["partnerManuIDs"])
+                && sizeof($GLOBALS["SL"]->x["partnerManuIDs"]) > 0)
+            || ($GLOBALS["SL"]->REQ->has('manu') 
+                && trim($GLOBALS["SL"]->REQ->manu) != ''
+                && $this->v["user"]->hasRole('administrator|staff'))) {
             return $this->printCompareLightManu($nID);
         }
         return $this->printPartnerCompetitive($nID, $uID);
@@ -56,6 +59,48 @@ class ScoreReportLightingManu extends ScoreListingsGraph
     protected function printPartnerCompetitive($nID, $uID)
     {
         $this->v["statCompete"] = new ScoreStats;
+        $this->initPartnerCompeteData();
+
+        $avgs = [];
+        foreach ($this->v["farmTypes"] as $label => $farm) {
+            $avgs[$farm] = [];
+            foreach ($this->v["dataLegend"] as $l => $leg) {
+                $avgs[$farm][$leg[0]] = [ 0, [] ];
+            }
+        }
+        $this->searcherAvgs = new CannabisScoreSearcher;
+        $this->searcherAvgs->getSearchFilts(1);
+        $this->searcherAvgs->v["fltPartner"] = 0;
+        $this->searcherAvgs->v["fltCmpl"] = 243;
+        $this->searcherAvgs->searchFiltsURL(true);
+        $this->searcherAvgs->loadAllScoresPublic();
+        if (sizeof($this->searcherAvgs->v["allscores"]) > 0) {
+//echo '<pre>'; print_r($this->searcherAvgs->v["allscores"]); echo '</pre>'; exit;
+            foreach ($this->searcherAvgs->v["allscores"] as $i => $ps) {
+                $farm = $ps->ps_characterize;
+                foreach ($this->v["dataLegend"] as $l => $leg) {
+                    if ($ps->{ 'ps_effic_' . $leg[1] } > 0 
+                        && $ps->{ 'ps_effic_' . $leg[1] . '_status' } 
+                            == $this->v["defCmplt"]) {
+                        $avgs[$farm][$leg[0]][1][] = $ps->{ 'ps_effic_' . $leg[1] };
+                    }
+                }
+            }
+            foreach ($this->v["farmTypes"] as $label => $farm) {
+                foreach ($this->v["dataLegend"] as $l => $leg) {
+                    $sum = array_sum($avgs[$farm][$leg[0]][1]);
+                    $cnt = count($avgs[$farm][$leg[0]][1]);
+                    if ($cnt > 0) {
+                        $avgs[$farm][$leg[0]][0] = $sum/$cnt;
+                    } else {
+                        $avgs[$farm][$leg[0]][0] = 0;
+                    }
+                }
+            }
+        }
+//echo '<pre>'; print_r($avgs); echo '</pre>'; exit;
+
+
         $this->searcher = new CannabisScoreSearcher;
         $this->v["partnerPSIDs"] = $this->searcher->getPartnerPSIDs($uID);
         $this->searcher->getSearchFilts(1);
@@ -67,7 +112,6 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         $this->v["fltClimate"] = $this->searcher->v["fltClimate"];
         $this->v["fltSize"] = $this->searcher->v["fltSize"];
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
-        $this->initPartnerCompeteData();
         if ($this->v["totCnt"] > 0) {
             foreach ($this->searcher->v["allscores"] as $i => $ps) {
 
@@ -116,33 +160,29 @@ class ScoreReportLightingManu extends ScoreListingsGraph
             }
         }
 
+
         foreach ($this->v["farmTypes"] as $label => $farm) {
-            $rank = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=' . $farm)
-                ->first();
-            if ($rank && isset($rank->ps_rnk_tot_cnt)) {
-                foreach ($this->v["dataLegend"] as $l => $leg) {
-                    $fld = 'ps_rnk_' . $leg[1];
-                    if (isset($rank->{ $fld }) && trim($rank->{ $fld }) != '') {
-                        $arr = $GLOBALS["SL"]->mexplode(',', $rank->{ $fld });
-                        if (sizeof($arr) > 0) {
-                            $avg = $GLOBALS["SL"]->arrAvg($arr);
-                            $this->v["graphData"][$l][1][$farm][] = [
-                                $avg,
-                                sizeof($arr),
-                                $label . ' Average'
-                            ];
-                            if ($this->v["graphData"][$l][2] < $avg) {
-                                $this->v["graphData"][$l][2] = $avg;
-                            }
-                        }
-                    }
+            foreach ($this->v["dataLegend"] as $l => $leg) {
+                $this->v["graphData"][$l][1][$farm][] = [
+                    $avgs[$farm][$leg[0]][0],
+                    sizeof($avgs[$farm][$leg[0]][1]),
+                    $label . ' Average'
+                ];
+                if ($this->v["graphData"][$l][2] < $avgs[$farm][$leg[0]][0]) {
+                    $this->v["graphData"][$l][2] = $avgs[$farm][$leg[0]][0];
                 }
             }
         }
 //echo '<pre>'; print_r($this->v["graphData"]); echo '</pre>'; exit;
 //echo 'statComplete: <pre>'; print_r($this->v["statCompete"]); echo '</pre>'; exit;
 
-
+        $this->searcher->v["nID"] = $nID;
+        $this->searcher->loadFilterCheckboxes();
+        $this->v["psFilters"] = view(
+            'vendor.cannabisscore.inc-filter-powerscores', 
+            $this->searcher->v
+        )->render();
+        $GLOBALS['SL']->x['partnerVersion'] = true;
         $GLOBALS["SL"]->x["needsCharts"] = true;
         return view(
             'vendor.cannabisscore.nodes.979-partner-competitive', 

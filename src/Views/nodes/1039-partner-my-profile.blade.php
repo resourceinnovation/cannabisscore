@@ -41,11 +41,30 @@
         $(document).on("keyup", "#myProfileCompanyNameID", function(e) { slugCompName(); });
         setTimeout(function() { slugCompName(); }, 10);
     }); </script>
+@else
+    <div class="slCard nodeWrap">
+        <center><a href="/dashboard" class="btn btn-xl btn-primary">
+            @if ($company && $company != '') {{ $company }} @else Partner @endif
+            Dashboard</a>
+        </center>
+    </div>
+    <div class="row mT30">
+        <div class="col-lg-6 pB30">
+            <div class="slCard nodeWrap">
+                <a class="btn btn-lg btn-primary btn-block taC"
+                    href="/start-for-{{ $usrInfo->slug }}">Start A Fresh PowerScore</a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="slCard nodeWrap">
+                <a class="btn btn-lg btn-primary btn-block taC mB30"
+                    href="/preview3">Preview <nobr>PowerScore Pro</nobr></a>
+                <p>
+                    Scores from this preview do not store in your partner 
+                    database, but can be viewed here on your My Profile page.
+                </p>
+            </div>
+        </div>
+    </div>
 @endif
 
-<div class="slCard nodeWrap">
-    <center><a href="/dashboard" class="btn btn-xl btn-primary">
-        @if ($company && $company != '') {{ $company }} @else Partner @endif
-        Dashboard</a>
-    </center>
-</div>

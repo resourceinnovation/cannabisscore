@@ -52,7 +52,7 @@ class CannabisScoreAdminMenu extends AdminMenu
                     [
                         $this->admMenuLnk(
                             '/dash/compare-powerscores',
-                            'Compare All Scores'
+                            'Ranked Data Set Rankings'
                         ),
                         $this->admMenuLnk(
                             '/dash/cultivation-classic-final-report',
@@ -73,14 +73,14 @@ class CannabisScoreAdminMenu extends AdminMenu
                     ]
                 ),
                 $this->admMenuLnk(
-                    '/dash/founders-circle-report',
+                    '/dash/resource-benchmarking-report',
                     'Score Analysis', 
                     '', 
                     1, 
                     [
                         $this->admMenuLnk(
-                            '/dash/founders-circle-report',
-                            'Founders Circle'
+                            '/dash/resource-benchmarking-report',
+                            'Resource Benchmarking'
                         ),
                         $this->admMenuLnk(
                             '/dash/compare-powerscore-averages',
@@ -201,8 +201,8 @@ class CannabisScoreAdminMenu extends AdminMenu
             1, 
             [
                 $this->admMenuLnk(
-                    '/dash/founders-circle-report',
-                    'Founders Circle'
+                    '/dash/resource-benchmarking-report',
+                    'Resource Benchmarking'
                 ),
                 $this->admMenuLnk(
                     '/dash/compare-powerscore-averages',
@@ -313,6 +313,11 @@ class CannabisScoreAdminMenu extends AdminMenu
             'Competition', 
             '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
         );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/partner-compare-official-powerscores', 
+            'Official Data', 
+            '<i class="fa fa-list" aria-hidden="true"></i>'
+        );
         /*
         $treeMenu[] = $this->admMenuLnk(
             'javascript:;', 
@@ -329,8 +334,8 @@ class CannabisScoreAdminMenu extends AdminMenu
                     'Score Averages'
                 ),
                 $this->admMenuLnk(
-                    '/dash/founders-circle-report',
-                    'Founders Report'
+                    '/dash/resource-benchmarking-report',
+                    'Resource Benchmarking'
                 ),
                 $this->admMenuLnk(
                     '/dash/powerscore-final-report',

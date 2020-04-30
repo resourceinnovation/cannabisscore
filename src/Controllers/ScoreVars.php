@@ -21,7 +21,9 @@ use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
 use App\Models\RIIUserPsPerms;
+use App\Models\RIIComplianceMaMonths;
 use App\Models\SLUsersRoles;
+use CannabisScore\Controllers\CannabisScoreSearcher;
 use CannabisScore\Controllers\ScoreLookups;
 use SurvLoop\Controllers\Tree\TreeSurvForm;
 
@@ -96,6 +98,7 @@ class ScoreVars extends TreeSurvForm
         $this->v["usrInfo"] = new ScoreUserInfo;
         if (isset($this->v["uID"]) && $this->v["uID"] > 0) {
             $this->v["usrInfo"]->loadUser($this->v["uID"], $this->v["user"]);
+            $GLOBALS["SL"]->x["usrInfo"] = $this->v["usrInfo"];
         }
         return true;
     }
@@ -182,6 +185,8 @@ class ScoreVars extends TreeSurvForm
                 }
                 $this->loadExtraLinkPartner();
             }
+        } elseif ($this->treeID == 71 && $this->coreID > 0) {
+            $this->checkComplianceMonths();
         }
 
         if (!session()->has('PowerScoreChecks') || $GLOBALS["SL"]->REQ->has('refresh')) {
@@ -438,6 +443,35 @@ class ScoreVars extends TreeSurvForm
             ->get();
     }
     
+    protected function checkComplianceMonths()
+    {
+        if (isset($this->sessData->dataSets["compliance_ma"])
+            && !isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_year)) {
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_year = intVal(date("Y"));
+        }
+        if (!isset($this->sessData->dataSets["compliance_ma_months"]) 
+            || sizeof($this->sessData->dataSets["compliance_ma_months"]) == 0) {
+            $this->sessData->dataSets["compliance_ma_months"] = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $new = new RIIComplianceMaMonths;
+                $new->com_ma_month_com_ma_id = $this->coreID;
+                $new->com_ma_month_month     = $m;
+                $new->save();
+                $this->sessData->dataSets["compliance_ma_months"][] = $new;
+            }
+        }
+        $tmp = [];
+        foreach ($this->sessData->dataSets["compliance_ma_months"] as $month) {
+            $tmp[($month->com_ma_month_month-1)] = $month;
+        }
+        $this->sessData->dataSets["compliance_ma_months"] = $tmp;
+        if ($GLOBALS["SL"]->REQ->has('gopro')) {
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro = 1;
+            $this->sessData->dataSets["compliance_ma"][0]->save();
+        }
+        return true;
+    }
+    
 }
 
 class ScoreUserInfo
@@ -491,8 +525,11 @@ class ScoreUserInfo
         $GLOBALS["SL"]->x["partnerCompany"] = $this->company;
         $GLOBALS["SL"]->x["partnerLevel"]   = $this->level;
         $GLOBALS["SL"]->x["partnerInfoID"]  = 0;
+        $GLOBALS["SL"]->x["partnerPSIDs"]   = [];
         if (isset($info->usr_id)) {
             $GLOBALS["SL"]->x["partnerInfoID"] = $info->usr_id;
+            $search = new CannabisScoreSearcher;
+            $GLOBALS["SL"]->x["partnerPSIDs"] = $search->getPartnerPSIDs($this->id);
         }
         return true;
     }

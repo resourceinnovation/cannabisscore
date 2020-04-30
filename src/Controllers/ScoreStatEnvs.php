@@ -130,23 +130,27 @@ class ScoreStatEnvs extends SurvStatsGraph
         $farm = intVal(str_replace('a', '', $this->applyCurrFilt('1')));
         $this->tblOut = [];
         foreach ($GLOBALS["SL"]->def->getSet('PowerScore Building Types') as $bld) {
-            $row = [
-                $bld->def_value, 
-                round(100*sizeof($this->envIDs[$farm][$bld->def_id])/$this->cmpl[$farm][0])
-            ];
-            if ($row[1] > 0) {
-                $row[1] = $row[1] . '% <sub class="slGrey">' 
-                    . number_format(sizeof($this->envIDs[$farm][$bld->def_id])) . '</sub>';
-            }
-            foreach ($this->filts["b"]["val"] as $i => $val) {
-                $cell = round(100*$this->cmpl[$farm][$val][$bld->def_id]/$this->cmpl[$farm][$val][0]);
-                if ($cell > 0) {
-                    $cell .= '% <sub class="slGrey">' 
-                        . number_format($this->cmpl[$farm][$val][$bld->def_id]) . '</sub>';
+            if ($this->cmpl[$farm][0] > 0) {
+                $perc = round(100*sizeof($this->envIDs[$farm][$bld->def_id])/$this->cmpl[$farm][0]);
+                $row = [ $bld->def_value, $perc ];
+                if ($row[1] > 0) {
+                    $row[1] = $row[1] . '% <sub class="slGrey">' 
+                        . number_format(sizeof($this->envIDs[$farm][$bld->def_id])) . '</sub>';
                 }
-                $row[] = $cell;
+                foreach ($this->filts["b"]["val"] as $i => $val) {
+                    $cell = '-';
+                    if ($this->cmpl[$farm][$val][0] > 0) {
+                        $cell = round(100*$this->cmpl[$farm][$val][$bld->def_id]
+                            /$this->cmpl[$farm][$val][0]);
+                        if ($cell > 0) {
+                            $cell .= '% <sub class="slGrey">' 
+                                . number_format($this->cmpl[$farm][$val][$bld->def_id]) . '</sub>';
+                        }
+                    }
+                    $row[] = $cell;
+                }
+                $this->tblOut[] = $row;
             }
-            $this->tblOut[] = $row;
         }
         return view(
             'vendor.survloop.reports.inc-stat-tbl-percs', 

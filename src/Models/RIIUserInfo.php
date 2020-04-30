@@ -12,7 +12,7 @@ class RIIUserInfo extends Model
     [    
 		'usr_user_id', 
 		'usr_company_name', 
-        'usr_membership_expiration',
+        'usr_membership_expire_date',
         'usr_level',
         'usr_invite_email',
         'usr_trial_start',

@@ -3,10 +3,7 @@
 @forelse ($tbl->rows as $i => $row)
     <tr @if (in_array($i, $tbl->lineRows)) class="brdBot" @endif >
     @forelse ($row as $j => $cell)
-        @if ($i == 0 || $j == 0) <th @else <td @endif
-        @if (in_array($j, $tbl->lineCols)) class="brdRgt" @endif >
-        {!! $cell !!}
-        @if ($i == 0 || $j == 0) </th> @else </td> @endif
+        {!! $cell->toExcel($j, in_array($j, $tbl->lineCols)) !!}
     @empty
     @endforelse
     </tr>

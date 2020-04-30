@@ -32,7 +32,10 @@ class ScoreCalcs extends ScoreFormsCustom
                 $this->chkPsType();
                 $this->calcClearScores($ps);
                 // Next, Recalculate Raw Efficiency Numbers
-                $defFut = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future');
+                $defFut = $GLOBALS["SL"]->def->getID(
+                    'PowerScore Submission Type', 
+                    'Future'
+                );
                 if ($ps->ps_time_type == $defFut) {
                     $ps = $this->calcFutureYields();
                     $ps->save();
@@ -58,37 +61,47 @@ class ScoreCalcs extends ScoreFormsCustom
         $ps = $this->sessData->dataSets["powerscore"][0];
         $prevFarmType = $ps->ps_characterize;
         $ps->ps_characterize = $this->frmTypIn; // default to Indoor
-        list($flwrSun, $flwrDep, $flwrArt) = $this->chkFlwrTypes();
-        if ($flwrSun) { // Uses the Sun during Flowering Stage
-            if ($flwrDep || $flwrArt) {
-                $ps->ps_characterize = $this->frmTypGrn;
-            } else {
-                $ps->ps_characterize = $this->frmTypOut;
-            }
-            /*
-            $flwrOutdoor = $flwrGrnhse = false;
-            if ($flwrArt || $flwrDep) {
-                $flwrGrnhse = true;
-            } elseif ($flwrSun == 1) {
-                $flwrOutdoor = true;
-            }
-            $areaFlwrID = $this->getAreaFld('Flower', 'ps_area_id');
-            $this->loadBldDefs($areaFlwrID);
-            if (sizeof($this->v["areaFlwrBlds"]) > 0) {
-                foreach ($this->v["areaFlwrBlds"] as $bld) {
-                    if ($bld->ps_ar_bld_type == $this->v["bldTypOut"]) {
-                        $flwrOutdoor = true;
-                    } elseif ($bld->ps_ar_bld_type == $this->v["bldTypGrn"]) {
-                        $flwrGrnhse = true;
+        $found = false;
+        $types = [ 'Flower', 'Veg', 'Clone', 'Mother' ];
+        foreach ($types as $type) {
+            if (!$found) {
+                $has = intVal($this->getAreaFld($type, 'ps_area_has_stage'));
+                if ($has == 1) {
+                    list($flwrSun, $flwrDep, $flwrArt) = $this->chkFlwrTypes($type);
+                    if ($flwrSun) { // Uses the Sun during Flowering Stage
+                        if ($flwrDep || $flwrArt) {
+                            $ps->ps_characterize = $this->frmTypGrn;
+                        } else {
+                            $ps->ps_characterize = $this->frmTypOut;
+                        }
+                        /*
+                        $flwrOutdoor = $flwrGrnhse = false;
+                        if ($flwrArt || $flwrDep) {
+                            $flwrGrnhse = true;
+                        } elseif ($flwrSun == 1) {
+                            $flwrOutdoor = true;
+                        }
+                        $areaFlwrID = $this->getAreaFld('Flower', 'ps_area_id');
+                        $this->loadBldDefs($areaFlwrID);
+                        if (sizeof($this->v["areaFlwrBlds"]) > 0) {
+                            foreach ($this->v["areaFlwrBlds"] as $bld) {
+                                if ($bld->ps_ar_bld_type == $this->v["bldTypOut"]) {
+                                    $flwrOutdoor = true;
+                                } elseif ($bld->ps_ar_bld_type == $this->v["bldTypGrn"]) {
+                                    $flwrGrnhse = true;
+                                }
+                            }
+                        }
+                        if ($flwrGrnhse) {
+                            $ps->ps_characterize = $this->frmTypGrn;
+                        } else {
+                            $ps->ps_characterize = $this->frmTypOut;
+                        }
+                        */
                     }
+                    $found = true;
                 }
             }
-            if ($flwrGrnhse) {
-                $ps->ps_characterize = $this->frmTypGrn;
-            } else {
-                $ps->ps_characterize = $this->frmTypOut;
-            }
-            */
         }
         $ps->save();
         $this->sessData->dataSets["powerscore"][0] = $ps;
@@ -96,7 +109,7 @@ class ScoreCalcs extends ScoreFormsCustom
     }
 
     // First, Determine Farm Type
-    protected function chkFlwrTypes()
+    protected function chkFlwrTypes($type = 'Flower')
     {
         $flwrSun = $flwrDep = $flwrArt = false;
 
@@ -105,9 +118,9 @@ class ScoreCalcs extends ScoreFormsCustom
 
 
         } else {
-            $flwrSun = (intVal($this->getAreaFld('Flower', 'ps_area_lgt_sun')) == 1);
-            $flwrDep = (intVal($this->getAreaFld('Flower', 'ps_area_lgt_dep')) == 1);
-            $flwrArt = (intVal($this->getAreaFld('Flower', 'ps_area_lgt_artif')) == 1);
+            $flwrSun = (intVal($this->getAreaFld($type, 'ps_area_lgt_sun')) == 1);
+            $flwrDep = (intVal($this->getAreaFld($type, 'ps_area_lgt_dep')) == 1);
+            $flwrArt = (intVal($this->getAreaFld($type, 'ps_area_lgt_artif')) == 1);
         }
 
         return [ $flwrSun, $flwrDep, $flwrArt ];
@@ -441,5 +454,70 @@ class ScoreCalcs extends ScoreFormsCustom
         }
         return true;
     }
+
+    protected function calcMaCompliance($nID)
+    {
+        if (isset($this->sessData->dataSets["compliance_ma"])
+            && isset($this->sessData->dataSets["compliance_ma_months"])
+            && sizeof($this->sessData->dataSets["compliance_ma_months"]) > 0) {
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh 
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kw
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_renew
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_natural_gas
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_diesel
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_propane
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_fuel_oil
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_water
+                = 0;
+            foreach ($this->sessData->dataSets["compliance_ma_months"] as $mon) {
+
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh
+                    += $mon->com_ma_month_kwh;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_renew
+                    += $mon->com_ma_month_kwh;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_diesel
+                    += $mon->com_ma_month_diesel_gallons;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel
+                    += $mon->com_ma_month_biofuel_wood_tons;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_fuel_oil
+                    += $mon->com_ma_month_fuel_oil;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_propane
+                    += $mon->com_ma_month_propane;
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_water
+                    += $mon->com_ma_month_water;
+                if ($this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kw
+                    < $mon->com_ma_month_kw) {
+                    $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kw
+                        = $mon->com_ma_month_kw;
+                }
+                if ($mon->com_ma_month_natural_gas_therms > 0) {
+                    $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_natural_gas
+                        += $mon->com_ma_month_natural_gas_therms;
+            //} elseif ($mon->com_ma_month_natural_gas_gallons > 0) {
+            //    $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_natural_gas
+            //        += $mon->com_ma_month_natural_gas_gallons;
+                }
+            }
+            if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_natural_gas)
+                && $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_natural_gas
+                    == $GLOBALS["SL"]->def->getID('Biofuel Wood Units', 'CCF')) {
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel *= 0.0103412;
+            // https://sciencing.com/convert-cubic-feet-therms-8374234.html
+            }
+            if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood)
+                && $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood
+                    == $GLOBALS["SL"]->def->getID('Biofuel Wood Units', 'Cords')) {
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel *= 2.6;
+            // http://extension.msstate.edu/sites/default/files/publications/publications/P2244_web.pdf
+            }
+            $btu = 3.412*$this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh;
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_effic_production
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_grams/$btu;
+            $this->sessData->dataSets["compliance_ma"][0]->save();
+        }
+        return true;
+    }
+
     
 }

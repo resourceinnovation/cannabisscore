@@ -3,14 +3,16 @@
     <div class="slCard nodeWrap">
     <div class="row">
         <div class="col-8">
-            <a href="/dash/compare-powerscores"><h1 class="slBlueDark">Compare All Lighting</h1></a>
+            <a href="/dash/compare-powerscores"
+                ><h1 class="slBlueDark">Compare All Lighting</h1></a>
         </div><div class="col-4 taR"><div class="mTn10 pB10">
         @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) 
             || !$GLOBALS["SL"]->x["partnerVersion"])
             <a class="btn btn-secondary mT20" 
                 href="/dash/compare-powerscores?lighting=1&srt={{ 
                 $sort[0] }}&srta={{ $sort[1] }}{{ $urlFlts }}&excel=1"
-                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+                Excel</a>
         @endif
         </div></div>
     </div>
