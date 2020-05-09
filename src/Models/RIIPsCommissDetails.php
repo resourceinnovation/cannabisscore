@@ -10,8 +10,8 @@ class RIIPsCommissDetails extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-        'ps_comis_det_psid', 
-        'ps_comis_det_type'
+		'ps_comis_det_psid', 
+		'ps_comis_det_type', 
     ];
     
     // END SurvLoop auto-generated portion of Model

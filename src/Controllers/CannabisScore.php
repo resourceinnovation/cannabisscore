@@ -73,6 +73,8 @@ class CannabisScore extends ScoreImports
             return $this->printReportBlds($nID);
         } elseif (in_array($nID, [209, 432, 440, 448])) {
             return $this->printReportLgts($nID);
+        } elseif ($nID == 1075) {
+            $this->loadRenewOther($nID);
         } elseif ($nID == 536) {
             $this->prepFeedbackSkipBtn();
             $GLOBALS["SL"]->pageJAVA .= view(
@@ -201,10 +203,23 @@ class CannabisScore extends ScoreImports
         // MA
         } elseif ($nID == 1403) {
             $this->calcMaCompliance($nID);
+        } elseif ($nID == 1447) {
+            return $this->reportMaPSID($nID);
         } elseif ($nID == 1420) {
             $ret .= $this->reportMaMonths($nID);
         } elseif ($nID == 1436) {
             $ret .= $this->reportMaNextPro($nID);
+        } elseif ($nID == 1442) {
+            return $this->reportMaEfficProd($nID);
+        } elseif ($nID == 1449) {
+            return $this->reportMaProPdf($nID);
+        } elseif ($nID == 1422) {
+            if ($GLOBALS["SL"]->REQ->has('recalc') 
+                || $GLOBALS["SL"]->REQ->has('refresh')) {
+                $this->calcMaCompliance($nID);
+            }
+        } elseif ($nID == 1424) {
+            $this->loadRenewOtherMA($nID);
             
 /*
         } elseif ($nID == 1120) {
@@ -321,6 +336,8 @@ class CannabisScore extends ScoreImports
         
         if ($nID == 47) {
             $this->postZipCode($nID);
+        } elseif ($nID == 1075) {
+            $this->postRenewOther($nID);
         } elseif ($nID == 1244) {
             $this->postRoomCnt($nID);
         } elseif ($nID == 1233) {
@@ -368,6 +385,10 @@ class CannabisScore extends ScoreImports
             }
             return true;
             
+
+        // MA Compliance
+        } elseif ($nID == 1424) {
+            $this->postRenewOtherMA($nID);
           
         /*  
         } elseif ($nID == 914) {

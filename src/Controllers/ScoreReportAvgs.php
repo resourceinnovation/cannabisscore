@@ -205,7 +205,7 @@ class ScoreReportAvgs extends ScoreReportStats
                 $this->v["statMisc"]->resetRecFilt();
                 $this->v["statMisc"]->addRecFilt('farm', $char, $ps->ps_id);
                 $this->v["statMisc"]->addRecDat('g', $ps->ps_grams, $ps->ps_id);
-                $this->v["statMisc"]->addRecDat('kWh', $ps->ps_kwh, $ps->ps_id);
+                $this->v["statMisc"]->addRecDat('kWh', $ps->ps_kwh_tot_calc, $ps->ps_id);
                 foreach ($GLOBALS["CUST"]->psTechs() as $fld => $name) {
                     if (isset($ps->{ $fld }) && intVal($ps->{ $fld }) == 1) {
                         $this->v["statMisc"]->addRecDat($fld, 1, $ps->ps_id);

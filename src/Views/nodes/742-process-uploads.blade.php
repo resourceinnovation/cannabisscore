@@ -13,7 +13,7 @@
         action="?sub=1&psid={{ $ps->ps_id }}" method="post" target="hidFrame">
     <input type="hidden" id="csrfTok" name="_token" value="{{ csrf_token() }}">
     <input type="hidden" name="kwh{{ $ps->ps_id }}a" 
-        @if (isset($ps->ps_kwh)) value="{{ $ps->ps_kwh }}" @endif >
+        @if (isset($ps->ps_kwh_tot_calc)) value="{{ $ps->ps_kwh_tot_calc }}" @endif >
     <tr id="psUpload{{ $ps->ps_id }}" class="disNon">
     <td>
         <div class="nodeAnchor"><a name="ps{{ $ps->ps_id }}"></a></div>
@@ -39,7 +39,7 @@
             <nobr><input name="kwh{{ $ps->ps_id }}" id="kwh{{ $ps->ps_id }}ID" 
                 type="number" min="0" autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!}
                 class="form-control form-control-lg ntrStp slTab disIn" style="width: 130px;" 
-                @if (isset($ps->ps_kwh)) value="{{ $ps->ps_kwh }}" @endif >
+                @if (isset($ps->ps_kwh_tot_calc)) value="{{ $ps->ps_kwh_tot_calc }}" @endif >
             <span class="mL5">kWh</span></nobr>
         </div>
         <div class="taR">

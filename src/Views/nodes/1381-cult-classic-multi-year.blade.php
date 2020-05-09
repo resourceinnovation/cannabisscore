@@ -64,7 +64,7 @@
                 @endif
             </td>
             <td class="brdLftGrey">{{ number_format($f["ps"]->ps_grams) }}</td>
-            <td>{{ number_format($f["ps"]->ps_kwh) }}</td>
+            <td>{{ number_format($f["ps"]->ps_kwh_tot_calc) }}</td>
             <td>{{ number_format($f["ps"]->ps_flower_canopy_size) }}</td>
 
             <td class="brdLftGrey">{{ date("n/j/Y", strtotime($f["ps"]->created_at)) }}</td>

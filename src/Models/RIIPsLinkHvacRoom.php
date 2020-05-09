@@ -10,8 +10,8 @@ class RIIPsLinkHvacRoom extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-        'ps_lnk_hv_rm_room_id', 
-        'ps_lnk_hv_rm_hvac', 
+		'ps_lnk_hv_rm_room_id', 
+		'ps_lnk_hv_rm_hvac', 
     ];
     
     // END SurvLoop auto-generated portion of Model

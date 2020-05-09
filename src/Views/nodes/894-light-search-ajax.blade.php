@@ -8,6 +8,8 @@
                 json_encode($model->lgt_mod_name) 
             }}, {{ 
                 $lightImportTypeConvert[$model->lgt_mod_tech] 
+            }}, {{ 
+                ((isset($model->lgt_mod_wattage)) ? intVal($model->lgt_mod_wattage) : 0)
             }});" class="btn btn-secondary btn-sm w100 taL mB5" >
             @if (isset($manufacts[$model->lgt_mod_manu_id])) {{ $manufacts[$model->lgt_mod_manu_id] }}: @endif
             {{ $model->lgt_mod_name }}

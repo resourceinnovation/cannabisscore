@@ -1,4 +1,5 @@
 <!-- resources/views/vendor/cannabisscore/nodes/1271-light-search-3.0.blade.php -->
+
 @if (sizeof($results["set"]) > 0)
     <div class="pB10">Click a search result to select the light:</div>
     @foreach ($results["set"] as $i => $model)
@@ -8,8 +9,12 @@
                 json_encode($model->lgt_mod_name) 
             }}, {{ 
                 $lightImportTypeConvert[$model->lgt_mod_tech] 
+            }}, {{ 
+                ((isset($model->lgt_mod_wattage)) ? intVal($model->lgt_mod_wattage) : 0)
             }});" class="btn btn-secondary btn-sm w100 taL mB5" >
-            @if (isset($manufacts[$model->lgt_mod_manu_id])) {{ $manufacts[$model->lgt_mod_manu_id] }}: @endif
+            @if (isset($manufacts[$model->lgt_mod_manu_id])) 
+                {{ $manufacts[$model->lgt_mod_manu_id] }}: 
+            @endif
             {{ $model->lgt_mod_name }}
             <?php /* <span class="slGrey">{{ $model->lgt_mod_tech }}</span> */ ?>
             </a>

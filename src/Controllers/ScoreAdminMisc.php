@@ -705,7 +705,7 @@ class ScoreAdminMisc extends ScorePrintReport
                     $line = trim($line);
                     if ($line != '') {
                         $cols = $GLOBALS["SL"]->mexplode("\t", $line);
-                        if (sizeof($cols) == 3) {
+                        if (sizeof($cols) >= 3) {
                             foreach ($cols as $i => $col) {
                                 $cols[$i] = trim($col);
                             }
@@ -725,6 +725,9 @@ class ScoreAdminMisc extends ScorePrintReport
                                 $chk->lgt_mod_name = $cols[1];
                             }
                             $chk->lgt_mod_tech = $cols[2];
+                            if (isset($cols[3])) {
+                                $chk->lgt_mod_wattage = intVal($cols[3]);
+                            }
                             $chk->save();
                         }
                     }

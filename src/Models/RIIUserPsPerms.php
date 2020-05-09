@@ -10,8 +10,8 @@ class RIIUserPsPerms extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-        'usr_perm_psid', 
-        'usr_perm_user_id', 
+		'usr_perm_psid', 
+		'usr_perm_user_id', 
     ];
     
     // END SurvLoop auto-generated portion of Model

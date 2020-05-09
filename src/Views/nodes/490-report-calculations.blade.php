@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 <div id="hidivCalcsFac" class="scoreCalcs">
-                @if (isset($sessData["powerscore"][0]->ps_kwh) 
+                @if (isset($sessData["powerscore"][0]->ps_kwh_tot_calc) 
                     && isset($totFlwrSqFt) 
                     && $totFlwrSqFt > 0)
                     <div class="pL10 slBlueDark">
@@ -94,14 +94,14 @@
                     </div>
                     <div class="pL10 pT15 slGrey">
                         = {{ number_format($GLOBALS["SL"]
-                            ->cnvrtKwh2Kbtu($sessData["powerscore"][0]->ps_kwh)) }} 
+                            ->cnvrtKwh2Kbtu($sessData["powerscore"][0]->ps_kwh_tot_calc)) }} 
                             Total Annual kBtu &nbsp;&nbsp;/&nbsp;&nbsp;
                             {{ number_format($totFlwrSqFt) }} 
                             Square Feet of Flowering Canopy<br />
                     </div>
                     <div class="pL10 pT15 slGrey">
                         Total Annual kBtu = 3.412 x ( {{ 
-                            number_format($sessData["powerscore"][0]->ps_kwh)
+                            number_format($sessData["powerscore"][0]->ps_kwh_tot_calc)
                         }} Total Kilowatt Hours )
                     </div>
                 @endif
@@ -133,11 +133,11 @@
                 </div>
                 <div id="hidivCalcsProd" class="scoreCalcs">
                 @if (isset($sessData["powerscore"][0]->ps_grams) 
-                    && isset($sessData["powerscore"][0]->ps_kwh))
+                    && isset($sessData["powerscore"][0]->ps_kwh_tot_calc))
                     <div class="pL10 slBlueDark">
                         = {{ $GLOBALS["SL"]->sigFigs(
                             $sessData["powerscore"][0]->ps_grams
-                                /$sessData["powerscore"][0]->ps_kwh, 
+                                /$sessData["powerscore"][0]->ps_kwh_tot_calc, 
                             3
                         ) }} <nobr>g / kWh</nobr>
                     </div>
@@ -146,12 +146,12 @@
                             Annual Grams of Dried Flower Produced
                             &nbsp;&nbsp;/&nbsp;&nbsp;
                             {{ number_format($GLOBALS["SL"]->cnvrtKwh2Kbtu(
-                                $sessData["powerscore"][0]->ps_kwh)) }} 
+                                $sessData["powerscore"][0]->ps_kwh_tot_calc)) }} 
                             Total Annual kBtu
                     </div>
                     <div class="pL10 pT15 slGrey">
                         Total Annual kBtu = 3.412 x ( {{ 
-                            number_format($sessData["powerscore"][0]->ps_kwh)
+                            number_format($sessData["powerscore"][0]->ps_kwh_tot_calc)
                             }} Total Kilowatt Hours )
                     </div>
                 @endif

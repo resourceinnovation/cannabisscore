@@ -73,7 +73,7 @@
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_lighting, 3) }}</td>
     <td>{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_hvac, 3) }}</td>
     <td>{{ number_format($ps->ps_grams) }}</td>
-    <td>{{ number_format($ps->ps_kwh) }}</td>
+    <td>{{ number_format($ps->ps_kwh_tot_calc) }}</td>
     <td>{{ number_format($ps->ps_flower_canopy_size) }}</td>
     <td>{{ str_replace('Multiple Environments', 'Multiple Env', 
         $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)) }}</td>

@@ -109,7 +109,7 @@ class ScoreCalcRanks extends ScoreCalcs
                 ->select('ps_area_size')
                 ->first();
             if ($sqft && isset($sqft->ps_area_size)) {
-                $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh);
+                $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
                 $this->v["rankAvg"]["btu"] += $btus/$sqft->ps_area_size;
                 $this->v["rankAvg"]["g"]   += $ps->ps_grams/$sqft->ps_area_size;
             }
@@ -378,8 +378,10 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
             }
         }
-        $msg = '<div class="slCard nodeWrap"><h3>Recalculating All Ranks ' . (1+$freshDone) 
-            . '/' . sizeof($GLOBALS["CUST"]->v["fltComb"]) . '...</h3>';
+        $msg = '<div class="slCard nodeWrap"><h3>'
+            . 'Hang tight, we are calculating your KPIs... ' 
+            . (1+$freshDone) . '/' . sizeof($GLOBALS["CUST"]->v["fltComb"]) 
+            . '...</h3>';
         if ($redir == 'report-ajax') {
             if ($nextFlt != '') {
                 return view(

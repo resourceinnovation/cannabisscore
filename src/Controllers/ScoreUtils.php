@@ -18,6 +18,10 @@ use App\Models\RIIPsAreas;
 use App\Models\RIIPsRenewables;
 use App\Models\RIIPsMonthly;
 use App\Models\RIIPsForCup;
+use App\Models\RIIComplianceMa;
+use App\Models\RIIComplianceMaMonths;
+use App\Models\RIIComplianceMaFuels;
+use App\Models\RIIPsOnsiteFuels;
 use App\Models\SLZips;
 use CannabisScore\Controllers\ScoreVars;
 
@@ -89,9 +93,17 @@ class ScoreUtils extends ScorePowerUtilities
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 0;
             $this->sessData->dataSets["powerscore"][0]->save();
         }
+        $this->firstPageChecksCups();
+        $this->firstPageChecksCopyMa();
+        return true;
+    }
+    
+    protected function firstPageChecksCups()
+    {
         if ($GLOBALS["SL"]->REQ->has('cups') 
             && trim($GLOBALS["SL"]->REQ->get('cups')) != '') {
-            $cupsIn = $GLOBALS["SL"]->mexplode(',', urldecode($GLOBALS["SL"]->REQ->get('cups')));
+            $cupsIn = urldecode($GLOBALS["SL"]->REQ->get('cups'));
+            $cupsIn = $GLOBALS["SL"]->mexplode(',', $cupsIn);
             $cupList = $GLOBALS["SL"]->def->getSet('PowerScore Competitions');
             if (sizeof($cupList) > 0) {
                 foreach ($cupList as $c) {
@@ -113,6 +125,117 @@ class ScoreUtils extends ScorePowerUtilities
                 }
             }
         }
+        return true;
+    }
+    
+    protected function firstPageChecksCopyMa()
+    {
+        if ($GLOBALS["SL"]->REQ->has('cpyMa') 
+            && trim($GLOBALS["SL"]->REQ->get('cpyMa')) != '') {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            $psOn = $this->sessData->dataSets["ps_onsite"][0];
+            $ps->ps_is_pro = 1;
+            $ps->ps_time_type 
+                = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past');
+            $copyMa = trim($GLOBALS["SL"]->REQ->get('cpyMa'));
+            $copyMa = $GLOBALS["SL"]->mexplode('-', $copyMa);
+            if (sizeof($copyMa) == 2) {
+                $ma = RIIComplianceMa::where('com_ma_id', $copyMa[0])
+                    ->where('com_ma_unique_str', $copyMa[1])
+                    ->first();
+                if ($ma && isset($ma->com_ma_id)) {
+                    $this->firstPageChecksCopyMaCore($ps, $ma);
+                    $idFld = 'com_ma_month_com_ma_id';
+                    $maMonths = RIIComplianceMaMonths::where($idFld, $ma->com_ma_id)
+                        ->get();
+                    if ($maMonths && sizeof($maMonths) > 0) {
+                        $psMonths = $this->sortMonths();
+                        foreach ($maMonths as $maMon) {
+                            foreach ($psMonths as $psMon) {
+                                if ($psMon->ps_month_month == $maMon->com_ma_month_month) {
+                                    $this->firstPageChecksCopyMaMonth($psMon, $maMon);
+                                    if (isset($maMon->com_ma_month_renew_kwh)
+                                        && intVal($maMon->com_ma_month_renew_kwh) > 0) {
+                                        $ps->ps_kwh_include_renewables = 1;
+                                    }
+                                    if (isset($maMon->com_ma_month_water)
+                                        && intVal($maMon->com_ma_month_water) > 0) {
+                                        $psOn->ps_on_water_by_months = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $chk = RIIPsOnsiteFuels::where('ps_fuel_ps_id', $ma->com_ma_id)
+                        ->get();
+                    $maFuels = RIIComplianceMaFuels::where('com_ma_fuel_com_ma_id', $ma->com_ma_id)
+                        ->get();
+                    if ($maFuels && sizeof($maFuels) > 0) {
+                        foreach ($maFuels as $maFuel) {
+                            $found = false;
+                            if ($chk && sizeof($chk) > 0) {
+                                foreach ($chk as $psFuel) {
+                                    if (isset($psFuel->ps_fuel_type)
+                                        && $psFuel->ps_fuel_type == $maFuel->com_ma_fuel_type) {
+                                        $found = true;
+                                    }
+                                }
+                            }
+                            if (!$found) {
+                                $psFuel = new RIIPsOnsiteFuels;
+                                $psFuel->ps_fuel_ps_id = $ps->ps_id;
+                                $psFuel->ps_fuel_type = $maFuel->com_ma_fuel_type;
+                                $psFuel->save();
+                            }
+                        }
+                    }
+                }
+            }
+            $ps->save();
+            $psOn->save();
+            $this->sessData->dataSets["powerscore"][0] = $ps;
+        }
+        return true;
+    }
+    
+    protected function firstPageChecksCopyMaCore(&$ps, &$ma)
+    {
+        $ma->com_ma_ps_id        = $ps->ps_id;
+        $ma->save();
+        $ps->ps_com_ma_id        = $ma->com_ma_id;
+        $ps->ps_year             = $ma->com_ma_year;
+        $ps->ps_name             = $ma->com_ma_name;
+        $ps->ps_zip_code         = $ma->com_ma_postal_code;
+        $ps->ps_grams            = $ma->com_ma_grams;
+        $ps->ps_kwh              = $ma->com_ma_tot_kwh;
+        $ps->ps_tot_kw_peak      = $ma->ps_tot_kw_peak;
+        $ps->ps_no_natural_gas   = $ma->com_ma_no_natural_gas;
+        $ps->ps_unit_natural_gas = $ma->com_ma_unit_natural_gas;
+        $ps->ps_unit_wood        = $ma->com_ma_unit_wood;
+        $ps->ps_unit_generator   = $ma->com_ma_unit_generator;
+        if (isset($ma->com_ma_no_renewable_electricity)) {
+            if (intVal($ma->com_ma_no_renewable_electricity) == 1) {
+                $ps->ps_source_renew = 0;
+            } else {
+                $ps->ps_source_renew = 1;
+            }
+        }
+        $ps->save();
+        return true;
+    }
+    
+    protected function firstPageChecksCopyMaMonth($psMon, $maMon)
+    {
+        $psMon->ps_month_kwh1          = $maMon->com_ma_month_kwh;
+        $psMon->ps_month_kw            = $maMon->com_ma_month_kw;
+        $psMon->ps_month_kwh_renewable = $maMon->com_ma_month_renew_kwh;
+        $psMon->ps_month_natural_gas   = $maMon->com_ma_month_natural_gas_therms;
+        $psMon->ps_month_generator     = $maMon->com_ma_month_diesel_gallons;
+        $psMon->ps_month_biofuel_wood  = $maMon->com_ma_month_biofuel_wood_tons;
+        $psMon->ps_month_propane       = $maMon->com_ma_month_propane;
+        $psMon->ps_month_fuel_oil      = $maMon->com_ma_month_fuel_oil;
+        $psMon->ps_month_water         = $maMon->com_ma_month_water;
+        $psMon->save();
         return true;
     }
     
@@ -224,12 +347,14 @@ class ScoreUtils extends ScorePowerUtilities
             if (isset($this->sessData->dataSets["ps_light_types"]) 
                 && sizeof($this->sessData->dataSets["ps_light_types"]) > 0) {
                 foreach ($this->sessData->dataSets["ps_light_types"] as $lgt) {
-                    if (isset($lgt->ps_lg_typ_room_id) && intVal($lgt->ps_lg_typ_room_id) > 0) {
+                    if (isset($lgt->ps_lg_typ_room_id) 
+                        && intVal($lgt->ps_lg_typ_room_id) > 0) {
                         if (!isset($this->v["roomLights"][$lgt->ps_lg_typ_room_id])) {
                             $this->v["roomLights"][$lgt->ps_lg_typ_room_id] = [];
                         }
                         $ind = 0;
-                        if (isset($lgt->ps_lg_typ_room_ord) && intVal($lgt->ps_lg_typ_room_ord) >= 0) {
+                        if (isset($lgt->ps_lg_typ_room_ord) 
+                            && intVal($lgt->ps_lg_typ_room_ord) >= 0) {
                             $ind = intVal($lgt->ps_lg_typ_room_ord);
                         }
                         $this->v["roomLights"][$lgt->ps_lg_typ_room_id][$ind] = $lgt;
@@ -317,9 +442,12 @@ class ScoreUtils extends ScorePowerUtilities
             $itemInd = 0;
         }
         $ret = 'Room #' . (1+$itemInd);
-        if ($itemRow && isset($itemRow->ps_room_name) && trim($itemRow->ps_room_name) != '') {
+        if ($itemRow 
+            && isset($itemRow->ps_room_name) 
+            && trim($itemRow->ps_room_name) != '') {
             return trim($itemRow->ps_room_name) . ' (' . $ret . ')';
         }
+//echo '<br /><br /><br />getRoomName(' . $itemInd . ' - ' . $ret . '<br />';
         return $ret;
     }
     
@@ -328,16 +456,20 @@ class ScoreUtils extends ScorePowerUtilities
         $ret = '';
         if ($itemRow && isset($itemRow->ps_lg_typ_id)) {
             $hasKeyDeets = 0;
-            if (isset($itemRow->ps_lg_typ_area_id) && intVal($itemRow->ps_lg_typ_area_id) > 0) {
-                $ret .= '<b>' . $this->getAreaIdTypeName($itemRow->ps_lg_typ_area_id) . ':</b> ';
+            if (isset($itemRow->ps_lg_typ_area_id) 
+                && intVal($itemRow->ps_lg_typ_area_id) > 0) {
+                $ret .= '<b>' . $this->getAreaIdTypeName($itemRow->ps_lg_typ_area_id)
+                    . ':</b> ';
             } else {
                 $ret .= 'Light Type #' . (1+$itemInd) . ': ';
             }
-            if (isset($itemRow->ps_lg_typ_count) && trim($itemRow->ps_lg_typ_count) != '') {
+            if (isset($itemRow->ps_lg_typ_count) 
+                && trim($itemRow->ps_lg_typ_count) != '') {
                 $ret .= number_format($itemRow->ps_lg_typ_count) . ' fixtures, ';
                 $hasKeyDeets++;
             }
-            if (isset($itemRow->ps_lg_typ_wattage) && trim($itemRow->ps_lg_typ_wattage) != '') {
+            if (isset($itemRow->ps_lg_typ_wattage) 
+                && trim($itemRow->ps_lg_typ_wattage) != '') {
                 $ret .= number_format($itemRow->ps_lg_typ_wattage) . 'W each';
                 $hasKeyDeets++;
             }
@@ -346,23 +478,29 @@ class ScoreUtils extends ScorePowerUtilities
             } elseif ($hasKeyDeets > 0) {
                 $ret .= ', ';
             }
-            if (isset($itemRow->ps_lg_typ_light) && intVal($itemRow->ps_lg_typ_light) > 0) {
+            if (isset($itemRow->ps_lg_typ_light) 
+                && intVal($itemRow->ps_lg_typ_light) > 0) {
                 $ret .= $GLOBALS["SL"]->def->getVal(
                     'PowerScore Light Types', 
                     $itemRow->ps_lg_typ_light
                 );
-                if ((isset($itemRow->ps_lg_typ_make) && trim($itemRow->ps_lg_typ_make) != '') 
-                    || (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '')) {
+                if ((isset($itemRow->ps_lg_typ_make) 
+                        && trim($itemRow->ps_lg_typ_make) != '') 
+                    || (isset($itemRow->ps_lg_typ_model) 
+                        && trim($itemRow->ps_lg_typ_model) != '')) {
                     $ret .= ', ';
                 }
             }
-            if (isset($itemRow->ps_lg_typ_make) && trim($itemRow->ps_lg_typ_make) != '') {
+            if (isset($itemRow->ps_lg_typ_make) 
+                && trim($itemRow->ps_lg_typ_make) != '') {
                 $ret .= $itemRow->ps_lg_typ_make;
-                if (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '') {
+                if (isset($itemRow->ps_lg_typ_model) 
+                    && trim($itemRow->ps_lg_typ_model) != '') {
                     $ret .= ', ';
                 }
             }
-            if (isset($itemRow->ps_lg_typ_model) && trim($itemRow->ps_lg_typ_model) != '') {
+            if (isset($itemRow->ps_lg_typ_model) 
+                && trim($itemRow->ps_lg_typ_model) != '') {
                 $ret .= $itemRow->ps_lg_typ_model;
             }
             if ($headers) {
@@ -375,7 +513,8 @@ class ScoreUtils extends ScorePowerUtilities
     private function getRoomLightDesc($loop, $itemRow = [], $itemInd = 0)
     {
         $ret = '';
-        if (isset($itemRow->ps_lg_typ_room_id) && intVal($itemRow->ps_lg_typ_room_id) > 0) {
+        if (isset($itemRow->ps_lg_typ_room_id) 
+            && intVal($itemRow->ps_lg_typ_room_id) > 0) {
             $roomID = intVal($itemRow->ps_lg_typ_room_id);
             $roomRow = $this->sessData->getRowById('ps_growing_rooms', $roomID);
             $roomInd = $this->sessData->getRowInd('ps_growing_rooms', $roomID);
@@ -384,8 +523,10 @@ class ScoreUtils extends ScorePowerUtilities
             if ($lgtDesc != '') {
                 $ret .= ': ' . $lgtDesc;
             }
-            if (!isset($itemRow->ps_lg_typ_count) || intVal($itemRow->ps_lg_typ_count) <= 0
-                || !isset($itemRow->ps_lg_typ_wattage) || intVal($itemRow->ps_lg_typ_wattage) <= 0) {
+            if (!isset($itemRow->ps_lg_typ_count) 
+                || intVal($itemRow->ps_lg_typ_count) <= 0
+                || !isset($itemRow->ps_lg_typ_wattage) 
+                || intVal($itemRow->ps_lg_typ_wattage) <= 0) {
                 $ret .= ' <nobr><span class="red">To Do</span></nobr>';
             }
         }
@@ -407,13 +548,14 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function nIDgetRenew($nID)
     {
+        $defSet = 'PowerScore Renewables';
         switch ($nID) {
             case 59:
-            case 78: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Solar PV');
-            case 80: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Wind');
-            case 61: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Biomass');
-            case 60: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Geothermal');
-            case 81: return $GLOBALS["SL"]->def->getID('PowerScore Renewables', 'Pelton Wheel');
+            case 78: return $GLOBALS["SL"]->def->getID($defSet, 'Solar PV');
+            case 80: return $GLOBALS["SL"]->def->getID($defSet, 'Wind');
+            case 61: return $GLOBALS["SL"]->def->getID($defSet, 'Biomass');
+            case 60: return $GLOBALS["SL"]->def->getID($defSet, 'Geothermal');
+            case 81: return $GLOBALS["SL"]->def->getID($defSet, 'Pelton Wheel');
         }
         return -3;
     }
@@ -422,7 +564,10 @@ class ScoreUtils extends ScorePowerUtilities
     {
         $this->getLookupAreaIDs();
         if (!isset($this->v["lgtNicknames"])) {
-            $this->v["lgtNicknames"] = $this->v["lgtHours"] = $this->v["lgtTotKwh"] = [];
+            $this->v["lgtNicknames"] 
+                = $this->v["lgtHours"] 
+                = $this->v["lgtTotKwh"] 
+                = [];
             if (!isset($this->sessData->dataSets["ps_light_types"])) {
                 return $this->v["lgtNicknames"];
             }
@@ -535,7 +680,8 @@ class ScoreUtils extends ScorePowerUtilities
     protected function getCurrAreaFld($fldName)
     {
         $area = $this->sessData->getDataBranchRow('areas');
-        if ($area && isset($area->{ $fldName }) && trim($area->{ $fldName }) != '') {
+        if ($area && isset($area->{ $fldName }) 
+            && trim($area->{ $fldName }) != '') {
             return $area->{ $fldName };
         }
         return null;

@@ -44,7 +44,7 @@
         <td>{{ $s->ps_effic_lighting }}</td>
         <td>{{ $s->ps_effic_hvac }}</td>
         <td>{{ number_format($s->ps_grams) }}</td>
-        <td>{{ number_format($s->ps_kwh) }}</td>
+        <td>{{ number_format($s->ps_kwh_tot_calc) }}</td>
         <td>{{ number_format($s->ps_flower_canopy_size) }}</td>
     @else 
         <td colspan=12 >{!! $GLOBALS["SL"]->getNodePageName($s->ps_submission_progress) !!}</td>

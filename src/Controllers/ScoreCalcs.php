@@ -74,30 +74,6 @@ class ScoreCalcs extends ScoreFormsCustom
                         } else {
                             $ps->ps_characterize = $this->frmTypOut;
                         }
-                        /*
-                        $flwrOutdoor = $flwrGrnhse = false;
-                        if ($flwrArt || $flwrDep) {
-                            $flwrGrnhse = true;
-                        } elseif ($flwrSun == 1) {
-                            $flwrOutdoor = true;
-                        }
-                        $areaFlwrID = $this->getAreaFld('Flower', 'ps_area_id');
-                        $this->loadBldDefs($areaFlwrID);
-                        if (sizeof($this->v["areaFlwrBlds"]) > 0) {
-                            foreach ($this->v["areaFlwrBlds"] as $bld) {
-                                if ($bld->ps_ar_bld_type == $this->v["bldTypOut"]) {
-                                    $flwrOutdoor = true;
-                                } elseif ($bld->ps_ar_bld_type == $this->v["bldTypGrn"]) {
-                                    $flwrGrnhse = true;
-                                }
-                            }
-                        }
-                        if ($flwrGrnhse) {
-                            $ps->ps_characterize = $this->frmTypGrn;
-                        } else {
-                            $ps->ps_characterize = $this->frmTypOut;
-                        }
-                        */
                     }
                     $found = true;
                 }
@@ -146,6 +122,16 @@ class ScoreCalcs extends ScoreFormsCustom
             $ps->ps_effic_lighting_status = $this->statusComplete;
         }
         $ps->ps_flower_canopy_size = $this->v["totFlwrSqFt"];
+        $ps->ps_kwh_tot_calc = $ps->ps_kwh;
+        if (isset($ps->com_ma_include_renewables)
+            && intVal($ps->com_ma_include_renewables) == 0) {
+            if (isset($this->sessData->dataSets["ps_monthly"])
+                && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
+                foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
+                    $ps->ps_kwh_tot_calc += $mon->ps_month_kwh_renewable;
+                }
+            }
+        }
         $ps->save();
         $this->sessData->dataSets["powerscore"][0] = $ps;
         return true;
@@ -171,17 +157,17 @@ class ScoreCalcs extends ScoreFormsCustom
 
     protected function calcSimplScore(&$ps)
     {
-        if (isset($ps->ps_kwh) 
-            && intVal($ps->ps_kwh) > 0
+        if (isset($ps->ps_kwh_tot_calc) 
+            && intVal($ps->ps_kwh_tot_calc) > 0
             && isset($ps->ps_grams) 
             && intVal($ps->ps_grams) > 0) {
-            $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh);
+            $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
             $ps->ps_effic_production = $ps->ps_grams/$btus;
         }
         if (isset($this->v["totFlwrSqFt"]) 
             && intVal($this->v["totFlwrSqFt"]) > 0) {
-            if (isset($ps->ps_kwh) && intVal($ps->ps_kwh) > 0) {
-                $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh);
+            if (isset($ps->ps_kwh_tot_calc) && intVal($ps->ps_kwh_tot_calc) > 0) {
+                $btus = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
                 $ps->ps_effic_facility = $btus/$this->v["totFlwrSqFt"];
             }
             if (isset($row->ps_green_waste_lbs) 
@@ -296,7 +282,14 @@ class ScoreCalcs extends ScoreFormsCustom
             return false;
         }
         $ps->ps_effic_water = 0;
-        if (isset($this->sessData->dataSets["ps_areas"])
+        if (isset($this->sessData->dataSets["ps_monthly"])
+            && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
+                $ps->ps_effic_water += $mon->ps_month_water;
+            }
+        }
+        if ($ps->ps_kwh_tot_calc == 0 
+            && isset($this->sessData->dataSets["ps_areas"])
             && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
             foreach ($this->sessData->dataSets["ps_areas"] as $a => $area) {
                 if (isset($area->ps_area_has_stage) 
@@ -320,12 +313,12 @@ class ScoreCalcs extends ScoreFormsCustom
         $ps->ps_effic_hvac = $ps->ps_effic_hvac_orig;
         if (!isset($ps->ps_total_canopy_size) 
             || $ps->ps_total_canopy_size <= 0
-            || !isset($ps->ps_kwh)
-            || $ps->ps_kwh <= 0) {
+            || !isset($ps->ps_kwh_tot_calc)
+            || $ps->ps_kwh_tot_calc <= 0) {
             return false;
         }
         // TBD
-        // $facility = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh);
+        // $facility = $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
         // $ps->ps_effic_hvac = $facility-$ps->ps_effic_lighting;
         return true;
     }
@@ -469,13 +462,16 @@ class ScoreCalcs extends ScoreFormsCustom
                 = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_propane
                 = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_fuel_oil
                 = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_water
+                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_effic_production
                 = 0;
             foreach ($this->sessData->dataSets["compliance_ma_months"] as $mon) {
 
                 $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh
                     += $mon->com_ma_month_kwh;
-                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_renew
-                    += $mon->com_ma_month_kwh;
+                if (isset($mon->com_ma_month_renew_kwh)) {
+                    $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_renew
+                        += $mon->com_ma_month_renew_kwh;
+                }
                 $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_diesel
                     += $mon->com_ma_month_diesel_gallons;
                 $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel
@@ -501,19 +497,28 @@ class ScoreCalcs extends ScoreFormsCustom
             }
             if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_natural_gas)
                 && $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_natural_gas
-                    == $GLOBALS["SL"]->def->getID('Biofuel Wood Units', 'CCF')) {
-                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel *= 0.0103412;
+                    == $GLOBALS["SL"]->def->getID('Natural Gas Units', 'CCF')) {
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_natural_gas *= 1.03412;
             // https://sciencing.com/convert-cubic-feet-therms-8374234.html
             }
+            /*
             if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood)
                 && $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood
                     == $GLOBALS["SL"]->def->getID('Biofuel Wood Units', 'Cords')) {
                 $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel *= 2.6;
             // http://extension.msstate.edu/sites/default/files/publications/publications/P2244_web.pdf
             }
+            */
+            if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_include_renewables)
+                && intVal($this->sessData->dataSets["compliance_ma"][0]->com_ma_include_renewables) == 0) {
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh
+                    += $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_renew;
+            }
             $btu = 3.412*$this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_kwh;
-            $this->sessData->dataSets["compliance_ma"][0]->com_ma_effic_production
-                = $this->sessData->dataSets["compliance_ma"][0]->com_ma_grams/$btu;
+            if ($btu > 0) {
+                $this->sessData->dataSets["compliance_ma"][0]->com_ma_effic_production
+                    = $this->sessData->dataSets["compliance_ma"][0]->com_ma_grams/$btu;
+            }
             $this->sessData->dataSets["compliance_ma"][0]->save();
         }
         return true;

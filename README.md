@@ -1,7 +1,7 @@
 
 # resourceinnovation/cannabisscore
 
-[![Laravel](https://img.shields.io/badge/Laravel-5.8-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-7.6-orange.svg?style=flat-square)](http://laravel.com)
 [![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/rockhopsoft/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -27,8 +27,8 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 # <a name="requirements"></a>Requirements
 
 * php: >=7.2.15
-* <a href="https://packagist.org/packages/laravel/laravel" target="_blank">laravel/laravel</a>: 5.8.*
-* <a href="https://packagist.org/packages/rockhopsoft/survloop" target="_blank">rockhopsoft/survloop</a>: >=0.2.1
+* <a href="https://packagist.org/packages/laravel/laravel" target="_blank">laravel/laravel</a>: 7.6.*
+* <a href="https://packagist.org/packages/rockhopsoft/survloop" target="_blank">rockhopsoft/survloop</a>: >=0.2.14
 
 
 # <a name="getting-started"></a>Getting Started
@@ -103,7 +103,7 @@ And if all has gone well, you'll be asked to create a master admin user account 
 
 ```
 $ composer global require "laravel/installer"
-$ composer create-project laravel/laravel powerscore "5.8.*"
+$ composer create-project laravel/laravel powerscore "7.6.*"
 $ cd powerscore
 $ php artisan key:generate
 $ php artisan make:auth

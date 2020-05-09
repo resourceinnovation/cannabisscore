@@ -42,6 +42,60 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return true;
     }
     
+    protected function postRenewOther($nID)
+    {
+        if ($GLOBALS["SL"]->REQ->has('otherRenewable1075')
+            && trim($GLOBALS["SL"]->REQ->otherRenewable1075) != ''
+            && isset($this->sessData->dataSets["ps_onsite"])
+            && isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_id)) {
+            $this->sessData->dataSets["ps_onsite"][0]->ps_on_produce_renewable_other
+                = trim($GLOBALS["SL"]->REQ->otherRenewable1075);
+            $this->sessData->dataSets["ps_onsite"][0]->save();
+        }
+        return true;
+    }
+    
+    protected function loadRenewOther($nID)
+    {
+        if (isset($this->sessData->dataSets["ps_onsite"])) {
+            $ps = $this->sessData->dataSets["ps_onsite"][0];
+            if (isset($ps->ps_on_produce_renewable_other)
+                && trim($ps->ps_on_produce_renewable_other) != '') {
+                $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
+                    . "document.getElementById(\"otherRenewable1075ID\").value=" 
+                    . json_encode($ps->ps_on_produce_renewable_other) . "', 10); ";
+            }
+        }
+        return true;
+    }
+    
+    protected function postRenewOtherMA($nID)
+    {
+        if ($GLOBALS["SL"]->REQ->has('otherRenewable1424')
+            && trim($GLOBALS["SL"]->REQ->otherRenewable1424) != ''
+            && isset($this->sessData->dataSets["compliance_ma"])
+            && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_id)) {
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_renewable_other
+                = trim($GLOBALS["SL"]->REQ->otherRenewable1424);
+            $this->sessData->dataSets["compliance_ma"][0]->save();
+        }
+        return true;
+    }
+    
+    protected function loadRenewOtherMA($nID)
+    {
+        if (isset($this->sessData->dataSets["compliance_ma"])) {
+            $ma = $this->sessData->dataSets["compliance_ma"][0];
+            if (isset($ma->com_ma_renewable_other)
+                && trim($ma->com_ma_renewable_other) != '') {
+                $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
+                    . "document.getElementById(\"otherRenewable1424ID\").value=" 
+                    . json_encode($ma->com_ma_renewable_other) . "', 10); ";
+            }
+        }
+        return true;
+    }
+    
     protected function postRoomCnt($nID)
     {
         $roomCnt = $currCnt = 0;
@@ -283,7 +337,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
     
     public function monthlyCalcPreselections($nID, $nIDtxt = '')
     {
-        $ret = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $ret = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
         $fld = (($nID == 70) ? 'ps_month_kwh1' 
             : (($nID == 74) ? 'ps_month_grams' : 'ps_month_waste_lbs'));
         $powerMonths = $this->sortMonths();
@@ -302,10 +356,12 @@ class ScoreFormsCustom extends ScoreCondsCustom
         if (isset($this->sessData->dataSets["powerscore"]) 
             && isset($this->sessData->dataSets["powerscore"][0])
             && isset($this->sessData->dataSets["powerscore"][0]->ps_grams)) {
-            $this->v["currSessData"] = $this->sessData->dataSets["powerscore"][0]->ps_grams;
+            $this->v["currSessData"] = $this->sessData
+                ->dataSets["powerscore"][0]->ps_grams;
         } elseif (isset($this->sessData->dataSets["compliance_ma"]) 
             && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_grams)) {
-            $this->v["currSessData"] = $this->sessData->dataSets["compliance_ma"][0]->com_ma_grams;
+            $this->v["currSessData"] = $this->sessData
+                ->dataSets["compliance_ma"][0]->com_ma_grams;
         }
         $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt 
             . "', 'reqFormFldGreater', 0.00000001);\n";

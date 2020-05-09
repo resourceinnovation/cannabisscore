@@ -38,7 +38,7 @@ Should all of these be removed from the list of 'published' scores which others 
         @if (isset($ps->ps_rnk_hvac) && $ps->ps_rnk_hvac > 0) 
             <span class="slGrey">{{ round($ps->ps_rnk_hvac) }}%</span> @endif </td>
     <td class="taR">{{ number_format($ps->ps_grams) }}</td>
-    <td class="taR">{{ number_format($ps->ps_kwh) }}</td>
+    <td class="taR">{{ number_format($ps->ps_kwh_tot_calc) }}</td>
     <td class="taR">{{ number_format($ps->ps_flower_canopy_size) }}</td>
     <td>{{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
         $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $ps->ps_characterize)) }}</td>

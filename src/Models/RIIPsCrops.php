@@ -10,8 +10,8 @@ class RIIPsCrops extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
-        'ps_crop_psid', 
-        'ps_crop_crop'
+		'ps_crop_psid', 
+		'ps_crop_crop', 
     ];
     
     // END SurvLoop auto-generated portion of Model

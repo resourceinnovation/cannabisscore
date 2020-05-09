@@ -17,7 +17,7 @@
     <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
     <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_lighting_power_density, 3) }}</b></th>
     <th><b>{{ number_format($psAvg->ps_grams) }}</b></th>
-    <th><b>{{ number_format($psAvg->ps_kwh) }}</b></th>
+    <th><b>{{ number_format($psAvg->ps_kwh_tot_calc) }}</b></th>
     <th><b>{{ number_format($psAvg->ps_flower_canopy_size) }}</b></th>
     <th colspan=2 >&nbsp;</th>
 </tr>
@@ -149,13 +149,13 @@
             </td>
             @if (!$isExcel)
                 <td> @if ($ps->ps_grams > 0) {{ number_format($ps->ps_grams) }} @endif </td>
-                <td> @if ($ps->ps_kwh > 0) {{ number_format($ps->ps_kwh) }} @endif </td>
+                <td> @if ($ps->ps_kwh_tot_calc > 0) {{ number_format($ps->ps_kwh_tot_calc) }} @endif </td>
                 <td> @if ($ps->ps_flower_canopy_size > 0) 
                     {{ number_format($ps->ps_flower_canopy_size) }} 
                 @endif </td>
             @else
                 <td>{{ number_format($ps->ps_grams) }}</td>
-                <td>{{ number_format($ps->ps_kwh) }}</td>
+                <td>{{ number_format($ps->ps_kwh_tot_calc) }}</td>
                 <td>{{ number_format($ps->ps_flower_canopy_size) }}</td>
             @endif 
             <td>

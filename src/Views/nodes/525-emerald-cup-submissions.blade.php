@@ -95,7 +95,7 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
         </td>
         <td class="psOpen" data-psid="{{ $s->ps_id }}">
             {{ number_format($s->ps_grams) }} g<br />
-            {{ number_format($s->ps_kwh) }} kWh<br />
+            {{ number_format($s->ps_kwh_tot_calc) }} kWh<br />
             {{ number_format($s->ps_flower_canopy_size) }} sq ft
         </td>
     @else 

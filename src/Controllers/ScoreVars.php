@@ -51,12 +51,26 @@ class ScoreVars extends TreeSurvForm
         // Establishing Main Navigation Organization, with Node ID# and Section Titles
         $this->majorSections = [];
         if ($GLOBALS["SL"]->treeID == 1) {
-            $this->majorSections[] = [971, 'Your Facility',        'active'];
-            $this->majorSections[] = [911, 'Lighting & HVAC',  'active'];
-            $this->majorSections[] = [969, 'Annual Totals', 'active'];
-            $this->majorSections[] = [972, 'Water',            'active'];
-            $this->majorSections[] = [970, 'Waste',            'active'];
-            $this->minorSections = [ [], [], [], [], [], [], [] ];
+            $this->majorSections[] = [971,  'Your Facility',     'active'];
+            $this->majorSections[] = [1492, 'Lighting & HVAC',   'active'];
+            $this->majorSections[] = [969,  'Annual Totals',     'active'];
+            $this->majorSections[] = [970,  'Confirm & Submit',  'active'];
+
+            $this->minorSections = [ [], [], [], [], [] ];
+            $this->minorSections[0][] = [45,   'Your Facility'];
+            $this->minorSections[0][] = [1242, 'Growing Rooms'];
+            $this->minorSections[0][] = [64,   'Growing Environments'];
+
+            $this->minorSections[1][] = [911,  'Your Lighting'];
+            $this->minorSections[1][] = [920,  'Your HVAC'];
+            $this->minorSections[1][] = [972,  'Environment Conditions'];
+
+            $this->minorSections[2][] = [1493, 'Water Sources & Usage'];
+            $this->minorSections[2][] = [1494, 'Annual Totals'];
+            $this->minorSections[2][] = [1495, 'Waste'];
+
+            $this->minorSections[3][] = [67,   'Contact & Options'];
+            $this->minorSections[3][] = [848,  'Confirm & Submit'];
         }
         
         //$GLOBALS["SL"]->addTopNavItem('Calculate PowerScore', '/start/calculator');
@@ -169,8 +183,12 @@ class ScoreVars extends TreeSurvForm
                     $rec->save();
                     $this->sessData->dataSets["ps_onsite"] = [ $rec ];
                     $this->sessData->addToMap(
-                        'powerscore', $this->coreID, 0, 
-                        'ps_onsite', $rec->ps_on_id, 0
+                        'powerscore', 
+                        $this->coreID, 
+                        0, 
+                        'ps_onsite', 
+                        $rec->ps_on_id, 
+                        0
                     );
                 }
                 if (!isset($this->sessData->dataSets["ps_page_feedback"])) {
@@ -179,17 +197,23 @@ class ScoreVars extends TreeSurvForm
                     $rec->save();
                     $this->sessData->dataSets["ps_page_feedback"] = [ $rec ];
                     $this->sessData->addToMap(
-                        'powerscore', $this->coreID, 0, 
-                        'ps_page_feedback', $rec->ps_pag_feed_id, 0
+                        'powerscore', 
+                        $this->coreID, 
+                        0, 
+                        'ps_page_feedback', 
+                        $rec->ps_pag_feed_id, 
+                        0
                     );
                 }
                 $this->loadExtraLinkPartner();
             }
+            $this->sessData->dataSets["ps_monthly"] = $this->sortMonths();
         } elseif ($this->treeID == 71 && $this->coreID > 0) {
             $this->checkComplianceMonths();
         }
 
-        if (!session()->has('PowerScoreChecks') || $GLOBALS["SL"]->REQ->has('refresh')) {
+        if (!session()->has('PowerScoreChecks') 
+            || $GLOBALS["SL"]->REQ->has('refresh')) {
             $chk = RIIPowerscore::where('ps_submission_progress', 'LIKE', '147') 
                     // redirection page
                 ->where('ps_status', '=', $this->statusIncomplete)
@@ -465,8 +489,12 @@ class ScoreVars extends TreeSurvForm
             $tmp[($month->com_ma_month_month-1)] = $month;
         }
         $this->sessData->dataSets["compliance_ma_months"] = $tmp;
-        if ($GLOBALS["SL"]->REQ->has('gopro')) {
+        if ($GLOBALS["SL"]->REQ->has('go') 
+            && trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
             $this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro = 1;
+            $this->sessData->dataSets["compliance_ma"][0]->save();
+        } elseif (!isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro)) {
+            $this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro = 0;
             $this->sessData->dataSets["compliance_ma"][0]->save();
         }
         return true;
@@ -552,11 +580,7 @@ class ScoreUserInfo
                 $this->expiration = intVal($info->usr_membership_expiration);
             }
             if ($this->levelDef > 0) {
-                $role = SLUsersRoles::where('role_user_rid', $this->partnerDef)
-                    ->where('role_user_uid', $this->id)
-                    ->first();
-                $hasPartnerFlag = ($role && isset($role->role_user_id));
-                $this->chkLevels($info, $hasPartnerFlag);
+                $this->chkLevels($info);
             }
         }
         return true;
@@ -584,11 +608,16 @@ class ScoreUserInfo
         return true;
     }   
     
-    protected function chkLevels($info, $hasPartnerFlag)
+    protected function chkLevels($info)
     {
+        $role = SLUsersRoles::where('role_user_rid', $this->partnerDef)
+            ->where('role_user_uid', $this->id)
+            ->first();
+        $hasPartnerFlag = ($role && isset($role->role_user_id));
         if ($this->level > 0 
             && isset($info->usr_invite_email)
-            && trim($info->usr_invite_email) == $this->email) {
+            && strtolower(trim($info->usr_invite_email)) 
+                == strtolower(trim($this->email))) {
             if (!isset($info->usr_trial_start)) {
                 $info->usr_trial_start = date("Y-m-d");
                 $info->save();
@@ -597,6 +626,7 @@ class ScoreUserInfo
             if (!$hasPartnerFlag) {
                 $this->addPartnerRole();
             }
+//echo 'id: ' . $this->id . ', email: ' . $this->email . ', company: ' . $this->company . ', levelDef: ' . $this->levelDef . ', partnerDef: ' . $this->partnerDef . '<br />info: <pre>'; print_r($role); print_r($info); echo '</pre>'; exit;
 
 
             // NEEDS ENFORCEMENT PROGRAMMED!..

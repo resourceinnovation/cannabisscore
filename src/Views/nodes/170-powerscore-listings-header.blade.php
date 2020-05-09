@@ -71,7 +71,7 @@
     <th>
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'kWh',
-            "srtVal" => 'ps_kwh',
+            "srtVal" => 'ps_kwh_tot_calc',
             "sort"   => $sort
         ])->render() !!}
     </th>

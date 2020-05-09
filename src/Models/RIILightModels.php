@@ -13,6 +13,7 @@ class RIILightModels extends Model
 		'lgt_mod_manu_id', 
 		'lgt_mod_name', 
 		'lgt_mod_tech', 
+		'lgt_mod_wattage', 
     ];
     
     // END SurvLoop auto-generated portion of Model

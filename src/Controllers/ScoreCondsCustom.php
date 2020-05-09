@@ -81,6 +81,14 @@ class ScoreCondsCustom extends ScoreUtils
             ])) {
             return $this->runCondIndoorFlowerSizes($condition);
 
+        } elseif ($condition == '#MACompliancePowerScore') {
+            if (isset($this->sessData->dataSets["powerscore"])
+                && sizeof($this->sessData->dataSets["powerscore"]) == 1
+                && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
+                && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
+                return 1;
+            }
+            return 0;
         }
         return -1;
     }

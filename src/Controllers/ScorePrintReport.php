@@ -428,4 +428,68 @@ class ScorePrintReport extends ScoreCalcsPrint
         )->render();
     }
 
+    protected function reportMaProPdf($nID)
+    {
+        $ret = '<style> #node1448, #blockWrap945 { display: none; } </style>';
+        if ($GLOBALS["SL"]->REQ->has('isPreview')) {
+            return $ret;
+        }
+        if (isset($this->sessData->dataSets["powerscore"])
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
+            return view(
+                'vendor.cannabisscore.nodes.1449-ma-compliance-above-powerscore', 
+                [ "id" => $this->sessData->dataSets["powerscore"][0]->ps_com_ma_id ]
+            )->render();
+        }
+        return $ret;
+    }
+
+    protected function reportMaPSID($nID)
+    {
+        $deetLabel = 'PowerScore ID#';
+        $deetVal = '';
+        if (isset($this->sessData->dataSets["compliance_ma"])) {
+            $com = $this->sessData->dataSets["compliance_ma"][0];
+            if (isset($com->com_ma_ps_id)
+                && intVal($com->com_ma_ps_id) > 0) {
+                $deetVal = '<a href="/calculated/read-' . $com->com_ma_ps_id 
+                    . '" target="_blank">#' . $com->com_ma_ps_id . '</a>';
+            }
+        }
+        return [ $deetLabel, $deetVal, $nID ];
+    }
+
+    protected function reportMaEfficProd($nID)
+    {
+        $deetLabel = 'Electric Production Efficiency (grams/kWh)';
+        $deetVal = 0;
+        if (isset($this->sessData->dataSets["compliance_ma"])) {
+            $com = $this->sessData->dataSets["compliance_ma"][0];
+            if (isset($com->com_ma_grams)
+                && intVal($com->com_ma_grams) > 0
+                && isset($com->com_ma_tot_kwh)
+                && intVal($com->com_ma_tot_kwh) > 0) {
+                $deetVal = $com->com_ma_grams/$com->com_ma_tot_kwh;
+                $deetVal = $GLOBALS["SL"]->sigFigs($deetVal, 3);
+            }
+        }
+        return [ $deetLabel, $deetVal, $nID ];
+    }
+
+    protected function reportMaYear($nID)
+    {
+        $deetLabel = 'Reporting Year';
+        $deetVal = intVal(date("Y"))-1;
+        if (isset($this->sessData->dataSets["compliance_ma"])) {
+            $com = $this->sessData->dataSets["compliance_ma"][0];
+            if (isset($com->com_ma_year)
+                && intVal($com->com_ma_year) > 0) {
+                $deetVal = $com->com_ma_year;
+            }
+        }
+        return [ $deetLabel, $deetVal, $nID ];
+    }
+
+
 }
