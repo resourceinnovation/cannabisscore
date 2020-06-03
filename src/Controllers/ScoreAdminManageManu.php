@@ -27,8 +27,19 @@ class ScoreAdminManageManu
 
     public function __construct()
     {
-        $this->v["manus"] = RIIManufacturers::orderBy('manu_name', 'asc')
-            ->get();
+        $this->addManufacturers();
+        $this->v["manuSrchWords"] = [];
+        if ($GLOBALS["SL"]->REQ->has('manuSrch')) {
+            $this->v["manuSrchWords"] = $GLOBALS["SL"]->mexplode(' ', strtolower($GLOBALS["SL"]->REQ->manuSrch));
+        }
+        if (sizeof($this->v["manuSrchWords"]) > 0) {
+            $this->v["manus"] = RIIManufacturers::orderBy('manu_name', 'asc')
+                ->where('manu_name', 'LIKE', '%' . $GLOBALS["SL"]->REQ->manuSrch . '%')
+                ->get();
+        } else {
+            $this->v["manus"] = RIIManufacturers::orderBy('manu_name', 'asc')
+                ->get();
+        }
     }
     
     /**
@@ -40,23 +51,17 @@ class ScoreAdminManageManu
     public function printMgmtManufacturers($nID = -3)
     {
         $this->cntManufacturerAdoption();
+        if ($GLOBALS["SL"]->REQ->has('excel')) {
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.914-manage-manufacturers-adoption-excel', 
+                $this->v
+            )->render();
+            $filename = 'PowerScore_Manufacturer_Adoption-' . date("ymd") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
+            exit;
+        }
         return view(
             'vendor.cannabisscore.nodes.914-manage-manufacturers', 
-            $this->v
-        )->render();
-    }
-    
-    /**
-     * Print admin tool to add one or more lighting manufacturers.
-     *
-     * @param int $nID
-     * @return string
-     */
-    public function printAddManufacturers($nID = -3)
-    {
-        $this->addManufacturers($nID);
-        return view(
-            'vendor.cannabisscore.nodes.1293-add-manufacturers', 
             $this->v
         )->render();
     }
@@ -151,12 +156,22 @@ class ScoreAdminManageManu
     protected function cntManufacturerAdoption()
     {
         $this->v["errorNotes"] = '';
+        $this->v["stageTots"] = [
+            "flower" => 0,
+            "veg"    => 0,
+            "clone"  => 0,
+            "mother" => 0
+        ];
+        $this->v["manusTots"] = [];
+        $this->v["manusTotSum"] = 0;
         if ($this->v["manus"]->isNotEmpty()) {
             foreach ($this->v["manus"] as $m => $manu) {
                 $this->v["manus"][$m]->manu_cnt_flower 
                     = $this->v["manus"][$m]->manu_cnt_veg
                     = $this->v["manus"][$m]->manu_cnt_clone
-                    = $this->v["manus"][$m]->manu_cnt_mother = 0;
+                    = $this->v["manus"][$m]->manu_cnt_mother 
+                    = 0;
+                $this->v["manusTots"][$m] = [];
             }
             $areaIDs = $areaIDsDone = [];
             $chk = RIIPsAreas::whereIn('ps_area_psid', function($query){
@@ -189,6 +204,11 @@ class ScoreAdminManageManu
                     $this->cntManufacturerAdoptionOne($m, $lgts);
                 }
                 $this->v["manus"][$m]->save();
+                $this->v["stageTots"]["flower"] += $this->v["manus"][$m]->manu_cnt_flower;
+                $this->v["stageTots"]["veg"]    += $this->v["manus"][$m]->manu_cnt_veg;
+                $this->v["stageTots"]["clone"]  += $this->v["manus"][$m]->manu_cnt_clone;
+                $this->v["stageTots"]["mother"] += $this->v["manus"][$m]->manu_cnt_mother;
+                $this->v["manusTotSum"] += sizeof($this->v["manusTots"][$m]);
             }
         }
         return true;
@@ -260,7 +280,22 @@ class ScoreAdminManageManu
             );
             if ($pos !== false
                 && !in_array($lgt->ps_area_psid, $found[$nick])) {
-                $found[$nick][] = $lgt->ps_area_psid;
+                $match = false;
+                if (sizeof($this->v["manuSrchWords"]) == 0) {
+                    $match = true;
+                } else {
+                    foreach ($this->v["manuSrchWords"] as $word) {
+                        if (strpos(strtolower($lgt->ps_lg_typ_make), $word) !== false) {
+                            $match = true;
+                        }
+                    }
+                }
+                if ($match) {
+                    $found[$nick][] = $lgt->ps_area_psid;
+                    if (!in_array($lgt->ps_area_psid, $this->v["manusTots"][$m])) {
+                        $this->v["manusTots"][$m][] = $lgt->ps_area_psid;
+                    }
+                }
             }
         }
         $stages = ['Flower', 'Veg', 'Clone', 'Mother'];
@@ -277,10 +312,9 @@ class ScoreAdminManageManu
     /**
      * Admins can add manufacturers to the database.
      *
-     * @param  int $nID
      * @return boolean
      */
-    public function addManufacturers($nID = -3)
+    public function addManufacturers()
     {
         if ($GLOBALS["SL"]->REQ->has('addManu') 
             && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
@@ -292,8 +326,7 @@ class ScoreAdminManageManu
                 foreach ($lines as $i => $line) {
                     $line = trim($line);
                     if ($line != '') {
-                        $chk = RIIManufacturers::where('manu_name', 
-                                'LIKE', $line)
+                        $chk = RIIManufacturers::where('manu_name', 'LIKE', $line)
                             ->first();
                         if (!$chk || !isset($chk->manu_id)) {
                             $chk = new RIIManufacturers;

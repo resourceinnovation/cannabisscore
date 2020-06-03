@@ -5,9 +5,7 @@
 [![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/rockhopsoft/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis 
-community, and the industry, to prepare, track, and grow in ever more sustainable directions. 
-The Cannabis PowerScore database is built using 
+Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis community, and the industry, to prepare, track, and grow in ever more sustainable directions. The Cannabis PowerScore database is built using 
 <a href="https://github.com/rockhopsoft/survloop" target="_blank">SurvLoop</a>, atop 
 <a href="https://laravel.com/" target="_blank">Laravel</a>. <br />
 <a href="http://ResourceInnovation.org" target="_blank">ResourceInnovation.org</a><br />
@@ -33,94 +31,105 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 
 # <a name="getting-started"></a>Getting Started
 
-## Install a copy of Cannabis PowerScore with Laradock
-
-First, <a href="https://www.docker.com/get-started" target="_blank">install Docker</a> on Mac, Windows, or an online server. 
-Then grab a copy of Laravel (last tested with v5.8.3)...
+## Install Laravel Using Composer
 ```
-$ git clone https://github.com/laravel/laravel.git survlooporg
-$ cd survlooporg
+$ composer create-project laravel/laravel powerscore "7.6.*"
+$ cd powerscore
+
 ```
 
-Next, install and boot up Laradock (last tested with v7.14).
+Edit the environment file to connect the default MYSQL database:
 ```
-$ git submodule add https://github.com/Laradock/laradock.git
-$ cd laradock
-$ cp env-example .env
-$ docker-compose up -d nginx mysql phpmyadmin redis workspace
+$ nano .env
 ```
-
-After Docker finishes booting up your containers, enter the mysql container with the root password, "root". This seems to fix things for the latest version of MYSQL.
 ```
-$ docker-compose exec mysql bash
-# mysql --user=root --password=root default
-mysql> ALTER USER 'default'@'%' IDENTIFIED WITH mysql_native_password BY 'secret';
-mysql> exit;
-$ exit
+DB_DATABASE=homestead
+DB_USERNAME=homestead
+DB_PASSWORD=secret
 ```
 
-At this point, you can optionally browse to <a href="http://localhost:8080" target="_blank">http://localhost:8080</a> for PhpMyAdmin.
+Next, install Laravel's out-of-the-box user authentication tools, and push the vendor file copies where they need to be:
 ```
-Server: mysql
-Username: default
-Password: secret
+$ composer require laravel/ui
+$ php artisan ui vue --auth
+$ echo "0" | php artisan vendor:publish --tag=laravel-notifications
 ```
 
-Finally, enter Laradock's workspace container and install the PowerScore.
+### Install ResourceInnovation/CannabisScore
+
+From your Laravel installation's root directory, update `composer.json` to require and easily reference CannabisScore:
 ```
-$ docker-compose exec workspace bash
-# cp .env.example .env
-# nano .env
+$ nano composer.json
 ```
-Edit these few lines in Laravel's environment file:
 ```
-DB_HOST=mysql
-DB_DATABASE=default
-DB_USERNAME=default
+...
+"require": {
+    ...
+    "rockhopsoft/survloop": "^0.2.4",
+    "resourceinnovation/cannabisscore": "^0.2.4",
+    ...
+},
+...
+"autoload": {
+    ...
+    "psr-4": {
+        ...
+        "SurvLoop\\": "vendor/rockhopsoft/survloop/src/",
+        "CannabisScore\\": "vendor/resourceinnovation/cannabisscore/src/",
+    }
+    ...
+}, ...
 ```
-And continue the install...
+
+After saving the file, run the update to download CannabisScore, and any missing dependencies.
 ```
-# composer install
-# php artisan key:generate
-# php artisan make:auth
-# composer require resourceinnovation/cannabisscore
-# composer dump-autoload
-# sed -i 's/App\\User::class/App\\Models\\User::class/g' config/auth.php
-# echo "0" | php artisan vendor:publish --force
-# php artisan migrate
-# php artisan optimize
-# composer dump-autoload
+$ composer update
+```
+
+Add the package to your application service providers in `config/app.php`.
+```
+$ nano config/app.php
+```
+```
+...
+'providers' => [
+    ...
+    SurvLoop\SurvLoopServiceProvider::class,
+    CannabisScore\CannabisScoreServiceProvider::class,
+    ...
+],
+...
+'aliases' => [
+    ...
+    'SurvLoop' => 'RockHopSoft\SurvLoop\SurvLoopFacade',
+    'CannabisScore' => 'ResourceInnovation\CannabisScore\CannabisScoreFacade',
+    ...
+], ...
+```
+
+Swap out the CannabisScore user model in `config/auth.php`.
+```
+$ nano config/auth.php
+```
+```
+...
+'model' => App\Models\User::class,
+...
+```
+
+Update composer, publish the package migrations, etc...
+```
+$ echo "0" | php artisan vendor:publish --force
+$ cd ~/homestead
+$ vagrant up
+$ vagrant ssh
+$ cd code/powerscore
+$ php artisan migrate
+$ composer dump-autoload
 # php artisan db:seed --class=SurvLoopSeeder
 $ php artisan db:seed --class=ZipCodeSeeder
 # php artisan db:seed --class=CannabisScoreSeeder
-```
-And if all has gone well, you'll be asked to create a master admin user account when you browse to <a href="http://localhost/" target="_blank">http://localhost/</a>. If it loads, but looks janky (without CSS), reload the page once... and hopefully it looks like a fresh install.
-
-
-## Install a copy of the Cannabis PowerScore without Laradock
-
-* Use Composer to install Laravel with default user authentication, one required package:
-
-```
-$ composer global require "laravel/installer"
-$ composer create-project laravel/laravel powerscore "7.6.*"
-$ cd powerscore
-$ php artisan key:generate
-$ php artisan make:auth
-$ composer require resourceinnovation/cannabisscore
-$ sed -i 's/App\\User::class/App\\Models\\User::class/g' config/auth.php
-```
-
-* Update composer, publish the package migrations, etc...
-
-```
-$ echo "0" | php artisan vendor:publish --force
-$ composer dump-autoload
-$ php artisan optimize
-$ php artisan migrate
-$ php artisan db:seed --class=SurvLoopSeeder
-$ php artisan db:seed --class=ZipCodeSeeder
-$ php artisan db:seed --class=CannabisScoreSeeder
+$ php artisan optimize:clear
 ```
 
 * For now, to apply database design changes to the same installation you are working in, depending on your server, 
@@ -147,10 +156,9 @@ target="_blank">OpenEI.org</a>.
 
 # <a name="roadmap"></a>Roadmap
 
-Here's the TODO list for the next release (**1.0**). It's my first time building on Laravel, or GitHub. So sorry.
+Here's the TODO list for the next release (**1.0**).
 
 * [ ] Code commenting, learning and implementing more community standards.
-* [ ] More reports, filters, and graphs of the collected data.
 
 # <a name="change-logs"></a>Change Logs
 

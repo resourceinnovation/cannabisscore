@@ -1,5 +1,6 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-powerscore-listings.blade.php -->
 <table border=0 class="table w100 bgWht">
+
 {!! view(
     'vendor.cannabisscore.nodes.170-powerscore-listings-header',
     [
@@ -9,31 +10,35 @@
     ]
 )->render() !!}
 
-<tr>
-    <th colspan=2 ><b>Averages</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
-    <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_lighting_power_density, 3) }}</b></th>
-    <th><b>{{ number_format($psAvg->ps_grams) }}</b></th>
-    <th><b>{{ number_format($psAvg->ps_kwh_tot_calc) }}</b></th>
-    <th><b>{{ number_format($psAvg->ps_flower_canopy_size) }}</b></th>
-    <th colspan=2 >&nbsp;</th>
-</tr>
-
 @if (!isset($fltPartner) || $fltPartner <= 0)
     <tr>
-        <th colspan=2 ><b>{{ number_format($allscores->count()) }} Found</b></th>
+        <th><b>Found</b></th>
+        <th><b>{{ number_format($allscores->count()) }}</b></th>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_facility) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_production) }}</td>
-        <td class="slGrey">{{ number_format($psCnt->ps_effic_lighting) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_hvac) }}</td>
-        <th colspan=6 >
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_lighting) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_lighting_power_density) }}</td>
+        <th colspan=5 >
     </tr>
 @endif
 
 @if ($allscores && $allscores->isNotEmpty())
+
+    <tr>
+        <th><b>Averages</b></th>
+        <th><b>{{ round($psAvg->ps_effic_overall) }}%</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_lighting_power_density, 3) }}</b></th>
+        <th><b>{{ number_format($psAvg->ps_grams) }}</b></th>
+        <th><b>{{ number_format($psAvg->ps_kwh) }}</b></th>
+        <th><b>{{ number_format($psAvg->ps_flower_canopy_size) }}</b></th>
+        <th colspan=2 >&nbsp;</th>
+    </tr>
+
     @foreach ($allscores as $i => $ps)
 
         @if ($GLOBALS["SL"]->REQ->has('test') 
@@ -142,9 +147,13 @@
             @endif
             </td>
             <td>
-            @if (isset($ps->ps_lighting_power_density) && $ps->ps_lighting_power_density > 0.00001)
-                {{ $GLOBALS["SL"]->sigFigs($ps->ps_lighting_power_density, 3) }}
-            @else 0
+            @if ((isset($ps->ps_effic_lighting_status) 
+                && intVal($ps->ps_effic_lighting_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
+                @if (isset($ps->ps_lighting_power_density) && $ps->ps_lighting_power_density > 0.00001)
+                    {{ $GLOBALS["SL"]->sigFigs($ps->ps_lighting_power_density, 3) }}
+                @else 0
+                @endif
             @endif
             </td>
             @if (!$isExcel)
@@ -219,6 +228,15 @@
         @endif
 
     @endforeach
+
+    <tr>
+        <td colspan=7 class="slGrey">Sums</td>
+        <td class="slGrey">{{ number_format($psSum->ps_grams) }}</td>
+        <td class="slGrey">{{ number_format($psSum->ps_kwh) }}</td>
+        <td class="slGrey">{{ number_format($psSum->ps_flower_canopy_size) }}</td>
+        <td colspan=2 >&nbsp;</td>
+    </tr>
+
 @else
     <tr><td colspan=11 class="slGrey">
         <i>No PowerScores found.</i>

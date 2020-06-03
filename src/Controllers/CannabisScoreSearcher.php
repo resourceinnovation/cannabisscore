@@ -72,7 +72,8 @@ class CannabisScoreSearcher extends Searcher
             ? intVal($GLOBALS["SL"]->REQ->get('fltCmpl')) : 243);
         $this->v["fltPartner"] = (($GLOBALS["SL"]->REQ->has('fltPartner')) 
             ? intVal($GLOBALS["SL"]->REQ->get('fltPartner')) : 0);
-        if (Auth::user() && (Auth::user()->hasRole('partner')
+        if (Auth::user() 
+            && (Auth::user()->hasRole('partner')
             && !Auth::user()->hasRole('administrator|staff'))) {
             if ((!isset($GLOBALS["SL"]->x["officialSet"]) 
                     || !$GLOBALS["SL"]->x["officialSet"])
@@ -170,6 +171,9 @@ class CannabisScoreSearcher extends Searcher
         //if ($this->v["psid"] > 0) $this->v["urlFlts"] .= '&ps=' . $this->v["psid"];
         if (intVal($this->v["fltPartner"]) > 0) {
             $this->v["urlFlts"] .= '&fltPartner=' . $this->v["fltPartner"];
+        }
+        if (intVal($this->v["fltManuLgt"]) > 0) {
+            $this->v["urlFlts"] .= '&fltManuLgt=' . $this->v["fltManuLgt"];
         }
         if (intVal($this->v["fltFut"]) > 0) {
             $this->v["urlFlts"] .= '&fltFut=' . $this->v["fltFut"];
@@ -375,8 +379,12 @@ class CannabisScoreSearcher extends Searcher
         } elseif (isset($this->v["fltCmpl"])) {
             $status = $this->v["fltCmpl"];
         }
-        $eval = "whereIn('ps_status', [" . $status . "])->where('ps_time_type', " 
-            . $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past') . ")";
+        $eval = "";
+        if ($this->v["fltPartner"] <= 0) {
+            $eval .= "whereIn('ps_status', [" . $status . "])->";
+        }
+        $eval .= "where('ps_time_type', " . $GLOBALS["SL"]
+            ->def->getID('PowerScore Submission Type', 'Past') . ")";
         $psidLgtARS = $psidLghts = $psidHvac = $psidRenew 
             = $psidSize = $psidCups = $psidManuLgt = [];
         foreach (["fltLgtArt", "fltLgtDep", "fltLgtSun"] as $flt) {
@@ -786,27 +794,43 @@ class CannabisScoreSearcher extends Searcher
             'ps_flower_canopy_size'
         ];
         $this->v["psAvg"] = new RIIPowerscore;
+        $this->v["psSum"] = new RIIPowerscore;
         $this->v["psCnt"] = new RIIPowerscore;
         foreach ($this->v["avgFlds"] as $fld) {
-            $this->v["psAvg"]->{ $fld } = $this->v["psCnt"]->{ $fld } = 0;
+            $this->v["psAvg"]->{ $fld } 
+                = $this->v["psSum"]->{ $fld } 
+                = $this->v["psCnt"]->{ $fld } 
+                = 0;
         }
+        $isFltPartner = (isset($this->v["fltPartner"]) 
+            && intVal($this->v["fltPartner"]) > 0);
         if ($this->v["allscores"] && $this->v["allscores"]->isNotEmpty()) {
             foreach ($this->v["allscores"] as $i => $ps) {
                 foreach ($this->v["avgFlds"] as $fld) {
-                    if (strpos($fld, 'ps_effic') === false 
-                        || (isset($ps->{ $fld . '_status' })
+                    if (in_array($fld, ['ps_effic_overall', 'ps_grams', 
+                        'ps_kwh', 'ps_flower_canopy_size'])) {
+                        $this->v["psSum"]->{ $fld } += (1*$ps->{ $fld });
+                        $this->v["psCnt"]->{ $fld }++;
+                    } elseif ($fld == 'ps_lighting_power_density') {
+                        if (isset($ps->ps_effic_lighting_status)
+                                && intVal($ps->ps_effic_lighting_status) 
+                                    == $this->v["defCmplt"]) {
+                            //|| $isFltPartner) {
+                            $this->v["psSum"]->{ $fld } += (1*$ps->{ $fld });
+                            $this->v["psCnt"]->{ $fld }++;
+                        }
+                    } elseif ((isset($ps->{ $fld . '_status' })
                             && intVal($ps->{ $fld . '_status' }) 
                                 == $this->v["defCmplt"])
-                        || (isset($this->v["fltPartner"])
-                            && $this->v["fltPartner"] > 0)) {
-                        $this->v["psAvg"]->{ $fld } += (1*$ps->{ $fld });
+                        || $isFltPartner) {
+                        $this->v["psSum"]->{ $fld } += (1*$ps->{ $fld });
                         $this->v["psCnt"]->{ $fld }++;
                     }
                 }
             }
             foreach ($this->v["avgFlds"] as $fld) {
                 if ($this->v["psCnt"]->{ $fld } > 0) {
-                    $this->v["psAvg"]->{ $fld } = $this->v["psAvg"]->{ $fld }
+                    $this->v["psAvg"]->{ $fld } = $this->v["psSum"]->{ $fld }
                         /$this->v["psCnt"]->{ $fld };
                 }
             }

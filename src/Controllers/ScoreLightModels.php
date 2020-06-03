@@ -89,6 +89,18 @@ class ScoreLightModels extends ScoreVars
     
     protected function getAllLightModels()
     {
+        if ($GLOBALS["SL"]->REQ->has('modelSrch')
+            && trim($GLOBALS["SL"]->REQ->modelSrch) != '') {
+            $srch = '%' . $GLOBALS["SL"]->REQ->modelSrch . '%';
+            return DB::table('rii_light_models')
+                ->join('rii_manufacturers', 'rii_manufacturers.manu_id', 
+                    '=', 'rii_light_models.lgt_mod_manu_id')
+                ->where('rii_manufacturers.manu_name', 'LIKE', $srch)
+                ->orderBy('rii_manufacturers.manu_name', 'asc')
+                ->orderBy('rii_light_models.lgt_mod_name', 'asc')
+                ->select('rii_light_models.*')
+                ->get();
+        }
         return DB::table('rii_light_models')
             ->join('rii_manufacturers', 'rii_manufacturers.manu_id', 
                 '=', 'rii_light_models.lgt_mod_manu_id')

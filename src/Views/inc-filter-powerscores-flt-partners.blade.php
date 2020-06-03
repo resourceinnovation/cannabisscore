@@ -14,7 +14,8 @@
                     @endif >All Partners</option>
             @forelse ($usrCompanies as $c => $company)
                 <option value="{{ $company->usr_user_id }}" 
-                    @if (isset($fltPartner) 
+                    @if (isset($fltPartner)
+                        && intVal($fltPartner) > 0 
                         && trim($fltPartner) == trim($company->usr_user_id))
                         SELECTED
                     @endif >{{ $company->usr_company_name }}</option>

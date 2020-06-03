@@ -4,11 +4,11 @@
     <select name="fltStateClim" id="fltStateClimID" 
         class="form-control psChageFilter ntrStp slTab"
         autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
-        <option value="" 
-            @if (isset($fltStateClim) && trim($fltStateClim) == '') 
+        <option value="" @if (isset($fltStateClim) && trim($fltStateClim) == '') 
                 SELECTED
             @endif >All Climates and States</option>
         <option disabled ></option>
         {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
     </select>
+    @if (isset($fltStateClim)) <!-- fltStateClim: {{ $fltStateClim }} --> @endif
 </div>

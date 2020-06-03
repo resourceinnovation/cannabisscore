@@ -68,8 +68,17 @@
                 >Get Random
             </a>
             <a class="btn btn-secondary" 
-                href="/dash/compare-powerscores?srt={{ $sort[0] 
-                }}&srta={{ $sort[1] }}{{ $urlFlts }}&excel=1"
+                href="?srt={{ $sort[0] }}&srta={{ 
+                $sort[1] }}{{ $urlFlts }}&excel=1"
+                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+                Excel
+            </a>
+        </div>
+    @else
+        <div class="pT10">
+            <a class="btn btn-secondary" 
+                href="?srt={{ $sort[0] }}&srta={{ 
+                $sort[1] }}{{ $urlFlts }}&excel=1"
                 ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
                 Excel
             </a>

@@ -239,9 +239,6 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 914) {
             $this->initManuAdmin();
             $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
-        } elseif ($nID == 1293) {
-            $this->initManuAdmin();
-            $ret .= $this->v["manuAdmin"]->printAddManufacturers($nID);
         } elseif ($nID == 915) {
             $this->initManuAdmin();
             $ret .= $this->v["manuAdmin"]->printMgmtPartners($nID);

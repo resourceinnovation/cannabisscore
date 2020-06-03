@@ -44,9 +44,9 @@ class ScoreListings extends ScoreReportLightingManu
             return $this->getRandomPowerScores();
         }
         $GLOBALS["SL"]->loadStates();
+        $this->searcher->v["fltStateClim"] = '';
         $this->searcher->getSearchFilts();
         $this->searcher->v["allListings"] = '';
-        $this->searcher->v["fltStateClim"] = '';
 
         $usrCompany = '';
         if ($this->v["user"] 
@@ -58,6 +58,7 @@ class ScoreListings extends ScoreReportLightingManu
                 || !$GLOBALS["SL"]->x["officialSet"])) {
             $usrCompany = trim($this->searcher->v["usrInfo"]->company);
         }
+
 
         $origFltManuLgt = '';
         if ($GLOBALS["SL"]->REQ->has('fltManuLgt')) {
@@ -86,30 +87,10 @@ class ScoreListings extends ScoreReportLightingManu
         $this->fakeMultiSite();
 
         if (in_array($origFltManuLgt, ['', '0'])) {
-
             //$this->searcher->searchResultsXtra();
             $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID);
-
         } else {
-
-            $this->searcher->v["fltManuLgt"] = $origFltManuLgt;
-            if ($this->v["user"]->hasRole('partner')) {
-                $this->searcher->v["fltManuLgt"] = $this->v["usrInfo"]->company;
-            }
-            $manus = $this->searcher->getUsrCompanyManus();
-            if ($manus && sizeof($manus) > 0) {
-                foreach ($manus as $manu) {
-                    $this->searcher->getSearchFilts();
-                    //$this->searcher->searchResultsXtra();
-                    $this->searcher->v["fltManuLgt"] = $manu->manu_id;
-                    $this->searcher->v["allListings"] .= '<a target="_blank" '
-                        . 'href="/dash/competitive-performance?manu='
-                        . urlencode($manu->manu_name) . '"><h4>' 
-                        . $manu->manu_name . '</h4></a>' 
-                        . $this->getPowerScoresPublic($nID);
-                }
-            }
-
+            $this->getAllPowerScoresPublicManu($nID);
         }
         $this->v["nID"] = $this->searcher->v["nID"] = $nID;
 
@@ -150,6 +131,30 @@ class ScoreListings extends ScoreReportLightingManu
             'vendor.cannabisscore.nodes.170-all-powerscores', 
             $this->searcher->v
         )->render();
+    }
+    
+    protected function getAllPowerScoresPublicManu($nID)
+    {
+        /*
+        $this->searcher->v["fltManuLgt"] = $origFltManuLgt;
+        if ($this->v["user"]->hasRole('partner')) {
+            $this->searcher->v["fltManuLgt"] = $this->v["usrInfo"]->company;
+        }
+        */
+        $manus = $this->searcher->getUsrCompanyManus();
+        if ($manus && sizeof($manus) > 0) {
+            foreach ($manus as $manu) {
+                $this->searcher->getSearchFilts();
+                //$this->searcher->searchResultsXtra();
+                $this->searcher->v["fltManuLgt"] = $manu->manu_id;
+                $this->searcher->v["allListings"] .= '<a target="_blank" '
+                    . 'href="/dash/competitive-performance?manu='
+                    . urlencode($manu->manu_name) . '"><h4>' 
+                    . $manu->manu_name . '</h4></a>'
+                    . $this->getPowerScoresPublic($nID);
+            }
+        }
+        return true;
     }
     
     protected function getRandomPowerScores()
@@ -418,7 +423,7 @@ class ScoreListings extends ScoreReportLightingManu
             ->where('rii_powerscore.ps_name', 'LIKE', $farmName)
             ->where('rii_powerscore.created_at', '>', $this->v["startDate"] . ' 00:00:00')
             //->where('rii_powerscore.ps_year', 'LIKE', (date("Y")-1))
-            ->whereIn('rii_powerscore.ps_status', [$this->v["defCmplt"], 364])
+            ->whereIn('rii_powerscore.ps_status', [ $this->v["defCmplt"], 364 ])
             ->orderBy('rii_powerscore.ps_id', 'desc')
             ->get();
         if ($chk2->isNotEmpty()) {

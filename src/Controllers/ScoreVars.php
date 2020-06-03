@@ -456,17 +456,6 @@ class ScoreVars extends TreeSurvForm
         return $this->v["lightImportTypeConvert"];
     }
     
-    protected function getAllLightModels()
-    {
-        return DB::table('rii_light_models')
-            ->join('rii_manufacturers', 'rii_manufacturers.manu_id', 
-                '=', 'rii_light_models.lgt_mod_manu_id')
-            ->orderBy('rii_manufacturers.manu_name', 'asc')
-            ->orderBy('rii_light_models.lgt_mod_name', 'asc')
-            ->select('rii_light_models.*')
-            ->get();
-    }
-    
     protected function checkComplianceMonths()
     {
         if (isset($this->sessData->dataSets["compliance_ma"])

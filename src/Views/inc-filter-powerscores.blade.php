@@ -21,10 +21,12 @@
                 )->render() !!}
             @endif
 
-            {!! view(
-                'vendor.cannabisscore.inc-filter-powerscores-flt-climate', 
-                [ "fltStateClim" => $fltStateClim ]
-            )->render() !!}
+            @if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+                {!! view(
+                    'vendor.cannabisscore.inc-filter-powerscores-flt-climate', 
+                    [ "fltStateClim" => $fltStateClim ]
+                )->render() !!}
+            @endif
 
             {!! view(
                 'vendor.cannabisscore.inc-filter-powerscores-flt-lght', 
@@ -34,14 +36,14 @@
                 ]
             )->render() !!}
 
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-flt-hvac',
+                [ "areaTypesFilt" => $areaTypesFilt ]
+            )->render() !!}
+
             @if ($GLOBALS["SL"]->x["partnerLevel"] < 4
                 && isset($GLOBALS["SL"]->x["partnerVersion"]) 
                 && $GLOBALS["SL"]->x["partnerVersion"])
-                {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-flt-hvac',
-                    [ "areaTypesFilt" => $areaTypesFilt ]
-                )->render() !!}
-
                 {!! view(
                     'vendor.cannabisscore.inc-filter-powerscores-join'
                 )->render() !!}
@@ -62,6 +64,8 @@
                 || (isset($fltVert) && intVal($fltVert) == 1) 
                 || (isset($fltRenew) && sizeof($fltRenew) > 0) 
                 || (isset($fltCup) && intVal($fltCup) > 0) )
+                || (isset($fltManuLgt) 
+                    && !in_array(trim($fltManuLgt), ['', '0']))
             @elseif (!isset($GLOBALS['SL']->x['partnerVersion']) 
                 || !$GLOBALS['SL']->x['partnerVersion'])
                 @if ( (isset($fltCmpl) && $fltCmpl != 243)
@@ -77,11 +81,6 @@
             @endif ">
 
             <div class="row">
-
-                {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-flt-hvac',
-                    [ "areaTypesFilt" => $areaTypesFilt ]
-                )->render() !!}
 
                 {!! view(
                     'vendor.cannabisscore.inc-filter-powerscores-flt-size', 
@@ -103,6 +102,7 @@
                     {!! view(
                         'vendor.cannabisscore.inc-filter-powerscores-flt-manus', 
                         [
+                            "fltPartner" => $fltPartner,
                             "fltManuLgt" => $fltManuLgt,
                             "manuList"   => $manuList
                         ]

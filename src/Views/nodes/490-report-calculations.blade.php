@@ -312,7 +312,39 @@
                 </div>
             </td></tr>
         @endif
+
+
+        @if ($GLOBALS["SL"]->REQ->has('bonus'))
+
+            <tr class="scoreRowHeader"><td>
+                <h5 class="slBlueDark">Bonus Points Earned</h5>
+            </td></tr>
+            <tr id="scoreRowBonusDLC"><td><div class="efficBlock">
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-6">
+                        <div class="pT5 pB5 pL15">
+                            <img border="0" height="150" 
+                                src="/cannabisscore/uploads/dlc-bonus-points.png">
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-6">
+                        <div class="p20"></div>
+                        <h5>Bringing Efficiency to Light&trade;</h5>
+                        <p>
+                            This facility flowers with <a target="_blank" 
+                            href="https://www.designlights.org/">DLC lights</a>!
+                        </p>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-6 efficHeadGuageLabel">
+                        <div class="p15"></div>
+                        <div class="efficGuageTxt">+5</div>
+                    </div>
+                </div>
+            </div></td></tr>
+
+        @endif
         
+
             </table>
         
         </div>

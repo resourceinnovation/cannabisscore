@@ -22,7 +22,8 @@ class ScoreCalcRanks extends ScoreCalcs
 {
     protected function calcCurrScoreRanks()
     {
-        $this->v["ranksCache"] = RIIPsRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
+        $this->v["ranksCache"] = RIIPsRanks::where(
+                'ps_rnk_filters', $this->searcher->v["urlFlts"])
             ->first();
         if (!$this->v["ranksCache"] || !isset($this->v["ranksCache"]->ps_rnk_id)) {
             $this->v["ranksCache"] = new RIIPsRanks;
@@ -282,8 +283,8 @@ class ScoreCalcRanks extends ScoreCalcs
                 if ($chk->isNotEmpty()) {
                     foreach ($chk as $rnk) {
                         $matches["flt"][] = $rnk->ps_rnk_filters;
-                        $matches["btu"] += $rnk->ps_rnk_avg_sqft_kwh;
-                        $matches["grm"] += $rnk->ps_rnk_avg_sqft_grm;
+                        $matches["btu"]  += $rnk->ps_rnk_avg_sqft_kwh;
+                        $matches["grm"]  += $rnk->ps_rnk_avg_sqft_grm;
                     }
                 }
             }

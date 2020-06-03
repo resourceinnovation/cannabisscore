@@ -1,11 +1,13 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores-flt-manus.blade.php -->
 
-@if (Auth::user())
+
+@if (Auth::user() && sizeof($manuList) > 0)
     @if (Auth::user()->hasRole('administrator|staff')
         || (Auth::user()->hasRole('partner') 
-            && is_array($GLOBALS["SL"]->x["partnerManuIDs"])
-            && sizeof($GLOBALS["SL"]->x["partnerManuIDs"]) > 0
-            && sizeof($manuList) > 0))
+            && isset($GLOBALS["SL"]->x["partnerVersion"])
+            && $GLOBALS["SL"]->x["partnerVersion"]
+            && isset($GLOBALS["SL"]->x["partnerLevel"])
+            && intVal($GLOBALS["SL"]->x["partnerLevel"]) >= 4))
         <div class="col-md-4 pB10">
             <select name="fltManuLgt" id="fltManuLgtID" 
                 class="form-control psChageFilter ntrStp slTab"
@@ -16,11 +18,15 @@
                         SELECTED
                     @endif >All Light Manufacturers</option>
         @forelse ($manuList as $m => $manu)
-            @if (Auth::user()->hasRole('administrator|staff')
-                || (Auth::user()->hasRole('partner')
-                    && isset($GLOBALS["SL"]->x["partnerManuIDs"])
-                    && in_array($manu->manu_id, 
-                        $GLOBALS["SL"]->x["partnerManuIDs"])))
+            @if ( Auth::user()->hasRole('administrator|staff')
+                || ( Auth::user()->hasRole('partner')
+                    && ( (isset($GLOBALS["SL"]->x["partnerVersion"])
+                            && $GLOBALS["SL"]->x["partnerVersion"]
+                            && isset($GLOBALS["SL"]->x["partnerLevel"])
+                            && intVal($GLOBALS["SL"]->x["partnerLevel"]) >= 4)
+                        || (isset($GLOBALS["SL"]->x["partnerManuIDs"])
+                            && in_array($manu->manu_id, 
+                                $GLOBALS["SL"]->x["partnerManuIDs"])) ) ) )
                 <option value="{{ $manu->manu_id }}" 
                     @if (isset($fltManuLgt) 
                         && intVal($fltManuLgt) == $manu->manu_id) 
@@ -30,6 +36,7 @@
         @empty
         @endforelse
             </select>
+            @if (isset($fltManuLgt)) <!-- fltManuLgt: {{ $fltManuLgt }} --> @endif
         </div>
     @endif
 @endif
