@@ -59,7 +59,6 @@ class ScoreListings extends ScoreReportLightingManu
             $usrCompany = trim($this->searcher->v["usrInfo"]->company);
         }
 
-
         $origFltManuLgt = '';
         if ($GLOBALS["SL"]->REQ->has('fltManuLgt')) {
             $origFltManuLgt = '';
@@ -82,6 +81,19 @@ class ScoreListings extends ScoreReportLightingManu
                 && $GLOBALS["SL"]->x["partnerVersion"]) {
                 $origFltManuLgt = $usrCompany;
             } */
+            if ($nID == 799) {
+                $this->searcher->v["fltPartner"] = 0;
+            }
+        } elseif ($nID == 799
+            && $GLOBALS["SL"]->x["usrInfo"]
+            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers)
+            && sizeof($GLOBALS['SL']->x['usrInfo']->manufacturers) > 0
+            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id)
+            && intVal($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id) > 0) {
+            $this->searcher->v["fltPartner"] = 0;
+            $this->searcher->v["fltManuLgt"] = intVal(
+                $GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id
+            );
         }
 
         $this->fakeMultiSite();
@@ -141,17 +153,38 @@ class ScoreListings extends ScoreReportLightingManu
             $this->searcher->v["fltManuLgt"] = $this->v["usrInfo"]->company;
         }
         */
-        $manus = $this->searcher->getUsrCompanyManus();
+        if ($nID == 1514) {
+            $manus = RIIManufacturers::orderBy('manu_name', 'asc')
+                ->get();
+        } else {
+            $manus = $this->searcher->getUsrCompanyManus();
+        }
         if ($manus && sizeof($manus) > 0) {
             foreach ($manus as $manu) {
-                $this->searcher->getSearchFilts();
-                //$this->searcher->searchResultsXtra();
-                $this->searcher->v["fltManuLgt"] = $manu->manu_id;
-                $this->searcher->v["allListings"] .= '<a target="_blank" '
-                    . 'href="/dash/competitive-performance?manu='
-                    . urlencode($manu->manu_name) . '"><h4>' 
-                    . $manu->manu_name . '</h4></a>'
-                    . $this->getPowerScoresPublic($nID);
+                $show = true;
+                if ($nID == 1514) {
+                    $cnt = $manu->manu_cnt_flower+$manu->manu_cnt_veg
+                        +$manu->manu_cnt_clone+$manu->manu_cnt_mother;
+                    $show = ($cnt > 0);
+                }
+                if ($show) {
+                    $this->searcher->getSearchFilts();
+                    $this->searcher->v["fltPartner"] = 0;
+                    //$this->searcher->searchResultsXtra();
+                    $this->searcher->v["fltManuLgt"] = $manu->manu_id;
+                    $this->searcher->v["allListings"] .= '<!-- start manu -->';
+                    if ($GLOBALS["SL"]->REQ->has('excel')) {
+                        $this->searcher->v["allListings"] .= '<tr><td colspan=12 ><b>' 
+                            . $manu->manu_name . '</b></td></tr>';
+                    } else {
+                        $this->searcher->v["allListings"] .= '<a target="_blank" '
+                            . 'href="/dash/competitive-performance?manu='
+                            . urlencode($manu->manu_name) . '"><h4>' 
+                            . $manu->manu_name . '</h4></a>';
+                    }
+                    $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID)
+                        . '<!-- end manu -->';
+                }
             }
         }
         return true;
@@ -277,6 +310,51 @@ class ScoreListings extends ScoreReportLightingManu
             }
         }
         return true;
+    }
+    
+    /**
+     * Print partner breakdown which analyses all lighting manufacturers.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function printMakeModelAnalysis($nID = -3)
+    {
+        if ($GLOBALS["SL"]->x["partnerLevel"] <= 2) {
+            return '<a href="https://resourceinnovation.org/joinwithus/" 
+                target="_blank">More reports are available 
+                with higher membership levels</a>';
+        }
+        $pageUrl = '/dash/lighting-manufacturer-report';
+        if ($GLOBALS["SL"]->REQ->has('excel')) {
+            $pageUrl .= '?excel=1';
+        }
+        $ret = $GLOBALS["SL"]->chkCache($pageUrl, 'page', 1);
+        if (trim($ret) == '' || $GLOBALS["SL"]->REQ->has('refresh')) {
+            $this->searcher->v["allListings"] = '';
+            $this->getAllPowerScoresPublicManu($nID);
+            if ($GLOBALS["SL"]->REQ->has('excel')) {
+                $ret = '<tr><td><b>Lighting Manufacturer Report</b></td></tr>'
+                    . str_replace('<!-- start manu -->', '<tr><td></td></tr>', 
+                        str_replace('<!-- end manu -->', '<tr><td></td></tr>', 
+                            $this->searcher->v["allListings"]));
+            } else {
+                $ret = '<div class="slCard">'
+                    . '<a href="?excel=1" class="btn btn-secondary pull-right">'
+                    . '<i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>'
+                    . '<h2 class="mB30">Lighting Manufacturer Report</h2>'
+                    . '</div>'
+                    . str_replace('<!-- start manu -->', '<div class="slCard mT30 mB30">', 
+                        str_replace('<!-- end manu -->', '</div>', 
+                            $this->searcher->v["allListings"]));
+            }
+            $GLOBALS["SL"]->putCache($pageUrl, $ret, 'page', 1);
+        }
+        if ($GLOBALS["SL"]->REQ->has('excel')) {
+            $filename = 'PowerScore-Make-Model-Analysis-' . date("Y-m-d") . '.xls';
+            $GLOBALS["SL"]->exportExcelOldSchool($ret, $filename);
+        }
+        return $ret;
     }
     
     protected function getAllPowerScoresPublicAreaLights($ps)

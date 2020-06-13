@@ -9,7 +9,16 @@
         @endif
         ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
         Excel</a>
-    <h1 class="slBlueDark">Ranked Data Set Averages by Category</h1>
+    <h1 class="slBlueDark">
+        @if ($nID == 801
+            && isset($GLOBALS["SL"]->x["partnerCompany"])
+            && trim($GLOBALS["SL"]->x["partnerCompany"]) != '')
+            {{ $GLOBALS["SL"]->x["partnerCompany"] }}
+        @else 
+            Ranked Data Set
+        @endif
+        Averages <nobr>by Category</nobr>
+    </h1>
 
     {!! view('vendor.cannabisscore.inc-partner-ref-disclaim')->render() !!}
 

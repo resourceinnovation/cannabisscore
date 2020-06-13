@@ -67,6 +67,9 @@ class ScoreReportLighting extends ScoreReportStats
         }
 
         $this->initSearcher(1);
+        if ($GLOBALS["SL"]->x["partnerLevel"] > 2) {
+            $this->searcher->v["fltPartner"] = 0;
+        }
         $qry = "->where('ps_effic_lighting', '>', 0.000001)"
             . "->where('ps_effic_lighting_status', '=', " 
             . $this->v["psComplete"] . ")";
@@ -126,6 +129,11 @@ class ScoreReportLighting extends ScoreReportStats
         foreach ($this->statScoreSets as $set) {
             $this->v["scoreSets"][$set[0]]->calcStats();
         }
+        $this->v["reportTitles"] = [
+            144 => 'a. Indoor', 
+            145 => 'b. Greenhouse/Mixed', 
+            143 => 'c. Outdoor'
+        ];
 
         if ($GLOBALS["SL"]->REQ->has('excel') 
             && intVal($GLOBALS["SL"]->REQ->excel) == 1) {
@@ -141,12 +149,26 @@ class ScoreReportLighting extends ScoreReportStats
             );
             exit;
         }
-
         $GLOBALS["SL"]->x["needsCharts"] = true;
-        return view(
+        $ret = view(
             'vendor.cannabisscore.nodes.983-lighting-report', 
             $this->v
         )->render();
+        //$GLOBALS["SL"]->x["baseUrl"] = '/dash/compare-powerscores';
+        if (isset($GLOBALS["SL"]->x["partnerID"]) 
+            && intVal($GLOBALS["SL"]->x["partnerID"]) > 0) {
+            //$GLOBALS["SL"]->x["baseUrl"] = '/dash/partner-compare-official-powerscores';
+            $ret = str_replace(
+                'compare-powerscores', 
+                'partner-compare-official-powerscores', 
+                str_replace(
+                    'partner-compare-powerscores', 
+                    'partner-compare-official-powerscores', 
+                    $ret
+                )
+            );
+        }
+        return $ret;
     }
 
     public function printLightingRawCalcs($nID)

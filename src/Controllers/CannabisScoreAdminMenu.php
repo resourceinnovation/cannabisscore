@@ -308,15 +308,32 @@ class CannabisScoreAdminMenu extends AdminMenu
             'Score Averages', 
             '<i class="fa fa-area-chart" aria-hidden="true"></i>'
         );
+        /*
         $treeMenu[] = $this->admMenuLnk(
             '/dash/competitive-performance', 
             'Competition', 
             '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
         );
+        */
         $treeMenu[] = $this->admMenuLnk(
             '/dash/partner-compare-official-powerscores', 
             'Official Data', 
             '<i class="fa fa-list" aria-hidden="true"></i>'
+        );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/average-powerscores-lighting', 
+            'Lighting Types', 
+            '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
+        );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/manufacturer-adoption', 
+            'Manufacturer Use', 
+            '<i class="fa fa-lightbulb-o mL5" aria-hidden="true"></i>'
+        );
+        $treeMenu[] = $this->admMenuLnk(
+            '/dash/lighting-manufacturer-report', 
+            'Manufacturer Stats', 
+            '<i class="fa fa-lightbulb-o mL5" aria-hidden="true"></i>'
         );
         /*
         $treeMenu[] = $this->admMenuLnk(

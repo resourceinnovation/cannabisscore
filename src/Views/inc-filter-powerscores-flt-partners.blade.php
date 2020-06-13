@@ -23,8 +23,10 @@
             @endforelse
             </select>
         </div>
+    <?php /*
     @elseif (Auth::user() && Auth::user()->hasRole('partner'))
         <input name="fltPartner" id="fltPartnerID" DISABLED 
             type="hidden" value="{{ $GLOBALS['SL']->x['partnerID'] }}">
+    */ ?>
     @endif
 @endif

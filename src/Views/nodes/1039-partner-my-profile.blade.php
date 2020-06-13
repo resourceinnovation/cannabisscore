@@ -57,12 +57,18 @@
         </div>
         <div class="col-lg-6">
             <div class="slCard nodeWrap">
-                <a class="btn btn-lg btn-primary btn-block taC mB30"
+                <a class="btn btn-lg btn-primary btn-block taC"
                     href="/preview3">Preview <nobr>PowerScore Pro</nobr></a>
-                <p>
+@if ($GLOBALS["SL"]->x["usrInfo"]
+    && (isset($GLOBALS['SL']->x['usrInfo']->slug)
+        && trim($GLOBALS['SL']->x['usrInfo']->slug) != '')
+    && (!isset($GLOBALS['SL']->x['usrInfo']->manufacturers)
+        || sizeof($GLOBALS['SL']->x['usrInfo']->manufacturers) == 0))
+                <p class="mT30">
                     Scores from this preview do not store in your partner 
                     database, but can be viewed here on your My Profile page.
                 </p>
+@endif
             </div>
         </div>
     </div>

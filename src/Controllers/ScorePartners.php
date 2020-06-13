@@ -42,6 +42,7 @@ class ScorePartners extends ScoreAdminMisc
         if (isset($this->v["usrInfo"])) {
             $usrInfo = $this->v["usrInfo"];
         }
+//echo '<pre>'; print_r($this->v["usrInfo"]); echo '</pre>'; exit;
         return view(
             'vendor.cannabisscore.nodes.1040-partner-dashboard', 
             [

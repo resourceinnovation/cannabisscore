@@ -23,8 +23,9 @@ use CannabisScore\Controllers\ScoreReportStats;
 
 class ScoreReportAvgs extends ScoreReportStats
 {
-    public function getAllPowerScoreAvgsPublic()
+    public function getAllPowerScoreAvgsPublic($nID)
     {
+        $this->v["nID"] = $nID;
         $this->initClimateFilts();
         $this->calcAllPowerScoreAvgs();
         $this->v["psTechs"] = $GLOBALS["CUST"]->psTechs();
@@ -76,6 +77,17 @@ class ScoreReportAvgs extends ScoreReportStats
     protected function calcAllPowerScoreAvgs()
     {
         $this->initClimateFilts();
+//echo '<pre>'; print_r($GLOBALS['SL']->x['usrInfo']); echo '</pre>'; exit;
+        if ($GLOBALS["SL"]->x["usrInfo"]
+            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers)
+            && sizeof($GLOBALS['SL']->x['usrInfo']->manufacturers) > 0
+            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id)
+            && intVal($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id) > 0) {
+            $this->searcher->v["fltPartner"] = 0;
+            $this->searcher->v["fltManuLgt"] = intVal(
+                $GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id
+            );
+        }
         $this->searcher->loadAllScoresPublic();
         $this->v["scoreSets"] = [
             ['farm',     'PowerScore Averages by Type of Farm'],
@@ -87,7 +99,7 @@ class ScoreReportAvgs extends ScoreReportStats
             ['pow1',     'PowerScore Averages by Other Power Sources'],
             ['pow2',     'PowerScore Averages by Other Power Sources']
         ];
-//echo 'calcAllPowerScoreAvgs()<pre>'; print_r($this->searcher->v["allscores"]); echo '</pre>'; exit;
+//echo 'calcAllPowerScoreAvgs()<pre>'; print_r($this->searcher->v); echo '</pre>'; exit;
         if ($this->searcher->v["allscores"]->isEmpty()) {
             return false;
         }

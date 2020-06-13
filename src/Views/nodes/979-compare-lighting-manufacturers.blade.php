@@ -3,12 +3,18 @@
 <div id="node979" class="nodeWrap">
 
 <div class="slCard mT15 mB30">
+<?php /*
     <a class="btn btn-secondary btn-sm pull-right"
         href="#raw">&darr; Raw Data</a>
+*/ ?>
     <h3 class="slBlueDark">
         Competitive Performance <nobr>Dashboard for</nobr>
         <nobr>{{ $lightManuName }}</nobr>
     </h3>
+    <?php /* <p>
+        Top competitors ranked based on largest adoption
+        within the official data set.
+    </p> */ ?>
     @if ($lightManuName == 'Largely Lumens, Inc.')
         <p><b class="red">
             If we had real data to show you here, 
@@ -168,6 +174,7 @@
 
 </div>
 
+<!--
 <div class="mB10">&nbsp;</div>
 <div class="slCard">
     <p><b>Your Individual PowerScore Records:</b><br />
@@ -179,6 +186,7 @@
     @endforelse
     </p>
 </div>
+-->
 
 <script type="text/javasript">
 

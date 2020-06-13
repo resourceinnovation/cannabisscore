@@ -331,19 +331,21 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                     ->mexplodeSize(',', $this->v["averageRanks"]->{ $fld });
             }
         }
-        $allManus = $this->getTopLightManuIDs(10, $manu);
+        $allManus = $this->getTopLightManuIDs(3, $manu);
         if (sizeof($allManus) > 0) {
             foreach ($allManus as $t => $currManu) {
                 $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($currManu);
-                $title = 'Customers of Competitor ' . chr(65+$t);
+                $title = $currManu;
+                //$title = 'Customers of Competitor ' . chr(65+$t);
                 $scoreMissed = $this->loadSearchLightManu($title);
+                /*
                 if ($scoreMissed > 0) {
                     $ind = sizeof($this->v["lgtCompetData"]->dataLines);
                     unset($this->v["lgtCompetData"]->dataLines[$ind]);
                 }
+                */
             }
         }
-
         $this->v["lgtCompetData"]->checkScoresMax();
 //echo 'allManus<pre>'; print_r($allManus); echo '</pre>lgtCompetData<pre>'; print_r($this->v["lgtCompetData"]); echo '</pre>'; exit;
         $this->v["yourPsIDs"] = $mainManuIDs;
@@ -360,8 +362,9 @@ class ScoreReportLightingManu extends ScoreListingsGraph
     {
         $this->searcher = new CannabisScoreSearcher;
         $this->searcher->getSearchFilts(1);
+        $this->searcher->v["fltPartner"] = 0;
         $this->searcher->loadAllScoresPublic(
-            "->whereIn('ps_id', [" . implode(", ", $this->v["yourPsIDs"]) . "])"
+            "->whereIn('ps_id', [" . implode(", ", $this->v["yourPsIDs"]) . "])" 
             . "->where('ps_effic_lighting', '>', 0)"
             . "->where('ps_effic_lighting_status', '=', " . $this->v["defCmplt"] . ")"
         );
@@ -373,6 +376,7 @@ class ScoreReportLightingManu extends ScoreListingsGraph
             }
             $this->v["lgtCompetData"]->calcScoreAvgs($title);
         }
+//echo '<pre>'; print_r($this->searcher->v["allscores"]); echo '</pre>';
         $scoreMissed = 0;
         foreach ($this->v["lgtCompetData"]->dataLines as $ind => $data) {
             $ranks = [];
@@ -408,9 +412,9 @@ class ScoreReportLightingManu extends ScoreListingsGraph
 
         $tmpTop = [
             'Fluence',
-            'Bios Lighting',
-            'Sunblaster',
-            'BIOS'
+            'BIOS',
+            'California Lightworks',
+            'Advanced LED Lights'
         ];
         foreach ($tmpTop as $top) {
             if ($top != $except) {
@@ -419,8 +423,7 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         }
         return $ret;
 
-
-        // Once there's more data... 
+        ////////////////////////////////////
 
         $chk = RIIManufacturers::where('manu_cnt_flower', '>', 0)
             ->orWhere('manu_cnt_veg', '>', 0)
@@ -463,13 +466,17 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                 }
             }
         }
-        $chk = RIIPsAreas::whereIn('ps_area_id', $areaIDs)
-            ->select('ps_area_psid')
+        $chk = DB::table('rii_ps_areas')
+            ->join('rii_powerscore', 'rii_powerscore.ps_id',
+                '=', 'rii_ps_areas.ps_area_psid')
+            ->whereIn('rii_ps_areas.ps_area_id', $areaIDs)
+            ->where('rii_powerscore.ps_status', 243)
+            ->select('rii_powerscore.ps_id')
             ->get();
         if ($chk && sizeof($chk) > 0) {
             foreach ($chk as $light) {
-                if (!in_array($light->ps_area_psid, $scoreIDs)) {
-                    $scoreIDs[] = $light->ps_area_psid;
+                if (!in_array($light->ps_id, $scoreIDs)) {
+                    $scoreIDs[] = $light->ps_id;
                 }
             }
         }

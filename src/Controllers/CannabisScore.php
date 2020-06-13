@@ -152,7 +152,7 @@ class CannabisScore extends ScoreImports
             $GLOBALS["SL"]->pageJAVA .= ' openAdmMenuOnLoad = false; ';
         } elseif ($nID == 773) {
             $report = new ScoreReportAvgs;
-            $ret .= $report->getAllPowerScoreAvgsPublic();
+            $ret .= $report->getAllPowerScoreAvgsPublic($nID);
             $GLOBALS["SL"]->pageJAVA .= ' openAdmMenuOnLoad = false; ';
         } elseif ($nID == 859) {
             $report = new ScoreReportAvgs;
@@ -160,7 +160,7 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 801) {
             $report = new ScoreReportAvgs;
             $GLOBALS["SL"]->x["partnerVersion"] = true;
-            $ret .= $report->getAllPowerScoreAvgsPublic();
+            $ret .= $report->getAllPowerScoreAvgsPublic($nID);
             $GLOBALS["SL"]->pageJAVA .= ' openAdmMenuOnLoad = false; ';
         } elseif ($nID == 979) {
             $report = new ScoreListings(
@@ -239,6 +239,13 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 914) {
             $this->initManuAdmin();
             $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
+        } elseif ($nID == 1514) {
+            $report = new ScoreListings(
+                $this->v["uID"], 
+                $this->v["user"], 
+                $this->v["usrInfo"]
+            );
+            $ret .= $report->printMakeModelAnalysis($nID);
         } elseif ($nID == 915) {
             $this->initManuAdmin();
             $ret .= $this->v["manuAdmin"]->printMgmtPartners($nID);

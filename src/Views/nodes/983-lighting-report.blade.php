@@ -31,6 +31,7 @@
                 <option disabled ></option>
                 {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
             </select>
+        @if ($GLOBALS["SL"]->x["partnerLevel"] > 6)
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
                     name="fltNoNWPCC" id="fltNoNWPCCID" 
@@ -40,6 +41,7 @@
                         CHECKED @endif
                     > Exclude NWPCC Imports
             </label>
+        @endif
             <!---
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
@@ -56,72 +58,53 @@
 </div>
 
 <div class="nodeAnchor"><a name="flowers"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
-    as $typeID => $typeName)
-    <div class="slCard nodeWrap">
-    <h3>
-        @if ($typeID == 144) 1a. 
-        @else 1b. 
-        @endif
-        {{ $typeName }} Scores by Type of Flowering Lighting
-    </h3>
-    {!! $scoreSets["statScorLgtF" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' 
-            . $typeID . '&fltLighting=162-[[val]]'
-    ) !!}
-    </div>
+@foreach ($reportTitles as $typeID => $typeName)
+    @if ($typeName != 'c. Outdoor')
+        <div class="slCard nodeWrap">
+        <h3>
+            1{{ $typeName }} Scores by Type of Flowering Lighting
+        </h3>
+        {!! str_replace('fltFarm=144', 'fltFarm=' . $typeID, 
+            $scoreSets["statScorLgtF" . $typeID]->printScoreAvgsTbl2()
+        ) !!}
+        </div>
+    @endif
 @endforeach
 
 <div class="nodeAnchor"><a name="veg"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed' ] 
-    as $typeID => $typeName)
-    <div class="slCard nodeWrap">
-    <h3>
-        @if ($typeID == 144) 2a. 
-        @elseif ($typeID == 145) 2b. 
-        @else 2c. 
-        @endif 
-        {{ $typeName }} Scores by Type of Vegetative Lighting
-    </h3>
-    {!! $scoreSets["statScorLgtV" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' 
-            . $typeID . '&fltLighting=161-[[val]]'
-    ) !!}
-    </div>
+@foreach ($reportTitles as $typeID => $typeName)
+    @if ($typeName != 'c. Outdoor')
+        <div class="slCard nodeWrap">
+        <h3>
+            2{{ $typeName }} Scores by Type of Vegetative Lighting
+        </h3>
+        {!! str_replace('fltFarm=144', 'fltFarm=' . $typeID, 
+            $scoreSets["statScorLgtV" . $typeID]->printScoreAvgsTbl2()
+        ) !!}
+        </div>
+    @endif
 @endforeach
 
 <div class="nodeAnchor"><a name="clones"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
-    as $typeID => $typeName)
+@foreach ($reportTitles as $typeID => $typeName)
     <div class="slCard nodeWrap">
     <h3>
-        @if ($typeID == 144) 3a. 
-        @elseif ($typeID == 145) 3b. 
-        @else 3c. 
-        @endif 
-        {{ $typeName }} Scores by Type of Clone Lighting
+        3{{ $typeName }} Scores by Type of Clone Lighting
     </h3>
-    {!! $scoreSets["statScorLgtC" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' 
-            . $typeID . '&fltLighting=160-[[val]]'
+    {!! str_replace('fltFarm=144', 'fltFarm=' . $typeID, 
+        $scoreSets["statScorLgtC" . $typeID]->printScoreAvgsTbl2()
     ) !!}
     </div>
 @endforeach
 
 <div class="nodeAnchor"><a name="mothers"></a></div>
-@foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 
-    as $typeID => $typeName)
+@foreach ($reportTitles as $typeID => $typeName)
     <div class="slCard nodeWrap">
     <h3>
-        @if ($typeID == 144) 4a. 
-        @elseif ($typeID == 145) 4b. 
-        @else 4c. 
-        @endif 
-        {{ $typeName }} Scores by Type of Mother Lighting
+        4{{ $typeName }} Scores by Type of Mother Lighting
     </h3>
-    {!! $scoreSets["statScorLgtM" . $typeID]->printScoreAvgsTbl2(
-        '/dash/compare-powerscores?fltFarm=' 
-            . $typeID . '&fltLighting=237-[[val]]'
+    {!! str_replace('fltFarm=144', 'fltFarm=' . $typeID, 
+        $scoreSets["statScorLgtM" . $typeID]->printScoreAvgsTbl2()
     ) !!}
     </div>
 @endforeach
@@ -227,3 +210,7 @@ function gatherFilts() {
     @endif
 @endforeach
 */ ?>
+
+<style>
+body { overflow-x: visible; }
+</style>

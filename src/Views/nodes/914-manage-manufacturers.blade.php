@@ -4,10 +4,11 @@
     {!! view(
         'vendor.cannabisscore.nodes.914-manage-manufacturers-adoption', 
         [
-            'manus'       => $manus,
-            'manusTots'   => $manusTots,
-            'stageTots'   => $stageTots,
-            'manusTotSum' => $manusTotSum
+            'manus'        => $manus,
+            'manusTots'    => $manusTots,
+            'stageTots'    => $stageTots,
+            'manusTotSum'  => $manusTotSum,
+            'addManusForm' => $addManusForm
         ]
     )->render() !!}
 </div>

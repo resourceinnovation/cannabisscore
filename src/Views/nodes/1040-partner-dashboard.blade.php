@@ -23,7 +23,7 @@
     <div class="row mT30">
         <div class="col-lg-6 pB10">
             <a href="/dash/partner-compare-powerscore-averages" 
-                class="btn btn-lg btn-primary btn-block"
+                class="btn btn-lg btn-secondary btn-block"
                 >Your Score Averages</a>
         </div>
         <div class="col-lg-6 pB10">
@@ -40,9 +40,10 @@
             @foreach ($usrInfo->manufacturers as $manu)
                 <div class="row mT30">
                     <div class="col-lg-6 pB10">
-                        <a href="/dash/competitive-performance?manu={{ 
-                            urlencode($manu->manu_name) }}" 
-                            class="btn btn-lg btn-primary btn-block"
+                        <a href="#" 
+                <?php /* /dash/competitive-performance?manu={{ 
+                    urlencode($manu->manu_name) }} */ ?>
+                            class="btn btn-lg btn-secondary btn-block disabled"
                             >{{ $manu->manu_name }} Competitive Performance</a>
                     </div>
                     <div class="col-lg-6 pB10">
@@ -57,8 +58,8 @@
         @else
             <div class="row mT30">
                 <div class="col-lg-6 pB10">
-                    <a href="/dash/competitive-performance" 
-                        class="btn btn-lg btn-primary btn-block"
+                    <a href="/dash/competitive-performance"
+                        class="btn btn-lg btn-secondary btn-block"
                         >Competitive Performance Report</a>
                 </div>
                 <div class="col-lg-6 pB10">
@@ -89,8 +90,10 @@
 
 </div>
 
-
-@if (isset($usrInfo->slug) && trim($usrInfo->slug) != '')
+@if (isset($usrInfo->slug) 
+    && trim($usrInfo->slug) != ''
+    && (!$usrInfo->manufacturers
+        || sizeof($usrInfo->manufacturers) == 0))
     <div class="slCard nodeWrap">
         <h3>Your Custom Referral Link</h3>
         <p>
@@ -110,10 +113,7 @@
                     $usrInfo->slug }}">
             </div>
         </div>
-        <div id="prtnerRefURLalert">
-
-        </div>
-
+        <div id="prtnerRefURLalert"></div>
     </div>
 @endif
 
@@ -133,5 +133,47 @@
             </p>
         </div>
     </div>
+@if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+    <div class="row mT30">
+        <div class="col-lg-6 pB10">
+            <a href="/dash/average-powerscores-lighting" 
+                class="btn btn-lg btn-secondary btn-block"
+                >Lighting Type Report</a>
+        </div>
+        <div class="col-lg-6 pB10">
+            <p>
+                Compare all sub-score averages for different types
+                of lighting within the official data set.
+            </p>
+        </div>
+    </div>
+@endif
+    <div class="row mT30">
+        <div class="col-lg-6 pB10">
+            <a href="/dash/manufacturer-adoption" 
+                class="btn btn-lg btn-secondary btn-block"
+                >Lighting Manufacturer Adoption</a>
+        </div>
+        <div class="col-lg-6 pB10">
+            <p>
+                Counts the total PowerScores within the official data set
+                which use specific lighting manufacturers, by growth stage.
+            </p>
+        </div>
+    </div>
+@if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+    <div class="row mT30">
+        <div class="col-lg-6 pB10">
+            <a href="/dash/lighting-manufacturer-report" 
+                class="btn btn-lg btn-secondary btn-block"
+                >Lighting Manufacturer Report</a>
+        </div>
+        <div class="col-lg-6 pB10">
+            <p>
+                Compare all lighting manufacturers sub-score averages
+                within the official data set.
+            </p>
+        </div>
+    </div>
+@endif
 </div>
-

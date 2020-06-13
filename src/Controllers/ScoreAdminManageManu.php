@@ -12,6 +12,7 @@
 namespace CannabisScore\Controllers;
 
 use DB;
+use Auth;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
@@ -23,6 +24,7 @@ use App\Models\User;
 
 class ScoreAdminManageManu
 {
+    // information to be passed to Views, and/or needed by dispersed functions
     protected $v = [];
 
     public function __construct()
@@ -30,7 +32,8 @@ class ScoreAdminManageManu
         $this->addManufacturers();
         $this->v["manuSrchWords"] = [];
         if ($GLOBALS["SL"]->REQ->has('manuSrch')) {
-            $this->v["manuSrchWords"] = $GLOBALS["SL"]->mexplode(' ', strtolower($GLOBALS["SL"]->REQ->manuSrch));
+            $this->v["manuSrchWords"] = $GLOBALS["SL"]->mexplode(' ', 
+                strtolower($GLOBALS["SL"]->REQ->manuSrch));
         }
         if (sizeof($this->v["manuSrchWords"]) > 0) {
             $this->v["manus"] = RIIManufacturers::orderBy('manu_name', 'asc')
@@ -40,6 +43,7 @@ class ScoreAdminManageManu
             $this->v["manus"] = RIIManufacturers::orderBy('manu_name', 'asc')
                 ->get();
         }
+        $this->v["isAdmin"] = (Auth::user() && Auth::user()->hasRole('administrator|staff'));
     }
     
     /**
@@ -59,6 +63,26 @@ class ScoreAdminManageManu
             $filename = 'PowerScore_Manufacturer_Adoption-' . date("ymd") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
             exit;
+        }
+        $this->v["addManusForm"] = '<div class="p10"></div>';
+        if ($this->v["isAdmin"]) {
+            $addForm = '<form name="companyName" action="?add=1" method="post">
+                <input type="hidden" name="_token" value="' . csrf_token() . '">
+                <div class="row"><div class="col-8">
+                <div style="margin: -43px 0px 20px 160px;">One per line.</div>
+                <textarea class="form-control w100" name="addManu"></textarea>
+                </div><div class="col-4">
+                <input type="submit" value="Add All" autocomplete="off"
+                    class="btn btn-primary btn-block">
+                </div></div></form>';
+            $this->v["addManusForm"] = '<div class="pT15 pB30">'
+                . $GLOBALS["SL"]->printAccordian(
+                    'Add Manufacturers',
+                    $addForm,
+                    false,
+                    false,
+                    'text'
+                ) . '</div>';
         }
         return view(
             'vendor.cannabisscore.nodes.914-manage-manufacturers', 

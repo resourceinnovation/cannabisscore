@@ -322,7 +322,7 @@
             <tr id="scoreRowBonusDLC"><td><div class="efficBlock">
                 <div class="row">
                     <div class="col-lg-3 col-md-3 col-6">
-                        <div class="pT5 pB5 pL15">
+                        <div class="pT5 pB15 pL15">
                             <img border="0" height="150" 
                                 src="/cannabisscore/uploads/dlc-bonus-points.png">
                         </div>
@@ -341,6 +341,9 @@
                     </div>
                 </div>
             </div></td></tr>
+            <style>
+                #nLabel974 .p30 { padding: 10px; }
+            </style>
 
         @endif
         

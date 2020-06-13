@@ -26,23 +26,7 @@
     </div>
 </div>
 
-<div class="pT15 pB30">
-{!! $GLOBALS["SL"]->printAccordian(
-    'Add Manufacturers',
-    '<form name="companyName" action="?add=1" method="post">
-    <input type="hidden" name="_token" value="' . csrf_token() . '">
-    <div class="row"><div class="col-8">
-    <div style="margin: -43px 0px 20px 160px;">One per line.</div>
-    <textarea class="form-control w100" name="addManu"></textarea>
-    </div><div class="col-4">
-    <input type="submit" value="Add All" autocomplete="off"
-        class="btn btn-primary btn-block">
-    </div></div></form>',
-    false,
-    false,
-    'text'
-) !!}
-</div>
+{!! $addManusForm !!}
 
 <div class="w100 pT10 pB10">
     <div class="row">

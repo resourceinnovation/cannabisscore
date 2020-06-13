@@ -24,6 +24,7 @@ class ScoreStats extends SurvStatsGraph
     public $sfHvacs = [];
     public $sfCups  = [];
     public $sfLgts  = [];
+    public $baseUrl = '/dash/compare-powerscores';
     
     function __construct($filts = ['farm'])
     {
@@ -34,21 +35,20 @@ class ScoreStats extends SurvStatsGraph
             'cln-lgty', 
             'mth-lgty'
         ];
-        $baseUrl = '/dash/compare-powerscores';
-        /* if (Auth::user() && Auth::user()->hasRole('partner')) {
-            $baseUrl = '/dash/partner-compare-powerscores';
-        } */
+        if (Auth::user() && Auth::user()->hasRole('partner')) {
+            $this->baseUrl = '/dash/partner-compare-powerscores';
+        }
         $this->sfFarms = [
             [
                 144, 
                 145, 
                 143
             ], [
-                '<a href="' . $baseUrl . '?fltFarm=144"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144"'
                     . ' target="_blank">Indoor',
-                '<a href="' . $baseUrl . '?fltFarm=145"'
+                '<a href="' . $this->baseUrl . '?fltFarm=145"'
                     . ' target="_blank">Greenhouse/Mixed</a>',
-                '<a href="' . $baseUrl . '?fltFarm=143"'
+                '<a href="' . $this->baseUrl . '?fltFarm=143"'
                     . ' target="_blank">Outdoor</a>'
             ]
         ];
@@ -60,15 +60,15 @@ class ScoreStats extends SurvStatsGraph
                 377, 
                 378
             ], [
-                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=375"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltSize=375"'
                     . ' target="_blank">&lt;5,000 sf</a>',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=376"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltSize=376"'
                     . ' target="_blank">5,000-10,000 sf</a>',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=431"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltSize=431"'
                     . ' target="_blank">10,000-30,000 sf</a>',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=377"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltSize=377"'
                     . ' target="_blank">30,000-50,000 sf</a>',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltSize=378"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltSize=378"'
                     . ' target="_blank">50,000+ sf</a>'
             ]
         ];
@@ -80,7 +80,7 @@ class ScoreStats extends SurvStatsGraph
             ], [
                 'Automatic Controls', 
                 'Manual Controls',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltAuto=1&fltManu=1"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltAuto=1&fltManu=1"'
                     . ' target="_blank">Using Both</a>'
             ]
         ];
@@ -90,7 +90,7 @@ class ScoreStats extends SurvStatsGraph
                 1
             ], [
                 'Without Vertical Stacking',
-                '<a href="' . $baseUrl . '?fltFarm=144&fltVert=1"'
+                '<a href="' . $this->baseUrl . '?fltFarm=144&fltVert=1"'
                     . ' target="_blank">With Vertical Stacking</a>'
             ]
         ];
@@ -121,11 +121,11 @@ class ScoreStats extends SurvStatsGraph
                 231, 
                 369
             ], [
-                '<a href="' . $baseUrl . '?fltCup=230" '
+                '<a href="' . $this->baseUrl . '?fltCup=230" '
                     . 'target="_blank">Cultivation Classic</a>',
-                '<a href="' . $baseUrl . '?fltCup=231" '
+                '<a href="' . $this->baseUrl . '?fltCup=231" '
                     . 'target="_blank">Emerald Cup Regenerative Award</a>',
-                '<a href="' . $baseUrl . '?fltCup=369" '
+                '<a href="' . $this->baseUrl . '?fltCup=369" '
                     . 'target="_blank">NWPCC</a>'
             ]
         ];
@@ -398,7 +398,7 @@ class ScoreStats extends SurvStatsGraph
                         && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"])) {
                     $val = $ps->{ $fld };
                     $this->addRecDat($type[0], $val, $ps->ps_id);
-                    if ($type[0] == 'pro') {
+                    if (in_array($type[0], ['pro', 'lgt'])) {
                         $val *= 3.412;
                     } else {
                         $val /= 3.412;
@@ -418,7 +418,7 @@ class ScoreStats extends SurvStatsGraph
                             && $area->ps_area_lighting_effic > 0) {
                             $this->addRecDat(
                                 'lgt' . substr($type, 0, 1), 
-                                $area->ps_area_lighting_effic, 
+                                $area->ps_area_lighting_effic/1000, 
                                 $ps->ps_id
                             );
                         }
@@ -431,6 +431,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsTblPrep($fltAbbr = '', $lnk = '')
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         $fLet = $this->fAbr($fltAbbr);
         $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
         if ($fLet != '' && !isset($this->filts[$fLet])) {
@@ -470,6 +473,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsTbl($fltAbbr = '', $lnk = '')
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-table', 
             [ "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk) ]
@@ -478,6 +484,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsExcel($fltAbbr = '', $lnk = '')
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-excel', 
             [ "tbl" => $this->printScoreAvgsTblPrep($fltAbbr, $lnk) ]
@@ -486,6 +495,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsTbl2Prep($lnk = '', $only = [])
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
         foreach ($this->filts as $fLet => $filt) {
             if (sizeof($only) == 0 || in_array($fLet, $only)) {
@@ -519,6 +531,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsTbl2($lnk = '', $only = [])
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-table', 
             [ "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only) ]
@@ -527,6 +542,9 @@ class ScoreStats extends SurvStatsGraph
     
     public function printScoreAvgsExcel2($lnk = '', $only = [])
     {
+        if ($lnk == '') {
+            $lnk = $this->baseUrl;
+        }
         return view(
             'vendor.cannabisscore.inc-score-avgs-report-excel', 
             [ "tbl" => $this->printScoreAvgsTbl2Prep($lnk, $only) ]
@@ -535,7 +553,7 @@ class ScoreStats extends SurvStatsGraph
     
     protected function loadLgts($area)
     {
-        $base = '<a href="/dash/compare-powerscores?fltFarm=144&fltLght=' . $area;
+        $base = '<a href="' . $this->baseUrl . '?fltFarm=144&fltLght=' . $area;
         $end = '" target="_blank">';
         $this->sfLgts = [
             168 => $base . '-168' . $end . 'HID (double-ended HPS)</a>',

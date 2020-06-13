@@ -128,6 +128,7 @@ square feet of flowering canopy (for each farm).</p>
 <div class="slCard nodeWrap">
 <h2 class="slBlueDark">5. Leads</h2>
 <table border=0 class="table table-striped w100">
+    
 {!! $statLeads->tblHeaderRow('farm', '/dash/compare-powerscores?fltFarm=[[val]]') !!}
 {!! $statLeads->tblPercHasDat(
     'farm', 

@@ -606,7 +606,7 @@ class CannabisScoreSearcher extends Searcher
         $eval .= "->orderBy('" . $this->v["sort"][0] . "', '" 
             . $this->v["sort"][1] . "')->get();";
         eval($eval);
-//echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br />'; exit;
+//echo '<br /><br /><br />' . $eval . '<br />getAllPowerScoreAvgsPublic( ' . $this->v["allscores"]->count() . '<br /><pre>'; print_r($this->v); echo '</pre>';
         return true;
     }
 

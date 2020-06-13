@@ -2,6 +2,12 @@
 
 <div class="slCard nodeWrap">
     
+    <a class="btn btn-secondary pull-right" 
+        href="?srt={{ $sort[0] }}&srta={{ 
+        $sort[1] }}{{ $urlFlts }}&excel=1"
+        ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
+        Excel
+    </a>
     <a href="?refresh=1"><h2 class="slBlueDark">
     @if (isset($GLOBALS["SL"]->x["partnerVersion"])
         && $GLOBALS["SL"]->x["partnerVersion"])
@@ -66,21 +72,6 @@
             <a class="btn btn-secondary mR5" target="_blank"
                 href="/dash/compare-powerscores?random=1" 
                 >Get Random
-            </a>
-            <a class="btn btn-secondary" 
-                href="?srt={{ $sort[0] }}&srta={{ 
-                $sort[1] }}{{ $urlFlts }}&excel=1"
-                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
-                Excel
-            </a>
-        </div>
-    @else
-        <div class="pT10">
-            <a class="btn btn-secondary" 
-                href="?srt={{ $sort[0] }}&srta={{ 
-                $sort[1] }}{{ $urlFlts }}&excel=1"
-                ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
-                Excel
             </a>
         </div>
     @endif
