@@ -42,6 +42,48 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return true;
     }
     
+    protected function postPsReportingMonth($nID)
+    {
+        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld') 
+            && trim($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) != ''
+            && isset($this->sessData->dataSets["powerscore"]) 
+            && isset($this->sessData->dataSets["powerscore"][0])) {
+            $newMonth = intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld'));
+            $this->sessData->dataSets["powerscore"][0]->ps_year = intVal(date("Y"));
+            if (intVal(date("n")) < $newMonth) {
+                $this->sessData->dataSets["powerscore"][0]->ps_year = intVal(date("Y"))-1;
+            }
+            $this->sessData->dataSets["powerscore"][0]->save();
+        }
+        return false;
+    }
+    
+    protected function postHeatPumpOther($nID)
+    {
+        if ($GLOBALS["SL"]->REQ->has('otherThermal1328')
+            && trim($GLOBALS["SL"]->REQ->otherThermal1328) != ''
+            && isset($this->sessData->dataSets["powerscore"])
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_id)) {
+            $this->sessData->dataSets["powerscore"][0]->ps_tech_other
+                = trim($GLOBALS["SL"]->REQ->otherThermal1328);
+            $this->sessData->dataSets["powerscore"][0]->save();
+        }
+        return true;
+    }
+    
+    protected function loadHeatPumpOther($nID)
+    {
+        if (isset($this->sessData->dataSets["powerscore"])) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            if (isset($ps->ps_tech_other) && trim($ps->ps_tech_other) != '') {
+                $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
+                    . "document.getElementById(\"otherThermal1328ID\").value=" 
+                    . json_encode($ps->ps_tech_other) . "', 10); ";
+            }
+        }
+        return true;
+    }
+    
     protected function postRenewOther($nID)
     {
         if ($GLOBALS["SL"]->REQ->has('otherRenewable1075')
@@ -373,9 +415,6 @@ class ScoreFormsCustom extends ScoreCondsCustom
         );
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
     }
-
-
-
 
     
     protected function prepFeedbackSkipBtn()

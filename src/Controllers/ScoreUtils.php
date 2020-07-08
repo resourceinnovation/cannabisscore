@@ -21,9 +21,10 @@ use App\Models\RIIPsForCup;
 use App\Models\RIIComplianceMa;
 use App\Models\RIIComplianceMaMonths;
 use App\Models\RIIComplianceMaFuels;
+use App\Models\RIIComplianceMaRenewables;
 use App\Models\RIIPsOnsiteFuels;
 use App\Models\SLZips;
-use CannabisScore\Controllers\ScoreVars;
+use CannabisScore\Controllers\ScorePowerUtilities;
 
 class ScoreUtils extends ScorePowerUtilities
 {   
@@ -97,6 +98,102 @@ class ScoreUtils extends ScorePowerUtilities
         $this->firstPageChecksCopyMa();
         return true;
     }
+
+    /**
+     * Initializing extra things for special admin pages.
+     *
+     * @param  Illuminate\Http\Request  $request
+     * @return boolean
+     */
+    protected function constructorExtra()
+    {
+        $this->runPowerScoreChecks();
+        return true;
+    }
+    
+    /**
+     * Run any validation and cleanup needed specific to PowerScore.
+     *
+     * @return boolean
+     */
+    protected function runPowerScoreChecks()
+    {
+        if (!isset($this->v["uID"]) 
+            || $this->v["uID"] <= 0 
+            || !isset($this->v["user"])
+            || !$this->v["user"]->hasRole('administrator|staff')) {
+            return false;
+        }
+        if (!session()->has('powerChks') 
+                || !session()->get('powerChks') 
+                || $GLOBALS["SL"]->REQ->has('refresh')) {
+            $cutoff = mktime(date("H"), date("i"), date("s"), 
+                date("n"), date("j")-14, date("Y"));
+            $cutoff = date("Y-m-d H:i:s", $cutoff);
+            $this->clearEmptyPowerScores($cutoff);
+            $this->clearEmptyComply($cutoff);
+            $this->clearLostSessionHelpers();
+            session()->put('powerChks', true);
+        }
+        return true;
+    }
+    
+    /**
+     * Clean out old PowerScores.
+     *
+     * @return boolean
+     */
+    protected function clearEmptyPowerScores($cutoff)
+    {
+        DB::select(DB::raw(
+            "DELETE FROM `rii_powerscore` 
+            WHERE `created_at` < '" . $cutoff . "'
+                AND `ps_status` LIKE '" . $this->statusIncomplete . "'
+                AND (`ps_user_id` IS NULL OR `ps_user_id` <= 0)
+                AND (`ps_zip_code` IS NULL OR `ps_zip_code` LIKE '')
+            LIMIT 2000"
+        ));
+        DB::select(DB::raw(
+            "DELETE FROM `sl_sess` 
+            WHERE `sl_sess`.`sess_tree` = 1
+                AND `sl_sess`.`sess_core_id` NOT IN 
+                    (SELECT `rii_powerscore`.`ps_id` FROM `rii_powerscore`)"
+        ));
+        DB::select(DB::raw(
+            "DELETE FROM `rii_ps_monthly` 
+            WHERE `rii_ps_monthly`.`ps_month_psid` NOT IN 
+                (SELECT `rii_powerscore`.`ps_id` FROM `rii_powerscore`)"
+        ));
+        return true;
+    }
+    
+    /**
+     * Clean out old compliance records.
+     *
+     * @return boolean
+     */
+    protected function clearEmptyComply($cutoff)
+    {
+        DB::select(DB::raw(
+            "DELETE FROM `rii_compliance_ma` 
+            WHERE `created_at` < '" . $cutoff . "'
+                AND (`com_ma_user_id` IS NULL OR `com_ma_user_id` <= 0)
+                AND (`com_ma_postal_code` IS NULL OR `com_ma_postal_code` LIKE '')
+            LIMIT 2000"
+        ));
+        DB::select(DB::raw(
+            "DELETE FROM `sl_sess` 
+            WHERE `sl_sess`.`sess_tree` = 71
+                AND `sl_sess`.`sess_core_id` NOT IN 
+                    (SELECT `rii_compliance_ma`.`com_ma_id` FROM `rii_compliance_ma`)"
+        ));
+        DB::select(DB::raw(
+            "DELETE FROM `rii_compliance_ma_months` 
+            WHERE `rii_compliance_ma_months`.`com_ma_month_com_ma_id` NOT IN 
+                (SELECT `rii_compliance_ma`.`com_ma_id` FROM `rii_compliance_ma`)"
+        ));
+        return true;
+    }
     
     protected function firstPageChecksCups()
     {
@@ -166,7 +263,7 @@ class ScoreUtils extends ScorePowerUtilities
                             }
                         }
                     }
-                    $chk = RIIPsOnsiteFuels::where('ps_fuel_ps_id', $ma->com_ma_id)
+                    $chk = RIIPsOnsiteFuels::where('ps_fuel_ps_id', $ma->com_ma_ps_id)
                         ->get();
                     $maFuels = RIIComplianceMaFuels::where('com_ma_fuel_com_ma_id', $ma->com_ma_id)
                         ->get();
@@ -189,6 +286,30 @@ class ScoreUtils extends ScorePowerUtilities
                             }
                         }
                     }
+
+                    $chk = RIIPsRenewables::where('ps_rnw_psid', $ma->com_ma_ps_id)
+                        ->get();
+                    $renews = RIIComplianceMaRenewables::where('com_ma_rnw_com_ma_id', $ma->com_ma_id)
+                        ->get();
+                    if ($renews && sizeof($renews) > 0) {
+                        foreach ($renews as $renew) {
+                            $found = false;
+                            if ($chk && sizeof($chk) > 0) {
+                                foreach ($chk as $psRenew) {
+                                    if (isset($psRenew->ps_rnw_renewable)
+                                        && $psRenew->ps_rnw_renewable == $renew->com_ma_rnw_renewable) {
+                                        $found = true;
+                                    }
+                                }
+                            }
+                            if (!$found) {
+                                $psRenew = new RIIPsRenewables;
+                                $psRenew->ps_rnw_psid = $ps->ps_id;
+                                $psRenew->ps_rnw_renewable = $renew->com_ma_rnw_renewable;
+                                $psRenew->save();
+                            }
+                        }
+                    }
                 }
             }
             $ps->save();
@@ -200,19 +321,21 @@ class ScoreUtils extends ScorePowerUtilities
     
     protected function firstPageChecksCopyMaCore(&$ps, &$ma)
     {
-        $ma->com_ma_ps_id        = $ps->ps_id;
+        $ma->com_ma_ps_id          = $ps->ps_id;
         $ma->save();
-        $ps->ps_com_ma_id        = $ma->com_ma_id;
-        $ps->ps_year             = $ma->com_ma_year;
-        $ps->ps_name             = $ma->com_ma_name;
-        $ps->ps_zip_code         = $ma->com_ma_postal_code;
-        $ps->ps_grams            = $ma->com_ma_grams;
-        $ps->ps_kwh              = $ma->com_ma_tot_kwh;
-        $ps->ps_tot_kw_peak      = $ma->ps_tot_kw_peak;
-        $ps->ps_no_natural_gas   = $ma->com_ma_no_natural_gas;
-        $ps->ps_unit_natural_gas = $ma->com_ma_unit_natural_gas;
-        $ps->ps_unit_wood        = $ma->com_ma_unit_wood;
-        $ps->ps_unit_generator   = $ma->com_ma_unit_generator;
+        $ps->ps_com_ma_id          = $ma->com_ma_id;
+        $ps->ps_year               = $ma->com_ma_year;
+        $ps->ps_start_month        = $ma->com_ma_start_month;
+        $ps->ps_name               = $ma->com_ma_name;
+        $ps->ps_zip_code           = $ma->com_ma_postal_code;
+        $ps->ps_flower_weight_type = $ma->com_ma_flower_weight_type;
+        $ps->ps_grams              = $ma->com_ma_grams;
+        $ps->ps_kwh                = $ma->com_ma_tot_kwh;
+        $ps->ps_tot_kw_peak        = $ma->ps_tot_kw_peak;
+        $ps->ps_no_natural_gas     = $ma->com_ma_no_natural_gas;
+        $ps->ps_unit_natural_gas   = $ma->com_ma_unit_natural_gas;
+        $ps->ps_unit_wood          = $ma->com_ma_unit_wood;
+        $ps->ps_unit_generator     = $ma->com_ma_unit_generator;
         if (isset($ma->com_ma_no_renewable_electricity)) {
             if (intVal($ma->com_ma_no_renewable_electricity) == 1) {
                 $ps->ps_source_renew = 0;
@@ -427,11 +550,11 @@ class ScoreUtils extends ScorePowerUtilities
     private function getStageName($itemRow = [], $itemInd = 0)
     {
         switch (intVal($itemRow->ps_area_type)) {
-            case 237: return 'Mother Plants';         break; // to be phased out
-            case 160: return 'Clone & Mother Plants'; break;
-            case 161: return 'Vegetating Plants';     break;
-            case 162: return 'Flowering Plants';      break;
-            case 163: return 'Drying / Curing';       break;
+            case 237: return 'Mother Plants';          break; // to be phased out
+            case 160: return 'Clone or Mother Plants'; break;
+            case 161: return 'Vegetating Plants';      break;
+            case 162: return 'Flowering Plants';       break;
+            case 163: return 'Drying / Curing';        break;
         }
         return '';
     }
@@ -690,6 +813,7 @@ class ScoreUtils extends ScorePowerUtilities
     protected function loadTotFlwrSqFt()
     {
         $this->v["totFlwrSqFt"] = 0;
+        /*
         if (isset($this->sessData->dataSets["powerscore"])
             && isset($this->sessData->dataSets["powerscore"][0])
             && isset($this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size)
@@ -701,6 +825,7 @@ class ScoreUtils extends ScorePowerUtilities
                 return $this->v["totFlwrSqFt"];
             }
         }
+        */
 
         if ($this->hasRooms()) { // post-3.0
             $this->loadRoomIndsByStage();
@@ -876,7 +1001,14 @@ class ScoreUtils extends ScorePowerUtilities
     protected function printReportLgts($nID)
     {
         $deet = '';
-        $lgts = $this->sessData->getBranchChildRows('ps_light_types');
+        $lgts = [];
+        if ($nID == 1360) {
+            $roomID = $this->sessData->getLatestDataBranchID();
+            $fldVals = [ "ps_lg_typ_room_id" => $roomID ];
+            $lgts = $this->sessData->getRowIDsByFldVal('ps_light_types', $fldVals, true);
+        } else {
+            $lgts = $this->sessData->getBranchChildRows('ps_light_types');
+        }
         if (sizeof($lgts) > 0) {
             foreach ($lgts as $i => $lgt) {
                 $lgtType = $GLOBALS["SL"]->def->getVal(

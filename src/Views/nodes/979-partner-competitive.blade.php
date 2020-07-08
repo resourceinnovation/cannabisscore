@@ -20,6 +20,25 @@
     @endif
 </div>
 
+@if ($totCnt == 0)
+    <div class="row">
+        <div class="col-lg-2 pB20"></div>
+        <div class="col-lg-8 pB20">
+            <div class="slCard">
+                <h5>No completed records found.</h5>
+                <p>
+                  Submit a record to see comparative results:<br />
+                  <a href="https://powerscore.resourceinnovation.org/start-for-{{ 
+                      $GLOBALS['SL']->x['usrInfo']->slug 
+                      }}">https://powerscore.resourceinnovation.org/start-for-{{ 
+                      $GLOBALS['SL']->x['usrInfo']->slug }}</a>
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-2 pB20"></div>
+    </div>
+@endif
+
 @foreach ($dataLegend as $l => $leg)
     <div class="row">
         <div class="col-lg-2 pB20"></div>

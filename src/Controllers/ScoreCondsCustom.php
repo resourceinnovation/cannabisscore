@@ -82,15 +82,36 @@ class ScoreCondsCustom extends ScoreUtils
             return $this->runCondIndoorFlowerSizes($condition);
 
         } elseif ($condition == '#MACompliancePowerScore') {
-            if (isset($this->sessData->dataSets["powerscore"])
-                && sizeof($this->sessData->dataSets["powerscore"]) == 1
-                && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
-                && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
-                return 1;
-            }
-            return 0;
+            return $this->hasMaCompliancePowerScore();
+        } elseif ($condition == '#MACompliancePowerScoreOwner') {
+            return $this->isMaCompliancePowerScoreOwner();
         }
         return -1;
+    }
+    
+    private function hasMaCompliancePowerScore()
+    {
+        if (isset($this->sessData->dataSets["powerscore"])
+            && sizeof($this->sessData->dataSets["powerscore"]) == 1
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    private function isMaCompliancePowerScoreOwner()
+    {
+        if ($this->hasMaCompliancePowerScore() == 1) {
+            $maID = $this->sessData->dataSets["powerscore"][0]->ps_com_ma_id;
+            if ($this->v["isOwner"]
+                || $this->isPartnerStaffAdminOrOwner()
+                || (session()->has('coreID71') 
+                    && session()->get('coreID71') == $maID)) {
+                return 1;
+            }
+        }
+        return 0;
     }
     
     private function hasRenewable()
@@ -315,6 +336,21 @@ class ScoreCondsCustom extends ScoreUtils
             }
         }
         return $ret;
+    }
+
+    protected function parseConditionsCustom($loop, $recObj)
+    {
+        if ($loop->data_loop_plural == 'Growth Stages') {
+            if (isset($recObj->ps_area_type)) {
+                if ($this->getStageNick($recObj->ps_area_type) != 'Dry'
+                    && isset($recObj->ps_area_has_stage)
+                    && intVal($recObj->ps_area_has_stage) == 1) {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        return -1;
     }
 
 }

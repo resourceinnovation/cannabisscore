@@ -75,7 +75,7 @@ class ScoreReportStats
         $defSet = 'PowerScore Growth Stages';
         $this->v["areaTypes"] = [
             'Mother' => $GLOBALS["SL"]->def->getID($defSet, 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID($defSet, 'Clone & Mother Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID($defSet, 'Clone or Mother Plants'),
             'Veg'    => $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def->getID($defSet, 'Flowering Plants'),
             'Dry'    => $GLOBALS["SL"]->def->getID($defSet, 'Drying/Curing')

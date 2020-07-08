@@ -96,25 +96,13 @@ class ScoreCalcsPrint extends ScoreCalcRanks
     
     protected function prepPrintEfficWater()
     {
-        $gals = 0;
-        if (isset($this->sessData->dataSets["ps_areas"])
-            && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
-            foreach ($this->sessData->dataSets["ps_areas"] as $a => $area) {
-                if (isset($area->ps_area_has_stage)
-                    && intVal($area->ps_area_has_stage) == 1
-                    && isset($area->ps_area_gallons)) {
-                    $gals += $area->ps_area_gallons;
-                }
-            }
-        }
         $this->v["printEfficWtr"] = view(
             'vendor.cannabisscore.nodes.490-report-calculations-water', 
             [
                 "ps"          => $this->sessData->dataSets["powerscore"][0],
                 "areas"       => $this->v["areas"],
                 "areaNicks"   => $this->v["areaNicks"],
-                "totFlwrSqFt" => $this->v["totFlwrSqFt"],
-                "gals"        => $gals
+                "totFlwrSqFt" => $this->v["totFlwrSqFt"]
             ]
         )->render();
         return true;

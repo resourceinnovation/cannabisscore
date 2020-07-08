@@ -32,6 +32,7 @@ class RIIPowerscore extends Model
 		'ps_effic_lighting', 
 		'ps_effic_hvac', 
 		'ps_grams', 
+		'ps_grams_dry', 
 		'ps_kwh', 
 		'ps_total_size', 
 		'ps_total_canopy_size', 
@@ -81,6 +82,10 @@ class RIIPowerscore extends Model
 		'ps_com_ma_id', 
 		'ps_start_month', 
 		'ps_kwh_tot_calc',
+		'ps_flower_weight_type',
+		'ps_tot_water', 
+		'ps_tech_other', 
+		'ps_tech_heat_pump', 
     ];
     
     // END SurvLoop auto-generated portion of Model

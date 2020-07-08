@@ -31,7 +31,7 @@ class ScoreLookups
             'Mother' => $GLOBALS["SL"]->def
                 ->getID('PowerScore Growth Stages', 'Mother Plants'),
             'Clone'  => $GLOBALS["SL"]->def
-                ->getID('PowerScore Growth Stages', 'Clone & Mother Plants'),
+                ->getID('PowerScore Growth Stages', 'Clone or Mother Plants'),
             'Veg'    => $GLOBALS["SL"]->def
                 ->getID('PowerScore Growth Stages', 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def

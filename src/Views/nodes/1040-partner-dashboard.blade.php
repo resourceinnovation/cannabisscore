@@ -133,7 +133,7 @@
             </p>
         </div>
     </div>
-@if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+@if ($GLOBALS["SL"]->x["partnerLevel"] >= 4)
     <div class="row mT30">
         <div class="col-lg-6 pB10">
             <a href="/dash/average-powerscores-lighting" 
@@ -147,33 +147,43 @@
             </p>
         </div>
     </div>
-@endif
-    <div class="row mT30">
-        <div class="col-lg-6 pB10">
-            <a href="/dash/manufacturer-adoption" 
-                class="btn btn-lg btn-secondary btn-block"
-                >Lighting Manufacturer Adoption</a>
+    @if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
+        <div class="row mT30">
+            <div class="col-lg-6 pB10">
+                <a href="/dash/manufacturer-adoption" 
+                    class="btn btn-lg btn-secondary btn-block"
+                    >Lighting Manufacturer Adoption</a>
+            </div>
+            <div class="col-lg-6 pB10">
+                <p>
+                    Counts the total PowerScores within the official data set
+                    which use specific lighting manufacturers, by growth stage.
+                </p>
+            </div>
         </div>
-        <div class="col-lg-6 pB10">
-            <p>
-                Counts the total PowerScores within the official data set
-                which use specific lighting manufacturers, by growth stage.
-            </p>
+        <div class="row mT30">
+            <div class="col-lg-6 pB10">
+                <a href="/dash/lighting-manufacturer-report" 
+                    class="btn btn-lg btn-secondary btn-block"
+                    >Lighting Manufacturer Report</a>
+            </div>
+            <div class="col-lg-6 pB10">
+                <p>
+                    Compare all lighting manufacturers sub-score averages
+                    within the official data set.
+                </p>
+            </div>
         </div>
-    </div>
-@if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
-    <div class="row mT30">
-        <div class="col-lg-6 pB10">
-            <a href="/dash/lighting-manufacturer-report" 
-                class="btn btn-lg btn-secondary btn-block"
-                >Lighting Manufacturer Report</a>
-        </div>
-        <div class="col-lg-6 pB10">
-            <p>
-                Compare all lighting manufacturers sub-score averages
-                within the official data set.
-            </p>
-        </div>
-    </div>
+    @else
+        <p>
+            <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
+                >More data anlysis is available with higher membership levels.</a>
+        </p>
+    @endif
+@else
+    <p>
+        <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
+            >More data anlysis is available with higher membership levels.</a>
+    </p>
 @endif
 </div>

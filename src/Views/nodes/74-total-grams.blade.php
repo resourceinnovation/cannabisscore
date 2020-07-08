@@ -2,8 +2,9 @@
 <div id="node{{ $nID }}" class="nodeWrap">
 <div id="nLabel{{ $nID }}" class="nPrompt">
     <label for="n{{ $nID }}FldID" class="w100">
-    <p>Over the <span class="txtInfo">12-month period</span>, how many total 
-    <span class="txtInfo">grams of dried cannabis flower</span> were produced? 
+    <p>Over the <span class="txtInfo">prior 12-month period</span>, how many total 
+    <span class="txtInfo">grams of cannabis flower</span> were produced? 
+    This includes trim but not waste like stems and branches.
     <span class="red">*required</span></p>
     </label>
 </div>
@@ -41,7 +42,7 @@
 </div>
 <script type="text/javascript">
 function convertGrams() {
-    document.getElementById('n{{ $nID }}FldLbID').value=document.getElementById('n{{ $nID }}FldID').value*0.002204623;
+    document.getElementById('n{{ $nID }}FldLbID').value=Math.round(document.getElementById('n{{ $nID }}FldID').value*0.002204623);
 }
 @if (isset($currSessData) && $currSessData > 0) setTimeout("convertGrams()", 10); @endif
 </script>

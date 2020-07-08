@@ -30,7 +30,7 @@ class CannabisScoreSearcher extends Searcher
         $set = 'PowerScore Growth Stages';
         $this->v["areaTypes"] = [
             'Mother' => $GLOBALS["SL"]->def->getID($set, 'Mother Plants'),
-            'Clone'  => $GLOBALS["SL"]->def->getID($set, 'Clone & Mother Plants'),
+            'Clone'  => $GLOBALS["SL"]->def->getID($set, 'Clone or Mother Plants'),
             'Veg'    => $GLOBALS["SL"]->def->getID($set, 'Vegetating Plants'),
             'Flower' => $GLOBALS["SL"]->def->getID($set, 'Flowering Plants'),
             'Dry'    => $GLOBALS["SL"]->def->getID($set, 'Drying/Curing')

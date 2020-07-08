@@ -650,6 +650,15 @@ class ScoreListings extends ScoreReportLightingManu
             && trim($GLOBALS["SL"]->REQ->get('sizes')) == 'no') {
             $this->v["sizes"] = [0];
         }
+
+        $this->v["catAlerts"] = [];
+        foreach ($this->v["farmTypesOrd"] as $type) {
+            $this->v["catAlerts"][$type] = [];
+            foreach ($this->v["sizes"] as $size) {
+                $this->v["catAlerts"][$type][$size] = 0;
+            }
+        }
+
         $this->v["scores"] = DB::table('rii_powerscore')
             ->join('rii_ps_areas', 'rii_powerscore.ps_id', '=', 'rii_ps_areas.ps_area_psid')
             ->whereIn('rii_powerscore.ps_status', $status)
@@ -740,6 +749,12 @@ class ScoreListings extends ScoreReportLightingManu
                     ->first();
                 if ($areaChk && isset($areaChk->ps_area_sq_ft_per_fix2)) {
                     $this->v["scoresVegSqFtFix"][$ps->ps_id] = $areaChk->ps_area_sq_ft_per_fix2;
+                }
+                if (!isset($ps->ps_effic_facility_status)
+                    && isset($ps->ps_status)
+                    && $ps->ps_status == $this->v["defCmplt"]) {
+                    $sizeDef = $GLOBALS["CUST"]->getSizeDefID($ps->ps_area_size);
+                    $this->v["catAlerts"][$ps->ps_characterize][$sizeDef]++;
                 }
             }
 

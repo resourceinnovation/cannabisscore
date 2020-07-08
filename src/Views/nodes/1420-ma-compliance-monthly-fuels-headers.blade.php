@@ -2,16 +2,7 @@
 
 @if ($rec->com_ma_tot_natural_gas > 0)
     <th>
-        Natural Gas 
-    @if (isset($rec->com_ma_unit_generator)
-        && $GLOBALS["SL"]->def->getVal(
-            'Natural Gas Units', 
-            $rec->com_ma_unit_natural_gas
-            ) == 'CCF')
-        (CCF)
-    @else
-        (Therms)
-    @endif
+        Natural Gas (Therms)
     </th>
 @endif
 @if ($rec->com_ma_tot_diesel > 0)

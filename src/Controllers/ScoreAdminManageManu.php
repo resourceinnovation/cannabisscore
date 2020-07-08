@@ -98,13 +98,33 @@ class ScoreAdminManageManu
      */
     public function printMgmtPartners($nID = -3)
     {
+        $this->v["isEditing"] = false;
+        $this->v["editPartner"] = null;
         if ($GLOBALS["SL"]->REQ->has('addPartnerManu')
             && intVal($GLOBALS["SL"]->REQ->addPartnerManu) == 1) {
-            $this->addNewPartnerInvite();
+            $this->savePartnerInvite();
+        }
+        if ($GLOBALS["SL"]->REQ->has('edit')
+            && intVal($GLOBALS["SL"]->REQ->edit) > 0) {
+            $this->v["editPartner"] = new ScoreUserInfo;
+            $this->v["editPartner"]->loadInvite(intVal($GLOBALS["SL"]->REQ->edit));
+            if ($GLOBALS["SL"]->REQ->has('save')) {
+                $this->savePartnerInvite();
+                $this->v["editPartner"] = new ScoreUserInfo;
+                $this->v["editPartner"]->loadInvite(intVal($GLOBALS["SL"]->REQ->edit));
+            } else {
+                $this->v["isEditing"] = true;
+            }
         }
         $this->loadPartnerUsers();
         $this->loadPartnerInvites();
+        $GLOBALS["SL"]->pageAJAX .= view(
+            'vendor.cannabisscore.nodes.915-manage-partners-edit-ajax'
+        )->render();
         return view(
+            'vendor.cannabisscore.nodes.915-manage-partners-edit', 
+            $this->v
+        )->render() . view(
             'vendor.cannabisscore.nodes.915-manage-partners', 
             $this->v
         )->render();
@@ -116,39 +136,47 @@ class ScoreAdminManageManu
      * @param int $nID
      * @return string
      */
-    public function addNewPartnerInvite()
+    public function savePartnerInvite()
     {
         $userID = $manu = 0;
         $user = $userInfo = null;
         $inviteEmail = '';
-        if ($GLOBALS["SL"]->REQ->has('partnerUser')) {
-            $userID = intVal($GLOBALS["SL"]->REQ->partnerUser);
-            if ($userID > 0) {
-                $user = User::find($userID);
-            }
-        }
-        if ((!$user || !isset($user->id)) 
-            && $GLOBALS["SL"]->REQ->has('partnerInviteEmail')) {
+        if ($GLOBALS["SL"]->REQ->has('partnerInviteEmail')
+            && trim($GLOBALS["SL"]->REQ->partnerInviteEmail) != '') {
             $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
-            $user = User::where('email', 'LIKE', $inviteEmail)
-                ->orderBy('id', 'asc')
-                ->first();
         }
-        if ($user && isset($user->id)) {
-            $userID = $user->id;
-            $userInfo = RIIUserInfo::where('usr_user_id', $userID)
-                ->first();
-            if (!$userInfo || !isset($userInfo->usr_id)) {
-                $userInfo = RIIUserInfo::where('usr_invite_email', $user->email)
+        if (isset($this->v["editPartner"])) {
+            $userID = $this->v["editPartner"]->id;
+            $user = User::find($userID);
+            $userInfo = RIIUserInfo::find($this->v["editPartner"]->usrInfoID);
+        } else { // Create new invite records
+            if ($GLOBALS["SL"]->REQ->has('partnerUser')) {
+                $userID = intVal($GLOBALS["SL"]->REQ->partnerUser);
+                if ($userID > 0) {
+                    $user = User::find($userID);
+                }
+            }
+            if ((!$user || !isset($user->id)) && $inviteEmail != '') {
+                $user = User::where('email', 'LIKE', $inviteEmail)
+                    ->orderBy('id', 'asc')
                     ->first();
             }
-        } elseif ($inviteEmail != '') {
-            $userInfo = RIIUserInfo::where('usr_invite_email', $inviteEmail)
-                ->first();
-        }
-        if (!$userInfo || !isset($userInfo->usr_id)) {
-            $userInfo = new RIIUserInfo;
-            $userInfo->usr_user_id = $userID;
+            if ($user && isset($user->id)) {
+                $userID = $user->id;
+                $userInfo = RIIUserInfo::where('usr_user_id', $userID)
+                    ->first();
+                if (!$userInfo || !isset($userInfo->usr_id)) {
+                    $userInfo = RIIUserInfo::where('usr_invite_email', $user->email)
+                        ->first();
+                }
+            } elseif ($inviteEmail != '') {
+                $userInfo = RIIUserInfo::where('usr_invite_email', $inviteEmail)
+                    ->first();
+            }
+            if (!$userInfo || !isset($userInfo->usr_id)) {
+                $userInfo = new RIIUserInfo;
+                $userInfo->usr_user_id = $userID;
+            }
         }
         $userInfo->usr_invite_email = $inviteEmail;
         if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')
@@ -157,6 +185,8 @@ class ScoreAdminManageManu
         }
         if ($GLOBALS["SL"]->REQ->has('partnerManu')
             && intVal($GLOBALS["SL"]->REQ->partnerManu) > 0) {
+            $chk = RIIUserManufacturers::where('usr_man_user_id', $userID)
+                ->delete();
             $userInfo->usr_manu_ids = intVal($GLOBALS["SL"]->REQ->partnerManu);
         }
         if ($GLOBALS["SL"]->REQ->has('partnerLevel')
@@ -166,6 +196,9 @@ class ScoreAdminManageManu
         if ($GLOBALS["SL"]->REQ->has('partnerExpire')
             && trim($GLOBALS["SL"]->REQ->partnerExpire) != '') {
             $userInfo->usr_membership_expiration = trim($GLOBALS["SL"]->REQ->partnerExpire);
+        }
+        if ($inviteEmail != '') {
+            $userInfo->usr_invite_email = $inviteEmail;
         }
         $userInfo->save();
         return true;
@@ -200,9 +233,9 @@ class ScoreAdminManageManu
             $areaIDs = $areaIDsDone = [];
             $chk = RIIPsAreas::whereIn('ps_area_psid', function($query){
                     $query->select('ps_id')
-                    ->from(with(new RIIPowerscore)->getTable())
-                    ->where('ps_status', 243)
-                    ->where('ps_effic_lighting_status', 243);
+                        ->from(with(new RIIPowerscore)->getTable())
+                        ->where('ps_status', 243)
+                        ->where('ps_effic_lighting_status', 243);
                 })
                 ->select('ps_area_id')
                 ->get();
@@ -440,7 +473,7 @@ class ScoreAdminManageManu
         switch ($defID) {
             case $GLOBALS["SL"]->def->getID($detSet, 'Mother Plants'):
                 return 'Mother';
-            case $GLOBALS["SL"]->def->getID($detSet, 'Clone & Mother Plants'):
+            case $GLOBALS["SL"]->def->getID($detSet, 'Clone or Mother Plants'):
                 return 'Clone';
             case $GLOBALS["SL"]->def->getID($detSet, 'Vegetating Plants'): 
                 return 'Veg';

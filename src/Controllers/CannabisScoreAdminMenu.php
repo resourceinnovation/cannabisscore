@@ -119,7 +119,7 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Manage Partners',
                         ),
                         $this->admMenuLnk(
-                            '/dash/manage-manufacturers', 
+                            '/dash/manufacturer-adoption', 
                             'Manufacturers', 
                         ),
                         $this->admMenuLnk(
@@ -131,6 +131,10 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Competitive Performance'
                         )
                     ]
+                ),
+                $this->admMenuLnk(
+                    '/dash/ma-comply-submissions',
+                    'Compliance'
                 ),
                 $this->admMenuLnk(
                     '/dash/handbook', 
@@ -238,7 +242,7 @@ class CannabisScoreAdminMenu extends AdminMenu
             []
         );
         $treeMenu[] = $this->admMenuLnk(
-            '/dash/manage-manufacturers', 
+            '/dash/manufacturer-adoption', 
             'Manufacturers', 
             '<i class="fa fa-lightbulb-o mL5" aria-hidden="true"></i>', 
             1, 
@@ -248,7 +252,7 @@ class CannabisScoreAdminMenu extends AdminMenu
                     'Competition Report'
                 ),
                 $this->admMenuLnk(
-                    '/dash/manage-manufacturers',
+                    '/dash/manufacturer-adoption',
                     'Manufacturers'
                 ),
                 $this->admMenuLnk(

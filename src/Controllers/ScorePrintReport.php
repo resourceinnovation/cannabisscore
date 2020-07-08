@@ -91,6 +91,36 @@ class ScorePrintReport extends ScoreCalcsPrint
         )->render();
         return $ret;
     }
+
+    protected function printReportRoomArea($nID)
+    {
+        $ret = '';
+        $roomID = $this->sessData->getLatestDataBranchID();
+        $lnks = $this->sessData->getChildRows(
+            'ps_growing_rooms', 
+            $roomID, 
+            'ps_link_room_area'
+        );
+        if (sizeof($lnks) > 0) {
+            foreach ($lnks as $i => $lnk) {
+                $area = $this->sessData->getRowById(
+                    'ps_areas', 
+                    $lnk->ps_lnk_rm_ar_area_id
+                );
+                if ($area 
+                    && isset($area->ps_area_type) 
+                    && intVal($area->ps_area_type) > 0) {
+                    $areaName = $this->getAreaAbbr($area->ps_area_type);
+                    $areaName = str_replace('Clone', 'Clone or Mother', $areaName);
+                    $ret .= (($ret != '') ? ', ' : '') . $areaName;
+                }
+            }
+        }
+        if (strpos($ret, ',') !== false) {
+            return [ 'Stages of Plant Growth', $ret ];
+        }
+        return [ 'Stage of Plant Growth', $ret ];
+    }
     
     public function customPrint490($nID)
     {
@@ -411,6 +441,10 @@ class ScorePrintReport extends ScoreCalcsPrint
 
     protected function reportMaMonths($nID)
     {
+        if (!isset($this->sessData->dataSets["compliance_ma"])
+            || !isset($this->sessData->dataSets["compliance_ma_months"])) {
+            return '';
+        }
         return view(
             'vendor.cannabisscore.nodes.1420-ma-compliance-monthly', 
             [
@@ -418,6 +452,14 @@ class ScorePrintReport extends ScoreCalcsPrint
                 "months" => $this->sessData->dataSets["compliance_ma_months"]
             ]
         )->render();
+    }
+
+    protected function reportMaID($nID)
+    {
+        return [
+            'PowerScore Comply ID#',
+            $this->coreID
+        ];
     }
 
     protected function reportMaNextPro($nID)
@@ -477,18 +519,44 @@ class ScorePrintReport extends ScoreCalcsPrint
         return [ $deetLabel, $deetVal, $nID ];
     }
 
+    protected function reportMaWood($nID)
+    {
+        if (isset($this->sessData->dataSets["compliance_ma"])
+            && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel)) {
+            $deetLabel = 'Annual Total Wood';
+            if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood)) {
+                $def = $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood;
+                $def = $GLOBALS["SL"]->def->getVal('Biofuel Wood Units', $def);
+                $deetLabel .= ' (' . $def . ')';
+            }
+            $deetVal = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel;
+            return [ $deetLabel, $deetVal, $nID ];
+        }
+        return [];
+    }
+
     protected function reportMaYear($nID)
     {
         $deetLabel = 'Reporting Year';
         $deetVal = intVal(date("Y"))-1;
         if (isset($this->sessData->dataSets["compliance_ma"])) {
             $com = $this->sessData->dataSets["compliance_ma"][0];
-            if (isset($com->com_ma_year)
-                && intVal($com->com_ma_year) > 0) {
+            if (isset($com->com_ma_year) && intVal($com->com_ma_year) > 0) {
                 $deetVal = $com->com_ma_year;
             }
         }
         return [ $deetLabel, $deetVal, $nID ];
+    }
+
+    // Override PDF filename to be used for delivery to user.
+    public function customPdfFilename()
+    {
+        if (in_array($this->treeID, [1, 22])) {
+            $GLOBALS["SL"]->x["pdfFilename"] = 'PowerScore_Report.pdf';
+        } elseif (in_array($this->treeID, [71, 93])) {
+            $GLOBALS["SL"]->x["pdfFilename"] = 'Massachusetts_PowerScore_Comply_Report.pdf';
+        }
+        return true;
     }
 
 

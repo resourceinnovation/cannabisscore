@@ -17,6 +17,7 @@ class RIIComplianceMa extends Model
 		'com_ma_renewable_other', 
 		'com_ma_postal_code', 
 		'com_ma_grams', 
+		'com_ma_grams_dry', 
 		'com_ma_tot_kwh', 
 		'com_ma_tot_kw', 
 		'com_ma_tot_renew', 
@@ -42,6 +43,9 @@ class RIIComplianceMa extends Model
 		'com_ma_ps_id', 
 		'com_ma_include_renewables', 
 		'com_ma_start_month', 
+		'com_ma_renewable_other',
+		'com_ma_flower_weight_type',
+		'com_ma_renewal_application_date',
     ];
     
     // END SurvLoop auto-generated portion of Model

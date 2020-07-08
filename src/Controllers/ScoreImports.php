@@ -22,9 +22,9 @@ use App\Models\RIIPsUtiliZips;
 use App\Models\RIIPsForCup;
 use App\Models\RIIPsLicenses;
 use App\Models\RIIPsPageFeedback;
-use CannabisScore\Controllers\ScorePartners;
+use CannabisScore\Controllers\ScoreComply;
 
-class ScoreImports extends ScorePartners
+class ScoreImports extends ScoreComply
 {
     protected function runImport()
     {

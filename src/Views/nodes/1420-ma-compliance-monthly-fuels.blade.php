@@ -4,7 +4,13 @@
     <td>
     @if (isset($month->com_ma_month_natural_gas_therms)
         && $month->com_ma_month_natural_gas_therms > 0)
-        {{ number_format($month->com_ma_month_natural_gas_therms) }}
+        @if (isset($rec->com_ma_unit_natural_gas)
+            && $rec->com_ma_unit_natural_gas
+                == $GLOBALS["SL"]->def->getID('Natural Gas Units', 'CCF'))
+            {{ $GLOBALS["SL"]->sigFigs(($month->com_ma_month_natural_gas_therms*0.0103412), 3) }}
+        @else
+            {{ number_format($month->com_ma_month_natural_gas_therms) }}
+        @endif
     @endif
     </td>
 @endif

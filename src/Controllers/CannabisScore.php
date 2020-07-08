@@ -71,10 +71,12 @@ class CannabisScore extends ScoreImports
             )->render();
         } elseif (in_array($nID, [177, 457, 465, 471])) {
             return $this->printReportBlds($nID);
-        } elseif (in_array($nID, [209, 432, 440, 448])) {
+        } elseif (in_array($nID, [209, 432, 440, 448, 1360])) {
             return $this->printReportLgts($nID);
         } elseif ($nID == 1075) {
             $this->loadRenewOther($nID);
+        } elseif ($nID == 1328) {
+            $this->loadHeatPumpOther($nID);
         } elseif ($nID == 536) {
             $this->prepFeedbackSkipBtn();
             $GLOBALS["SL"]->pageJAVA .= view(
@@ -95,6 +97,7 @@ class CannabisScore extends ScoreImports
                 'PowerScoreOwner' . $this->coreID, 
                 $this->coreID
             );
+            $this->calcCurrSubScores();
             
         } elseif ($nID == 490) {
             if ($GLOBALS["SL"]->REQ->has('recalc')) {
@@ -122,6 +125,8 @@ class CannabisScore extends ScoreImports
             return $this->printReportGrowingYear($nID);
         } elseif ($nID == 508) {
             $ret .= $this->printReportUtilRef($nID);
+        } elseif ($nID == 1353) {
+            return $this->printReportRoomArea($nID);
             
         // PowerScore Reporting
         } elseif (in_array($nID, [744, 1381])) {
@@ -193,14 +198,23 @@ class CannabisScore extends ScoreImports
             $report = new ScoreReportHvac;
             $ret .= $report->getHvacReport($nID);
         } elseif ($nID == 983) {
-            $report = new ScoreReportLighting;
-            $ret .= $report->getLightingReport($nID);
+            if ($GLOBALS["SL"]->x["partnerLevel"] >= 4) {
+                $report = new ScoreReportLighting;
+                $ret .= $report->getLightingReport($nID);
+            } else {
+                $ret .= '<p>
+                    <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
+                        >More data anlysis is available with higher membership levels.</a>
+                </p>';
+            }
         } elseif ($nID == 855) {
             $report = new ScoreReportLighting;
             $ret .= $report->printLightingRawCalcs($nID);
             $GLOBALS["SL"]->pageJAVA .= ' openAdmMenuOnLoad = false; ';
             
         // MA
+        } elseif ($nID == 1545) {
+            $this->completeMaCompliance($nID);
         } elseif ($nID == 1403) {
             $this->calcMaCompliance($nID);
         } elseif ($nID == 1447) {
@@ -211,15 +225,19 @@ class CannabisScore extends ScoreImports
             $ret .= $this->reportMaNextPro($nID);
         } elseif ($nID == 1442) {
             return $this->reportMaEfficProd($nID);
+        } elseif ($nID == 1418) {
+            return $this->reportMaWood($nID);
         } elseif ($nID == 1449) {
             return $this->reportMaProPdf($nID);
-        } elseif ($nID == 1422) {
+        } elseif ($nID == 1407) {
             if ($GLOBALS["SL"]->REQ->has('recalc') 
                 || $GLOBALS["SL"]->REQ->has('refresh')) {
                 $this->calcMaCompliance($nID);
             }
         } elseif ($nID == 1424) {
             $this->loadRenewOtherMA($nID);
+        } elseif ($nID == 1522) {
+            return $this->reportMaID($nID);
             
 /*
         } elseif ($nID == 1120) {
@@ -237,15 +255,29 @@ class CannabisScore extends ScoreImports
             
         // Admin Tools
         } elseif ($nID == 914) {
-            $this->initManuAdmin();
-            $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
+            if ($GLOBALS["SL"]->x["partnerLevel"] > 4) {
+                $this->initManuAdmin();
+                $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
+            } else {
+                $ret .= '<p>
+                    <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
+                        >More data anlysis is available with higher membership levels.</a>
+                </p>';
+            }
         } elseif ($nID == 1514) {
-            $report = new ScoreListings(
-                $this->v["uID"], 
-                $this->v["user"], 
-                $this->v["usrInfo"]
-            );
-            $ret .= $report->printMakeModelAnalysis($nID);
+            if ($GLOBALS["SL"]->x["partnerLevel"] > 4) {
+                $report = new ScoreListings(
+                    $this->v["uID"], 
+                    $this->v["user"], 
+                    $this->v["usrInfo"]
+                );
+                $ret .= $report->printMakeModelAnalysis($nID);
+            } else {
+                $ret .= '<p>
+                    <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
+                        >More data anlysis is available with higher membership levels.</a>
+                </p>';
+            }
         } elseif ($nID == 915) {
             $this->initManuAdmin();
             $ret .= $this->v["manuAdmin"]->printMgmtPartners($nID);
@@ -270,6 +302,8 @@ class CannabisScore extends ScoreImports
                 'vendor.cannabisscore.nodes.968-lighting-manufacturers-comparison', 
                 [ "nID" => $nID ]
             )->render();
+        } elseif ($nID == 1543) {
+            return $this->reportMaListing($nID);
             
         // Misc
         } elseif ($nID == 1276) {
@@ -327,6 +361,13 @@ class CannabisScore extends ScoreImports
             $curr->addTmpResponse(0, 'Other:');
             $curr->dataStore = 'powerscore:ps_source_utility';
             $curr->chkFldOther();
+        } elseif (in_array($nID, [1509, 1508])) {
+            $curr->clearResponses();
+            for ($i = 0; $i < 12; $i++) {
+                $time = mktime(0, 0, 0, date("n")-$i, date("j"), date("Y"));
+                $curr->addTmpResponse(date('n', $time), date('F Y', $time));
+            }
+            $curr->defaultVal = intVal(date("n"))-1;
         }
         return $curr;    
     }
@@ -340,8 +381,12 @@ class CannabisScore extends ScoreImports
         
         if ($nID == 47) {
             $this->postZipCode($nID);
+        } elseif ($nID == 1508) {
+            $this->postPsReportingMonth($nID);
         } elseif ($nID == 1075) {
             $this->postRenewOther($nID);
+        } elseif ($nID == 1328) {
+            $this->postHeatPumpOther($nID);
         } elseif ($nID == 1244) {
             $this->postRoomCnt($nID);
         } elseif ($nID == 1233) {

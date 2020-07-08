@@ -265,9 +265,8 @@ class ScoreCalcRanks extends ScoreCalcs
         return $tmp;
     }
     
-    protected function calcFutureYields()
+    protected function calcFutureYields(&$ps)
     {
-        $this->loadTotFlwrSqFt();
         $this->initSearcher();
         $this->searcher->loadCurrScoreFltParams($this->sessData->dataSets);
         $matches = [
@@ -290,15 +289,12 @@ class ScoreCalcRanks extends ScoreCalcs
             }
         }
         if (sizeof($matches["flt"]) > 0) {
-            $ps = $this->sessData->dataSets["powerscore"][0];
             $ps->ps_effic_facility = $matches["btu"]/sizeof($matches["flt"]);
             $ps->ps_kwh = $ps->ps_effic_facility*$this->v["totFlwrSqFt"];
             $ps->ps_grams = ($matches["grm"]/sizeof($matches["flt"]))
                 *$this->v["totFlwrSqFt"];
-            $this->sessData->dataSets["powerscore"][0] = $ps;
-            $this->sessData->dataSets["powerscore"][0]->save();
         }
-        return $this->sessData->dataSets["powerscore"][0];
+        return $ps;
     }
     
     protected function recalc2AllSubScores()

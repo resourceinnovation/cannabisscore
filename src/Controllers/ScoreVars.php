@@ -23,6 +23,7 @@ use App\Models\RIIUserManufacturers;
 use App\Models\RIIUserPsPerms;
 use App\Models\RIIComplianceMaMonths;
 use App\Models\SLUsersRoles;
+use App\Models\User;
 use CannabisScore\Controllers\CannabisScoreSearcher;
 use CannabisScore\Controllers\ScoreLookups;
 use SurvLoop\Controllers\Tree\TreeSurvForm;
@@ -306,11 +307,13 @@ class ScoreVars extends TreeSurvForm
     protected function recordIsIncomplete($coreTbl, $coreID, $coreRec = NULL)
     {
         if ($coreID > 0) {
-            if (!isset($coreRec->ps_id)) {
-                $coreRec = RIIPowerscore::find($coreID);
+            if ($coreTbl == 'powerscore') {
+                if (!isset($coreRec->ps_id)) {
+                    $coreRec = RIIPowerscore::find($coreID);
+                }
+                return (!isset($coreRec->ps_status) 
+                    || $coreRec->ps_status == $this->statusIncomplete);
             }
-            return (!isset($coreRec->ps_status) 
-                || $coreRec->ps_status == $this->statusIncomplete);
         }
         return false;
     }
@@ -329,7 +332,7 @@ class ScoreVars extends TreeSurvForm
         switch ($defID) {
             case $GLOBALS["SL"]->def->getID($defSet, 'Mother Plants'):
                 return 'Mother';
-            case $GLOBALS["SL"]->def->getID($defSet, 'Clone & Mother Plants'):
+            case $GLOBALS["SL"]->def->getID($defSet, 'Clone or Mother Plants'):
                 return 'Clone';
             case $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants'): 
                 return 'Veg';
@@ -458,10 +461,22 @@ class ScoreVars extends TreeSurvForm
     
     protected function checkComplianceMonths()
     {
-        if (isset($this->sessData->dataSets["compliance_ma"])
-            && !isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_year)) {
-            $this->sessData->dataSets["compliance_ma"][0]->com_ma_year = intVal(date("Y"));
+        $t = "compliance_ma";
+        if (isset($this->sessData->dataSets[$t])
+            && !isset($this->sessData->dataSets[$t][0]->com_ma_year)) {
+            $this->sessData->dataSets[$t][0]->com_ma_year = intVal(date("Y"));
         }
+        if (isset($this->sessData->dataSets[$t])
+            && !isset($this->sessData->dataSets[$t][0]->com_ma_start_month)) {
+            $this->sessData->dataSets[$t][0]->com_ma_start_month = intVal(date("n"));
+        }
+        if ($GLOBALS["SL"]->REQ->has('go') 
+            && trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
+            $this->sessData->dataSets[$t][0]->com_ma_go_pro = 1;
+        } elseif (!isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro)) {
+            $this->sessData->dataSets[$t][0]->com_ma_go_pro = 0;
+        }
+        $this->sessData->dataSets[$t][0]->save();
         if (!isset($this->sessData->dataSets["compliance_ma_months"]) 
             || sizeof($this->sessData->dataSets["compliance_ma_months"]) == 0) {
             $this->sessData->dataSets["compliance_ma_months"] = [];
@@ -478,14 +493,6 @@ class ScoreVars extends TreeSurvForm
             $tmp[($month->com_ma_month_month-1)] = $month;
         }
         $this->sessData->dataSets["compliance_ma_months"] = $tmp;
-        if ($GLOBALS["SL"]->REQ->has('go') 
-            && trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
-            $this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro = 1;
-            $this->sessData->dataSets["compliance_ma"][0]->save();
-        } elseif (!isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro)) {
-            $this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro = 0;
-            $this->sessData->dataSets["compliance_ma"][0]->save();
-        }
         return true;
     }
     
@@ -494,6 +501,7 @@ class ScoreVars extends TreeSurvForm
 class ScoreUserInfo
 {
     public $id            = 0;
+    public $usrInfoID     = 0;
     public $name          = '';
     public $email         = '';
     public $company       = '';
@@ -506,6 +514,24 @@ class ScoreUserInfo
 
     public $partnerDef    = 368;
     public $partTierDefs  = [];
+
+    public function loadInvite($usrInfoID = 0)
+    {
+        $this->usrInfoID = $usrInfoID;
+        $user = null;
+        $info = RIIUserInfo::find($usrInfoID);
+        if ($info && isset($info->usr_user_id) && $info->usr_user_id > 0) {
+            $user = User::find($info->usr_user_id);
+            if (isset($user->id)) {
+                $this->id    = $user->id;
+                $this->name  = $user->name;
+                $this->email = $user->email;
+            }
+        }
+        $this->loadCompany($info);
+        $this->loadCore();
+        return true;
+    }
 
     public function loadUser($userID = 0, $user = null, $company = '')
     {
@@ -532,8 +558,17 @@ class ScoreUserInfo
                 $info->save();
             }
         }
+        if ($info && isset($info->usr_id)) {
+            $this->usrInfoID = $info->usr_id;
+        }
         $this->loadCompany($info, $company);
         $this->postCompanyName();
+        $this->loadCore();
+        return true;
+    }
+    
+    protected function loadCore($user = null)
+    {
         $this->getUserManufacturers();
         if (Auth::user()->hasRole('administrator|staff')) {
             $this->level = 10;
@@ -543,8 +578,8 @@ class ScoreUserInfo
         $GLOBALS["SL"]->x["partnerLevel"]   = $this->level;
         $GLOBALS["SL"]->x["partnerInfoID"]  = 0;
         $GLOBALS["SL"]->x["partnerPSIDs"]   = [];
-        if (isset($info->usr_id)) {
-            $GLOBALS["SL"]->x["partnerInfoID"] = $info->usr_id;
+        if ($this->usrInfoID > 0) {
+            $GLOBALS["SL"]->x["partnerInfoID"] = $this->usrInfoID;
             $search = new CannabisScoreSearcher;
             $GLOBALS["SL"]->x["partnerPSIDs"] = $search->getPartnerPSIDs($this->id);
         }

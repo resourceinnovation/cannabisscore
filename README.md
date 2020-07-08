@@ -65,8 +65,8 @@ $ nano composer.json
 ...
 "require": {
     ...
-    "rockhopsoft/survloop": "^0.2.4",
-    "resourceinnovation/cannabisscore": "^0.2.4",
+    "rockhopsoft/survloop": "^0.2.18",
+    "resourceinnovation/cannabisscore": "^0.2.5",
     ...
 },
 ...
@@ -96,6 +96,7 @@ $ nano config/app.php
     ...
     SurvLoop\SurvLoopServiceProvider::class,
     CannabisScore\CannabisScoreServiceProvider::class,
+    Intervention\Image\ImageServiceProvider::class,
     ...
 ],
 ...
@@ -103,6 +104,7 @@ $ nano config/app.php
     ...
     'SurvLoop' => 'RockHopSoft\SurvLoop\SurvLoopFacade',
     'CannabisScore' => 'ResourceInnovation\CannabisScore\CannabisScoreFacade',
+    'Image' => Intervention\Image\Facades\Image::class,
     ...
 ], ...
 ```
@@ -120,16 +122,17 @@ $ nano config/auth.php
 Update composer, publish the package migrations, etc...
 ```
 $ echo "0" | php artisan vendor:publish --force
+$ php artisan vendor:publish --provider="Intervention\Image\ImageServiceProviderLaravelRecent"
 $ cd ~/homestead
 $ vagrant up
 $ vagrant ssh
 $ cd code/powerscore
-$ php artisan migrate
+$ php artisan optimize:clear
 $ composer dump-autoload
+$ php artisan migrate
 # php artisan db:seed --class=SurvLoopSeeder
 $ php artisan db:seed --class=ZipCodeSeeder
 # php artisan db:seed --class=CannabisScoreSeeder
-$ php artisan optimize:clear
 ```
 
 * For now, to apply database design changes to the same installation you are working in, depending on your server, 
@@ -138,9 +141,22 @@ you might also need something like this...
 ```
 $ chown -R www-data:33 app/Models
 $ chown -R www-data:33 database
+$ chown -R www-data:33 storage
 ```
 
-* Load in the browser to create super admin account and get started.
+### Initialize SurvLoop Installation
+
+Then browsing to the home page should prompt you to create the first admin user account:
+
+http://powerscore.local
+
+If everything looks janky, then manually load the style sheets, etc:
+
+http://powerscore.local/css-reload
+
+After logging in as an admin, this link rebuilds many supporting files:
+
+http://powerscore.local/dashboard/settings?refresh=2
 
 
 # <a name="documentation"></a>Documentation

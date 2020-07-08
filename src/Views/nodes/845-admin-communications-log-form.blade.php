@@ -10,5 +10,4 @@
 <input type="submit" class="btn btn-xs btn-secondary mT5" 
     value="Add New Communication">
 </form>
-<style> body { background: #F9FFF0; } </style>
 @endsection

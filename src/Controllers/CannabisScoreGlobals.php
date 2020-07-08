@@ -21,7 +21,7 @@ class CannabisScoreGlobals
             case 'Mother': 
                 return $GLOBALS["SL"]->def->getID($defSet, 'Mother Plants');
             case 'Clone':
-                return $GLOBALS["SL"]->def->getID($defSet, 'Clone & Mother Plants');
+                return $GLOBALS["SL"]->def->getID($defSet, 'Clone or Mother Plants');
             case 'Veg':
                 return $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants');
             case 'Flower':
