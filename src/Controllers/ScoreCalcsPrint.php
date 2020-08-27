@@ -28,12 +28,16 @@ class ScoreCalcsPrint extends ScoreCalcRanks
         $this->loadCalcNicknames();
         $this->prepPrintEfficLgt();
         $this->prepPrintEfficHvac();
+        $this->prepPrintEfficFacNon();
         $this->prepPrintEfficWater();
+        $this->prepPrintEfficWaste();
         $this->chkUnprintableSubScores();
+        $this->prepScoreYearMonths();
         $this->v["sessData"] = $this->sessData->dataSets;
         if (isset($this->sessData->dataSets["powerscore"])) {
             $this->v["psid"] = $this->sessData->dataSets["powerscore"][0]->getKey();
-            $this->v["hasRefresh"] = (($GLOBALS["SL"]->REQ->has('refresh')) ? '&refresh=1' : '')
+            $this->v["hasRefresh"] = (($GLOBALS["SL"]->REQ->has('refresh')) 
+                    ? '&refresh=1' : '')
                 . (($GLOBALS["SL"]->REQ->has('print')) ? '&print=1' : '');
             $GLOBALS["SL"]->loadStates();
             return true;
@@ -47,8 +51,8 @@ class ScoreCalcsPrint extends ScoreCalcRanks
         if (isset($this->sessData->dataSets["ps_growing_rooms"])) {
             $rooms = $this->sessData->dataSets["ps_growing_rooms"];
             foreach ($rooms as $r => $room) {
-                $this->v["roomNicks"][$r] = str_replace(' (', ', ', str_replace(')', '', 
-                    $this->getRoomName($room, $r)));
+                $this->v["roomNicks"][$r] = str_replace(' (', ', ', 
+                    str_replace(')', '', $this->getRoomName($room, $r)));
             }
         }
         if (isset($this->sessData->dataSets["ps_areas"])
@@ -94,17 +98,102 @@ class ScoreCalcsPrint extends ScoreCalcRanks
         return $this->v["printEfficLgt"];
     }
     
-    protected function prepPrintEfficWater()
+    protected function prepPrintEfficFacNon()
     {
-        $this->v["printEfficWtr"] = view(
-            'vendor.cannabisscore.nodes.490-report-calculations-water', 
+        $ps = $this->sessData->dataSets["powerscore"][0];
+        $addLines = $addLines2 = [];
+        if (isset($ps->ps_tot_natural_gas) && $ps->ps_tot_natural_gas > 0) {
+            $addLines[] = '( ' . number_format($ps->ps_tot_natural_gas) . ' Natural Gas Therms x <a '
+                . 'href="https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu"'
+                . ' target="_blank">99.976</a> ) kBtu';
+            $addLines2[] = number_format($ps->ps_tot_natural_gas*99.97612449) 
+                . ' Natural Gas kBtu';
+        }
+        if (isset($ps->ps_tot_generator) && $ps->ps_tot_generator > 0) {
+            $set = 'Compliance MA Generator Units';
+            $unit = $GLOBALS["SL"]->def->getID($set, 'Diesel (Gallons)');
+            if (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) == $unit) {
+                $addLines[] = '( ' . number_format($ps->ps_tot_generator) . ' Diesel Gallons x <a '
+                    . 'href="https://www.convertunits.com/from/gallon+%5bU.S.%5d+of+diesel+oil/to/Btu"'
+                    . ' target="_blank">138.87</a> ) kBtu';
+                $addLines2[] = number_format($ps->ps_tot_generator*138.87415823) . ' Diesel kBtu';
+            } else {
+                $addLines[] = '( ' . number_format($ps->ps_tot_generator) . ' Gasoline Gallons x <a '
+                    . 'href="https://www.convertunits.com/from/gallon+[U.S.]+of+automotive+gasoline/to/Btu+[thermochemical]"'
+                    . ' target="_blank">124.97</a> ) kBtu';
+                $addLines2[] = number_format($ps->ps_tot_generator*124.9679542) . ' Gasoline kBtu';
+            }
+        }
+        if (isset($ps->ps_tot_fuel_oil) && $ps->ps_tot_fuel_oil > 0) {
+            $addLines[] = '( ' . number_format($ps->ps_tot_fuel_oil) . ' Fuel Oil Gallons x '
+                . '<a href="https://www.convertunits.com/from/gallon+%5BU.S.%5D+of'
+                . '+distillate+no.+2+fuel+oil/to/Btus" target="_blank">138.87</a> ) kBtu';
+                $addLines2[] = number_format($ps->ps_tot_generator*138.87415823) . ' Fuel Oil kBtu';
+        }
+        if (isset($ps->ps_tot_propane) && $ps->ps_tot_propane > 0) {
+            $addLines[] = '( ' . number_format($ps->ps_tot_propane) . ' Propane Gallons x <a '
+                . 'href="https://www.convertunits.com/from/gallon+[U.S.]+of+LPG/to/Btu"'
+                . ' target="_blank">95.500</a> ) kBtu';
+            $addLines2[] = number_format($ps->ps_tot_propane*95.500) . ' Propane kBtu';
+        }
+        return $this->prepPrintEfficFacNonViews($addLines, $addLines2);
+    }
+    
+    protected function prepPrintEfficFacNonViews($addLines, $addLines2)
+    {
+        $this->v["printEfficFacNon"] 
+            = $this->v["printEfficFacAll"]
+            = $this->v["printEfficProdNon"]
+            = $this->v["printEfficProdAll"]
+            = '';
+        $this->v["printEfficFac"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-facility', 
             [
                 "ps"          => $this->sessData->dataSets["powerscore"][0],
-                "areas"       => $this->v["areas"],
-                "areaNicks"   => $this->v["areaNicks"],
                 "totFlwrSqFt" => $this->v["totFlwrSqFt"]
             ]
         )->render();
+        $this->v["printEfficProd"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-production', 
+            [
+                "ps"          => $this->sessData->dataSets["powerscore"][0],
+                "totFlwrSqFt" => $this->v["totFlwrSqFt"]
+            ]
+        )->render();
+        if (sizeof($addLines) > 0) {
+            $this->v["printEfficFacNon"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-fac-non', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines,
+                    "addLines2" => $addLines2
+                ]
+            )->render();
+            $this->v["printEfficFacAll"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-fac-all', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines,
+                    "addLines2" => $addLines2
+                ]
+            )->render();
+            $this->v["printEfficProdNon"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-prod-non', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines,
+                    "addLines2" => $addLines2
+                ]
+            )->render();
+            $this->v["printEfficProdAll"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-prod-all', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines,
+                    "addLines2" => $addLines2
+                ]
+            )->render();
+        }
         return true;
     }
     
@@ -130,6 +219,43 @@ class ScoreCalcsPrint extends ScoreCalcRanks
             ]
         )->render();
         return true;
+    }
+    
+    protected function prepPrintEfficWater()
+    {
+        $this->v["printEfficWtr"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-water', 
+            [
+                "ps"          => $this->sessData->dataSets["powerscore"][0],
+                "areas"       => $this->v["areas"],
+                "areaNicks"   => $this->v["areaNicks"]
+            ]
+        )->render();
+        return true;
+    }
+    
+    protected function prepPrintEfficWaste()
+    {
+        $this->v["printEfficWst"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-waste', 
+            [ "ps" => $this->sessData->dataSets["powerscore"][0] ]
+        )->render();
+        return true;
+    }
+
+    private function prepScoreYearMonths($ps = null)
+    {
+        if ($ps === null && isset($this->sessData->dataSets["powerscore"])) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+        }
+        if (!isset($this->v["scoreYearMonths"])) {
+            $this->v["scoreYearMonths"] = [];
+        }
+        if (!isset($this->v["scoreYearMonths"][$ps->ps_id])) {
+            $this->v["scoreYearMonths"][$ps->ps_id] 
+                = $GLOBALS["SL"]->lastMonths12($ps, 'ps_start_month');
+        }
+        return $this->v["scoreYearMonths"][$ps->ps_id];
     }
 
 

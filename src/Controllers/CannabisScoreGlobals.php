@@ -35,7 +35,8 @@ class CannabisScoreGlobals
     public function getTypeHours($typ)
     {
         return (($typ == 'Veg') 
-            ? 18 : (($typ == 'Flower') ? 12 : 24));
+            ? 18 
+            : (($typ == 'Flower') ? 12 : 24));
     }
     
     public function getHvacEffic($defID)
@@ -112,7 +113,7 @@ class CannabisScoreGlobals
             'ps_incentive_wants'  => 'Wants Utility Incentives',
             'ps_incentive_used'   => 'Has Used Utility Incentives',
             'ps_newsletter'       => 'RII Newsletter'
-            ];
+        ];
     }
     
     public function chkScoreFiltCombs()
@@ -194,8 +195,10 @@ class CannabisScoreGlobals
             "ovr" => [ 0, 0 ], 
             "fac" => [ 0, 0 ], 
             "pro" => [ 0, 0 ], 
-            "lgt" => [ 0, 0 ], 
+            "wtr" => [ 0, 0 ],
+            "wst" => [ 0, 0 ],
             "hvc" => [ 0, 0 ],
+            "lgt" => [ 0, 0 ], 
             "lgtAr" => [
                 162 => [ 0, 0 ], 
                 161 => [ 0, 0 ], 

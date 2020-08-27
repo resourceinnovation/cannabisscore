@@ -19,7 +19,7 @@
     Small subscript counts are the number of growing areas 
     (reported in powerscores) upon which each calculated 
     average is based. This report only shows PowerScores 
-    with Lighting Sub-Scores greater than zero (AKA use 
+    with Lighting KPIs greater than zero (AKA use 
     any artifical lighting), and have not been archived.
 </td></tr>
 <tr><td>

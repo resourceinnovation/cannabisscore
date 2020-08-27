@@ -13,7 +13,7 @@
     </h3>
     <?php /* <p>
         Top competitors ranked based on largest adoption
-        within the official data set.
+        within the ranked data set.
     </p> */ ?>
     @if ($lightManuName == 'Largely Lumens, Inc.')
         <p><b class="red">

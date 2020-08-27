@@ -45,10 +45,13 @@ class ScoreUtils extends ScorePowerUtilities
     
     public function multiRecordCheckRowSummary($coreRecord)
     {
+//echo '<pre>'; print_r($coreRecord); echo '</pre>'; exit;
+//if ($coreRecord[1]->ps_id == 47496009) { echo 'prog: ' . $coreRecord[1]->ps_submission_progress . '<br />'; }
         return '<div class="mT5 mB5 slGrey">Last Edited: ' 
-            . date('n/j/y, g:ia', strtotime($coreRecord[1]->updated_at)) 
-            . '<br />Percent Complete: ' 
-            . $this->rawOrderPercent($coreRecord[1]->ps_submission_progress) . '%</div>';
+            . date('n/j/y, g:ia', strtotime($coreRecord[1]->updated_at))
+            //. '<br />Percent Complete: ' 
+            //. $this->rawOrderPercent($coreRecord[1]->ps_submission_progress) . '%' 
+            . '</div>';
     }
     
     protected function checkScore()
@@ -77,8 +80,8 @@ class ScoreUtils extends ScorePowerUtilities
         }
         if ($GLOBALS["SL"]->REQ->has('time') 
             && trim($GLOBALS["SL"]->REQ->get('time')) != '') {
-            $this->sessData->dataSets["powerscore"][0]
-                ->ps_time_type = intVal($GLOBALS["SL"]->REQ->get('time'));
+            $this->sessData->dataSets["powerscore"][0]->ps_time_type 
+                = intVal($GLOBALS["SL"]->REQ->get('time'));
             $this->sessData->dataSets["powerscore"][0]->save();
         } elseif (!isset($this->sessData->dataSets["powerscore"][0]->ps_time_type)
             || intVal($this->sessData->dataSets["powerscore"][0]->ps_time_type) <= 0) {
@@ -94,6 +97,7 @@ class ScoreUtils extends ScorePowerUtilities
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 0;
             $this->sessData->dataSets["powerscore"][0]->save();
         }
+        $this->sortMonths();
         $this->firstPageChecksCups();
         $this->firstPageChecksCopyMa();
         return true;
@@ -441,9 +445,11 @@ class ScoreUtils extends ScorePowerUtilities
                             'ps_areas', 
                             $areaLnk->ps_lnk_rm_ar_area_id
                         );
-                        foreach ($this->v["areaTypes"] as $typ => $defID) {
-                            if ($area->ps_area_type == $defID) {
-                                $this->v["stageRooms"][$typ][] = $roomInd;
+                        if (isset($area->ps_area_type)) {
+                            foreach ($this->v["areaTypes"] as $typ => $defID) {
+                                if ($area->ps_area_type == $defID) {
+                                    $this->v["stageRooms"][$typ][] = $roomInd;
+                                }
                             }
                         }
                     }
@@ -487,8 +493,26 @@ class ScoreUtils extends ScorePowerUtilities
         }
         return $this->v["roomLights"];
     }
+
+    protected function isDistanceInMeters()
+    {
+        return (isset($this->sessData->dataSets["powerscore"]) 
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_distances)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_unit_distances)
+                == $GLOBALS["SL"]->def->getID('Measure Distance Unit', 'Meters'));
+    }
+
+    protected function isWaterInLiters()
+    {
+        return (isset($this->sessData->dataSets["powerscore"]) 
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+                == $GLOBALS["SL"]->def->getID('Water Measure Unit', 'Liters'));
+    }
     
-    protected function customLabels($nIDtxt = '', $str = '')
+    protected function customLabels($curr, $str = '')
     {
         // Temporary for 3.0 mock-ups
         if (strpos($str, '100 sf of Vegetation space') !== false) {
@@ -498,23 +522,72 @@ class ScoreUtils extends ScorePowerUtilities
             $areaSq = number_format($area->ps_area_size);
             $swap = $areaSq . ' sf of <span class="txtInfo">' . $areaLab . ' space</span>';
             $str = str_replace('100 sf of Vegetation space', $swap, $str);
-        } elseif ($nIDtxt == '1088res1') {
+        } elseif ($curr->nIDtxt == '1088res1') {
             $str = str_replace('HVAC System 0', 'HVAC System A', $str);
-        } elseif ($nIDtxt == '1088res2') {
+        } elseif ($curr->nIDtxt == '1088res2') {
             $str = str_replace('HVAC System 0', 'HVAC System B', $str);
-        } elseif ($nIDtxt == '1088res3') {
+        } elseif ($curr->nIDtxt == '1088res3') {
             $str = str_replace('HVAC System 0', 'HVAC System C', $str);
-        } elseif ($nIDtxt == '1088res4') {
+        } elseif ($curr->nIDtxt == '1088res4') {
             $str = str_replace('HVAC System 0', 'HVAC System D', $str);
-        } elseif ($nIDtxt == '1088res5') {
+        } elseif ($curr->nIDtxt == '1088res5') {
             $str = str_replace('HVAC System 0', 'HVAC System E', $str);
-        } elseif ($nIDtxt == '1088res6') {
+        } elseif ($curr->nIDtxt == '1088res6') {
             $str = str_replace('HVAC System 0', 'HVAC System F', $str);
-        } elseif ($nIDtxt == '1088res7') {
+        } elseif ($curr->nIDtxt == '1088res7') {
             $str = str_replace('HVAC System 0', 'HVAC System G', $str);
-        } elseif ($nIDtxt == '1088res8') {
+        } elseif ($curr->nIDtxt == '1088res8') {
             $str = str_replace('HVAC System 0', 'Other HVAC System', $str);
+        } elseif (in_array($curr->nID, [1468, 1590, 1589, 1785, 1794, 
+            1793, 1798, 1792, 1795, 1799, 1796, 1797, 927,
+            1674, 1629, 1630, 1633, 1634, 1637, 1638,
+            1673, 1647, 1648, 1651, 1652, 1655, 1656,
+            1152, 1662, 1663, 1666, 1667, 1670, 1671])) {
+            if ($this->isWaterInLiters()) {
+                $str = $this->swapGalsForLiters($str);
+            }
+        } elseif (in_array($curr->nID, [1247, 1733, 483, 700, 908,
+            1352, 454, 462, 468, 474, 482])) {
+            if ($this->isDistanceInMeters()) {
+                $str = $this->swapSqftForMeters($str);
+            }
         }
+        return $str;
+    }
+
+    protected function nodePrintNumberFldUnitSwap($curr)
+    {
+        if (isset($curr->extraOpts["unit"])) {
+            $str = trim($curr->extraOpts["unit"]);
+            if (in_array($curr->nID, [1593, 1594, 1596, 1597, 1600, 1601, 927])) {
+                if ($this->isWaterInLiters()) {
+                    $str = $this->swapGalsForLiters($str);
+                }
+            } elseif (in_array($curr->nID, [1247, 1733, 483, 700, 908])) {
+                if ($this->isDistanceInMeters()) {
+                    $str = $this->swapSqftForMeters($str);
+                }
+            }
+            return $str;
+        }
+        return '';
+    }
+    
+    private function swapGalsForLiters($str)
+    {
+        $str = str_replace('Gallons', 'Liters', $str);
+        $str = str_replace('gallons', 'liters', $str);
+        $str = str_replace('gal/day', 'liters/day', $str);
+        $str = str_replace('gal / day', 'liters / day', $str);
+        return $str;
+    }
+    
+    private function swapSqftForMeters($str)
+    {
+        $str = str_replace('Square Feet', 'Square Meters', $str);
+        $str = str_replace('square feet', 'square meters', $str);
+        $str = str_replace('sq ft', 'sq m', $str);
+        $str = str_replace('square footage', 'area', $str);
         return $str;
     }
     
@@ -549,12 +622,14 @@ class ScoreUtils extends ScorePowerUtilities
     
     private function getStageName($itemRow = [], $itemInd = 0)
     {
-        switch (intVal($itemRow->ps_area_type)) {
-            case 237: return 'Mother Plants';          break; // to be phased out
-            case 160: return 'Clone or Mother Plants'; break;
-            case 161: return 'Vegetating Plants';      break;
-            case 162: return 'Flowering Plants';       break;
-            case 163: return 'Drying / Curing';        break;
+        if (isset($itemRow->ps_area_type)) {
+            switch (intVal($itemRow->ps_area_type)) {
+                case 237: return 'Mother Plants';          break; // to be phased out
+                case 160: return 'Clone or Mother Plants'; break;
+                case 161: return 'Vegetating Plants';      break;
+                case 162: return 'Flowering Plants';       break;
+                case 163: return 'Drying / Curing';        break;
+            }
         }
         return '';
     }
@@ -564,13 +639,12 @@ class ScoreUtils extends ScorePowerUtilities
         if ($itemInd < 0) {
             $itemInd = 0;
         }
-        $ret = 'Room #' . (1+$itemInd);
+        $ret = 'Space #' . (1+$itemInd);
         if ($itemRow 
             && isset($itemRow->ps_room_name) 
             && trim($itemRow->ps_room_name) != '') {
             return trim($itemRow->ps_room_name) . ' (' . $ret . ')';
         }
-//echo '<br /><br /><br />getRoomName(' . $itemInd . ' - ' . $ret . '<br />';
         return $ret;
     }
     
@@ -844,6 +918,7 @@ class ScoreUtils extends ScorePowerUtilities
                     }
                 }
             }
+//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? ' . (($this->hasRooms()) ? 'true' : 'false') . '<pre>'; print_r($this->v["stageRooms"]); echo '</pre>'; exit;
         } else { // pre-3.0 method
             $this->v["totFlwrSqFt"] = $this->getAreaFld('Flower', 'ps_area_size');
             if (intVal($this->v["totFlwrSqFt"]) == 0) {
@@ -857,9 +932,12 @@ class ScoreUtils extends ScorePowerUtilities
                     }
                 }
             }
+//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? ' . (($this->hasRooms()) ? 'true' : 'false') . '<pre>'; print_r($this->sessData->dataSets["ps_areas"]); echo '</pre>'; exit;
         }
-        $this->sessData->dataSets["powerscore"][0]
-            ->ps_flower_canopy_size = $this->v["totFlwrSqFt"];
+        if ($this->isDistanceInMeters()) {
+            $this->v["totFlwrSqFt"] = $GLOBALS["SL"]->cnvrtSqFt2SqMeters($this->v["totFlwrSqFt"]);
+        }
+        $this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size = $this->v["totFlwrSqFt"];
         $this->sessData->dataSets["powerscore"][0]->save();
         return $this->v["totFlwrSqFt"];
     }
@@ -897,7 +975,8 @@ class ScoreUtils extends ScorePowerUtilities
     
     public function printProfileExtraBtns()
     {
-        if (isset($this->v["profileUser"]) && isset($this->v["uID"])
+        if (isset($this->v["profileUser"]) 
+            && isset($this->v["uID"])
             && isset($this->v["profileUser"]->id)
             && $this->v["profileUser"]->id == $this->v["uID"] 
             && $this->isUserPastCultClassic($this->v["uID"])) {
@@ -910,6 +989,37 @@ class ScoreUtils extends ScorePowerUtilities
                 . 'Start A Fresh PowerScore</a>';
         }
         return '';
+    }
+
+    protected function printProfileScores($nID)
+    {
+        $ret = '';
+        if (isset($this->v["profileUser"]) 
+            && isset($this->v["profileUser"]->id)
+            && intVal($this->v["profileUser"]->id) > 0) {
+            $defInc = $GLOBALS["SL"]->def->getID('PowerScore Status', 'Incomplete');
+            $scores = RIIPowerscore::where('ps_status', 'NOT LIKE', $defInc)
+                ->where('ps_user_id', $this->v["profileUser"]->id)
+                ->orderBy('ps_id', 'desc')
+                ->select('ps_id')
+                ->get();
+            if ($scores->isNotEmpty()) {
+                foreach ($scores as $ps) {
+                    $this->loadAllSessData('powerscore', $ps->ps_id);
+                    $ret .= '<div id="reportPreview' . $ps->ps_id 
+                        . '" class="reportPreview">' 
+                        . $this->printPreviewReport() . '</div>';
+                }
+            }
+        }
+        if ($ret == '') {
+            $ret = '<div class="p15"><i>None found.</i></div>';
+        }
+        return '<h2 class="slBlueDark">Your Calculated PowerScores</h2>
+            <p>You can create a copy of a past PowerScore to update it 
+            for this year. You might only need to update your annual 
+            totals for grams grown and wattage used.</p>' 
+            . $ret . '<div class="p30"></div>';
     }
     
     protected function isUserPastCultClassic($uID)
@@ -1092,6 +1202,25 @@ class ScoreUtils extends ScorePowerUtilities
             }
         }
         return $this->v["noprints"];
+    }
+
+    protected function calcConvertGramsDry($tbl = 'powerscore', $abbr = 'ps_')
+    {
+        $defSet = 'Flower Weight Methods';
+        $defWet = $GLOBALS["SL"]->def->getID($defSet, 'Wet flower weight');
+        $defFrozen = $GLOBALS["SL"]->def->getID($defSet, 'Fresh frozen weight');
+        $flwrType = $abbr . 'flower_weight_type';
+        $this->sessData->dataSets[$tbl][0]->{ $abbr . 'grams_dry' }
+            = $this->sessData->dataSets[$tbl][0]->{ $abbr . 'grams' };
+        if (isset($this->sessData->dataSets[$tbl][0]->{ $flwrType })) {
+            if (intVal($this->sessData->dataSets[$tbl][0]->{ $flwrType }) == $defWet) {
+                $this->sessData->dataSets[$tbl][0]->{ $abbr . 'grams_dry' } *= 0.2;
+            } elseif (intVal($this->sessData->dataSets[$tbl][0]->{ $flwrType }) == $defFrozen) {
+                $this->sessData->dataSets[$tbl][0]->{ $abbr . 'grams_dry' } *= 0.2;
+            }
+        }
+        $this->sessData->dataSets[$tbl][0]->save();
+        return true;
     }
     
     protected function getTableRecLabelCustom($tbl, $rec = [], $ind = -3)

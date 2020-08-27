@@ -9,7 +9,7 @@
 </th>
 </tr>
 <tr><td>
-    Under each Lighting Sub-Score (weighted by SqFt) is its breakdown by growth stage.
+    Under each Lighting KPI (weighted by SqFt) is its breakdown by growth stage.
 </td></tr>
 
 @foreach ($scoreSets as $i => $set)

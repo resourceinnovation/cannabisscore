@@ -31,7 +31,7 @@
         @if ($f['ps'] 
             && isset($f['ps']->ps_status) 
             && in_array($f['ps']->ps_status, [ 
-                $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS['SL']->def->getID('PowerScore Status', 'Ranked Data Set'),
                 $GLOBALS['SL']->def->getID('PowerScore Status', 'Archived') 
             ])) slGreenDark
         @else txtDanger @endif " >
@@ -50,7 +50,7 @@
         <td colspan="16" class="brdLftGrey">&nbsp;</td>
     @else
         <td @if (in_array($f["ps"]->ps_status, [
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') 
                 ])) class="slGreenDark"
             @else class="txtDanger" 
@@ -64,7 +64,7 @@
         </b></td>
         <td>
             @if (in_array($f["ps"]->ps_status, [ 
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived')
                 ])) Yes 
             @else No 
@@ -82,7 +82,7 @@
             </td>
         @endif
         @if (in_array($f["ps"]->ps_status, [
-                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'),
+                $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'),
                 $GLOBALS["SL"]->def->getID('PowerScore Status', 'Archived') ]))
             @if (!isset($f["ranks"]) || !$f["ranks"])
                 <td colspan=5 class="brdLftGrey"><i>ranking not found</i></td>

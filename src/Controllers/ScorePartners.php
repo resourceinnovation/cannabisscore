@@ -31,7 +31,7 @@ class ScorePartners extends ScoreAdminMisc
         )->render();
     }
     
-    public function printPartnerProfileDashHead($nID)
+    public function printPartnerDashboard($nID)
     {
         $title = 'Partner Members Dashboard';
         $company = $this->getPartnerCompany();
@@ -42,7 +42,14 @@ class ScorePartners extends ScoreAdminMisc
         if (isset($this->v["usrInfo"])) {
             $usrInfo = $this->v["usrInfo"];
         }
-//echo '<pre>'; print_r($this->v["usrInfo"]); echo '</pre>'; exit;
+        $GLOBALS["SL"]->pageJAVA .= view(
+            'vendor.cannabisscore.nodes.1040-partner-dashboard-java', 
+            [
+                'usrInfo' => $usrInfo,
+                'company' => $company,
+                'title'   => $title
+            ]
+        )->render();
         return view(
             'vendor.cannabisscore.nodes.1040-partner-dashboard', 
             [

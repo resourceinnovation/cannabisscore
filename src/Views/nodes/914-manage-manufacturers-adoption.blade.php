@@ -6,8 +6,7 @@
     Excel</a>
 <a href="?manuSrch="><h2>Manufacturer Adoption</h2></a>
 <p>
-    Out of the Lighting Sub-Scores in the
-    PowerScore's official data set.
+    Out of the Lighting KPIs in the PowerScore's ranked data set.
 </p>
 
 <div class="row">

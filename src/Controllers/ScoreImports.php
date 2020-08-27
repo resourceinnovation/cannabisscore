@@ -355,13 +355,17 @@ class ScoreImports extends ScoreComply
         
         $this->searcher->getAllscoresAvgFlds();
         $this->searcher->v["isExcel"] = $GLOBALS["SL"]->REQ->has('excel');
-        if ($GLOBALS["SL"]->REQ->has('excel')) {
+        if ($GLOBALS["SL"]->REQ->has('excel')
+            && ($GLOBALS["SL"]->x["partnerLevel"] > 4
+                || !isset($GLOBALS["SL"]->x["officialSet"]) 
+                || !$GLOBALS["SL"]->x["officialSet"])) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.170-all-powerscores-excel', 
                 $this->searcher->v
             )->render();
             $exportFile = 'NWPCC Import Into PowerScore';
-            $exportFile = str_replace(' ', '_', $exportFile) . '-' . date("Y-m-d") . '.xls';
+            $exportFile = str_replace(' ', '_', $exportFile) 
+                . '-' . date("Y-m-d") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $exportFile);
         }
         $this->searcher->v["nID"] = 808;

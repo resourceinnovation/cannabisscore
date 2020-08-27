@@ -21,10 +21,17 @@ use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
 use App\Models\RIIUserManufacturers;
 use App\Models\SLUsersRoles;
+use App\Models\RIIUserInfo;
+use App\Models\RIIUserCompanies;
+use App\Models\RIIUserFacilities;
 use App\Models\SLUploads;
 use App\Models\User;
 use SurvLoop\Controllers\Stats\SurvTrends;
 use CannabisScore\Controllers\ScorePrintReport;
+
+
+use App\Models\RIIPsCrops;
+
 
 class ScoreAdminMisc extends ScorePrintReport
 {
@@ -181,6 +188,31 @@ class ScoreAdminMisc extends ScorePrintReport
                     }
                 }
             }
+        }
+        */
+
+        /*
+        if ($GLOBALS["SL"]->REQ->has('convertCrop')) {
+            $chk = RIIPowerscore::where('ps_crop_other', '>', 0)
+                ->select('ps_id', 'ps_crop_other')
+                ->get();
+            if ($chk->isNotEmpty()) {
+                foreach ($chk as $ps) {
+                    $crop = RIIPsCrops::where('ps_crop_psid', $ps->ps_id)
+                        ->where('ps_crop_crop', 'LIKE', $ps->ps_crop_other)
+                        ->first();
+                    if (!$crop || !isset($crop->ps_crop_psid)) {
+                        $crop = new RIIPsCrops;
+                        $crop->ps_crop_psid = $ps->ps_id;
+                        $crop->ps_crop_crop = $ps->ps_crop_other;
+echo 'adding ' . $ps->ps_id . ' = ' . $ps->ps_crop_other . '<br />';
+                        $crop->save();
+                        $ps->ps_crop_other = null;
+                        $ps->save();
+                    }
+                }
+            }
+            exit;
         }
         */
         
@@ -672,6 +704,51 @@ class ScoreAdminMisc extends ScorePrintReport
         }
         return '';
     }
+
+    
+    /**
+     * Check if this slug is already taken.
+     *
+     * @param  
+     * @return string
+     */
+    protected function ajaxCheckSlug(Request $request)
+    {
+        $this->v["slugFound"] = false;
+        if ($request->has('slug') && trim($request->get('slug')) != '') {
+            $slug = trim($request->get('slug'));
+            $chk = RIIUserInfo::where('usr_referral_slug', 'LIKE', $slug)
+                ->get();
+            if ($chk->isNotEmpty()) {
+                $this->v["slugFound"] = true;
+            }
+            $comID = 0;
+            if ($request->has('comID')) {
+                $comID = intVal($request->comID);
+            }
+            $chk = RIIUserCompanies::where('usr_com_slug', 'LIKE', $slug)
+                ->where('usr_com_id', 'NOT LIKE', $comID)
+                ->get();
+            if ($chk->isNotEmpty()) {
+                $this->v["slugFound"] = true;
+            }
+            $facID = 0;
+            if ($request->has('facID')) {
+                $facID = intVal($request->facID);
+            }
+            $chk = RIIUserFacilities::where('usr_fac_slug', 'LIKE', $slug)
+                ->where('usr_fac_id', 'NOT LIKE', $facID)
+                ->get();
+            if ($chk->isNotEmpty()) {
+                $this->v["slugFound"] = true;
+            }
+        }
+        return view(
+            'vendor.cannabisscore.ajax-check-slug', 
+            $this->v
+        )->render();
+    }
+
     
     /**
      * List lighting models by manufacturer.

@@ -6,14 +6,14 @@
                 PowerScore Outliers
             </h2></a>
             <p>
-                Below each sub-score (Facility, Production, Lighting, and HVAC) 
-                are that sub-score's Standard Deviations (SD) from the group's 
+                Below each KPI (Facility, Production, HVAC, Water, and Lighting) 
+                are that KPI's Standard Deviations (SD) from the group's 
                 average, then Interquartile Range (IQR) from the median.
                 These are flagged as <span class="slRedDark">red</span> when at 
                 least 2 SDs from mean, lower than (Quartile 1 ​− 1.5*IQR), 
                 or higher than (Quartile 3 + 1.5*IQR).
             </p><p>
-                In addition to the efficiency sub-scores, the final columns show the
+                In addition to the efficiency KPIs, the final columns show the
                 reported flowering canopy square feet per lighting fixture and
                 vegitative canopy square feet per lighting fixture.
                 These are currently set to flag <span class="slRedDark">red</span> 
@@ -42,7 +42,7 @@
                         || trim($GLOBALS["SL"]->REQ->get('sizes')) == 'yes') 
                         SELECTED
                     @endif
-                    >Break Down By Flowing Sizes</option>
+                    >Break Down By Flowing Canopy Sizes</option>
                 <option value="no" 
                 @if ($GLOBALS["SL"]->REQ->has('sizes') 
                     && trim($GLOBALS["SL"]->REQ->get('sizes')) == 'no') 
@@ -55,8 +55,10 @@
 </div>
 
 <form action="?saveArchives=1&refresh=1{{ 
-    (($GLOBALS['SL']->REQ->has('status')) ? '&status=' . $GLOBALS['SL']->REQ->get('status') : '')
-    . (($GLOBALS['SL']->REQ->has('sizes')) ? '&sizes=' . $GLOBALS['SL']->REQ->get('sizes') : '')
+    (($GLOBALS['SL']->REQ->has('status')) 
+        ? '&status=' . $GLOBALS['SL']->REQ->get('status') : '')
+    . (($GLOBALS['SL']->REQ->has('sizes')) 
+        ? '&sizes=' . $GLOBALS['SL']->REQ->get('sizes') : '')
     }}" method="post">
 <input type="hidden" id="csrfTok" name="_token" value="{{ csrf_token() }}">
 
@@ -68,7 +70,7 @@
                     $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', $type)) 
                 . ' ' . $GLOBALS["SL"]->def->getVal('Indoor Size Groups', $size) 
                 . '<span class="slBlueDark mL30">'
-                . number_format($stats[$type][$size]["Facility"]["cnt"]) . '</span>'
+                . number_format($stats[$type][$size]["Facility Electric"]["cnt"]) . '</span>'
                 . ((isset($catAlerts[$type]) 
                     && isset($catAlerts[$type][$size]) 
                     && $catAlerts[$type][$size] > 0)
@@ -116,3 +118,6 @@
         filterOutliers();
     });
 }); </script>
+<style>
+body { overflow-x: visible; }
+</style>

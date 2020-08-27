@@ -10,6 +10,7 @@ class RIIUserManufacturers extends Model
     public $timestamps    = true;
     protected $fillable   = 
     [    
+		'usr_man_company_id', 
 		'usr_man_user_id', 
 		'usr_man_manu_id', 
     ];

@@ -207,14 +207,21 @@ class ScoreStats extends SurvStatsGraph
                             );
                         }
                     }
-                } elseif (in_array($f, ['pow1', 'pow2'])) {
-                    $set = $GLOBALS["SL"]->def
-                        ->getSet('PowerScore Onsite Power Sources');
+                } elseif (in_array($f, ['pow1', 'pow2', 'pow3'])) {
+                    $set = $GLOBALS["SL"]->def->getSet('PowerScore Onsite Power Sources');
                     foreach ($set as $def) {
-                        if (($f == 'pow1' && in_array($def->def_id, [149, 159, 151, 150, 158])) 
-                            || ($f != 'pow1' && !in_array($def->def_id, [149, 159, 151, 150, 158]))) {
-                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' . $def->def_id
-                                . '" target="_blank">' . $def->def_value . '</a>';
+                        $add = false;
+                        if ($f == 'pow1') {
+                            $add = in_array($def->def_id, [149, 159, 155, 154]);
+                        } elseif ($f == 'pow2') {
+                            $add = in_array($def->def_id, [548, 156, 549, 151]);
+                        } elseif ($f == 'pow3') {
+                            $add = in_array($def->def_id, [150, 551, 158, 153, 552]);
+                        }
+                        if ($add) {
+                            $lab = '<a href="/dash/compare-powerscores?fltRenew=' 
+                                . $def->def_id . '" target="_blank">'
+                                . $def->def_value . '</a>';
                             $this->addFilt(
                                 'powr' . $def->def_id, 
                                 $lab, 
@@ -246,6 +253,14 @@ class ScoreStats extends SurvStatsGraph
         $this->addDataType( // stat var 'b'
             'proW',  
             '<nobr>Production <sup class="slBlueDark">g / kWh</sup></nobr>'
+        );
+        $this->addDataType(
+            'wtr',  
+            '<nobr>Water <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
+        );
+        $this->addDataType(
+            'wst',  
+            '<nobr>Waste <sup class="slBlueDark">lbs / sq ft</sup></nobr>'
         );
         $this->addDataType( // stat var 'c'
             'hvc',  
@@ -286,14 +301,6 @@ class ScoreStats extends SurvStatsGraph
             '<nobr><i class="fa fa-level-up fa-rotate-90 slGrey mL5 mR5"'
             . ' aria-hidden="true"></i>'
             . 'Flower <sup class="slBlueDark">kWh / day</sup></nobr>'
-        );
-        $this->addDataType(
-            'wtr',  
-            '<nobr>Water <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
-        );
-        $this->addDataType(
-            'wst',  
-            '<nobr>Waste <sup class="slBlueDark">lbs / sq ft</sup></nobr>'
         );
         return true;
     }
@@ -388,6 +395,8 @@ class ScoreStats extends SurvStatsGraph
             $dataPoints = [
                 ['fac', 'facility'],
                 ['pro', 'production'],
+                ['wtr', 'water'],
+                ['wst', 'waste'],
                 ['hvc', 'hvac'],
                 ['lgt', 'lighting']
             ];
@@ -435,7 +444,7 @@ class ScoreStats extends SurvStatsGraph
             $lnk = $this->baseUrl;
         }
         $fLet = $this->fAbr($fltAbbr);
-        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
+        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8, 10, 14], [1]);
         if ($fLet != '' && !isset($this->filts[$fLet])) {
             echo 'error in printScoreAvgsTblPrep(' . $fltAbbr;
             exit;
@@ -498,7 +507,7 @@ class ScoreStats extends SurvStatsGraph
         if ($lnk == '') {
             $lnk = $this->baseUrl;
         }
-        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8], [1]);
+        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8, 10, 14], [1]);
         foreach ($this->filts as $fLet => $filt) {
             if (sizeof($only) == 0 || in_array($fLet, $only)) {
                 $tbl->addHeaderCol($filt["lab"], $this->getDatCnt($fLet . '1'));

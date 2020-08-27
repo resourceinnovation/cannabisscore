@@ -242,10 +242,10 @@ class ScoreLgtManuData
         $this->dataLegend = [
             ['facility',   'Facility Efficiency',   'kBtu / sq ft',    0, 0],
             ['production', 'Production Efficiency', 'g / kBtu',        0, 0],
-            ['lighting',   'Lighting Efficiency',   'kWh / day',       0, 0],
-            ['hvac',       'HVAC Efficiency',       'kBtu / sq ft',    0, 0],
             ['water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
-            ['waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0]
+            ['waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0],
+            ['hvac',       'HVAC Efficiency',       'kBtu / sq ft',    0, 0],
+            ['lighting',   'Lighting Efficiency',   'kWh / day',       0, 0]
         ];
     }
 
@@ -301,7 +301,8 @@ class ScoreLgtManuData
         $scores = [];
         foreach ($this->dataLegend as $l => $leg) {
             if (isset($rnks->{ 'ps_rnk_' . $leg[0] })) {
-                $scores[] = $GLOBALS["SL"]->commaListAvg($rnks->{ 'ps_rnk_' . $leg[0] });
+                $fld = 'ps_rnk_' . $leg[0];
+                $scores[] = $GLOBALS["SL"]->commaListAvg($rnks->{ $fld });
             } else {
                 $scores[] = 0;
             }

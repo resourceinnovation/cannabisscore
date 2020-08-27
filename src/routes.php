@@ -26,6 +26,10 @@ Route::group(['middleware' => ['web']], function () {
         '/start-for-{prtnSlug}',       
         'CannabisScore\Controllers\CannabisScore@startForPartner'
     );
+    Route::get(
+        '/go-pro-for-{prtnSlug}',       
+        'CannabisScore\Controllers\CannabisScore@startForPartner'
+    );
 
 });    
 

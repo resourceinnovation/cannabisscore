@@ -8,7 +8,8 @@
             && $GLOBALS["SL"]->x["partnerVersion"]
             && isset($GLOBALS["SL"]->x["partnerLevel"])
             && intVal($GLOBALS["SL"]->x["partnerLevel"]) >= 4))
-        <div class="col-md-4 pB10">
+        <div id="fltManuLgtWrap" class="col-md-4 pB10"
+            @if (!isset($fltManuLgt) || in_array(trim($fltManuLgt), ['', '0'])) style="display: none;" @endif >
             <select name="fltManuLgt" id="fltManuLgtID" 
                 class="form-control psChageFilter ntrStp slTab"
                 autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >

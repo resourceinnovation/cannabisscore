@@ -9,8 +9,7 @@
 </th>
 </tr>
 <tr><td>
-    Under each Lighting Sub-Score (weighted by SqFt) 
-    is its breakdown by growth stage.
+    Under each Lighting KPI (weighted by SqFt) is its breakdown by growth stage.
 </td></tr>
 
 @foreach ([ 144 => 'Indoor', 145 => 'Greenhouse/Mixed', 143 => 'Outdoor' ] 

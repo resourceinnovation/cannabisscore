@@ -12,122 +12,123 @@
 
         <div class="row">
 
-            @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) 
-                || !$GLOBALS["SL"]->x["partnerVersion"]
-                || $nID != 979)
-                {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-flt-farm', 
-                    [ "fltFarm" => $fltFarm ]
-                )->render() !!}
-            @endif
-
-            @if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
-                {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-flt-climate', 
-                    [ "fltStateClim" => $fltStateClim ]
-                )->render() !!}
-            @endif
-
+        @if ($GLOBALS["SL"]->x["partnerLevel"] >= 9)
             {!! view(
-                'vendor.cannabisscore.inc-filter-powerscores-flt-lght', 
-                [
-                    "fltLght"       => $fltLght,
-                    "areaTypesFilt" => $areaTypesFilt
-                ]
+                'vendor.cannabisscore.inc-filter-powerscores-flt-cmpl', 
+                [ "fltCmpl" => $fltCmpl ]
             )->render() !!}
+        @endif
 
+        @if ($nID != 979 
+            && Auth::user()
+            && Auth::user()->hasRole('partner')
+            && isset($GLOBALS['SL']->x['usrInfo'])
+            && sizeof($GLOBALS['SL']->x['usrInfo']->companies) > 0
+            && sizeof($GLOBALS['SL']->x['usrInfo']->companies[0]->facs) > 0)
             {!! view(
-                'vendor.cannabisscore.inc-filter-powerscores-flt-hvac',
-                [ "areaTypesFilt" => $areaTypesFilt ]
+                'vendor.cannabisscore.inc-filter-powerscores-flt-facilities',
+                [ "fltFacility" => $fltFacility ]
             )->render() !!}
+        @endif
 
-            @if ($GLOBALS["SL"]->x["partnerLevel"] < 4
-                && isset($GLOBALS["SL"]->x["partnerVersion"]) 
-                && $GLOBALS["SL"]->x["partnerVersion"])
-                {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-join'
-                )->render() !!}
-            @endif
+        @if (!isset($GLOBALS["SL"]->x["partnerVersion"]) 
+            || !$GLOBALS["SL"]->x["partnerVersion"]
+            || $nID != 979)
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-flt-farm', 
+                [ "fltFarm" => $fltFarm ]
+            )->render() !!}
+        @endif
 
-        </div>
+        @if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-flt-climate', 
+                [ "fltStateClim" => $fltStateClim ]
+            )->render() !!}
+        @endif
+
+        {!! view(
+            'vendor.cannabisscore.inc-filter-powerscores-flt-lght', 
+            [
+                "fltLght"       => $fltLght,
+                "areaTypesFilt" => $areaTypesFilt
+            ]
+        )->render() !!}
+
+        {!! view(
+            'vendor.cannabisscore.inc-filter-powerscores-flt-hvac',
+            [ "areaTypesFilt" => $areaTypesFilt ]
+        )->render() !!}
+
+        @if ($GLOBALS["SL"]->x["partnerLevel"] < 4
+            && isset($GLOBALS["SL"]->x["partnerVersion"]) 
+            && $GLOBALS["SL"]->x["partnerVersion"])
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-join'
+            )->render() !!}
+        @endif
 
     @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4
         || !isset($GLOBALS["SL"]->x["partnerVersion"]) 
         || !$GLOBALS["SL"]->x["partnerVersion"])
-        <div id="hidivFiltsAdv" class="
-            @if ( (isset($fltSize) && intVal($fltSize) > 0) 
-                || (isset($fltPerp) && intVal($fltPerp) == 1) 
-                || (isset($fltPump) && intVal($fltPump) == 1) 
-                || (isset($fltWtrh) && intVal($fltWtrh) == 1) 
-                || (isset($fltManu) && intVal($fltManu) == 1) 
-                || (isset($fltAuto) && intVal($fltAuto) == 1) 
-                || (isset($fltVert) && intVal($fltVert) == 1) 
-                || (isset($fltRenew) && sizeof($fltRenew) > 0) 
-                || (isset($fltCup) && intVal($fltCup) > 0) )
-                || (isset($fltManuLgt) 
-                    && !in_array(trim($fltManuLgt), ['', '0']))
-            @elseif (!isset($GLOBALS['SL']->x['partnerVersion']) 
-                || !$GLOBALS['SL']->x['partnerVersion'])
-                @if ( (isset($fltCmpl) && $fltCmpl != 243)
-                    || (isset($fltPartner) && $fltPartner > 0)
-                    || (isset($fltManuLgt) 
-                        && !in_array(trim($fltManuLgt), ['', '0'])) )
-                    disBlo
-                @else
-                    disNon
-                @endif
-            @else 
-                disNon 
-            @endif ">
 
-            <div class="row">
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-flt-size', 
+                [ "fltSize" => $fltSize ]
+            )->render() !!}
 
+            {!! $flts["fltRenew"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! $flts["fltWaterSource"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! $flts["fltWaterStore"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! $flts["fltWaterStoreSys"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! $flts["fltWaterStoreMeth"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! $flts["fltGrowMedia"]->printDropdownColWrap('psChageFilter') !!}
+
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-flt-techniques', 
+                [ "fltTechniques" => $fltTechniques ]
+            )->render() !!}
+
+        @if ($nID != 946)
+            @if (isset($manuList) && sizeof($manuList) > 0)
                 {!! view(
-                    'vendor.cannabisscore.inc-filter-powerscores-flt-size', 
-                    [ "fltSize" => $fltSize ]
+                    'vendor.cannabisscore.inc-filter-powerscores-flt-manus', 
+                    [
+                        "fltPartner" => $fltPartner,
+                        "fltManuLgt" => $fltManuLgt,
+                        "manuList"   => $manuList
+                    ]
                 )->render() !!}
-
-            @if ($nID != 946)
-                @if (isset($usrCompanies))
-                    {!! view(
-                        'vendor.cannabisscore.inc-filter-powerscores-flt-partners', 
-                        [
-                            "fltPartner"   => $fltPartner,
-                            "usrCompanies" => $usrCompanies
-                        ]
-                    )->render() !!}
-                @endif
-
-                @if (isset($manuList) && sizeof($manuList) > 0)
-                    {!! view(
-                        'vendor.cannabisscore.inc-filter-powerscores-flt-manus', 
-                        [
-                            "fltPartner" => $fltPartner,
-                            "fltManuLgt" => $fltManuLgt,
-                            "manuList"   => $manuList
-                        ]
-                    )->render() !!}
-                @endif
-
-                @if ($GLOBALS["SL"]->x["partnerLevel"] >= 9)
-                    {!! view(
-                        'vendor.cannabisscore.inc-filter-powerscores-flt-cmpl', 
-                        [
-                            "fltCmpl" => $fltCmpl,
-                            "fltFut"  => $fltFut,
-                            "fltCup"  => $fltCup
-                        ]
-                    )->render() !!}
-                @endif
             @endif
 
-            </div>
-
-            @if (isset($psFiltChks)) 
-                <div class="w100 pB20 taL">{!! $psFiltChks !!}</div>
+            @if (isset($usrCompanies))
+                {!! view(
+                    'vendor.cannabisscore.inc-filter-powerscores-flt-partners', 
+                    [
+                        "fltPartner"   => $fltPartner,
+                        "usrCompanies" => $usrCompanies
+                    ]
+                )->render() !!}
             @endif
+        @endif
+
+        @if ($GLOBALS["SL"]->x["partnerLevel"] >= 9)
+            {!! view(
+                'vendor.cannabisscore.inc-filter-powerscores-admin-extras', 
+                [
+                    "fltFut" => $fltFut,
+                    "fltCup" => $fltCup
+                ]
+            )->render() !!}
+        @endif
 
         </div>
+        <input id="fltAdvShowing" name="fltAdvShow" type="hidden" value="0">
 
     @endif
 
@@ -149,7 +150,7 @@
         @if ($nID == 979)
             value="/dash/competitive-performance?z=z"
         @elseif ($nID == 1373)
-            value="/dash/partner-compare-official-powerscores?z=z"
+            value="/dash/partner-compare-ranked-powerscores?z=z"
         @else
             value="/dash/partner-compare-powerscores?z=z"
         @endif
@@ -199,6 +200,36 @@
         return true; 
     });
 @endif
+
+    function showAdvFilt(item, index) {
+        if (document.getElementById(""+item+"Wrap")) {
+            document.getElementById(""+item+"Wrap").style.display='block';
+        }
+    } 
+    function hideAdvFilt(item, index) {
+        if (document.getElementById(""+item+"Wrap") && document.getElementById(""+item+"ID")) {
+            var e = document.getElementById(""+item+"ID");
+            var currVal = parseInt(e.options[e.selectedIndex].value);
+            if (currVal <= 0) {
+                document.getElementById(""+item+"Wrap").style.display='none';
+            } else if (item == "fltFut" && currVal == 232) {
+                document.getElementById(""+item+"Wrap").style.display='none';
+            }
+        }
+    } 
+    function toggleAdvFilts() {
+        if (document.getElementById("fltAdvShowing")) {
+            var fltList = new Array('fltSize', 'fltRenew', 'fltWaterSource', 'fltWaterStore', 'fltWaterStoreSys', 'fltWaterStoreMeth', 'fltGrowMedia', 'fltTechniques', 'fltManuLgt', 'fltPartner', 'fltFut', 'fltCup');
+            if (parseInt(document.getElementById("fltAdvShowing").value) == 0) {
+                fltList.forEach(showAdvFilt);
+                document.getElementById("fltAdvShowing").value = 1;
+            } else {
+                fltList.forEach(hideAdvFilt);
+                document.getElementById("fltAdvShowing").value = 0;
+            }
+        }
+    }
+    $(document).on("click", "#filtsAdvBtn", function() { toggleAdvFilts(); });
     
 }); </script>
 

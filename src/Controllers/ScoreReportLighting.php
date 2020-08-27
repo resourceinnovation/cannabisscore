@@ -136,13 +136,13 @@ class ScoreReportLighting extends ScoreReportStats
         ];
 
         if ($GLOBALS["SL"]->REQ->has('excel') 
-            && intVal($GLOBALS["SL"]->REQ->excel) == 1) {
+            && intVal($GLOBALS["SL"]->REQ->excel) == 1
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.983-lighting-report-excel', 
                 $this->v
             )->render();
-            $excelFile = $this->getExportFilename() 
-                . '.xls';
+            $excelFile = $this->getExportFilename() . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool(
                 $innerTable, 
                 $excelFile
@@ -157,7 +157,7 @@ class ScoreReportLighting extends ScoreReportStats
         //$GLOBALS["SL"]->x["baseUrl"] = '/dash/compare-powerscores';
         if (isset($GLOBALS["SL"]->x["partnerID"]) 
             && intVal($GLOBALS["SL"]->x["partnerID"]) > 0) {
-            //$GLOBALS["SL"]->x["baseUrl"] = '/dash/partner-compare-official-powerscores';
+            //$GLOBALS["SL"]->x["baseUrl"] = '/dash/partner-compare-ranked-powerscores';
             $ret = str_replace(
                 'compare-powerscores', 
                 'partner-compare-official-powerscores', 
@@ -322,7 +322,8 @@ class ScoreReportLighting extends ScoreReportStats
         }
 
         if ($GLOBALS["SL"]->REQ->has('excel') 
-            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.983-lighting-raw-calcs-excel', 
                 $this->v

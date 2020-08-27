@@ -1,35 +1,43 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/966-score-outliers-inner.blade.php -->
 
 <table border=0 class="table w100 bgWht">
-    @if ($stats[$type][$size]["Facility"]["cnt"] == 0)
+    @if ($stats[$type][$size]["Facility Electric"]["cnt"] == 0)
         <tr><th colspan=8 ><i>None found.</i></th></tr>
     @else
         <tr class="slGrey">
             <th class="brdRgtGrey"><b>Average</b>, SD</th>
         @foreach ($outlierCols as $scr)
-            <th @if ($scr == 'Lighting') class="brdLftGrey" @endif d>
-            <b>{{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr]["avg"], 3) }}</b>, 
-            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr]["sd"], 3) }}
+            <th @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
+            <b>{{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["avg"], 3) }}</b>, 
+            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["sd"], 3) }}
             </th>
         @endforeach
         </tr>
         <tr class="slGrey">
             <th class="brdRgtGrey">Median, IQR</th>
         @foreach ($outlierCols as $scr)
-            <th @if ($scr == 'Lighting') class="brdLftGrey" @endif >
-            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr]["med"], 3) }}, 
-            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr]["iqr"], 3) }}
+            <th @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
+            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["med"], 3) }}, 
+            {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["iqr"], 3) }}
             </th>
         @endforeach
         </tr>
         <tr>
             <th class="brdRgtGrey">Score #, Location, Status</th>
-            <th>Facility
-                ({{ number_format($stats[$type][$size]["Facility"]["cnt"]) }})</th>
-            <th>Production
-                ({{ number_format($stats[$type][$size]["Facility"]["cnt"]) }})</th>
+            <th>Facility Electric
+                ({{ number_format($stats[$type][$size]["Facility Electric"]["cnt"]) }})</th>
+            <th>Facility Non-Electric
+                ({{ number_format($stats[$type][$size]["Facility Non-Electric"]["cnt"]) }})</th>
+            <th>Production Electric
+                ({{ number_format($stats[$type][$size]["Production Electric"]["cnt"]) }})</th>
+            <th>Production Non-Electric
+                ({{ number_format($stats[$type][$size]["Production Non-Electric"]["cnt"]) }})</th>
+            <th class="brdLftGrey">Water
+                ({{ number_format($stats[$type][$size]["Water"]["cnt"]) }})</th>
+            <th>Waste
+                ({{ number_format($stats[$type][$size]["Waste"]["cnt"]) }})</th>
             <th>HVAC
-                ({{ number_format($stats[$type][$size]["Hvac"]["cnt"]) }})</th>
+                ({{ number_format($stats[$type][$size]["HVAC"]["cnt"]) }})</th>
             <th class="brdLftGrey">Lighting
                 ({{ number_format($stats[$type][$size]["Lighting"]["cnt"]) }})</th>
             <th>Flow SqFt/Fix</th>
@@ -60,7 +68,7 @@
                     @endif
                 </div></td>
                 @foreach ($outlierCols as $scr)
-                    <td @if ($scr == 'Lighting') class="brdLftGrey" @endif >
+                    <td @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
                     {!! view(
                         'vendor.cannabisscore.nodes.966-score-outliers-cell', 
                         [
@@ -69,7 +77,6 @@
                             "type"             => $type,
                             "size"             => $size,
                             "scr"              => $scr,
-                            "scrL"             => strtolower($scr),
                             "ps"               => $ps,
                             "showStats"        => $showStats,
                             "scoresVegSqFtFix" => $scoresVegSqFtFix

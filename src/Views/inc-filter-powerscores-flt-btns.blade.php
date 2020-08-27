@@ -8,7 +8,6 @@
     || !$GLOBALS["SL"]->x["partnerVersion"]
     || $GLOBALS["SL"]->x["partnerLevel"] >= 4)
     <div class="mT10">
-        <a id="hidivBtnFiltsAdv" class="hidivBtn" href="javascript:;"
-            ><i class="fa fa-cogs"></i></a>
+        <a id="filtsAdvBtn" href="javascript:;"><i class="fa fa-cogs"></i></a>
     </div>
 @endif

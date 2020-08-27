@@ -128,6 +128,10 @@ class ScoreReportStats
         if (isset($this->searcher->searchFilts["fltStateClim"])) {
             $this->v["fltStateClim"] = trim($this->searcher->searchFilts["fltStateClim"]);
         }
+        $this->v["fltFacility"] = 0;
+        if ($GLOBALS["SL"]->REQ->has('fltFacility')) {
+            $this->v["fltFacility"] = intVal($GLOBALS["SL"]->REQ->fltFacility);
+        }
         $this->prepStatFilts();
         return true;
     }

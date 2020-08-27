@@ -1,6 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/inc-filter-powerscores-flt-size.blade.php -->
 
-<div class="col-md-4 pB10">
+<div id="fltSizeWrap" class="col-md-4 pB10"
+    @if (!isset($fltSize) || intVal($fltSize) <= 0) style="display: none;" @endif >
     <select name="fltSize" id="fltSizeID" autocomplete="off" 
         class="form-control psChageFilter ntrStp slTab"
         {!! $GLOBALS["SL"]->tabInd() !!} >

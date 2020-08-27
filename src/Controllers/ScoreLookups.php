@@ -17,7 +17,7 @@ class ScoreLookups
     {
         $this->v["defCmplt"] = $GLOBALS["SL"]->def->getID(
             'PowerScore Status', 
-            'Complete'
+            'Ranked Data Set'
         );
         $this->v["farmTypes"] = [
             'Indoor'           => $GLOBALS["SL"]->def

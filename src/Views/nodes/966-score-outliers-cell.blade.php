@@ -2,31 +2,31 @@
 
 <?php
 $currVal = -1; 
-if (isset($ps->{ 'ps_effic_' . $scrL }) && $ps->{ 'ps_effic_' . $scrL } > 0) {
-    $currVal = $ps->{ 'ps_effic_' . $scrL };
-} elseif ($scr == 'Flow SqFt/Fix') {
+if (isset($ps->{ $scr[1] }) && $ps->{ $scr[1] } > 0) {
+    $currVal = $ps->{ $scr[1] };
+} elseif ($scr[0] == 'Flow SqFt/Fix') {
     $currVal = $ps->ps_area_sq_ft_per_fix2;
-} elseif ($scr == 'Veg SqFt/Fix' && isset($scoresVegSqFtFix[$ps->ps_id])) {
+} elseif ($scr[0] == 'Veg SqFt/Fix' && isset($scoresVegSqFtFix[$ps->ps_id])) {
     $currVal = $scoresVegSqFtFix[$ps->ps_id];
 }
 ?>
 
-@if (!in_array($scr, $showStats[$ps->ps_id]))
+@if (!in_array($scr[0], $showStats[$ps->ps_id]))
 
     <span class="slGrey">-</span>
 
 @elseif ($currVal >= 0)
 
-    @if (isset($ps->{ 'ps_effic_' . $scrL }) && $ps->{ 'ps_effic_' . $scrL } > 0)
-        <label>
-        <input type="checkbox" name="goodScores[]" class="mLn10 mR0" autocomplete="off" 
-            value="p{{ $ps->ps_id }}s{{ str_replace(' SqFt/Fix', 'SqFix', $scr) }}"
-            @if (isset($ps->{ 'ps_effic_' . $scrL . '_status' }) 
-                && intVal($ps->{ 'ps_effic_' . $scrL . '_status' }) == 243) 
+    @if (isset($ps->{ $scr[1] }) && $ps->{ $scr[1] } > 0)
+        <label><nobr>
+        <input type="checkbox" name="goodScores[]" class="mLn10 mR0" 
+            value="P{{ $ps->ps_id }}K{{ $scr[1] }}" autocomplete="off" 
+            @if (isset($ps->{ $scr[1] . '_status' }) 
+                && intVal($ps->{ $scr[1] . '_status' }) == 243) 
                 CHECKED
             @endif >
         {{ $GLOBALS["SL"]->sigFigs($currVal, 3) }}
-        </label>
+        </nobr></label>
     @elseif ($currVal < 2 || $currVal > 64)
         <b class="slRedDark">{{ $GLOBALS["SL"]->sigFigs($currVal, 3) }}</b>
     @else
@@ -34,50 +34,53 @@ if (isset($ps->{ 'ps_effic_' . $scrL }) && $ps->{ 'ps_effic_' . $scrL } > 0) {
     @endif
 
     <div class="pL5 fPerc80">
-    @if ($stats[$type][$size][$scr]["sd"] > 0)
-        @if ((($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]) <= -2)
+    @if ($stats[$type][$size][$scr[0]]["sd"] > 0)
+        @if ((($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]) <= -2)
             <b class="slRedDark">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]), 3) }}</b><br />
-        @elseif ((($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]) >= 2)
+            (($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]), 3) }}</b><br />
+        @elseif ((($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]) >= 2)
             <b class="slRedDark">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]), 3) }}</b><br />
-        @elseif ($currVal < $stats[$type][$size][$scr]["avg"])
+            (($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]), 3) }}</b><br />
+        @elseif ($currVal < $stats[$type][$size][$scr[0]]["avg"])
             <span class="slGrey">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]), 3) }}</span><br />
-        @elseif ($currVal >= $stats[$type][$size][$scr]["avg"])
+            (($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]), 3) }}</span><br />
+        @elseif ($currVal >= $stats[$type][$size][$scr[0]]["avg"])
             <span class="slGrey">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["avg"])
-            /$stats[$type][$size][$scr]["sd"]), 3) }}</span><br />
+            (($currVal-$stats[$type][$size][$scr[0]]["avg"])
+            /$stats[$type][$size][$scr[0]]["sd"]), 3) }}</span><br />
         @else <br />
         @endif
     @endif
     
-    @if ($stats[$type][$size][$scr]["iqr"] > 0)
-        @if ($currVal < $stats[$type][$size][$scr]["q1"])
+    @if ($stats[$type][$size][$scr[0]]["iqr"] > 0)
+        @if ($currVal < $stats[$type][$size][$scr[0]]["q1"])
             <b class="slRedDark">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["med"])
-            /$stats[$type][$size][$scr]["iqr"]), 3) }}</b><br />
-        @elseif ($currVal > $stats[$type][$size][$scr]["q3"])
+            (($currVal-$stats[$type][$size][$scr[0]]["med"])
+            /$stats[$type][$size][$scr[0]]["iqr"]), 3) }}</b><br />
+        @elseif ($currVal > $stats[$type][$size][$scr[0]]["q3"])
             <b class="slRedDark">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["med"])
-            /$stats[$type][$size][$scr]["iqr"]), 3) }}</b><br />
-        @elseif ($currVal < $stats[$type][$size][$scr]["med"])
+            (($currVal-$stats[$type][$size][$scr[0]]["med"])
+            /$stats[$type][$size][$scr[0]]["iqr"]), 3) }}</b><br />
+        @elseif ($currVal < $stats[$type][$size][$scr[0]]["med"])
             <span class="slGrey">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["med"])
-            /$stats[$type][$size][$scr]["iqr"]), 3) }}</span><br />
-        @elseif ($currVal >= $stats[$type][$size][$scr]["med"])
+            (($currVal-$stats[$type][$size][$scr[0]]["med"])
+            /$stats[$type][$size][$scr[0]]["iqr"]), 3) }}</span><br />
+        @elseif ($currVal >= $stats[$type][$size][$scr[0]]["med"])
             <span class="slGrey">{{ $GLOBALS["SL"]->sigFigs(
-            (($currVal-$stats[$type][$size][$scr]["med"])
-            /$stats[$type][$size][$scr]["iqr"]), 3) }}</span><br />
+            (($currVal-$stats[$type][$size][$scr[0]]["med"])
+            /$stats[$type][$size][$scr[0]]["iqr"]), 3) }}</span><br />
         @else <br />
         @endif
     @endif
     </div>
+
 @else
+
     <span class="slGrey">-</span>
+
 @endif

@@ -9,7 +9,7 @@ function lightAuditError() {
                     . '</h4><ul><li class="red">'
                     . implode('</li><li class="red">', $auditAreas) 
                     . '</li></ul><p>'
-                    . 'If you are not using artificial light in these rooms, '
+                    . 'If you are not using artificial light in these spaces, '
                     . 'please go back to correct this on the previous page.</p>'
             )
         !!};

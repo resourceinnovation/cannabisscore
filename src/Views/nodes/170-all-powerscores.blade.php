@@ -1,19 +1,22 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/170-all-powerscores.blade.php -->
 
 <div class="slCard nodeWrap">
-    
+@if ($GLOBALS["SL"]->x["partnerLevel"] > 4
+    || !isset($GLOBALS["SL"]->x["officialSet"]) 
+    || !$GLOBALS["SL"]->x["officialSet"])
     <a class="btn btn-secondary pull-right" 
         href="?srt={{ $sort[0] }}&srta={{ 
         $sort[1] }}{{ $urlFlts }}&excel=1"
         ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
         Excel
     </a>
+@endif
     <a href="?refresh=1"><h2 class="slBlueDark">
     @if (isset($GLOBALS["SL"]->x["partnerVersion"])
         && $GLOBALS["SL"]->x["partnerVersion"])
         @if (isset($GLOBALS["SL"]->x["officialSet"]) 
             && $GLOBALS["SL"]->x["officialSet"])
-            Official Data Set of PowerScores
+            Ranked Data Set of PowerScores
         @elseif (isset($usrInfo) && isset($usrInfo->company))
             {{ $usrInfo->company }}
         @else Largely Lumens, Inc. PowerScores
@@ -56,8 +59,15 @@
     @endif
     </div>
 
+    <div class="row" id="dataSetWrap">
+        <div class="col-lg-9 pT10">
     @if (Auth::user()->hasRole('administrator|staff'))
-        <div class="pT10">
+            @if (isset($unreviewedCnt) && $unreviewedCnt > 0)
+                <a class="btn btn-danger mR5" href="?fltCmpl=556"
+                    ><i class="fa fa-star-half-o mR3" aria-hidden="true"></i> 
+                    New ({{ number_format($unreviewedCnt) }})
+                </a>
+            @endif
             @if (!$GLOBALS["SL"]->REQ->has('review'))
                 <a class="btn btn-secondary mR5" 
                     href="/dash/compare-powerscores?review=1"
@@ -73,13 +83,48 @@
                 href="/dash/compare-powerscores?random=1" 
                 >Get Random
             </a>
-        </div>
+    @else
+        <style>
+            #dataSetWrap { margin-top: -45px; }
+        </style>
     @endif
-
+        </div>
+        <div class="col-lg-3 pT10">
+            <select name="dataSet" id="dataSetID" 
+                class="form-control psChageFilter ntrStp slTab"
+                autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
+                <option DISABLED >Select columns to show
+                    @if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
+                        (all in Excel export)
+                    @endif </option>
+                <option value="kpi" 
+                    @if (!isset($dataSet) 
+                        || in_array(trim($dataSet), ['', 'kpi'])) 
+                        SELECTED
+                    @endif >Facility & Production Indicators</option>
+                <option value="lighting"
+                    @if (isset($dataSet) && trim($dataSet) == 'lighting') 
+                        SELECTED
+                    @endif >Lighting Indicators</option>
+                <option value="others"
+                    @if (isset($dataSet) && trim($dataSet) == 'others') 
+                        SELECTED
+                    @endif >HVAC, Water, & Waste Indicators</option>
+                <option value="totals"
+                    @if (isset($dataSet) && trim($dataSet) == 'totals') 
+                        SELECTED
+                    @endif >Annual Totals</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <div class="slCard nodeWrap">
     {!! $allListings !!}
+    @if (isset($dataSet) && trim($dataSet) == 'lighting') 
+        <b>HLPD<sub>MA</sub></b> equals all lighting wattage divided 
+        by the sum of the flowering, veg, and mother canopy area.
+    @endif
 </div>
 
 @if (isset($reportExtras))

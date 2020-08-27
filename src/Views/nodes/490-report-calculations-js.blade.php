@@ -2,9 +2,13 @@
 
 var spn = '<i class="fa-li fa fa-spinner fa-spin mL30 mT20"></i>';
 var guageList = new Array();
-guageList[guageList.length] = new Array('Overall',    2800, 0, '', '', '');
-guageList[guageList.length] = new Array('Facility',   2400, 0, '', '', '');
-guageList[guageList.length] = new Array('Production', 2000, 0, '', '', '');
+guageList[guageList.length] = new Array('Overall',    4400, 0, '', '', '');
+guageList[guageList.length] = new Array('FacAll',     4000, 0, '', '', '');
+guageList[guageList.length] = new Array('Facility',   3600, 0, '', '', '');
+guageList[guageList.length] = new Array('FacNon',     3200, 0, '', '', '');
+guageList[guageList.length] = new Array('ProdAll',    2800, 0, '', '', '');
+guageList[guageList.length] = new Array('Production', 2400, 0, '', '', '');
+guageList[guageList.length] = new Array('ProdNon',    2000, 0, '', '', '');
 guageList[guageList.length] = new Array('Hvac',       1600, 0, '', '', '');
 guageList[guageList.length] = new Array('Lighting',   1200, 0, '', '', '');
 guageList[guageList.length] = new Array('Water',      800,  0, '', '', '');

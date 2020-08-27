@@ -43,30 +43,124 @@ class ScoreListings extends ScoreReportLightingManu
             && intVal($GLOBALS["SL"]->REQ->get('random')) == 1) {
             return $this->getRandomPowerScores();
         }
+        $this->prepAllPowerScoresPublic($nID);
+
+        if ($GLOBALS["SL"]->REQ->has('excel')
+            && ($GLOBALS["SL"]->x["partnerLevel"] > 4
+                || !isset($GLOBALS["SL"]->x["officialSet"]) 
+                || !$GLOBALS["SL"]->x["officialSet"])) {
+            $this->getAllPowerScoresPublicExcel($nID);
+        }
+
+        $this->searcher->v["manuList"] = RIIManufacturers::orderBy('manu_name', 'asc')
+            ->get();
+        $this->searcher->v["usrCompanies"] = RIIUserInfo::whereNotNull('usr_company_name')
+            ->orderBy('usr_company_name', 'asc')
+            ->get();
+        $this->searcher->v["psFilters"] = view(
+            'vendor.cannabisscore.inc-filter-powerscores', 
+            $this->searcher->v
+        )->render();
+
+        $defNew = $GLOBALS["SL"]->def->getID('PowerScore Status', 'New / Unreviewed');
+        $this->searcher->v["unreviewedCnt"] = RIIPowerscore::where('ps_status', $defNew)
+            ->count();
+
+        $this->getAllPowerScoresPublicFixedHeader($nID);
+
+        return view(
+            'vendor.cannabisscore.nodes.170-all-powerscores', 
+            $this->searcher->v
+        )->render();
+    }
+    
+    public function getAllPowerScoresPublicFixedHeader($nID)
+    {
+        $nav2 = '<div class="w100" style="background: #FFF; '
+            . 'padding: 0px 50px; overflow-y: hidden; height: 72px; '
+            . 'border-bottom: 1px #777 solid;">' 
+            . '<table border=0 class="table w100 bgWht" '
+            . 'style="margin: -8px 0px 0px 0px;">'
+            . view(
+                'vendor.cannabisscore.nodes.170-powerscore-listings-header',
+                [
+                    "nID"     => $nID,
+                    "fixed"   => 'Fixed',
+                    "sort"    => $this->searcher->v["sort"],
+                    "fltCmpl" => $this->searcher->v["fltCmpl"],
+                    "dataSet" => $this->searcher->v["dataSet"],
+                    "psSum"   => $this->searcher->v["psSum"],
+                    "isExcel" => $this->searcher->v["isExcel"]
+                ]
+            )->render() 
+            . '</table></div>';
+        $GLOBALS["SL"]->setPageNav2Scroll(460, 550, 700);
+        $GLOBALS["SL"]->setPageNav2($nav2, false);
+        return true;
+    }
+    
+    private function prepAllPowerScoresPublic($nID)
+    {
         $GLOBALS["SL"]->loadStates();
         $this->searcher->v["fltStateClim"] = '';
         $this->searcher->getSearchFilts();
         $this->searcher->v["allListings"] = '';
-
-        $usrCompany = '';
+        $origFltManuLgt = $this->chkAllPublicFiltsPartner($nID);
+        $this->fakeMultiSite();
+        if (in_array($origFltManuLgt, ['', '0'])) {
+            //$this->searcher->searchResultsXtra();
+            $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID);
+        } else {
+            $this->getAllPowerScoresPublicManu($nID);
+        }
+        $this->v["nID"] = $this->searcher->v["nID"] = $nID;
+        return true;
+    }
+    
+    private function getAllPowerScoresPublicExcel($nID)
+    {
+        $exportFile = 'Compare All';
+        if ($this->searcher->v["fltFarm"] == 0) {
+            $exportFile .= ' Farms';
+        } else {
+            $exportFile .= ' ' . $GLOBALS["SL"]->def->getVal(
+                'PowerScore Farm Types', 
+                $this->searcher->v["fltFarm"]
+            );
+        }
+        if ($this->searcher->v["fltClimate"] != '') {
+            $exportFile .= ' Climate Zone ' . $this->searcher->v["fltClimate"];
+        }
+        $exportFile = str_replace(' ', '_', $exportFile) 
+            . '-' . date("Y-m-d") . '.xls';
+        $GLOBALS["SL"]->exportExcelOldSchool(
+            $this->searcher->v["allListings"], 
+            $exportFile
+        );
+    }
+    
+    protected function chkAllPublicFiltsPartner($nID)
+    {
+        $origFltManuLgt = $usrCompany = '';
         if ($this->v["user"] 
             && $this->v["user"]->hasRole('partner')
             && isset($this->v["usrInfo"]) 
-            && isset($this->v["usrInfo"]->company)
-            && trim($this->v["usrInfo"]->company) != ''
+            && isset($this->v["usrInfo"]->companyIDs)
+            && sizeof($this->v["usrInfo"]->companyIDs) > 0
+            && $this->searcher->v["usrInfo"]->companyIDs[0] > 0
             && (!isset($GLOBALS["SL"]->x["officialSet"])
                 || !$GLOBALS["SL"]->x["officialSet"])) {
             $usrCompany = trim($this->searcher->v["usrInfo"]->company);
+            // $this->searcher->v["usrInfo"]->companyIDs[0]
         }
 
-        $origFltManuLgt = '';
         if ($GLOBALS["SL"]->REQ->has('fltManuLgt')) {
             $origFltManuLgt = '';
-            $chk = RIIManufacturers::find($GLOBALS["SL"]->REQ->fltManuLgt);
+            $chk = RIIManufacturers::find(intVal($GLOBALS["SL"]->REQ->fltManuLgt));
             if ($chk && isset($chk->manu_name)) {
                 $origFltManuLgt = $chk->manu_name;
             }
-            if (Auth::user()->hasRole('administrator|staff')
+            if (Auth::user()->hasRole('administrator|staff') 
                 || $origFltManuLgt == $usrCompany) {
                 $psidManuLgt = [];
                 $this->searcher->addAllManuPSIDs($psidManuLgt);
@@ -86,63 +180,15 @@ class ScoreListings extends ScoreReportLightingManu
             }
         } elseif ($nID == 799
             && $GLOBALS["SL"]->x["usrInfo"]
-            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers)
-            && sizeof($GLOBALS['SL']->x['usrInfo']->manufacturers) > 0
-            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id)
-            && intVal($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id) > 0) {
+            && sizeof($GLOBALS["SL"]->x["usrInfo"]->companies) > 0
+            && sizeof($GLOBALS["SL"]->x["usrInfo"]->companies[0]->manus) > 0
+            && isset($GLOBALS["SL"]->x["usrInfo"]->companies[0]->manus[0]->id)) {
             $this->searcher->v["fltPartner"] = 0;
             $this->searcher->v["fltManuLgt"] = intVal(
-                $GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id
+                $GLOBALS["SL"]->x["usrInfo"]->companies[0]->manus[0]->id
             );
         }
-
-        $this->fakeMultiSite();
-
-        if (in_array($origFltManuLgt, ['', '0'])) {
-            //$this->searcher->searchResultsXtra();
-            $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID);
-        } else {
-            $this->getAllPowerScoresPublicManu($nID);
-        }
-        $this->v["nID"] = $this->searcher->v["nID"] = $nID;
-
-        if ($GLOBALS["SL"]->REQ->has('excel')) {
-            $exportFile = 'Compare All';
-            if ($this->searcher->v["fltFarm"] == 0) {
-                $exportFile .= ' Farms';
-            } else {
-                $exportFile .= ' ' . $GLOBALS["SL"]->def->getVal(
-                    'PowerScore Farm Types', 
-                    $this->searcher->v["fltFarm"]
-                );
-            }
-            if ($this->searcher->v["fltClimate"] != '') {
-                $exportFile .= ' Climate Zone ' 
-                    . $this->searcher->v["fltClimate"];
-            }
-            $exportFile = str_replace(' ', '_', $exportFile) 
-                . '-' . date("Y-m-d") . '.xls';
-            $GLOBALS["SL"]->exportExcelOldSchool(
-                $this->searcher->v["allListings"], 
-                $exportFile
-            );
-        }
-
-        $this->searcher->v["manuList"] = RIIManufacturers::orderBy('manu_name', 'asc')
-            ->get();
-        $this->searcher->v["usrCompanies"] = RIIUserInfo::whereNotNull('usr_company_name')
-            ->orderBy('usr_company_name', 'asc')
-            ->get();
-        $this->searcher->loadFilterCheckboxes();
-        $this->searcher->v["psFilters"] = view(
-            'vendor.cannabisscore.inc-filter-powerscores', 
-            $this->searcher->v
-        )->render();
-
-        return view(
-            'vendor.cannabisscore.nodes.170-all-powerscores', 
-            $this->searcher->v
-        )->render();
+        return $origFltManuLgt;
     }
     
     protected function getAllPowerScoresPublicManu($nID)
@@ -172,18 +218,18 @@ class ScoreListings extends ScoreReportLightingManu
                     $this->searcher->v["fltPartner"] = 0;
                     //$this->searcher->searchResultsXtra();
                     $this->searcher->v["fltManuLgt"] = $manu->manu_id;
-                    $this->searcher->v["allListings"] .= '<!-- start manu -->';
                     if ($GLOBALS["SL"]->REQ->has('excel')) {
-                        $this->searcher->v["allListings"] .= '<tr><td colspan=12 ><b>' 
-                            . $manu->manu_name . '</b></td></tr>';
+                        $this->searcher->v["allListings"] .= '<tr><td colspan=12 ></td></tr>'
+                            . '<tr><td colspan=12 ><b>' . $manu->manu_name . '</b></td></tr>'
+                            . $this->getPowerScoresPublic($nID);
                     } else {
-                        $this->searcher->v["allListings"] .= '<a target="_blank" '
-                            . 'href="/dash/competitive-performance?manu='
+                        $this->searcher->v["allListings"] .= '<!-- start manu -->'
+                            . '<a target="_blank" href="/dash/competitive-performance?manu='
                             . urlencode($manu->manu_name) . '"><h4>' 
-                            . $manu->manu_name . '</h4></a>';
+                            . $manu->manu_name . '</h4></a>'
+                            . $this->getPowerScoresPublic($nID)
+                            . '<!-- end manu -->';
                     }
-                    $this->searcher->v["allListings"] .= $this->getPowerScoresPublic($nID)
-                        . '<!-- end manu -->';
                 }
             }
         }
@@ -251,15 +297,16 @@ class ScoreListings extends ScoreReportLightingManu
         $this->searcher->getAllscoresAvgFlds();
         $this->v["nID"] = $this->searcher->v["nID"] = $nID;
         $this->searcher->v["isExcel"] = $GLOBALS["SL"]->REQ->has('excel');
-        if ($this->searcher->v["isExcel"]) {
+        if ($this->searcher->v["isExcel"] 
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $this->v["showFarmNames"] = $GLOBALS["SL"]->REQ->has('farmNames');
             if ($GLOBALS["SL"]->REQ->has('lighting')) {
-                $ret .= view(
+                return view(
                     'vendor.cannabisscore.nodes.170-all-powerscores-lighting', 
                     $this->searcher->v
                 )->render();
             } else {
-                $ret .= view(
+                return view(
                     'vendor.cannabisscore.nodes.170-all-powerscores-excel', 
                     $this->searcher->v
                 )->render();
@@ -267,7 +314,11 @@ class ScoreListings extends ScoreReportLightingManu
         }
         $this->searcher->loadCupScoreIDs();
         $this->loadAllRanksAllScores();
-
+        $this->searcher->v["scoreYearMonths"] = [];
+        foreach ($this->searcher->v["allscores"] as $i => $ps) {
+            $this->searcher->v["scoreYearMonths"][$ps->ps_id] 
+                = $GLOBALS["SL"]->lastMonths12($ps, 'ps_start_month');
+        }
         if ($GLOBALS["SL"]->REQ->has('lighting')) {
             $ret .= view(
                 'vendor.cannabisscore.nodes.170-all-powerscores-lighting', 
@@ -335,9 +386,7 @@ class ScoreListings extends ScoreReportLightingManu
             $this->getAllPowerScoresPublicManu($nID);
             if ($GLOBALS["SL"]->REQ->has('excel')) {
                 $ret = '<tr><td><b>Lighting Manufacturer Report</b></td></tr>'
-                    . str_replace('<!-- start manu -->', '<tr><td></td></tr>', 
-                        str_replace('<!-- end manu -->', '<tr><td></td></tr>', 
-                            $this->searcher->v["allListings"]));
+                    . $this->searcher->v["allListings"];
             } else {
                 $ret = '<div class="slCard">'
                     . '<a href="?excel=1" class="btn btn-secondary pull-right">'
@@ -350,6 +399,7 @@ class ScoreListings extends ScoreReportLightingManu
             }
             $GLOBALS["SL"]->putCache($pageUrl, $ret, 'page', 1);
         }
+//echo $ret; exit;
         if ($GLOBALS["SL"]->REQ->has('excel')) {
             $filename = 'PowerScore-Make-Model-Analysis-' . date("Y-m-d") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($ret, $filename);
@@ -569,8 +619,7 @@ class ScoreListings extends ScoreReportLightingManu
     public function getCultClassicMultiYearReport()
     {
         $this->getCultClassicReportInit();
-        $chk = RIICompetitors::where('cmpt_competition', 
-                '=', $this->v["defCC"])
+        $chk = RIICompetitors::where('cmpt_competition', '=', $this->v["defCC"])
             ->orderBy('cmpt_name', 'asc')
             ->get();
         if ($chk->isNotEmpty()) {
@@ -620,19 +669,26 @@ class ScoreListings extends ScoreReportLightingManu
     
     public function getPowerScoresOutliers($nID)
     {
-        $this->v["stats"] = $this->v["showStats"] = $this->v["scoresVegSqFtFix"] = [];
-        $status = [ $this->v["defCmplt"] ];
+        $this->v["stats"] 
+            = $this->v["showStats"] 
+            = $this->v["scoresVegSqFtFix"] 
+            = [];
+        $status = [ $this->v["defCmplt"], 556 ]; // new/unreviewed
         if (!$GLOBALS["SL"]->REQ->has('status') 
             || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') {
             $status[] = $this->v["defArch"];
         }
         $this->v["outlierCols"] = [
-            'Facility', 
-            'Production', 
-            'Hvac', 
-            'Lighting', 
-            'Flow SqFt/Fix', 
-            'Veg SqFt/Fix'
+            ['Facility Electric',       'ps_effic_facility'], 
+            ['Facility Non-Electric',   'ps_effic_non_electric'], 
+            ['Production Electric',     'ps_effic_production'], 
+            ['Production Non-Electric', 'ps_effic_prod_non'], 
+            ['Water',                   'ps_effic_water'], 
+            ['Waste',                   'ps_effic_waste'], 
+            ['HVAC',                    'ps_effic_hvac'], 
+            ['Lighting',                'ps_effic_lighting'], 
+            ['Flow SqFt/Fix',           'lgt_sqft_fix_flower'], 
+            ['Veg SqFt/Fix',            'lgt_sqft_fix_veg']
         ]; // , 'Carbon', 'Water', 'Waste'
         $this->v["sizes"] = [
             375, // <5,000 sf
@@ -664,22 +720,30 @@ class ScoreListings extends ScoreReportLightingManu
             ->whereIn('rii_powerscore.ps_status', $status)
             ->where('rii_powerscore.ps_time_type', 
                 $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'))
-            ->where('rii_powerscore.ps_effic_facility', '>', 0)
-            ->where('rii_powerscore.ps_effic_production', '>', 0)
+            //->where('rii_powerscore.ps_effic_facility', '>', 0)
+            //->where('rii_powerscore.ps_effic_production', '>', 0)
             ->where('rii_ps_areas.ps_area_type', 162) // flower
             ->select(
                 'rii_powerscore.ps_id', 
                 'rii_powerscore.ps_characterize', 
                 'rii_powerscore.ps_effic_overall',
+                'rii_powerscore.ps_effic_fac_all', 
                 'rii_powerscore.ps_effic_facility', 
+                'rii_powerscore.ps_effic_non_electric',
+                'rii_powerscore.ps_effic_prod_all', 
                 'rii_powerscore.ps_effic_production', 
+                'rii_powerscore.ps_effic_prod_non', 
                 'rii_powerscore.ps_effic_lighting', 
                 'rii_powerscore.ps_effic_hvac', 
                 'rii_powerscore.ps_effic_carbon', 
                 'rii_powerscore.ps_effic_water', 
                 'rii_powerscore.ps_effic_waste', 
+                'rii_powerscore.ps_effic_fac_all_status', 
                 'rii_powerscore.ps_effic_facility_status', 
+                'rii_powerscore.ps_effic_non_electric_status',
+                'rii_powerscore.ps_effic_prod_all_status', 
                 'rii_powerscore.ps_effic_production_status', 
+                'rii_powerscore.ps_effic_prod_non_status', 
                 'rii_powerscore.ps_effic_lighting_status', 
                 'rii_powerscore.ps_effic_hvac_status', 
                 'rii_powerscore.ps_effic_carbon_status', 
@@ -701,41 +765,24 @@ class ScoreListings extends ScoreReportLightingManu
             if ($GLOBALS["SL"]->REQ->has('saveArchives')
                 && $GLOBALS["SL"]->REQ->has('goodScores')
                 && is_array($GLOBALS["SL"]->REQ->get('goodScores'))) {
-                $scoreChecks = [];
-                foreach ($this->v["scores"] as $p => $ps) {
-                    $scoreChecks[$ps->ps_id] = [];
-                }
-                foreach ($GLOBALS["SL"]->REQ->get('goodScores') as $score) {
-                    list($psID, $scr) = explode('s', str_replace('p', '', $score));
-                    $scoreChecks[intVal($psID)][] = $scr;
-                }
-                foreach ($this->v["scores"] as $p => $ps) {
-                    foreach ($this->v["outlierCols"] as $scr) {
-                        if (strpos($scr, 'SqFt/Fix') === false) {
-                            $status = ((in_array($scr, $scoreChecks[$ps->ps_id]))
-                                ? $this->v["defCmplt"] : $this->v["defArch"]);
-                            $fld = 'ps_effic_' . strtolower($scr) . '_status';
-                            $this->v["scores"][$p]->{ $fld } = $status;
-                            $ps = RIIPowerscore::find($ps->ps_id);
-                            $ps->{ $fld } = $status;
-                            $ps->save();
-                        }
-                    }
-                }
+                $this->getPowerScoresOutliersSave();
             }
 
             foreach ($this->v["scores"] as $ps) {
                 $this->v["showStats"][$ps->ps_id] = [];
                 if (!$GLOBALS["SL"]->REQ->has('status') 
                     || trim($GLOBALS["SL"]->REQ->get('status')) == 'all') {
-                    $this->v["showStats"][$ps->ps_id] = $this->v["outlierCols"];
+                    $this->v["showStats"][$ps->ps_id] = [];
+                    foreach ($this->v["outlierCols"] as $scr) {
+                        $this->v["showStats"][$ps->ps_id][] = $scr[0];
+                    }
                 } else { // hide archived
                     foreach ($this->v["outlierCols"] as $scr) {
-                        if (!in_array($scr, ['Flow SqFt/Fix', 'Veg SqFt/Fix'])
-                            && $ps->{ 'ps_effic_' . strtolower($scr) . '_status' } 
+                        if (!in_array($scr[0], ['Flow SqFt/Fix', 'Veg SqFt/Fix'])
+                            && $ps->{ $scr[1] . '_status' } 
                                 == $this->v["defCmplt"]) {
-                            $this->v["showStats"][$ps->ps_id][] = $scr;
-                            if ($scr == 'Lighting') {
+                            $this->v["showStats"][$ps->ps_id][] = $scr[0];
+                            if ($scr[0] == 'Lighting') {
                                 $this->v["showStats"][$ps->ps_id][] = 'Flow SqFt/Fix';
                                 $this->v["showStats"][$ps->ps_id][] = 'Veg SqFt/Fix';
                             }
@@ -763,7 +810,7 @@ class ScoreListings extends ScoreReportLightingManu
                 foreach ($this->v["sizes"] as $size) {
                     $this->v["stats"][$type][$size] = $dat = [];
                     foreach ($this->v["outlierCols"] as $scr) {
-                        $this->v["stats"][$type][$size][$scr] = [
+                        $this->v["stats"][$type][$size][$scr[0]] = [
                             "cnt" => 0,
                             "med" => 0,
                             "iqr" => 0,
@@ -783,27 +830,79 @@ class ScoreListings extends ScoreReportLightingManu
         )->render();
     }
     
+    private function getPowerScoresOutliersSave()
+    {
+        $scoreChecks = [];
+        foreach ($this->v["scores"] as $p => $ps) {
+            $scoreChecks[$ps->ps_id] = [];
+        }
+        foreach ($GLOBALS["SL"]->REQ->get('goodScores') as $score) {
+            list($psID, $scr) = explode('K', str_replace('P', '', $score));
+            $scoreChecks[intVal($psID)][] = $scr;
+        }
+        foreach ($this->v["scores"] as $p => $ps) {
+            $ps = RIIPowerscore::find($ps->ps_id);
+            foreach ($this->v["outlierCols"] as $scr) {
+                if (strpos($scr[1], 'lgt_sqft_fix') === false) {
+                    $status = ((in_array($scr[1], $scoreChecks[$ps->ps_id]))
+                        ? $this->v["defCmplt"] : $this->v["defArch"]);
+                    $fld = $scr[1] . '_status';
+                    $ps->{ $fld } = $this->v["scores"][$p]->{ $fld } = $status;
+                }
+            }
+            if (isset($ps->ps_effic_facility)
+                && $ps->ps_effic_facility > 0
+                && isset($ps->ps_effic_facility_status)
+                && $ps->ps_effic_facility_status == $this->v["defCmplt"]
+                && isset($ps->ps_effic_non_electric)
+                && $ps->ps_effic_non_electric > 0
+                && isset($ps->ps_effic_non_electric_status)
+                && $ps->ps_effic_non_electric_status == $this->v["defCmplt"]
+                && isset($ps->ps_effic_fac_all)
+                && $ps->ps_effic_fac_all > 0) {
+                $ps->ps_effic_fac_all_status = $this->v["defCmplt"];
+            } else {
+                $ps->ps_effic_fac_all_status = $this->v["defArch"];
+            }
+            if (isset($ps->ps_effic_production)
+                && $ps->ps_effic_production > 0
+                && isset($ps->ps_effic_production_status)
+                && $ps->ps_effic_production_status == $this->v["defCmplt"]
+                && isset($ps->ps_effic_prod_non)
+                && $ps->ps_effic_prod_non > 0
+                && isset($ps->ps_effic_prod_non_status)
+                && $ps->ps_effic_prod_non_status == $this->v["defCmplt"]
+                && isset($ps->ps_effic_prod_all)
+                && $ps->ps_effic_prod_all > 0) {
+                $ps->ps_effic_prod_all_status = $this->v["defCmplt"];
+            } else {
+                $ps->ps_effic_prod_all_status = $this->v["defArch"];
+            }
+            $ps->save();
+        }
+        return true;
+    }
+    
     protected function processPowerScoresOutliersRow($ps, $type, $size, $scr)
     {
         $dat = [];
         foreach ($this->v["scores"] as $ps) {
             $sizeDef = $GLOBALS["CUST"]->getSizeDefID($ps->ps_area_size);
             if ($ps->ps_characterize == $type && ($size == 0 || $sizeDef == $size)) {
-                $fld = 'ps_effic_' . strtolower($scr);
-                if ($scr == 'Flow SqFt/Fix') {
+                if ($scr[0] == 'Flow SqFt/Fix') {
                     if (in_array('Lighting', $this->v["showStats"][$ps->ps_id])
                         && $ps->ps_area_sq_ft_per_fix2 > 0) {
                         $dat[] = $ps->ps_area_sq_ft_per_fix2;
                     }
-                } elseif ($scr == 'Veg SqFt/Fix') {
+                } elseif ($scr[0] == 'Veg SqFt/Fix') {
                     if (in_array('Lighting', $this->v["showStats"][$ps->ps_id])
                         && $this->v["scoresVegSqFtFix"][$ps->ps_id] > 0) {
                         $dat[] = $this->v["scoresVegSqFtFix"][$ps->ps_id];
                     }
-                } elseif (in_array($scr, $this->v["showStats"][$ps->ps_id]) 
-                    && isset($ps->{ $fld }) 
-                    && $ps->{ $fld } > 0) {
-                    $dat[] = $ps->{ $fld };
+                } elseif (in_array($scr[0], $this->v["showStats"][$ps->ps_id]) 
+                    && isset($ps->{ $scr[1] }) 
+                    && $ps->{ $scr[1] } > 0) {
+                    $dat[] = $ps->{ $scr[1] };
                 }
             }
         }
@@ -811,19 +910,19 @@ class ScoreListings extends ScoreReportLightingManu
         $cnt = sizeof($dat);
         if ($cnt > 0) {
             sort($dat);
-            $this->v["stats"][$type][$size][$scr]["cnt"] = $cnt;
-            $this->v["stats"][$type][$size][$scr]["med"] = $dat[floor($cnt/2)];
-            $this->v["stats"][$type][$size][$scr]["q1"]  = $dat[floor($cnt/4)];
-            $this->v["stats"][$type][$size][$scr]["q3"]  = $dat[floor($cnt*(3/4))];
-            $this->v["stats"][$type][$size][$scr]["iqr"]
-                = $this->v["stats"][$type][$size][$scr]["q3"]
-                    -$this->v["stats"][$type][$size][$scr]["q1"];
-            $this->v["stats"][$type][$size][$scr]["q1"] 
-                -= 1.5*$this->v["stats"][$type][$size][$scr]["iqr"];
-            $this->v["stats"][$type][$size][$scr]["q3"] 
-                += 1.5*$this->v["stats"][$type][$size][$scr]["iqr"];
-            $this->v["stats"][$type][$size][$scr]["avg"] = array_sum($dat)/$cnt;
-            $this->v["stats"][$type][$size][$scr]["sd"] 
+            $this->v["stats"][$type][$size][$scr[0]]["cnt"] = $cnt;
+            $this->v["stats"][$type][$size][$scr[0]]["med"] = $dat[floor($cnt/2)];
+            $this->v["stats"][$type][$size][$scr[0]]["q1"]  = $dat[floor($cnt/4)];
+            $this->v["stats"][$type][$size][$scr[0]]["q3"]  = $dat[floor($cnt*(3/4))];
+            $this->v["stats"][$type][$size][$scr[0]]["iqr"]
+                = $this->v["stats"][$type][$size][$scr[0]]["q3"]
+                    -$this->v["stats"][$type][$size][$scr[0]]["q1"];
+            $this->v["stats"][$type][$size][$scr[0]]["q1"] 
+                -= 1.5*$this->v["stats"][$type][$size][$scr[0]]["iqr"];
+            $this->v["stats"][$type][$size][$scr[0]]["q3"] 
+                += 1.5*$this->v["stats"][$type][$size][$scr[0]]["iqr"];
+            $this->v["stats"][$type][$size][$scr[0]]["avg"] = array_sum($dat)/$cnt;
+            $this->v["stats"][$type][$size][$scr[0]]["sd"] 
                 = $GLOBALS["SL"]->arrStandardDeviation($dat);
         }
         return true;

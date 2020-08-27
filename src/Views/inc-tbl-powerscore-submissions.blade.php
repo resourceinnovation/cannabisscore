@@ -11,7 +11,7 @@
         <b>F</b>acility, <b>P</b>roduction, <b>L</b>ighting, <b>H</b>VAC
     </div>
 </th>
-<th>Sub-Scores</th>
+<th>KPIs</th>
 <th>Grams, kWh, Sq Ft</th>
 </tr>
 @forelse ($scores as $i => $s)
@@ -30,13 +30,14 @@
         @endif
     </td><td class="psOpen" data-psid="{{ $s->ps_id }}">
         @if (isset($s->ps_status))
-            <div class=" @if ($s->ps_status == $GLOBALS['SL']->def->getID('PowerScore Status', 'Complete')) 
+            <div class=" @if ($s->ps_status 
+                == $GLOBALS['SL']->def->getID('PowerScore Status', 'Ranked Data Set')) 
             slGreenDark @else txtDanger @endif ">
             {{ $GLOBALS["SL"]->def->getVal('PowerScore Status', $s->ps_status) }}</div>
         @endif
         {{ date("n/j, g:ia", strtotime($s->created_at)) }}
     </td>
-    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Complete'))
+    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'))
         <td class="psOpen" data-psid="{{ $s->ps_id }}">
             <b class="fPerc133">{{ round($s->ps_effic_overall) }}%</b> <div class="fPerc80">
             @if (isset($s->ps_rnk_facility) && $s->ps_rnk_facility > 0) 

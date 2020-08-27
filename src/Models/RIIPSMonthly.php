@@ -24,6 +24,8 @@ class RIIPsMonthly extends Model
 		'ps_month_waste_lbs', 
 		'ps_month_grams', 
 		'ps_month_order', 
+		'ps_month_water_storage_source', 
+		'ps_month_water_storage_recirc', 
     ];
     
     // END SurvLoop auto-generated portion of Model

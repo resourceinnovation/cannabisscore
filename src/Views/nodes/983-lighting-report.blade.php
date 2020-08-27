@@ -2,9 +2,11 @@
 
 <div class="slCard nodeWrap">
     <input type="hidden" name="toExcel" id="toExcelID" value="0" >
+@if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         href="javascript:;" onClick="return loadExcel();"
         ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> Excel</a>
+@endif
     <h1 class="slBlueDark">Lighting Report</h1>
     <div class="row">
         <div class="col-8">
@@ -14,7 +16,7 @@
             Small subscript counts are the number of growing areas 
             (reported in powerscores) upon which each calculated 
             average is based. This report only shows PowerScores 
-            with Lighting Sub-Scores greater than zero (AKA use 
+            with Lighting KPIs greater than zero (AKA use 
             any artifical lighting), and have not been archived.
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"

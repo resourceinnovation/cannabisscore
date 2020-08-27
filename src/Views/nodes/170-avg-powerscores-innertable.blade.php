@@ -17,6 +17,13 @@
     <td class="fPerc125"> @if ($allAvgs["all"]["lgt"][0] > 0)
         {{ $GLOBALS["SL"]->sigFigs($allAvgs["all"]["lgt"][1]/$allAvgs["all"]["lgt"][0], 3) }}
     @endif </td>
+    <td class="fPerc125"> @if ($allAvgs["all"]["wtr"][0] > 0)
+        {{ $GLOBALS["SL"]->sigFigs($allAvgs["all"]["wtr"][1]/$allAvgs["all"]["wtr"][0], 3) }}
+    @endif </td>
+    <td class="fPerc125"> @if ($allAvgs["all"]["wst"][0] > 0)
+        {{ $GLOBALS["SL"]->sigFigs($allAvgs["all"]["wst"][1]/$allAvgs["all"]["wst"][0], 3) }}
+    @endif </td>
+    <td></td>
     <td class="fPerc125 slGrey brdLft">{{ number_format($allAvgs["all"]["tot"]) }}</td>
 </tr>
 <tr><td colspan=7 > </td></tr>
@@ -39,6 +46,13 @@
         <td> @if ($avgs["lgt"][0] > 0) 
             {{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }} 
         @endif </td>
+        <td> @if ($avgs["wtr"][0] > 0) 
+            {{ $GLOBALS["SL"]->sigFigs($avgs["wtr"][1]/$avgs["wtr"][0], 3) }} 
+        @endif </td>
+        <td> @if ($avgs["wst"][0] > 0) 
+            {{ $GLOBALS["SL"]->sigFigs($avgs["wst"][1]/$avgs["wst"][0], 3) }} 
+        @endif </td>
+        <td></td>
         <td class="slGrey brdLft">{{ number_format($avgs["tot"]) }}</td>
     </tr>
 @endforeach
@@ -69,6 +83,15 @@
                 <td>{{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }}</td>
             @else <td>0</td> 
             @endif
+            @if ($avgs["wtr"][0] > 0.000001) 
+                <td>{{ $GLOBALS["SL"]->sigFigs($avgs["wtr"][1]/$avgs["wtr"][0], 3) }}</td>
+            @else <td>0</td> 
+            @endif
+            @if ($avgs["wst"][0] > 0.000001) 
+                <td>{{ $GLOBALS["SL"]->sigFigs($avgs["wst"][1]/$avgs["wst"][0], 3) }}</td>
+            @else <td>0</td> 
+            @endif
+            <td></td>
             <td class="slGrey brdLft">{{ number_format($avgs["tot"]) }}</td>
         </tr>
     @endif
@@ -100,6 +123,15 @@
                 <td>{{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }}</td>
             @else <td> </td> 
             @endif
+            @if ($avgs["wtr"][0] > 0) 
+                <td>{{ $GLOBALS["SL"]->sigFigs($avgs["wtr"][1]/$avgs["wtr"][0], 3) }}</td>
+            @else <td> </td> 
+            @endif
+            @if ($avgs["wst"][0] > 0) 
+                <td>{{ $GLOBALS["SL"]->sigFigs($avgs["wst"][1]/$avgs["wst"][0], 3) }}</td>
+            @else <td> </td> 
+            @endif
+            <td></td>
             <td class="slGrey brdLft">{{ number_format($avgs["tot"]) }}</td>
         </tr>
     @endif
@@ -124,6 +156,13 @@
         <td> @if ($avgs["lgt"][0] > 0) 
             {{ $GLOBALS["SL"]->sigFigs($avgs["lgt"][1]/$avgs["lgt"][0], 3) }} 
         @endif </td>
+        <td> @if ($avgs["wtr"][0] > 0) 
+            {{ $GLOBALS["SL"]->sigFigs($avgs["wtr"][1]/$avgs["wtr"][0], 3) }} 
+        @endif </td>
+        <td> @if ($avgs["wst"][0] > 0) 
+            {{ $GLOBALS["SL"]->sigFigs($avgs["wst"][1]/$avgs["wst"][0], 3) }} 
+        @endif </td>
+        <td></td>
         <td class="slGrey brdLft">{{ number_format($avgs["tot"]) }}</td>
     </tr>
 @endforeach
@@ -135,29 +174,92 @@
     @foreach ([ 162 => 'Flower', 163 => 'Veg', 160 => 'Clone'] as $area => $areaName)
         @if (in_array($area, [163, 160])) <tr><td colspan=7 > </td></tr> @endif
         @foreach ($GLOBALS["SL"]->def->getSet($set) as $def)
+            <?php $ind = $area . '-' . $def->def_id; ?>
             <tr>
-                <th> @if ($set == 'PowerScore HVAC Systems') <a href="javascript:;" id="hidivBtnH{{ $def->def_id 
-                    }}" class="hidivBtn"> {{ $areaName }} HVAC {!! str_replace(' - ', 
-                    '</a> <div id="hidivH' . $def->def_id . '" class="disNon slGrey">', $def->def_value) !!}</div> 
-                    @else {{ $areaName }} {{ str_replace('double-ended ', '2x', str_replace('single-ended ', '1x', $def->def_value)) }} @endif
-                    </th>
-                <td class="brdRgt"> @if ($allAvgs["avgs"][$area . '-' . $def->def_id]["ovr"][0] > 0) {{ 
-                    round($allAvgs["avgs"][$area . '-' . $def->def_id]["ovr"][1]/$allAvgs["avgs"][$area . '-' 
-                        . $def->def_id]["ovr"][0]) }}% @else <span class="slGrey">0%</span> @endif </td>
-                <td> @if ($allAvgs["avgs"][$area . '-' . $def->def_id]["fac"][0] > 0) {{ 
-                    $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$area . '-' . $def->def_id]["fac"][1]/$allAvgs["avgs"][$area 
-                        . '-' . $def->def_id]["fac"][0], 3) }} @else <span class="slGrey">0</span> @endif </td>
-                <td> @if ($allAvgs["avgs"][$area . '-' . $def->def_id]["pro"][0] > 0) {{ 
-                    $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$area . '-' . $def->def_id]["pro"][1]/$allAvgs["avgs"][$area 
-                        . '-' . $def->def_id]["pro"][0], 3) }} @else <span class="slGrey">0</span> @endif </td>
-                <td> @if ($allAvgs["avgs"][$area . '-' . $def->def_id]["hvc"][0] > 0) {{ 
-                    $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$area . '-' . $def->def_id]["hvc"][1]/$allAvgs["avgs"][$area 
-                        . '-' . $def->def_id]["hvc"][0], 3) }} @else <span class="slGrey">0</span> @endif </td>
-                <td> @if ($allAvgs["avgs"][$area . '-' . $def->def_id]["lgt"][0] > 0) {{ 
-                    $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$area . '-' . $def->def_id]["lgt"][1]/$allAvgs["avgs"][$area 
-                        . '-' . $def->def_id]["lgt"][0], 3) }} @else <span class="slGrey">0</span> @endif </td>
-                <td class="slGrey brdLft">{{ number_format($allAvgs["avgs"][$area . '-' . $def->def_id]["ovr"][0]) 
-                    }}</td>
+                <th>
+                @if ($set == 'PowerScore HVAC Systems') 
+                    <a href="javascript:;" id="hidivBtnH{{ $def->def_id 
+                        }}" class="hidivBtn"> {{ $areaName }} HVAC {!! 
+                        str_replace(
+                            ' - ', 
+                            '</a> <div id="hidivH' . $def->def_id . '" class="disNon slGrey">', $def->def_value
+                        ) !!}</div> 
+                @else 
+                    {{ $areaName }} {{ str_replace('double-ended ', '2x', 
+                        str_replace('single-ended ', '1x', $def->def_value)) }}
+                @endif
+                </th>
+                <td class="brdRgt">
+                @if ($allAvgs["avgs"][$ind]["ovr"][0] > 0) 
+                    {{ round($allAvgs["avgs"][$ind]["ovr"][1]/$allAvgs["avgs"][$ind]["ovr"][0]) }}%
+                @else
+                    <span class="slGrey">0%</span>
+                @endif
+                </td>
+                <td>
+                @if ($allAvgs["avgs"][$ind]["fac"][0] > 0)
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["fac"][1]/$allAvgs["avgs"][$ind]["fac"][0], 
+                        3
+                    ) }}
+                @else
+                    <span class="slGrey">0</span>
+                @endif
+                </td>
+                <td> 
+                @if ($allAvgs["avgs"][$ind]["pro"][0] > 0) 
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["pro"][1]/$allAvgs["avgs"][$ind]["pro"][0], 
+                        3
+                    ) }} 
+                @else 
+                    <span class="slGrey">0</span> 
+                @endif
+                </td>
+                <td>
+                @if ($allAvgs["avgs"][$ind]["hvc"][0] > 0) 
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["hvc"][1]/$allAvgs["avgs"][$ind]["hvc"][0], 
+                        3
+                    ) }} 
+                @else 
+                    <span class="slGrey">0</span> 
+                @endif
+                </td>
+                <td>
+                @if ($allAvgs["avgs"][$ind]["lgt"][0] > 0)
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["lgt"][1]/$allAvgs["avgs"][$ind]["lgt"][0], 
+                        3
+                    ) }} 
+                @else 
+                    <span class="slGrey">0</span> 
+                @endif
+                </td>
+                <td>
+                @if ($allAvgs["avgs"][$ind]["wtr"][0] > 0) 
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["wtr"][1]/$allAvgs["avgs"][$ind]["wtr"][0], 
+                        3
+                    ) }} 
+                @else 
+                    <span class="slGrey">0</span> 
+                @endif
+                </td>
+                <td>
+                @if ($allAvgs["avgs"][$ind]["wst"][0] > 0) 
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allAvgs["avgs"][$ind]["wst"][1]/$allAvgs["avgs"][$ind]["wst"][0], 
+                        3
+                    ) }} 
+                @else 
+                    <span class="slGrey">0</span>
+                @endif
+                </td>
+                <td></td>
+                <td class="slGrey brdLft">
+                    {{ number_format($allAvgs["avgs"][$ind]["ovr"][0]) }}
+                </td>
             </tr>
         @endforeach
     @endforeach
@@ -185,6 +287,13 @@
         <td> @if ($allAvgs["avgs"][$fld]["lgt"][0] > 0) {{ 
             $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$fld]["lgt"][1]/$allAvgs["avgs"][$fld]["lgt"][0], 3) 
             }} @else <span class="slGrey">0</span> @endif </td>
+        <td> @if ($allAvgs["avgs"][$fld]["wtr"][0] > 0) {{ 
+            $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$fld]["wtr"][1]/$allAvgs["avgs"][$fld]["wtr"][0], 3) 
+            }} @else <span class="slGrey">0</span> @endif </td>
+        <td> @if ($allAvgs["avgs"][$fld]["wst"][0] > 0) {{ 
+            $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$fld]["wst"][1]/$allAvgs["avgs"][$fld]["wst"][0], 3) 
+            }} @else <span class="slGrey">0</span> @endif </td>
+        <td></td>
         <td class="slGrey brdLft">{{ number_format($allAvgs["avgs"][$fld]["ovr"][0]) }}</td>
     </tr>
 @endforeach
@@ -215,6 +324,15 @@
             $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$def->def_id]["lgt"][1]
                 /$allAvgs["avgs"][$def->def_id]["lgt"][0], 3) 
             }} @else <span class="slGrey">0</span> @endif </td>
+        <td> @if ($allAvgs["avgs"][$def->def_id]["wtr"][0] > 0) {{ 
+            $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$def->def_id]["wtr"][1]
+                /$allAvgs["avgs"][$def->def_id]["wtr"][0], 3) 
+            }} @else <span class="slGrey">0</span> @endif </td>
+        <td> @if ($allAvgs["avgs"][$def->def_id]["wst"][0] > 0) {{ 
+            $GLOBALS["SL"]->sigFigs($allAvgs["avgs"][$def->def_id]["wst"][1]
+                /$allAvgs["avgs"][$def->def_id]["wst"][0], 3) 
+            }} @else <span class="slGrey">0</span> @endif </td>
+        <td></td>
         <td class="slGrey brdLft">{{ number_format($allAvgs["avgs"][$def->def_id]["ovr"][0]) }}</td>
     </tr>
 @endforeach

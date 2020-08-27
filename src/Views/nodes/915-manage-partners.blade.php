@@ -2,62 +2,39 @@
 
 <div class="slCard nodeWrap">
 
-    <h3 class="mT0">Invited Partner Users</h3>
+    <h3 class="mT0">Partner Users</h3>
+    <p>
+        Companies are collections of data submitted using one or more 
+        custom referral links, and accessible to multiple users.
+        Lighting manufacturer partners access reports of the 
+        ranked data set, filtered for records using their product.
+    </p>
     <div class="row brdBot">
-        <div class="col-2"><p class="slBlueDark">Company Name</p></div>
-        <div class="col-2"><p class="slBlueDark">Manufacturers</p></div>
-        <div class="col-2"><p class="slBlueDark">User Account</p></div>
-        <div class="col-2"><p class="slBlueDark">Invite Email Address</p></div>
+        <div class="col-4"><p class="slBlueDark">User Account,<br />Email Address</p></div>
+        <div class="col-3"><p class="slBlueDark">Company</p></div>
         <div class="col-2"><p class="slBlueDark">Trial Level</p></div>
-        <div class="col-2"><p class="slBlueDark">Expires In</p></div>
+        <div class="col-3"><p class="slBlueDark">Expiration Date,<br />First Login Date</p></div>
     </div>
 
 @forelse ($GLOBALS["SL"]->x["partners"] as $cnt => $partner)
     <div class="w100 pT10 pB10 @if ($cnt%2 > 0) row2 @endif ">
         <div class="row">
-            <div class="col-2">
-            @if (isset($partner->company) && trim($partner->company) != '')
-                <b>{{ $partner->company }}</b>
-            @else
-                <span class="slGrey">-</span>
-            @endif
-            </div>
-            <div class="col-2">
-            @if (isset($partner->manufacturers)
-                && sizeof($partner->manufacturers) > 0)
-                @if (sizeof($partner->manufacturers) == 1
-                    && isset($partner->manufacturers[0]->manu_name)
-                    && strtolower($partner->manufacturers[0]->manu_name) 
-                        != strtolower($partner->company))
-                    <a href="/dash/competitive-performance?manu={{
-                        urlencode($partner->manufacturers[0]->manu_name) 
-                        }}">{{ $partner->manufacturers[0]->manu_name 
-                        }}</a>
-                @else
-                    @foreach ($partner->manufacturers as $m => $manu)
-                        @if ($m > 0) , @endif
-                        <a href="/dash/competitive-performance?manu={{
-                            urlencode($manu->manu_name) }}">{{ 
-                            $manu->manu_name }}</a>
-                    @endforeach
-                @endif
-            @else
-                <span class="slGrey">-</span>
-            @endif
-            </div>
-            <div class="col-2">
+            <div class="col-4">
             @if (isset($partner->name) && trim($partner->name) != '')
                 <a href="/profile/{{ urlencode($partner->name) }}"
-                    >{{ $partner->name }}</a>
+                    ><b>{{ $partner->name }}</b></a>
             @else
                 <span class="slGrey">-</span>
             @endif
-            </div>
-            <div class="col-2">
             @if (isset($partner->email) && trim($partner->email) != '')
-                <a href="mailto:{{ $partner->email }}">{{ 
-                    $GLOBALS["SL"]->charLimitDotDotDot($partner->email, 18) 
+                <br /><a href="mailto:{{ $partner->email }}" class="slGrey">{{ 
+                    $GLOBALS["SL"]->charLimitDotDotDot($partner->email, 40) 
                     }}</a>
+            @endif
+            </div>
+            <div class="col-3">
+            @if (sizeof($partner->companies) > 0)
+                {{ $partner->listCompanyNames() }}
             @else
                 <span class="slGrey">-</span>
             @endif
@@ -69,11 +46,20 @@
                 <span class="slGrey">-</span>
             @endif
             </div>
-            <div class="col-1">
-            @if (isset($partner->expiration) && intVal($partner->expiration) > 0)
-                {{ $partner->expiration }} days
+            <div class="col-2">
+            @if (!isset($partner->expiration) || intVal($partner->expiration) == 0)
+                Never
             @else
-                <i class="slGrey">never</i>
+                {{ date("n/j/y", $partner->expireTime) }}
+                @if ($partner->isExpired)
+                    <i class="slRedDark mL5">Expired</i>
+                @endif
+            @endif
+            @if (isset($partner->trialStart) && trim($partner->trialStart) != '')
+                <br /><span class="slGrey">{{ date("n/j/y", strtotime($partner->trialStart)) }}</span>
+                @if (isset($partner->expiration) && intVal($partner->expiration) > 0)
+                    <nobr>+ {{ $partner->expiration }} days</nobr>
+                @endif
             @endif
             </div>
             <div class="col-1">
@@ -94,9 +80,8 @@
 
     <h3 class="mT0">Pending Partner Invitations</h3>
     <div class="row brdBot">
-        <div class="col-3"><p class="slBlueDark">Company Name</p></div>
-        <div class="col-2"><p class="slBlueDark">Manufacturers</p></div>
-        <div class="col-3"><p class="slBlueDark">Invite Email Address</p></div>
+        <div class="col-5"><p class="slBlueDark">Invite Email Address</p></div>
+        <div class="col-3"><p class="slBlueDark">Company</p></div>
         <div class="col-2"><p class="slBlueDark">Trial Level</p></div>
         <div class="col-2"><p class="slBlueDark">Expires In</p></div>
     </div>
@@ -104,52 +89,42 @@
 @forelse ($GLOBALS["SL"]->x["partnerInvites"] as $cnt => $partner)
     <div class="w100 pT10 pB10 @if ($cnt%2 > 0) row2 @endif ">
         <div class="row">
-            <div class="col-3">
-            @if (isset($partner->usr_company_name) 
-                && trim($partner->usr_company_name) != '')
-                <b>{{ $partner->usr_company_name }}</b>
-            @else
-                <span class="slGrey">-</span>
-            @endif
-            </div>
-            <div class="col-2 slGrey">
-            @if (isset($partner->usr_manu_ids) 
-                && trim($partner->usr_manu_ids) != '')
-                {{ $partner->usr_manu_ids }}
+            <div class="col-5">
+            @if (isset($partner->email) && trim($partner->email) != '')
+                <a href="mailto:{{ $partner->email }}">{{ 
+                    $GLOBALS["SL"]->charLimitDotDotDot($partner->email, 40)
+                }}</a>
             @else
                 <span class="slGrey">-</span>
             @endif
             </div>
             <div class="col-3">
-            @if (isset($partner->usr_invite_email) 
-                && trim($partner->usr_invite_email) != '')
-                <a href="mailto:{{ $partner->usr_invite_email }}">{{ 
-                    $GLOBALS["SL"]->charLimitDotDotDot($partner->usr_invite_email, 32)
-                    }}</a>
+            @if (sizeof($partner->companies) > 0)
+                {{ $partner->listCompanyNames() }}
             @else
                 <span class="slGrey">-</span>
             @endif
             </div>
             <div class="col-2">
-            @if (isset($partner->usr_level) && intVal($partner->usr_level) > 0)
+            @if (isset($partner->levelDef) && intVal($partner->levelDef) > 0)
                 {{ str_replace(': Basic Tracking', '', 
                     str_replace(': Full Data Access', '', 
-                    $GLOBALS["SL"]->def->getVal('Partner Levels', $partner->usr_level)
+                    $GLOBALS["SL"]->def->getVal('Partner Levels', $partner->levelDef)
                 )) }}
             @else
                 <span class="slGrey">-</span>
             @endif
             </div>
             <div class="col-1">
-            @if (isset($partner->usr_membership_expiration) 
-                && intVal($partner->usr_membership_expiration) > 0)
-                {{ $partner->usr_membership_expiration }} days
+            @if (isset($partner->expiration) && intVal($partner->expiration) > 0)
+                {{ $partner->expiration }} days
             @else
                 <i class="slGrey">never</i>
             @endif
             </div>
             <div class="col-1">
-                <a href="?edit={{ $partner->usrInfoID }}" class="btn btn-secondary btn-sm"
+                <a href="?edit={{ $partner->usrInfoID }}" 
+                    class="btn btn-secondary btn-sm"
                     ><i class="fa fa-pencil" aria-hidden="true"></i></a>
             </div>
         </div>
@@ -172,8 +147,8 @@
         user account linked with this email address</b> I have for you:
     </p>
     <p>
-        <a href="https://powerscore.resourceinnovation.org/register" target="_blank"
-            >https://powerscore.resourceinnovation.org/register</a>
+        <a href="https://powerscore.resourceinnovation.org/register-pro" target="_blank"
+            >https://powerscore.resourceinnovation.org/register-pro</a>
     </p>
     <p>
         From there, you can finish setting up your partner account. 

@@ -26,11 +26,11 @@ class ScoreReportAvgs extends ScoreReportStats
     public function getAllPowerScoreAvgsPublic($nID)
     {
         $this->v["nID"] = $nID;
-        $this->initClimateFilts();
         $this->calcAllPowerScoreAvgs();
         $this->v["psTechs"] = $GLOBALS["CUST"]->psTechs();
         if ($GLOBALS["SL"]->REQ->has('excel') 
-            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.773-powerscore-avgs-excel', 
                 $this->v
@@ -55,14 +55,20 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->calcMorePowerStats();
         /*
         if ($GLOBALS["SL"]->REQ->has('excel')) {
-            $innerTable = view('vendor.cannabisscore.nodes.170-avg-powerscores-innertable', $this->v)->render();
+            $innerTable = view(
+                'vendor.cannabisscore.nodes.170-avg-powerscores-innertable', 
+                $this->v
+            )->render();
             $GLOBALS["SL"]->exportExcelOldSchool(
                 $innerTable, 
                 'PowerScore_Averages-' . date("Y-m-d") . '.xls'
             );
         }
         */
-        return view('vendor.cannabisscore.nodes.859-report-more-stats', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.859-report-more-stats', 
+            $this->v
+        )->render();
     }
     
     public function getPowerScoreFinalReport()
@@ -71,21 +77,23 @@ class ScoreReportAvgs extends ScoreReportStats
         $this->v["allscores"] = $this->searcher->v["allscores"];
         $this->calcMorePowerStats();
         $GLOBALS["SL"]->x["needsCharts"] = true;
-        return view('vendor.cannabisscore.nodes.797-powerscore-report-tbls', $this->v)->render();
+        return view(
+            'vendor.cannabisscore.nodes.797-powerscore-report-tbls', 
+            $this->v
+        )->render();
     }
     
     protected function calcAllPowerScoreAvgs()
     {
         $this->initClimateFilts();
-//echo '<pre>'; print_r($GLOBALS['SL']->x['usrInfo']); echo '</pre>'; exit;
-        if ($GLOBALS["SL"]->x["usrInfo"]
-            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers)
-            && sizeof($GLOBALS['SL']->x['usrInfo']->manufacturers) > 0
-            && isset($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id)
-            && intVal($GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id) > 0) {
+        if (isset($GLOBALS["SL"]->x["usrInfo"])
+            && isset($GLOBALS['SL']->x['usrInfo']->companies[0]->manus)
+            && sizeof($GLOBALS['SL']->x['usrInfo']->companies[0]->manus) > 0
+            && isset($GLOBALS['SL']->x['usrInfo']->companies[0]->manus[0]->id)
+            && intVal($GLOBALS['SL']->x['usrInfo']->companies[0]->manus[0]->id) > 0) {
             $this->searcher->v["fltPartner"] = 0;
             $this->searcher->v["fltManuLgt"] = intVal(
-                $GLOBALS['SL']->x['usrInfo']->manufacturers[0]->manu_id
+                $GLOBALS['SL']->x['usrInfo']->companies[0]->manus[0]->id
             );
         }
         $this->searcher->loadAllScoresPublic();
@@ -97,7 +105,8 @@ class ScoreReportAvgs extends ScoreReportStats
             ['cln-lgty', 'Indoor PowerScore Averages by Type of Cloning/Mother Lights'],
             ['tech',     'PowerScore Averages by Technique'],
             ['pow1',     'PowerScore Averages by Other Power Sources'],
-            ['pow2',     'PowerScore Averages by Other Power Sources']
+            ['pow2',     'PowerScore Averages by Other Power Sources'],
+            ['pow3',     'PowerScore Averages by Other Power Sources']
         ];
 //echo 'calcAllPowerScoreAvgs()<pre>'; print_r($this->searcher->v); echo '</pre>'; exit;
         if ($this->searcher->v["allscores"]->isEmpty()) {
@@ -125,7 +134,7 @@ class ScoreReportAvgs extends ScoreReportStats
             } else {
                 $this->v["scoreSets"][$i][2] = $tmp->printScoreAvgsTbl2();
             }
-            $this->v["scoreSets"][$i][3] = $tmp;
+            //$this->v["scoreSets"][$i][3] = $tmp;
             unset($tmp);
         }
         return true;
@@ -418,25 +427,37 @@ class ScoreReportAvgs extends ScoreReportStats
                                                 /$this->v["statMisc"]->getDatTot('kWh');
             for ($i = 0; $i < 5; $i++) {
                 foreach (["scrLED", "scrHID"] as $lyt) {
-                    $this->v["statMore"][$lyt][$i] = $this->v["statMore"][$lyt][$i]/$this->v["statMore"][$lyt][5];
+                    $this->v["statMore"][$lyt][$i] 
+                        = $this->v["statMore"][$lyt][$i]
+                            /$this->v["statMore"][$lyt][5];
                 }
                 if (in_array($i, [0, 2])) { // higher is better
-                    $this->v["statMore"]["scrLHR"][$i] = ($this->v["statMore"]["scrLED"][$i]
-                        -$this->v["statMore"]["scrHID"][$i])/$this->v["statMore"]["scrHID"][$i];
+                    $this->v["statMore"]["scrLHR"][$i] 
+                        = ($this->v["statMore"]["scrLED"][$i]
+                                -$this->v["statMore"]["scrHID"][$i])
+                            /$this->v["statMore"]["scrHID"][$i];
                 } else { // lower is better
-                    $this->v["statMore"]["scrLHR"][$i] = ($this->v["statMore"]["scrHID"][$i]
-                        -$this->v["statMore"]["scrLED"][$i])/$this->v["statMore"]["scrHID"][$i];
+                    $this->v["statMore"]["scrLHR"][$i] 
+                        = ($this->v["statMore"]["scrHID"][$i]
+                                -$this->v["statMore"]["scrLED"][$i])
+                            /$this->v["statMore"]["scrHID"][$i];
                 }
             }
-            $this->v["statMore"]["flwrPercHID"] = ($this->v["statLgts"]->getDatCnt('b162-c168')
-                +$this->v["statLgts"]->getDatCnt('b162-c169')+$this->v["statLgts"]->getDatCnt('b162-c170')
-                +$this->v["statLgts"]->getDatCnt('b162-c171'))/$this->v["statLgts"]->getDatCnt('b162');
-            $this->v["statMore"]["sqftFxtHID"] = $this->v["statMore"]["scrHID"][6]/$this->v["statMore"]["scrHID"][5];
+            $this->v["statMore"]["flwrPercHID"] 
+                = ($this->v["statLgts"]->getDatCnt('b162-c168')
+                        +$this->v["statLgts"]->getDatCnt('b162-c169')
+                        +$this->v["statLgts"]->getDatCnt('b162-c170')
+                        +$this->v["statLgts"]->getDatCnt('b162-c171'))
+                    /$this->v["statLgts"]->getDatCnt('b162');
+            $this->v["statMore"]["sqftFxtHID"] 
+                = $this->v["statMore"]["scrHID"][6]
+                    /$this->v["statMore"]["scrHID"][5];
             
         }
         
-        $chk = RIIPsRenewables::whereIn('ps_rnw_psid', [1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 1725, 1756, 
-                2101, 878, 881, 884, 914, 922, 929, 934])
+        $chk = RIIPsRenewables::whereIn('ps_rnw_psid', [
+                1427, 1447, 1503, 1628, 1648, 1669, 1681, 1690, 
+                1725, 1756, 2101, 878, 881, 884, 914, 922, 929, 934])
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $renew) {

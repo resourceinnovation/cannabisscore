@@ -2,9 +2,22 @@
 <script type="text/javascript">
 
 function updateRanks() {
-@foreach (['Overall', 'Facility', 'Production', 'HVAC', 'Lighting', 'Water', 'Waste'] as $i => $eff)
-    @if (isset($currRanks->{ 'ps_rnk_' . strtolower($eff) }))
-    <?php $perc = round($currRanks->{ 'ps_rnk_' . strtolower($eff) }); ?>
+@foreach (['Overall', 'FacAll', 'Facility', 'FacNon', 'ProdAll', 'Production', 'ProdNon', 
+    'HVAC', 'Lighting', 'Water', 'Waste'] as $i => $eff)
+<?php
+$fld = 'ps_rnk_' . strtolower($eff);
+if ($eff == 'FacAll') {
+    $fld = 'ps_rnk_fac_all';
+} elseif ($eff == 'FacNon') {
+    $fld = 'ps_rnk_fac_non';
+} elseif ($eff == 'ProdAll') {
+    $fld = 'ps_rnk_prod_all';
+} elseif ($eff == 'ProdNon') {
+    $fld = 'ps_rnk_prod_non';
+}
+?>
+    @if (isset($currRanks->{ $fld }))
+    <?php $perc = round($currRanks->{ $fld }); ?>
         guageList[{{ $i }}][2] = {!! $perc !!};
         @if ($eff == 'Overall')
             guageList[{{ $i }}][3] = {!! json_encode($withinFilters) !!};

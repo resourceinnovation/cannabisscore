@@ -20,10 +20,13 @@ use App\Models\RIIPsPageFeedback;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
+use App\Models\RIIUserCompanies;
+use App\Models\RIIUserFacilities;
 use App\Models\RIIUserPsPerms;
 use App\Models\RIIComplianceMaMonths;
 use App\Models\SLUsersRoles;
 use App\Models\User;
+use CannabisScore\Controllers\ScoreUserInfo;
 use CannabisScore\Controllers\CannabisScoreSearcher;
 use CannabisScore\Controllers\ScoreLookups;
 use SurvLoop\Controllers\Tree\TreeSurvForm;
@@ -59,7 +62,7 @@ class ScoreVars extends TreeSurvForm
 
             $this->minorSections = [ [], [], [], [], [] ];
             $this->minorSections[0][] = [45,   'Your Facility'];
-            $this->minorSections[0][] = [1242, 'Growing Rooms'];
+            $this->minorSections[0][] = [1242, 'Growing Spaces'];
             $this->minorSections[0][] = [64,   'Growing Environments'];
 
             $this->minorSections[1][] = [911,  'Your Lighting'];
@@ -78,33 +81,26 @@ class ScoreVars extends TreeSurvForm
         return true;
     }
     
+    public function authMinimalInit(Request $request, $currPage = '')
+    {
+        if ($request->has('pro')) {
+            $GLOBALS["SL"]->x["registerNotes"] = view(
+                'vendor.cannabisscore.inc-register-pro-license'
+            )->render();
+        }
+        return true;
+    }
+    
     protected function loadCommonVars()
     {
-        $this->frmTypOut = $GLOBALS["SL"]->def->getID(
-            'PowerScore Farm Types', 
-            'Outdoor'
-        );
-        $this->frmTypIn  = $GLOBALS["SL"]->def->getID(
-            'PowerScore Farm Types', 
-            'Indoor'
-        );
-        $this->frmTypGrn = $GLOBALS["SL"]->def->getID(
-            'PowerScore Farm Types', 
-            'Greenhouse/Hybrid/Mixed Light'
-        );
-
-        $this->statusIncomplete = $GLOBALS["SL"]->def->getID(
-            'PowerScore Status', 
-            'Incomplete'
-        );
-        $this->statusComplete = $GLOBALS["SL"]->def->getID(
-            'PowerScore Status', 
-            'Complete'
-        );
-        $this->statusArchive = $GLOBALS["SL"]->def->getID(
-            'PowerScore Status', 
-            'Archived'
-        );
+        $set = 'PowerScore Farm Types';
+        $this->frmTypOut = $GLOBALS["SL"]->def->getID($set, 'Outdoor');
+        $this->frmTypIn  = $GLOBALS["SL"]->def->getID($set, 'Indoor');
+        $this->frmTypGrn = $GLOBALS["SL"]->def->getID($set, 'Greenhouse/Hybrid/Mixed Light');
+        $set = 'PowerScore Status';
+        $this->statusIncomplete = $GLOBALS["SL"]->def->getID($set, 'Incomplete');
+        $this->statusComplete = $GLOBALS["SL"]->def->getID($set, 'Ranked Data Set');
+        $this->statusArchive = $GLOBALS["SL"]->def->getID($set, 'Archived');
         return true;
     }
     
@@ -114,6 +110,10 @@ class ScoreVars extends TreeSurvForm
         if (isset($this->v["uID"]) && $this->v["uID"] > 0) {
             $this->v["usrInfo"]->loadUser($this->v["uID"], $this->v["user"]);
             $GLOBALS["SL"]->x["usrInfo"] = $this->v["usrInfo"];
+            if (sizeof($this->v["usrInfo"]->companies) > 0
+                && sizeof($this->v["usrInfo"]->companies[0]->manus) > 0) {
+                $GLOBALS["SL"]->pageCSS .= ' #admMenu1Tier4 { display: none; } ';
+            }
         }
         return true;
     }
@@ -243,43 +243,88 @@ class ScoreVars extends TreeSurvForm
         return true;
     }
 
+    protected function loadPartnerSlug($slug)
+    {
+        $this->v["referralSlug"] = $slug;
+        $this->v["referralType"] = $this->v["partnerName"] = '';
+        $this->v["companyRec"] = RIIUserCompanies::where('usr_com_slug', 'LIKE', $slug)
+            ->first();
+        if ($this->v["companyRec"] && isset($this->v["companyRec"]->usr_com_id)) {
+            $this->v["referralType"] = 'company';
+            $this->v["partnerName"]  = $this->v["companyRec"]->usr_com_name;
+        } else {
+            $this->v["facilityRec"] = $f = RIIUserFacilities::where('usr_fac_slug', 'LIKE', $slug)
+                ->first();
+            if ($f && isset($f->usr_fac_id)) {
+                $this->v["referralType"] = 'facility';
+                $this->v["partnerName"]  = $f->usr_fac_name;
+                $perm = RIIUserPsPerms::where('usr_perm_facility_id', $f->usr_fac_id)
+                    ->where('usr_perm_company_id', '>', 0)
+                    ->first();
+                if ($perm && isset($perm->usr_perm_company_id)) {
+                    $com = RIIUserCompanies::find($perm->usr_perm_company_id);
+                    if ($com && isset($com->usr_com_id)) {
+                        $this->v["partnerName"] = $com->usr_com_name 
+                            . ' (' . $this->v["partnerName"] . ')';
+                    }
+                }
+            } else {
+                $this->v["partnerRec"] = RIIUserInfo::where('usr_referral_slug', 'LIKE', $slug)
+                    ->first();
+                if ($this->v["partnerRec"] && isset($this->v["partnerRec"]->usr_id)) {
+                    $this->v["referralType"] = 'partner';
+                    $this->v["partnerName"]  = $this->v["partnerRec"]->usr_company_name;
+                }
+            }
+        }
+//echo 'loadPartnerSlug(' . $slug . ', partnerName: ' . $this->v["partnerName"] . '<br />';
+        return true;
+    }
+
     protected function loadExtraLinkPartner()
     {
         if ($GLOBALS["SL"]->REQ->has('partner')
             && trim($GLOBALS["SL"]->REQ->get('partner')) != '') {
             $slug = trim($GLOBALS["SL"]->REQ->get('partner'));
-            $this->v["partnerRec"] = RIIUserInfo::where('usr_referral_slug', $slug)
-                ->first();
-            if ($this->v["partnerRec"] 
-                && isset($this->v["partnerRec"]->usr_user_id)) {
-                $id = intVal($this->v["partnerRec"]->usr_user_id);
-                if ($id > 0) {
-                    $found = false;
-                    if (!isset($this->sessData->dataSets["user_ps_perms"])) {
-                        $this->sessData->dataSets["user_ps_perms"] = [];
-                    }
-                    if (sizeof($this->sessData->dataSets["user_ps_perms"]) > 0) {
-                        foreach ($this->sessData->dataSets["user_ps_perms"] as $perm) {
-                            if (isset($perm->usr_perm_user_id)
-                                && intVal($perm->usr_perm_user_id) == $id) {
-                                $found = true;
+            $this->loadPartnerSlug($slug);
 
-                            }
+            if (isset($this->v["referralType"]) && trim($this->v["referralType"]) != '') {
+                $found = false;
+                if (!isset($this->sessData->dataSets["user_ps_perms"])) {
+                    $this->sessData->dataSets["user_ps_perms"] = [];
+                }
+                if (sizeof($this->sessData->dataSets["user_ps_perms"]) > 0) {
+                    foreach ($this->sessData->dataSets["user_ps_perms"] as $perm) {
+                        if (isset($perm->usr_perm_user_id)
+                            && intVal($perm->usr_perm_user_id) == $id) {
+                            $found = true;
+
                         }
                     }
-                    if (!$found) {
-                        $perm = new RIIUserPsPerms;
-                        $perm->usr_perm_user_id = $id;
-                        $perm->usr_perm_psid = $this->coreID;
-                        $perm->save();
-                        $this->sessData->dataSets["user_ps_perms"][] = $perm;
+                }
+                if (!$found) {
+                    $defOwn = $GLOBALS["SL"]->def->getID('Permissions', 'Own');
+                    $perm = new RIIUserPsPerms;
+                    $perm->usr_perm_psid = $this->coreID;
+                    $perm->usr_perm_permissions = $defOwn;
+                    if ($this->v["referralType"] == 'company'
+                        && isset($this->v["companyRec"]->usr_com_id)) {
+                        $perm->usr_perm_company_id = $this->v["companyRec"]->usr_com_id;
+                    } elseif ($this->v["referralType"] == 'facility'
+                        && isset($this->v["facilityRec"]->usr_fac_id)) {
+                        $perm->usr_perm_facility_id = $this->v["facilityRec"]->usr_fac_id;
+                    } elseif ($this->v["referralType"] == 'partner'
+                        && isset($this->v["partnerRec"]->usr_id)) {
+                        $perm->usr_perm_user_id = $this->v["partnerRec"]->usr_id;
                     }
+                    $perm->save();
+                    $this->sessData->dataSets["user_ps_perms"][] = $perm;
                 }
             }
         }
         return true;
     }
-    
+
     public function chkCoreRecEmpty($coreID = -3, $coreRec = NULL)
     {
         if ($this->treeID == 1) {
@@ -356,7 +401,17 @@ class ScoreVars extends TreeSurvForm
         return '';
     }
     
-    public function xmlAllAccess()
+    protected function xmlAccess()
+    {
+        if (isset($this->v["user"]) 
+            && $this->v["user"] 
+            && $this->v["user"]->hasRole('administrator|staff')) {
+            return true;
+        }
+        return false;
+    }
+    
+    protected function xmlAllAccess()
     {
         if (isset($this->v["user"]) 
             && $this->v["user"] 
@@ -496,246 +551,4 @@ class ScoreVars extends TreeSurvForm
         return true;
     }
     
-}
-
-class ScoreUserInfo
-{
-    public $id            = 0;
-    public $usrInfoID     = 0;
-    public $name          = '';
-    public $email         = '';
-    public $company       = '';
-    public $slug          = '';
-    public $manufacturers = [];
-    public $level         = 0;
-    public $levelDef      = 0;
-    public $expiration    = 0;
-    public $isExpired     = true;
-
-    public $partnerDef    = 368;
-    public $partTierDefs  = [];
-
-    public function loadInvite($usrInfoID = 0)
-    {
-        $this->usrInfoID = $usrInfoID;
-        $user = null;
-        $info = RIIUserInfo::find($usrInfoID);
-        if ($info && isset($info->usr_user_id) && $info->usr_user_id > 0) {
-            $user = User::find($info->usr_user_id);
-            if (isset($user->id)) {
-                $this->id    = $user->id;
-                $this->name  = $user->name;
-                $this->email = $user->email;
-            }
-        }
-        $this->loadCompany($info);
-        $this->loadCore();
-        return true;
-    }
-
-    public function loadUser($userID = 0, $user = null, $company = '')
-    {
-        if (!$user && !isset($user->id)) {
-            $user = User::find($userID);
-        }
-        if (isset($user->id)) {
-            $this->id    = $user->id;
-            $this->name  = $user->name;
-            $this->email = $user->email;
-        } else {
-            $this->id = $userID;
-        }
-        $info = RIIUserInfo::where('usr_user_id', $this->id)
-            ->first();
-        if ((!$info || !isset($info->usr_user_id) || intVal($info->usr_user_id) <= 0) 
-            && isset($user->email)) {
-            $info = RIIUserInfo::where('usr_invite_email', $user->email)
-                ->first();
-            if ($info 
-                && isset($this->id)
-                && (!isset($info->usr_user_id) || intVal($info->usr_user_id) <= 0)) {
-                $info->usr_user_id = $this->id;
-                $info->save();
-            }
-        }
-        if ($info && isset($info->usr_id)) {
-            $this->usrInfoID = $info->usr_id;
-        }
-        $this->loadCompany($info, $company);
-        $this->postCompanyName();
-        $this->loadCore();
-        return true;
-    }
-    
-    protected function loadCore($user = null)
-    {
-        $this->getUserManufacturers();
-        if (Auth::user()->hasRole('administrator|staff')) {
-            $this->level = 10;
-        }
-        $GLOBALS["SL"]->x["partnerID"]      = $this->id;
-        $GLOBALS["SL"]->x["partnerCompany"] = $this->company;
-        $GLOBALS["SL"]->x["partnerLevel"]   = $this->level;
-        $GLOBALS["SL"]->x["partnerInfoID"]  = 0;
-        $GLOBALS["SL"]->x["partnerPSIDs"]   = [];
-        if ($this->usrInfoID > 0) {
-            $GLOBALS["SL"]->x["partnerInfoID"] = $this->usrInfoID;
-            $search = new CannabisScoreSearcher;
-            $GLOBALS["SL"]->x["partnerPSIDs"] = $search->getPartnerPSIDs($this->id);
-        }
-        return true;
-    }
-    
-    protected function loadCompany($info, $company = '')
-    {
-        if ($company != '') {
-            $this->company = $company;
-        } elseif ($info && isset($info->usr_company_name)) {
-            $this->company = trim($info->usr_company_name);
-        }
-        if ($info && isset($info->usr_referral_slug)) {
-            $this->slug = trim($info->usr_referral_slug);
-        }
-        if ($info && isset($info->usr_user_id)) {
-            if (isset($info->usr_level)) {
-                $this->getPartTierLevel($info->usr_level);
-            }
-            if (isset($info->usr_membership_expiration)) {
-                $this->expiration = intVal($info->usr_membership_expiration);
-            }
-            if ($this->levelDef > 0) {
-                $this->chkLevels($info);
-            }
-        }
-        return true;
-    }
-
-    protected function getPartTierLevel($usrLevel)
-    {
-        $this->loadPartTierDefs();
-        $this->levelDef = $usrLevel;
-        $this->level = 0;
-        foreach ($this->partTierDefs as $ind => $defID) {
-            if ($usrLevel == $defID) {
-                $this->level = $ind;
-            }
-        }
-        return $this->level;
-    }
-
-    protected function loadPartTierDefs()
-    {
-        $this->partTierDefs = [];
-        foreach ($GLOBALS["SL"]->def->getSet('Partner Levels') as $level) {
-            $this->partTierDefs[] = $level->def_id;
-        }
-        return true;
-    }   
-    
-    protected function chkLevels($info)
-    {
-        $role = SLUsersRoles::where('role_user_rid', $this->partnerDef)
-            ->where('role_user_uid', $this->id)
-            ->first();
-        $hasPartnerFlag = ($role && isset($role->role_user_id));
-        if ($this->level > 0 
-            && isset($info->usr_invite_email)
-            && strtolower(trim($info->usr_invite_email)) 
-                == strtolower(trim($this->email))) {
-            if (!isset($info->usr_trial_start)) {
-                $info->usr_trial_start = date("Y-m-d");
-                $info->save();
-            }
-            $this->chkManus($info);
-            if (!$hasPartnerFlag) {
-                $this->addPartnerRole();
-            }
-//echo 'id: ' . $this->id . ', email: ' . $this->email . ', company: ' . $this->company . ', levelDef: ' . $this->levelDef . ', partnerDef: ' . $this->partnerDef . '<br />info: <pre>'; print_r($role); print_r($info); echo '</pre>'; exit;
-
-
-            // NEEDS ENFORCEMENT PROGRAMMED!..
-
-            $this->isExpired = false;
-
-
-        } elseif ($hasPartnerFlag) {
-            $this->isExpired = false;
-        }
-        return true;
-    }
-    
-    protected function chkManus($info)
-    {
-        if (isset($info->usr_manu_ids) && trim($info->usr_manu_ids) != '') {
-            $manuIDs = $GLOBALS["SL"]->mexplode(',', $info->usr_manu_ids);
-            if (sizeof($manuIDs) > 0) {
-                foreach ($manuIDs as $manuID) {
-                    $chk = RIIUserManufacturers::where('usr_man_user_id', $this->id)
-                        ->where('usr_man_manu_id', intVal($manuID))
-                        ->get();
-                    if (!$chk->isNotEmpty()) {
-                        $chk = new RIIUserManufacturers;
-                        $chk->usr_man_user_id = $this->id;
-                        $chk->usr_man_manu_id = intVal($manuID);
-                        $chk->save();
-                    }
-                }
-            }
-        }
-        return true;
-    }
-    
-    protected function addPartnerRole()
-    {
-        $role = new SLUsersRoles;
-        $role->role_user_rid = $this->partnerDef;
-        $role->role_user_uid = $this->id;
-        $role->save();
-        echo view(
-            'vendor.survloop.js.redir', 
-            [ "redir" => '?refresh=1' ]
-        )->render();
-        exit;
-    }
-    
-    protected function postCompanyName()
-    {
-        if ($GLOBALS["SL"]->REQ->has('companyName')
-            && intVal($GLOBALS["SL"]->REQ->companyName) == 1
-            && $GLOBALS["SL"]->REQ->has('myProfileCompanyName')) {
-            $this->company = trim($GLOBALS["SL"]->REQ->myProfileCompanyName);
-            if ($GLOBALS["SL"]->REQ->has('myProfileCompanySlug')) {
-                $this->slug = trim($GLOBALS["SL"]->REQ->myProfileCompanySlug);
-            }
-            RIIUserInfo::where('usr_user_id', $this->id)
-                ->update([
-                    'usr_company_name'  => $this->company,
-                    'usr_referral_slug' => $this->slug
-                ]);
-        }
-        return true;
-    }
-    
-    public function getUserManufacturers()
-    {
-        $this->manufacturers = $GLOBALS["SL"]->x["partnerManuIDs"] = [];
-        $chk = DB::table('rii_manufacturers')
-            ->join('rii_user_manufacturers', 'rii_manufacturers.manu_id', 
-                '=', 'rii_user_manufacturers.usr_man_manu_id')
-            ->where('rii_user_manufacturers.usr_man_user_id', $this->id)
-            ->select(
-                'rii_manufacturers.manu_id',
-                'rii_manufacturers.manu_name'
-            )
-            ->orderBy('manu_name', 'asc')
-            ->get();
-        if ($chk->isNotEmpty()) {
-            foreach ($chk as $manu) {
-                $this->manufacturers[] = $manu;
-                $GLOBALS["SL"]->x["partnerManuIDs"][] = $manu->manu_id;
-            }
-        }
-        return $this->manufacturers;
-    }
-
 }

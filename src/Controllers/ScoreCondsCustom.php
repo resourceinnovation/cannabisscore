@@ -10,6 +10,7 @@
   */
 namespace CannabisScore\Controllers;
 
+use DB;
 use CannabisScore\Controllers\ScoreUtils;
 
 class ScoreCondsCustom extends ScoreUtils
@@ -33,6 +34,8 @@ class ScoreCondsCustom extends ScoreUtils
             return $this->runCondHasArea('Flower');
         } elseif ($condition == '#DryingOnSite') {
             return $this->runCondHasArea('Dry');
+        } elseif ($condition == '#GrowthStageProLoop') {
+            return $this->runCondGrowthStageProLoop();
 
         } elseif ($condition == '#MotherArtificialLight') {
             return $this->runCondArtifArea('Mother');
@@ -61,6 +64,13 @@ class ScoreCondsCustom extends ScoreUtils
             }
             return 0;
 
+        } elseif ($condition == '#GrowthStageIsOutdoor') {
+            return $this->runCondGrowthStageIsOutdoor();
+        } elseif ($condition == '#IsFullyOutdoor') {
+            return $this->runCondIsFullyOutdoor();
+        } elseif ($condition == '#ShowWaterMonthlyTbl') {
+            return $this->runCondShowWaterMonthlyTbl();
+
         } elseif ($condition == '#HasUniqueness') {
             return $this->runCondHasFeedback('uniqueness');
         } elseif ($condition == '#HasFeedback') {
@@ -80,6 +90,17 @@ class ScoreCondsCustom extends ScoreUtils
                 '#IndoorFlowerOver50Ksf'
             ])) {
             return $this->runCondIndoorFlowerSizes($condition);
+
+        } elseif ($condition == '#UsesBiofuels') {
+            return $this->runCondUsesOtherFuel('Biofuels (cord wood, wood pellets, other)');
+        } elseif ($condition == '#UsesGenerator') {
+            return $this->runCondUsesOtherFuel('Back up generator');
+        } elseif ($condition == '#UsesPropane') {
+            return $this->runCondUsesOtherFuel('Propane');
+        } elseif ($condition == '#UsesFuelOil') {
+            return $this->runCondUsesOtherFuel('Fuel oil');
+        } elseif ($condition == '#UsesAnyOtherFuels') {
+            return $this->runCondUsesAnyOtherFuels();
 
         } elseif ($condition == '#MACompliancePowerScore') {
             return $this->hasMaCompliancePowerScore();
@@ -107,7 +128,8 @@ class ScoreCondsCustom extends ScoreUtils
             if ($this->v["isOwner"]
                 || $this->isPartnerStaffAdminOrOwner()
                 || (session()->has('coreID71') 
-                    && session()->get('coreID71') == $maID)) {
+                    && session()->get('coreID71') == $maID)
+                || $maID == 431) { // temporary
                 return 1;
             }
         }
@@ -128,6 +150,28 @@ class ScoreCondsCustom extends ScoreUtils
                 }
             }
         }
+        return 0;
+    }
+
+    private function runCondGrowthStageProLoop($area = null)
+    {
+        if ($area === null) {
+            $area = $this->sessData->getDataBranchRow('ps_areas');
+        }
+        $defs = [
+            $this->v["areaTypes"]["Flower"],
+            $this->v["areaTypes"]["Veg"],
+            $this->v["areaTypes"]["Clone"]
+        ];
+//echo '<pre>'; print_r($area); echo '</pre>'; exit;
+        if ($area
+            && isset($area->ps_area_has_stage)
+            && intVal($area->ps_area_has_stage) == 1
+            && isset($area->ps_area_type)
+            && in_array($area->ps_area_type, $defs)) {
+            return 1;
+        }
+//echo '<pre>'; print_r($area); echo '</pre>'; exit;
         return 0;
     }
     
@@ -173,6 +217,127 @@ class ScoreCondsCustom extends ScoreUtils
             || $this->runCondArtifArea('Flower') == 1) {
             // could be replaced by OR functionality
             return 1;
+        }
+        return 0;
+    }
+
+    protected function stageIsOutdoor($area)
+    {
+        if ($area
+            && isset($area->ps_area_has_stage)
+            && intVal($area->ps_area_has_stage) == 1
+            && $area->ps_area_type != $this->v["areaTypes"]["Dry"]) {
+            if (isset($this->sessData->dataSets["ps_growing_rooms"])
+                && sizeof($this->sessData->dataSets["ps_growing_rooms"]) > 0) {
+                $rooms = DB::table('rii_ps_link_room_area')
+                    ->join('rii_ps_growing_rooms', 'rii_ps_link_room_area.ps_lnk_rm_ar_room_id', 
+                        '=', 'rii_ps_growing_rooms.ps_room_id')
+                    ->where('rii_ps_link_room_area.ps_lnk_rm_ar_area_id', $area->getKey())
+                    ->select('rii_ps_growing_rooms.ps_room_farm_type')
+                    ->get();
+                foreach ($rooms as $room) {
+                    if (isset($room->ps_room_farm_type)
+                        && intVal($room->ps_room_farm_type) == $this->frmTypOut) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return $this->stageIsOutdoorNoRooms($area);
+        }
+        return false;
+    }
+
+    protected function stageIsOutdoorNoRooms($area)
+    {
+        if (isset($room->ps_area_farm_type)
+            && intVal($room->ps_area_farm_type) > 0) {
+            if (intVal($room->ps_area_farm_type) == $this->frmTypOut) {
+                return true;
+            }
+            return false;
+        }
+        // Counting as Outdoor if they ONLY selected Outdoor
+        $outCnt = 0;
+        $bldTypOut = $GLOBALS["SL"]->def->getID('PowerScore Building Types', 'Outdoor');
+        $blds = $this->sessData->getChildRows('ps_areas', $area->getKey(), 'ps_areas_blds');
+        foreach ($blds as $bld) {
+            if (isset($bld->ps_ar_bld_type) && intVal($bld->ps_ar_bld_type) > 0) {
+                if (intVal($bld->ps_ar_bld_type) == $bldTypOut) {
+                    $outCnt++;
+                } else {
+                    $outCnt--;
+                }
+            }
+        }
+        if ($outCnt > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function runCondGrowthStageIsOutdoor()
+    {
+        $area = $this->sessData->getDataBranchRow('ps_areas');
+        if ($this->stageIsOutdoor($area)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    protected function runCondIsFullyOutdoor()
+    {
+        if (isset($this->sessData->dataSets["ps_growing_rooms"])
+            && sizeof($this->sessData->dataSets["ps_growing_rooms"]) > 0) {
+            $outdoorRooms = 0;
+            foreach ($this->sessData->dataSets["ps_growing_rooms"] as $room) {
+                if (isset($room->ps_room_farm_type)
+                    && intVal($room->ps_room_farm_type) == $this->frmTypOut) {
+                    $outdoorRooms++;
+                }
+            }
+            if ($outdoorRooms == sizeof($this->sessData->dataSets["ps_growing_rooms"])) {
+                return 1;
+            }
+            return 0;
+        } elseif (isset($this->sessData->dataSets["ps_areas"])
+            && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
+            $hasCnt = $outdoorCnt = 0;
+            foreach ($this->sessData->dataSets["ps_areas"] as $area) {
+                if (isset($area->ps_area_has_stage)
+                    && intVal($area->ps_area_has_stage) == 1
+                    && $area->ps_area_type != $this->v["areaTypes"]["Dry"]
+                    && $area->ps_area_type != $this->v["areaTypes"]["Mother"]) {
+                    $hasCnt++;
+                    if ($this->stageIsOutdoor($area)) {
+                        $outdoorCnt++;
+                    }
+                }
+            }
+            if ($hasCnt == $outdoorCnt) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    private function runCondShowWaterMonthlyTbl()
+    {
+
+        if (isset($this->sessData->dataSets["ps_onsite"])
+            && isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_id)) {
+            if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source)
+                && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source) == 1) {
+                return 1;
+            }
+            if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc)
+                && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc) == 1) {
+                return 1;
+            }
+            if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_by_months)
+                && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_by_months) == 1) {
+                return 1;
+            }
         }
         return 0;
     }
@@ -309,8 +474,10 @@ class ScoreCondsCustom extends ScoreUtils
     private function runCondIndoorFlowerSizes($condition)
     {
         $area = $this->getArea('Flower');
-        if (!isset($area) || !isset($area->ps_area_has_stage) 
-            || !isset($area->ps_area_size) || intVal($area->ps_area_size) == 0) {
+        if (!isset($area) 
+            || !isset($area->ps_area_has_stage) 
+            || !isset($area->ps_area_size) 
+            || intVal($area->ps_area_size) == 0) {
             return 0;
         }
         $ret = 0;
@@ -338,17 +505,38 @@ class ScoreCondsCustom extends ScoreUtils
         return $ret;
     }
 
-    protected function parseConditionsCustom($loop, $recObj)
+    private function runCondUsesOtherFuel($defVal = '')
     {
-        if ($loop->data_loop_plural == 'Growth Stages') {
-            if (isset($recObj->ps_area_type)) {
-                if ($this->getStageNick($recObj->ps_area_type) != 'Dry'
-                    && isset($recObj->ps_area_has_stage)
-                    && intVal($recObj->ps_area_has_stage) == 1) {
+        $defID = $GLOBALS["SL"]->def->getID('Compliance MA Delivered Fuels', $defVal);
+        if (isset($this->sessData->dataSets["ps_onsite_fuels"])
+            && sizeof($this->sessData->dataSets["ps_onsite_fuels"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_onsite_fuels"] as $fuel) {
+                if (isset($fuel->ps_fuel_type) && $fuel->ps_fuel_type == $defID) {
                     return 1;
                 }
             }
-            return 0;
+        }
+        return 0;
+    }
+
+    private function runCondUsesAnyOtherFuels()
+    {
+        if (isset($this->sessData->dataSets["powerscore"])
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_no_natural_gas)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_no_natural_gas) == 0) {
+            return 1;
+        }
+        if (isset($this->sessData->dataSets["ps_onsite_fuels"])
+            && sizeof($this->sessData->dataSets["ps_onsite_fuels"]) > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    protected function parseConditionsCustom($loop, $recObj)
+    {
+        if ($loop->data_loop_plural == 'Growth Stages') {
+            return $this->runCondGrowthStageProLoop($recObj);
         }
         return -1;
     }

@@ -9,6 +9,9 @@
   */
 namespace CannabisScore\Controllers;
 
+use Auth;
+use App\Models\SLDefinitions;
+use App\Models\RIIUserInfo;
 use SurvLoop\Controllers\Admin\AdminMenu;
 
 class CannabisScoreAdminMenu extends AdminMenu
@@ -46,7 +49,7 @@ class CannabisScoreAdminMenu extends AdminMenu
             [
                 $this->admMenuLnk(
                     '/dash/compare-powerscores',
-                    'Raw Score Data',
+                    'Ranked Data Set',
                     '',
                     1,
                     [
@@ -119,6 +122,10 @@ class CannabisScoreAdminMenu extends AdminMenu
                             'Manage Partners',
                         ),
                         $this->admMenuLnk(
+                            '/dash/manage-company-facilities', 
+                            'Companies', 
+                        ),
+                        $this->admMenuLnk(
                             '/dash/manufacturer-adoption', 
                             'Manufacturers', 
                         ),
@@ -176,7 +183,7 @@ class CannabisScoreAdminMenu extends AdminMenu
         $treeMenu[] = $this->addAdmMenuHome();
         $treeMenu[] = $this->admMenuLnk(
             'javascript:;', 
-            'Raw Score Data', 
+            'Ranked Data Set', 
             '<i class="fa fa-tachometer" aria-hidden="true"></i>', 
             1, 
             [
@@ -312,33 +319,37 @@ class CannabisScoreAdminMenu extends AdminMenu
             'Score Averages', 
             '<i class="fa fa-area-chart" aria-hidden="true"></i>'
         );
-        /*
         $treeMenu[] = $this->admMenuLnk(
             '/dash/competitive-performance', 
             'Competition', 
             '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
         );
-        */
         $treeMenu[] = $this->admMenuLnk(
-            '/dash/partner-compare-official-powerscores', 
-            'Official Data', 
+            '/dash/partner-compare-ranked-powerscores', 
+            'Ranked Data', 
             '<i class="fa fa-list" aria-hidden="true"></i>'
         );
-        $treeMenu[] = $this->admMenuLnk(
-            '/dash/average-powerscores-lighting', 
-            'Lighting Types', 
-            '<i class="fa fa-bar-chart" aria-hidden="true"></i>'
-        );
-        $treeMenu[] = $this->admMenuLnk(
-            '/dash/manufacturer-adoption', 
-            'Manufacturer Use', 
-            '<i class="fa fa-lightbulb-o mL5" aria-hidden="true"></i>'
-        );
-        $treeMenu[] = $this->admMenuLnk(
-            '/dash/lighting-manufacturer-report', 
-            'Manufacturer Stats', 
-            '<i class="fa fa-lightbulb-o mL5" aria-hidden="true"></i>'
-        );
+        if ($this->isPartnerSustainOrCorner()) {
+            $treeMenu[] = $this->admMenuLnk(
+                '/dash/average-powerscores-lighting', 
+                'Lighting Types', 
+                '<i class="fa fa-lightbulb-o mL3 mR3" aria-hidden="true"></i>'
+            );
+            if ($this->isPartnerSustaining()) {
+                $treeMenu[] = $this->admMenuLnk(
+                    '/dash/manufacturer-adoption', 
+                    'Manufacturer Use', 
+                    '<nobr><i class="fa fa-lightbulb-o mR3" aria-hidden="true"></i>'
+                        . '<i class="fa fa-ellipsis-v mT3" aria-hidden="true"></i></nobr>'
+                );
+                $treeMenu[] = $this->admMenuLnk(
+                    '/dash/lighting-manufacturer-report', 
+                    'Manufacturer Stats', 
+                    '<nobr><i class="fa fa-lightbulb-o mLn3 mR0" aria-hidden="true"></i>'
+                        . '<i class="fa fa-line-chart fPerc66" aria-hidden="true"></i></nobr>'
+                );
+            }
+        }
         /*
         $treeMenu[] = $this->admMenuLnk(
             'javascript:;', 
@@ -366,6 +377,41 @@ class CannabisScoreAdminMenu extends AdminMenu
         );
         */
         return $treeMenu;
+    }
+
+    private function isPartnerSustaining()
+    {
+        $def = SLDefinitions::where('def_set', 'Value Ranges')
+            ->where('def_subset', 'Partner Levels')
+            ->where('def_value', 'Sustaining Partner')
+            ->first();
+        $chk = RIIUserInfo::where('usr_user_id', Auth::user()->id)
+            ->first();
+        return ($chk 
+            && $def
+            && isset($chk->usr_level) 
+            && isset($def->def_id)
+            && $chk->usr_level == $def->def_id);
+    }
+
+    private function isPartnerCornerstone()
+    {
+        $def = SLDefinitions::where('def_set', 'Value Ranges')
+            ->where('def_subset', 'Partner Levels')
+            ->where('def_value', 'Cornerstone Partner')
+            ->first();
+        $chk = RIIUserInfo::where('usr_user_id', Auth::user()->id)
+            ->first();
+        return ($chk 
+            && $def
+            && isset($chk->usr_level) 
+            && isset($def->def_id)
+            && $chk->usr_level == $def->def_id);
+    }
+
+    private function isPartnerSustainOrCorner()
+    {
+        return ($this->isPartnerSustaining() && $this->isPartnerCornerstone());
     }
     
 }

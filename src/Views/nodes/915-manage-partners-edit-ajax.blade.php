@@ -29,3 +29,48 @@ function changePartnerUser() {
 }
 $(document).on("change", "#partnerUserID", function() { return changePartnerUser(); });
 setTimeout(function() { changePartnerUser(); }, 1);
+
+
+
+function changePartnerCompany() {
+    var comID = 0;
+    if (document.getElementById("partnerCompanyID")) {
+        comID = parseInt(document.getElementById("partnerCompanyID").value);
+        /*
+        if (document.getElementById("partnerCompanyID").value.trim() != "") {
+            $("#partnerManuWrap").slideUp(50);
+        } else {
+            $("#partnerManuWrap").slideDown(50);
+        }
+        */
+    }
+    if (comID == 0) {
+        $("#partnerCompanyWrap").slideDown(50);
+    } else {
+        $("#partnerCompanyWrap").slideUp(50);
+    }
+    return true;
+}
+$(document).on("change", "#partnerCompanyID", function() { return changePartnerCompany(); });
+setTimeout(function() { changePartnerCompany(); }, 1);
+
+
+function slugCompName() {
+    var newVal = document.getElementById('partnerCompanyNameID').value;
+    document.getElementById('partnerCompanySlugID').value=slugify(newVal);
+    chkSlug();
+}
+$(document).on("blur", "#partnerCompanyNameID", function(e) { slugCompName(); });
+setTimeout(function() { slugCompName(); }, 10);
+
+function chkSlug() {
+    if (document.getElementById('slugSearchResult')) {
+        var url = "/ajax/check-slug?slug="+document.getElementById('partnerCompanySlugID').value;
+console.log(url);
+        $("#slugSearchResult").load(url);
+    }
+}
+$(document).on("keyup", "#partnerCompanySlugID", function(e) { chkSlug(); });
+
+
+

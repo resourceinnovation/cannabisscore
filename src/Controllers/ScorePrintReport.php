@@ -14,20 +14,28 @@ use Auth;
 use Illuminate\Http\Request;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
+use App\Models\RIIUserPsPerms;
+use App\Models\RIIUserCompanies;
 use SurvLoop\Controllers\Globals\Globals;
-use CannabisScore\Controllers\ScoreCalcsPrint;
+use SurvLoop\Controllers\Tree\Report\ReportMonthly;
+use CannabisScore\Controllers\ScoreUserCompanies;
+use CannabisScore\Controllers\ComplyPrintReport;
 
-class ScorePrintReport extends ScoreCalcsPrint
+class ScorePrintReport extends ComplyPrintReport
 {
     public function printPreviewReport($isAdmin = false)
     {
-        return view(
-            'vendor.cannabisscore.powerscore-report-preview', 
-            [
-                "uID"      => $this->v["uID"],
-                "sessData" => $this->sessData->dataSets
-            ]
-        )->render();
+        if (isset($this->sessData->dataSets["powerscore"])) {
+            $this->chkPowerScoreRanked();
+            return view(
+                'vendor.cannabisscore.powerscore-report-preview', 
+                [
+                    "uID"      => $this->v["uID"],
+                    "sessData" => $this->sessData->dataSets
+                ]
+            )->render();
+        }
+        return '';
     }
     
     public function printPsRankingFilters($nID)
@@ -38,10 +46,6 @@ class ScorePrintReport extends ScoreCalcsPrint
         $this->initSearcher();
         $this->searcher->getSearchFilts();
         $this->searcher->v["nID"] = $nID;
-        $this->searcher->v["psFiltChks"] = view(
-            'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
-            $this->searcher->v
-        )->render();
         $ret = view(
             'vendor.cannabisscore.inc-filter-powerscores', 
             $this->searcher->v
@@ -59,11 +63,9 @@ class ScorePrintReport extends ScoreCalcsPrint
             foreach ($this->sessData->dataSets["ps_for_cup"] as $i => $cup) {
                 if (isset($cup->ps_cup_cup_id) 
                     && intVal($cup->ps_cup_cup_id) > 0) {
+                    $defSet = 'PowerScore Competitions';
                     $deetVal .= (($i > 0) ? ', ' : '') 
-                        . $GLOBALS["SL"]->def->getVal(
-                            'PowerScore Competitions', 
-                            $cup->ps_cup_cup_id
-                        );
+                        . $GLOBALS["SL"]->def->getVal($defSet, $cup->ps_cup_cup_id);
                 }
             }
             return [ 'Competition', $deetVal, $nID ];
@@ -195,7 +197,7 @@ class ScorePrintReport extends ScoreCalcsPrint
                 return view(
                     'vendor.cannabisscore.nodes.490-report-calculations-top-refresh-mid', 
                     [
-                        "msg"  => '<i class="slGrey">Recalculating Sub-Scores...',
+                        "msg"  => '<i class="slGrey">Recalculating KPIs & Scores...',
                         "psid" => $this->v["ajax-psid"]
                     ]
                 )->render();
@@ -219,10 +221,6 @@ class ScorePrintReport extends ScoreCalcsPrint
         $this->loadAreaLgtTypes();
         $this->v["isPast"] = ($this->sessData->dataSets["powerscore"][0]->ps_time_type 
             == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
-        $this->v["psFiltChks"] = view(
-            'vendor.cannabisscore.inc-filter-powerscores-checkboxes', 
-            $this->searcher->v
-        )->render();
         $this->v["psFilters"] = view(
             'vendor.cannabisscore.inc-filter-powerscores', 
             $this->searcher->v
@@ -278,7 +276,11 @@ class ScorePrintReport extends ScoreCalcsPrint
         $effTypes = [
             'Overall', 
             'Facility', 
+            'FacNon', 
+            'FacAll', 
             'Production', 
+            'ProdNon', 
+            'ProdAll', 
             'HVAC', 
             'Lighting', 
             'Water', 
@@ -295,10 +297,10 @@ class ScorePrintReport extends ScoreCalcsPrint
         $this->initSearcher();
         $this->searcher->searchResultsXtra(1);
         $this->searcher->searchFiltsURL();
-        if ($this->searcher->v["powerscore"] 
+        if (isset($this->searcher->v["powerscore"])
             && isset($this->searcher->v["powerscore"]->ps_id)) {
-            $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->ps_time_type 
-                == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'));
+            $pastDef = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past');
+            $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->ps_time_type == $pastDef);
             $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_filters', 
                     $this->searcher->v["urlFlts"])
                 ->where('ps_rnk_psid', $this->searcher->v["powerscore"]->ps_id)
@@ -308,11 +310,19 @@ class ScorePrintReport extends ScoreCalcsPrint
                 || !isset($this->searcher->v["currRanks"]->ps_rnk_overall->ps_rnk_overall)) {
                 $this->ajaxScorePercentilesCalcRanks();
             }
+
+            $myFilt = '&fltFarm=' . $this->searcher->v["powerscore"]->ps_characterize;
+            if ($this->searcher->v["urlFlts"] == $myFilt
+                && (!isset($this->searcher->v["powerscore"]->ps_effic_over_similar)
+                    || $this->searcher->v["powerscore"]->ps_effic_over_similar <= 0.000000001)) {
+                $this->searcher->v["powerscore"]->ps_effic_over_similar
+                    = $this->searcher->v["currRanks"]->ps_rnk_overall;
+                $this->searcher->v["powerscore"]->save();
+            }
+
             $this->searcher->v["currGuage"] = 0;
             $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->ps_effic_facility) 
                 && isset($this->searcher->v["powerscore"]->ps_effic_production) 
-                && isset($this->searcher->v["powerscore"]->ps_effic_hvac) 
-                && isset($this->searcher->v["powerscore"]->ps_effic_lighting) 
                 && $this->searcher->v["powerscore"]->ps_effic_facility > 0
                 && $this->searcher->v["powerscore"]->ps_effic_production > 0);
             $overRank = round($this->searcher->v["currRanks"]->ps_rnk_overall);
@@ -376,9 +386,27 @@ class ScorePrintReport extends ScoreCalcsPrint
                 $this->searcher->v["powerscore"]->ps_effic_facility, 
                 true
             );
+            $currRanks->ps_rnk_fac_non = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_fac_non, 
+                $this->searcher->v["powerscore"]->ps_effic_fac_non, 
+                true
+            );
+            $currRanks->ps_rnk_fac_all = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_fac_all, 
+                $this->searcher->v["powerscore"]->ps_effic_fac_all, 
+                true
+            );
             $currRanks->ps_rnk_production = $GLOBALS["SL"]->getArrPercentileStr(
                 $ranks->ps_rnk_production, 
                 $this->searcher->v["powerscore"]->ps_effic_production
+            );
+            $currRanks->ps_rnk_prod_non = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_prod_non, 
+                $this->searcher->v["powerscore"]->ps_effic_prod_non
+            );
+            $currRanks->ps_rnk_prod_all = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_prod_all, 
+                $this->searcher->v["powerscore"]->ps_effic_prod_all
             );
             $currRanks->ps_rnk_lighting = $GLOBALS["SL"]->getArrPercentileStr(
                 $ranks->ps_rnk_lighting, 
@@ -420,7 +448,8 @@ class ScorePrintReport extends ScoreCalcsPrint
             && $GLOBALS["SL"]->REQ->has('mine')
             && intVal($GLOBALS["SL"]->REQ->myExport) == 1
             && intVal($GLOBALS["SL"]->REQ->excel) == 1
-            && intVal($GLOBALS["SL"]->REQ->mine) == 1) {
+            && intVal($GLOBALS["SL"]->REQ->mine) == 1
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, 1, 1);
             $this->initSearcher();
             $this->searcher->getSearchFilts(1);
@@ -439,113 +468,60 @@ class ScorePrintReport extends ScoreCalcsPrint
         return true;
     }
 
-    protected function reportMaMonths($nID)
+    protected function reportPsMonths($nID)
     {
-        if (!isset($this->sessData->dataSets["compliance_ma"])
-            || !isset($this->sessData->dataSets["compliance_ma_months"])) {
-            return '';
+        if (!isset($this->sessData->dataSets["powerscore"])
+            || !isset($this->sessData->dataSets["ps_monthly"])
+            || sizeof($this->sessData->dataSets["ps_monthly"]) < 12) {
+            return '<!-- no months -->';
         }
-        return view(
-            'vendor.cannabisscore.nodes.1420-ma-compliance-monthly', 
-            [
-                "rec"    => $this->sessData->dataSets["compliance_ma"][0],
-                "months" => $this->sessData->dataSets["compliance_ma_months"]
-            ]
-        )->render();
-    }
-
-    protected function reportMaID($nID)
-    {
-        return [
-            'PowerScore Comply ID#',
-            $this->coreID
-        ];
-    }
-
-    protected function reportMaNextPro($nID)
-    {
-        return view(
-            'vendor.cannabisscore.nodes.1436-ma-compliance-next-go-pro', 
-            [ "rec" => $this->sessData->dataSets["compliance_ma"][0] ]
-        )->render();
-    }
-
-    protected function reportMaProPdf($nID)
-    {
-        $ret = '<style> #node1448, #blockWrap945 { display: none; } </style>';
-        if ($GLOBALS["SL"]->REQ->has('isPreview')) {
-            return $ret;
+        $ps     = $this->sessData->dataSets["powerscore"][0];
+        $title  = '<h4 class="mT0 mB15 slBlueDark">Monthly Breakdowns</h4>';
+        $footer = '';
+        $report = new ReportMonthly($this->sessData->dataSets["ps_monthly"]);
+        $report->setMonthFld('ps_month_month');
+        $startMonth = 1;
+        if (isset($ps->ps_start_month) && intVal($ps->ps_start_month) > 0) {
+            $startMonth = intVal($ps->ps_start_month);
         }
-        if (isset($this->sessData->dataSets["powerscore"])
-            && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
-            && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
-            return view(
-                'vendor.cannabisscore.nodes.1449-ma-compliance-above-powerscore', 
-                [ "id" => $this->sessData->dataSets["powerscore"][0]->ps_com_ma_id ]
-            )->render();
+        $report->setStartMonth($startMonth);
+        $report->addCol('ps_month_grams', 'Dried Flower Produced', 'Grams');
+        $report->addCol('ps_month_kwh1', 'Electricity Usage', 'kWh');
+        $report->addCol('ps_month_kw', 'Peak Electricity Usage', 'kW');
+        $report->addCol('ps_month_kwh_renewable', 'Renewable Electricity Generated', 'kWh');
+        $unit = 'Gallons';
+        if ($this->isWaterInLiters()) {
+            $unit = 'Liters';
         }
-        return $ret;
-    }
-
-    protected function reportMaPSID($nID)
-    {
-        $deetLabel = 'PowerScore ID#';
-        $deetVal = '';
-        if (isset($this->sessData->dataSets["compliance_ma"])) {
-            $com = $this->sessData->dataSets["compliance_ma"][0];
-            if (isset($com->com_ma_ps_id)
-                && intVal($com->com_ma_ps_id) > 0) {
-                $deetVal = '<a href="/calculated/read-' . $com->com_ma_ps_id 
-                    . '" target="_blank">#' . $com->com_ma_ps_id . '</a>';
+        $report->addCol('ps_month_water', 'Water Usage', $unit);
+        $report->addCol('ps_month_water_storage_source', 'Source Water Storage', $unit);
+        $report->addCol('ps_month_water_storage_recirc', 'Recirculated Water Storage', $unit);
+        $unit = 'Therms';
+        if (isset($ps->ps_unit_natural_gas) && intVal($ps->ps_unit_natural_gas) > 0) {
+            $unit = $GLOBALS["SL"]->def->getVal('Natural Gas Units', $ps->ps_unit_natural_gas);
+            if ($unit == 'CCF') {
+                $footer .= '<p class="slGrey">1 Therm is around 100 CCF</p>';
             }
         }
-        return [ $deetLabel, $deetVal, $nID ];
-    }
-
-    protected function reportMaEfficProd($nID)
-    {
-        $deetLabel = 'Electric Production Efficiency (grams/kWh)';
-        $deetVal = 0;
-        if (isset($this->sessData->dataSets["compliance_ma"])) {
-            $com = $this->sessData->dataSets["compliance_ma"][0];
-            if (isset($com->com_ma_grams)
-                && intVal($com->com_ma_grams) > 0
-                && isset($com->com_ma_tot_kwh)
-                && intVal($com->com_ma_tot_kwh) > 0) {
-                $deetVal = $com->com_ma_grams/$com->com_ma_tot_kwh;
-                $deetVal = $GLOBALS["SL"]->sigFigs($deetVal, 3);
-            }
+        $report->addCol('ps_month_natural_gas', 'Natural Gas', $unit);
+        $unit = 'Gasoline Gallons';
+        if (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) > 0) {
+            $unit = $GLOBALS["SL"]->def->getVal(
+                'Compliance MA Generator Units', 
+                $ps->ps_unit_generator
+            );
+            $unit = str_replace('(', '', str_replace(')', '', $unit));
         }
-        return [ $deetLabel, $deetVal, $nID ];
-    }
-
-    protected function reportMaWood($nID)
-    {
-        if (isset($this->sessData->dataSets["compliance_ma"])
-            && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel)) {
-            $deetLabel = 'Annual Total Wood';
-            if (isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood)) {
-                $def = $this->sessData->dataSets["compliance_ma"][0]->com_ma_unit_wood;
-                $def = $GLOBALS["SL"]->def->getVal('Biofuel Wood Units', $def);
-                $deetLabel .= ' (' . $def . ')';
-            }
-            $deetVal = $this->sessData->dataSets["compliance_ma"][0]->com_ma_tot_biofuel;
-            return [ $deetLabel, $deetVal, $nID ];
+        $report->addCol('ps_month_generator', 'Back Up Generator', $unit);
+        $unit = 'Cords';
+        if (isset($ps->ps_unit_wood) && intVal($ps->ps_unit_wood) > 0) {
+            $unit = $GLOBALS["SL"]->def->getVal('Biofuel Wood Units', $ps->ps_unit_wood);
         }
-        return [];
-    }
-
-    protected function reportMaYear($nID)
-    {
-        $deetLabel = 'Reporting Year';
-        $deetVal = intVal(date("Y"))-1;
-        if (isset($this->sessData->dataSets["compliance_ma"])) {
-            $com = $this->sessData->dataSets["compliance_ma"][0];
-            if (isset($com->com_ma_year) && intVal($com->com_ma_year) > 0) {
-                $deetVal = $com->com_ma_year;
-            }
-        }
-        return [ $deetLabel, $deetVal, $nID ];
+        $report->addCol('ps_month_biofuel_wood', 'Biofuels', $unit);
+        $report->addCol('ps_month_propane', 'Propane', 'Gallons');
+        $report->addCol('ps_month_fuel_oil', 'Fuel Oil', 'Gallons');
+        $report->setTitle($title, $footer);
+        return $report->printTables() . '<!-- end printTables() -->';
     }
 
     // Override PDF filename to be used for delivery to user.
@@ -554,9 +530,89 @@ class ScorePrintReport extends ScoreCalcsPrint
         if (in_array($this->treeID, [1, 22])) {
             $GLOBALS["SL"]->x["pdfFilename"] = 'PowerScore_Report.pdf';
         } elseif (in_array($this->treeID, [71, 93])) {
-            $GLOBALS["SL"]->x["pdfFilename"] = 'Massachusetts_PowerScore_Comply_Report.pdf';
+            $GLOBALS["SL"]->x["pdfFilename"] 
+                = 'Massachusetts_PowerScore_Comply_Report.pdf';
         }
         return true;
+    }
+
+    protected function adminChangeScoreFacility($nID)
+    {
+        if (!Auth::user() || !Auth::user()->hasRole('administrator|staff')) {
+            return '<!-- No Thank You -->';
+        }
+        $this->v["companies"] = [];
+        $chk = RIIUserCompanies::whereNotNull('usr_com_name')
+            ->orderBy('usr_com_name', 'asc')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $com) {
+                $this->v["companies"][] = new ScoreUserCompanies($com);
+            }
+        }
+        $this->v["coreID"] = $this->coreID;
+        $this->v["psComOwner"] = '';
+        $perms = RIIUserPsPerms::where('usr_perm_psid', $this->coreID)
+            ->where('usr_perm_company_id', '>', 0)
+            ->get();
+        if ($perms->isNotEmpty()) {
+            foreach ($perms as $p) {
+                if (isset($p->usr_perm_company_id)
+                    && intVal($p->usr_perm_company_id) > 0) {
+                    $this->v["psComOwner"] = 'C' . $p->usr_perm_company_id;
+                }
+            }
+        }
+        if ($this->v["psComOwner"] == '') {
+            $perms = RIIUserPsPerms::where('usr_perm_psid', $this->coreID)
+                ->where('usr_perm_facility_id', '>', 0)
+                ->get();
+            if ($perms->isNotEmpty()) {
+                foreach ($perms as $p) {
+                    if (isset($p->usr_perm_facility_id)
+                        && intVal($p->usr_perm_facility_id) > 0) {
+                        $this->v["psComOwner"] = 'F' . $p->usr_perm_facility_id;
+                    }
+                }
+            }
+        }
+        return view(
+            'vendor.cannabisscore.nodes.1566-change-score-facility', 
+            $this->v
+        )->render();
+    }
+
+    protected function saveAdminChangeScoreFacility(Request $request)
+    {
+
+        if (!Auth::user() 
+            || !Auth::user()->hasRole('administrator|staff')
+            || !$request->has('psid')
+            || intVal($request->get('psid')) <= 0) {
+            return '<!-- No Thank You -->';
+        }
+        RIIUserPsPerms::where('usr_perm_psid', intVal($request->psid))
+            ->where('usr_perm_company_id', '>', 0)
+            ->delete();
+        RIIUserPsPerms::where('usr_perm_psid', intVal($request->psid))
+            ->where('usr_perm_facility_id', '>', 0)
+            ->delete();
+        if ($request->has('fac') && trim($request->fac) != '') {
+            $type = substr(trim($request->fac), 0, 1);
+            $id   = intVal(substr(trim($request->fac), 1));
+            $defOwn = $GLOBALS["SL"]->def->getID('Permissions', 'Own');
+            $perm = new RIIUserPsPerms;
+            $perm->usr_perm_psid = intVal($request->psid);
+            $perm->usr_perm_permissions = $defOwn;
+            if ($type == 'C') {
+                $perm->usr_perm_company_id = $id;
+            } elseif ($type == 'F') {
+                $perm->usr_perm_facility_id = $id;
+            }
+            $perm->save();
+        }
+        return '<div class="hidSelf"><b>Saved</b> '
+            . '<i class="fa fa-floppy-o mL3" aria-hidden="true"></i></div>';
     }
 
 

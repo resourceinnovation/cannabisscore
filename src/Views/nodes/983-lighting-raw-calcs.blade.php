@@ -9,8 +9,8 @@
     <div class="row" style="max-width: 720px;">
         <div class="col-8">
             <p>
-            Only showing PowerScores with Lighting Sub-Scores greater than zero, 
-            and not archived.
+            Only showing PowerScores with Lighting KPIs 
+            greater than zero, and not archived.
             <!--- <nobr><a href="javascript:;" onClick="return loadFullReport();">Lighting Report</a></nobr> --->
             <input type="hidden" name="rawCalcs" id="rawCalcsID"
                 @if ($GLOBALS["SL"]->REQ->has('rawCalcs')) value="1"
@@ -65,7 +65,7 @@
                 <th>Lighting Stage Errors</th>
             @endif
                 <th class="brdLft">Overall Similar Percentile</th>
-                <th>Lighting Efficiency <nobr>Sub-Score</nobr></th>
+                <th>Lighting Efficiency <nobr>KPI</nobr></th>
                 <th>LPD</th>
                 <th class="brdLft">Flower Weighted</th>
                 <th>Veg Weighted</th>

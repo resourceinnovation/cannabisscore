@@ -55,9 +55,13 @@ upon which each calculated average is based.
 <?php $scoreSets["statScorVert"]->addCurrFilt('farm', 144); ?>
 {!! $scoreSets["statScorVert"]->printScoreAvgsTbl('vert') !!}
 
-<p>The experimental 'Production Density' calculation 
-divides the Production Sub-Score by the average total 
-square feet of flowering canopy (for each farm).</p>
+<div class="pT30">
+    <h4>Production Density</h4>
+    <p>
+        This experimental calculation divides the Production KPI by the 
+        average total square feet of flowering canopy (for each farm).
+    </p>
+</div>
 <table border=0 class="table table-striped w100">
     <tr>
         <td></td>

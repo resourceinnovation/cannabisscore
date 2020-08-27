@@ -136,7 +136,9 @@ class ScoreReportHvac extends ScoreReportStats
         //$this->v["scoreSets"]["statScorHvcV"]->addCurrFilt('farm', 144);
         //$this->v["scoreSets"]["statScorHvcC"]->addCurrFilt('farm', 144);
 
-        if ($GLOBALS["SL"]->REQ->has('excel') && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
+        if ($GLOBALS["SL"]->REQ->has('excel') 
+            && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $innerTable = view('vendor.cannabisscore.nodes.981-hvac-report-excel', $this->v)->render();
             $filename = 'PowerScore_Averages-HVAC' . ((trim($this->v["fltStateClim"]) != '') 
                 ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) : '')

@@ -138,9 +138,9 @@
     Overall <span class="slBlueDark">lighting represents 
     {{ number_format(round(100*$statLgts->getDatTot('kWh')/$statMisc->getDatTot('kWh'))) }}
     percent of the total power demand</span> in facility operations. 
-    The highest demand of lighting is in flowering rooms at
+    The highest demand of lighting is in flowering spaces at
     {{ number_format(round(100*$statLgts->getDatTotFval('kWh', 'area', 162)/$statLgts->getDatTot('kWh'))) }}
-    percent. Vegetative rooms use
+    percent. Vegetative spaces use
     {{ number_format(round(100*$statLgts->getDatTotFval('kWh', 'area', 161)/$statLgts->getDatTot('kWh'))) }}
     percent of total facility electricity use. 
     </p>
@@ -159,7 +159,7 @@
         <th>% of total</th>
     </tr>
     <tr class="slBlueDark">
-        <th>Lighting, by room:</th>
+        <th>Lighting, by growing space:</th>
         <td><b>{{ number_format($statLgts->getDatTot('kWh')) }}</b></td>
         <td><b>{{ number_format(round(100*$statLgts->getDatTot('kWh')/$statMisc->getDatTot('kWh'))) }}%</b></td>
     </tr>
@@ -247,10 +247,10 @@
     </tr>
     </table>
     <p>
-    Compared to using HID, flower rooms with high-efficient lamps have 
-    lighting sub-scores (kWh/sqft) which are {{ round(100*abs($statMore["scrLHR"][3])) }}% 
+    Compared to using HID, flower spaces with high-efficient lamps have 
+    lighting KPIs (kWh/sqft) which are {{ round(100*abs($statMore["scrLHR"][3])) }}% 
     @if ($statMore["scrLHR"][3] > 0) better, @else worse, @endif 
-    facility sub-scores (kWh/sqft) which are {{ round(100*abs($statMore["scrLHR"][1])) }}% 
+    facility KPIs (kWh/sqft) which are {{ round(100*abs($statMore["scrLHR"][1])) }}% 
     @if ($statMore["scrLHR"][1] > 0) better, @else worse, @endif and
     <b class="slBlueDark">overall PowerScore rankings which are {!! round(100*abs($statMore["scrLHR"][0])) !!}% 
     @if ($statMore["scrLHR"][0] > 0) better. @else worse. @endif </b>
@@ -261,7 +261,7 @@
     <p>
     Table 6 shows additional details on the type of 
     lighting technologies in each grow environment. 
-    In the flowering rooms for example, 
+    In the flowering spaces for example, 
     {{ round(100*$statMore["flwrPercHID"]) }}
     percent of lighting was HID; 
     {{ round(100*$statLgts->getDatCnt('b162-c165')/$statLgts->getDatCnt('b162')) }}

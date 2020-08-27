@@ -11,10 +11,12 @@
   */
 namespace CannabisScore\Controllers;
 
+use DB;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
+use App\Models\RIIUserPsPerms;
 use SurvLoop\Controllers\Globals\Globals;
 use CannabisScore\Controllers\ScoreCalcs;
 
@@ -42,13 +44,11 @@ class ScoreCalcRanks extends ScoreCalcs
             
             // Now store calculated ranks for individual scores...
             $currFlt = trim($this->searcher->v["urlFlts"]);
-            $allFilts = [ '', '&fltFarm=0' ];
             foreach ($allscores as $i => $ps) {
-                if (in_array($currFlt, $allFilts)) {
+                if (in_array($currFlt, [ '', '&fltFarm=0' ])) {
                     $ps->ps_effic_overall = $this->v["rank"][$ps->ps_id]["over"];
                     $ps->save();
-                }
-                if ($currFlt == '&fltFarm=' . $ps->ps_characterize) {
+                } elseif ($currFlt == '&fltFarm=' . $ps->ps_characterize) {
                     $ps->ps_effic_over_similar = $this->v["rank"][$ps->ps_id]["over"];
                     $ps->save();
                 }
@@ -57,21 +57,18 @@ class ScoreCalcRanks extends ScoreCalcs
         }
         
         // Now store listed raw sub-score values for filter...
-        $this->v["ranksCache"]->ps_rnk_tot_cnt     = $allscores->count();
-        $this->v["ranksCache"]->ps_rnk_overall_avg 
-            = implode(',', $this->v["rankList"]["oraw"]);
-        $this->v["ranksCache"]->ps_rnk_facility
-            = implode(',', $this->v["rankList"]["faci"]);
-        $this->v["ranksCache"]->ps_rnk_production  
-            = implode(',', $this->v["rankList"]["prod"]);
-        $this->v["ranksCache"]->ps_rnk_lighting
-            = implode(',', $this->v["rankList"]["ligh"]);
-        $this->v["ranksCache"]->ps_rnk_hvac
-            = implode(',', $this->v["rankList"]["hvac"]);
-        $this->v["ranksCache"]->ps_rnk_water
-            = implode(',', $this->v["rankList"]["watr"]);
-        $this->v["ranksCache"]->ps_rnk_waste
-            = implode(',', $this->v["rankList"]["wste"]);
+        $this->v["ranksCache"]->ps_rnk_tot_cnt = $allscores->count();
+        $this->v["ranksCache"]->ps_rnk_overall_avg = implode(',', $this->v["rankList"]["oraw"]);
+        $this->v["ranksCache"]->ps_rnk_facility    = implode(',', $this->v["rankList"]["faci"]);
+        $this->v["ranksCache"]->ps_rnk_fac_non     = implode(',', $this->v["rankList"]["facN"]);
+        $this->v["ranksCache"]->ps_rnk_fac_all     = implode(',', $this->v["rankList"]["facA"]);
+        $this->v["ranksCache"]->ps_rnk_production  = implode(',', $this->v["rankList"]["prod"]);
+        $this->v["ranksCache"]->ps_rnk_prod_non    = implode(',', $this->v["rankList"]["proN"]);
+        $this->v["ranksCache"]->ps_rnk_prod_all    = implode(',', $this->v["rankList"]["proA"]);
+        $this->v["ranksCache"]->ps_rnk_lighting    = implode(',', $this->v["rankList"]["ligh"]);
+        $this->v["ranksCache"]->ps_rnk_hvac        = implode(',', $this->v["rankList"]["hvac"]);
+        $this->v["ranksCache"]->ps_rnk_water       = implode(',', $this->v["rankList"]["watr"]);
+        $this->v["ranksCache"]->ps_rnk_waste       = implode(',', $this->v["rankList"]["wste"]);
         if ($this->v["ranksCache"]->ps_rnk_tot_cnt > 0) {
             $this->v["ranksCache"]->ps_rnk_avg_sqft_kwh 
                 = $this->v["rankAvg"]["btu"]/$allscores->count();
@@ -89,7 +86,11 @@ class ScoreCalcRanks extends ScoreCalcs
             "over" => [], 
             "oraw" => [], 
             "faci" => [], 
+            "facN" => [], 
+            "facA" => [], 
             "prod" => [], 
+            "proN" => [], 
+            "proA" => [], 
             "ligh" => [], 
             "hvac" => [], 
             "watr" => [], 
@@ -118,9 +119,25 @@ class ScoreCalcRanks extends ScoreCalcs
                 && $ps->ps_effic_facility_status == $this->statusComplete) {
                 $this->v["rankList"]["faci"][] = $ps->ps_effic_facility;
             }
+            if ($ps->ps_effic_non_electric > 0 
+                && $ps->ps_effic_non_electric_status == $this->statusComplete) {
+                $this->v["rankList"]["facN"][] = $ps->ps_effic_non_electric;
+            }
+            if ($ps->ps_effic_fac_all > 0 
+                && $ps->ps_effic_fac_all_status == $this->statusComplete) {
+                $this->v["rankList"]["facA"][] = $ps->ps_effic_fac_all;
+            }
             if ($ps->ps_effic_production > 0 
                 && $ps->ps_effic_production_status == $this->statusComplete) {
                 $this->v["rankList"]["prod"][] = $ps->ps_effic_production;
+            }
+            if ($ps->ps_effic_prod_non > 0 
+                && $ps->ps_effic_prod_non_status == $this->statusComplete) {
+                $this->v["rankList"]["proN"][] = $ps->ps_effic_prod_non;
+            }
+            if ($ps->ps_effic_prod_all > 0 
+                && $ps->ps_effic_prod_all_status == $this->statusComplete) {
+                $this->v["rankList"]["proA"][] = $ps->ps_effic_prod_all;
             }
             if ($ps->ps_effic_lighting > 0 
                 && $ps->ps_effic_lighting_status == $this->statusComplete) {
@@ -148,7 +165,11 @@ class ScoreCalcRanks extends ScoreCalcs
             }
         }
         sort($this->v["rankList"]["faci"], SORT_NUMERIC);
+        sort($this->v["rankList"]["facN"], SORT_NUMERIC);
+        sort($this->v["rankList"]["facA"], SORT_NUMERIC);
         sort($this->v["rankList"]["prod"], SORT_NUMERIC);
+        sort($this->v["rankList"]["proN"], SORT_NUMERIC);
+        sort($this->v["rankList"]["proA"], SORT_NUMERIC);
         sort($this->v["rankList"]["ligh"], SORT_NUMERIC);
         sort($this->v["rankList"]["hvac"], SORT_NUMERIC);
         sort($this->v["rankList"]["watr"], SORT_NUMERIC);
@@ -175,15 +196,17 @@ class ScoreCalcRanks extends ScoreCalcs
     
     protected function rankOneValidSubScore($ps)
     {
-        $this->v["rank"][$ps->ps_id] = [
-            "over" => 0,
-            "oraw" => 0,
-            "faci" => 0,
-            "prod" => 0,
-            "ligh" => 0,
-            "hvac" => 0,
-            "watr" => 0,
-            "wste" => 0
+        $efficsOver = [
+            [ 'facility',   'faci' ], 
+            [ 'fac_non',    'facN' ], 
+            [ 'fac_all',    'facA' ], 
+            [ 'production', 'prod' ], 
+            [ 'prod_non',   'proN' ], 
+            [ 'prod_all',   'proA' ], 
+            [ 'lighting',   'ligh' ], 
+            [ 'hvac',       'hvac' ], 
+            [ 'water',      'watr' ], 
+            [ 'waste',      'wste' ]
         ];
         $efficLgt = $ps->ps_effic_lighting;
         if ($efficLgt < 0.00001) {
@@ -193,41 +216,37 @@ class ScoreCalcRanks extends ScoreCalcs
         if ($efficHvac < 0.00001) {
             $efficHvac = 0;
         }
-        $this->v["rank"][$ps->ps_id]["faci"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["faci"], 
-            $ps->ps_effic_facility,
-            true
-        );
-        $this->v["rank"][$ps->ps_id]["prod"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["prod"], 
-            $ps->ps_effic_production
-        );
-        $this->v["rank"][$ps->ps_id]["ligh"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["ligh"], 
-            $efficLgt,
-            true
-        );
-        $this->v["rank"][$ps->ps_id]["hvac"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["hvac"], 
-            $efficHvac,
-            true
-        );
-        $this->v["rank"][$ps->ps_id]["watr"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["watr"], 
-            $ps->ps_effic_water,
-            true
-        );
-        $this->v["rank"][$ps->ps_id]["wste"] = $GLOBALS["SL"]->getArrPercentile(
-            $this->v["rankList"]["wste"], 
-            $ps->ps_effic_waste,
-            true
-        );
-        $this->v["rank"][$ps->ps_id]["oraw"] = ($this->v["rank"][$ps->ps_id]["faci"]
-            +$this->v["rank"][$ps->ps_id]["prod"]
-            +$this->v["rank"][$ps->ps_id]["ligh"]
-            +$this->v["rank"][$ps->ps_id]["hvac"])/4; 
-            // +$this->v["rank"][$ps->ps_id]["watr"]
-            // +$this->v["rank"][$ps->ps_id]["wste"]
+        $this->v["rank"][$ps->ps_id] = [];
+        $this->v["rank"][$ps->ps_id]["over"] = 0;
+        $this->v["rank"][$ps->ps_id]["oraw"] = 0;
+        foreach ($efficsOver as $effic) {
+            $rank = 0;
+            if (isset($ps->{ 'ps_effic_' . $effic[0] })
+                && $ps->{ 'ps_effic_' . $effic[0] } > 0) {
+                $val = $ps->{ 'ps_effic_' . $effic[0] };
+                if ($val < 0.000001) {
+                    $val = 0;
+                }
+                $isGolf = (substr($effic[0], 0, 3) != 'pro');
+                $list = $this->v["rankList"][$effic[1]];
+                $rank = $GLOBALS["SL"]->getArrPercentile($list, $val, $isGolf);
+            }
+            $this->v["rank"][$ps->ps_id][$effic[1]] = $rank;
+        }
+
+        $this->v["rank"][$ps->ps_id]["oraw"] = $cnt = 0;
+        foreach ($efficsOver as $effic) {
+            if (!in_array($effic[1], ['facA', 'proA'])
+                && isset($ps->{ 'ps_effic_' . $effic[0] })
+                && $ps->{ 'ps_effic_' . $effic[0] } > 0) {
+                $this->v["rank"][$ps->ps_id]["oraw"] += $this->v["rank"][$ps->ps_id][$effic[1]];
+                $cnt++;
+            }
+        }
+        if ($cnt > 0) {
+            $this->v["rank"][$ps->ps_id]["oraw"] = $this->v["rank"][$ps->ps_id]["oraw"]/$cnt;
+        }
+//if ($ps->ps_id == 47495975) { echo '<pre>'; print_r($this->v["rank"][$ps->ps_id]); echo '</pre>'; exit; }
         return true;
     }
     
@@ -250,13 +269,21 @@ class ScoreCalcRanks extends ScoreCalcs
         $tmp->ps_rnk_overall        = $this->v["rank"][$ps->ps_id]["over"];
         $tmp->ps_rnk_overall_avg    = $this->v["rank"][$ps->ps_id]["oraw"];
         $tmp->ps_rnk_facility       = $this->v["rank"][$ps->ps_id]["faci"];
+        $tmp->ps_rnk_fac_non        = $this->v["rank"][$ps->ps_id]["facN"];
+        $tmp->ps_rnk_fac_all        = $this->v["rank"][$ps->ps_id]["facA"];
         $tmp->ps_rnk_production     = $this->v["rank"][$ps->ps_id]["prod"];
+        $tmp->ps_rnk_prod_non       = $this->v["rank"][$ps->ps_id]["proN"];
+        $tmp->ps_rnk_prod_all       = $this->v["rank"][$ps->ps_id]["proA"];
         $tmp->ps_rnk_lighting       = $this->v["rank"][$ps->ps_id]["ligh"];
         $tmp->ps_rnk_hvac           = $this->v["rank"][$ps->ps_id]["hvac"];
         $tmp->ps_rnk_water          = $this->v["rank"][$ps->ps_id]["watr"];
         $tmp->ps_rnk_waste          = $this->v["rank"][$ps->ps_id]["wste"];
         $tmp->ps_rnk_facility_cnt   = sizeof($this->v["rankList"]["faci"]);
+        $tmp->ps_rnk_fac_non_cnt    = sizeof($this->v["rankList"]["facN"]);
+        $tmp->ps_rnk_fac_all_cnt    = sizeof($this->v["rankList"]["facA"]);
         $tmp->ps_rnk_production_cnt = sizeof($this->v["rankList"]["prod"]);
+        $tmp->ps_rnk_prod_non_cnt   = sizeof($this->v["rankList"]["proN"]);
+        $tmp->ps_rnk_prod_all_cnt   = sizeof($this->v["rankList"]["proA"]);
         $tmp->ps_rnk_lighting_cnt   = sizeof($this->v["rankList"]["ligh"]);
         $tmp->ps_rnk_hvac_cnt       = sizeof($this->v["rankList"]["hvac"]);
         $tmp->ps_rnk_water_cnt      = sizeof($this->v["rankList"]["watr"]);
@@ -306,7 +333,9 @@ class ScoreCalcRanks extends ScoreCalcs
             $doneIDs = $GLOBALS["SL"]->mexplode(',', $GLOBALS["SL"]->REQ->get('doneIDs'));
         }
         $GLOBALS["SL"] = new Globals($GLOBALS["SL"]->REQ, $this->dbID, 1);
-        $GLOBALS["SL"]->x["pageView"] = $GLOBALS["SL"]->x["dataPerms"] = 'public';
+        $GLOBALS["SL"]->x["pageView"] 
+            = $GLOBALS["SL"]->x["dataPerms"] 
+            = 'public';
         $this->loadCustLoop($GLOBALS["SL"]->REQ, 1);
         $all = RIIPowerscore::select('ps_id')
             ->where('ps_status', 'NOT LIKE', $this->statusIncomplete)
@@ -314,7 +343,7 @@ class ScoreCalcRanks extends ScoreCalcs
             ->get();
         if ($all->isNotEmpty()) {
             foreach ($all as $i => $ps) {
-                if ($i < 30) {
+                if ($i < 20) {
                     $this->custReport->loadAllSessData('powerscore', $ps->ps_id);
                     $this->custReport->calcCurrSubScores();
                     $doneIDs[] = $ps->ps_id;
@@ -325,7 +354,8 @@ class ScoreCalcRanks extends ScoreCalcs
         }
         if ($hasMore) {
             return '<br /><br /><div class="slCard nodeWrap">'
-                . '<h3>Recalculating All Scores...</h3> <script type="text/javascript"> '
+                . '<h3>Recalculating All Scores...</h3> '
+                . '<script type="text/javascript"> '
                 . 'setTimeout("window.location=\'?recalc=1' 
                 . (($GLOBALS["SL"]->REQ->has('fixLightingErrors')) 
                     ? '&fixLightingErrors=1' : '')
@@ -413,12 +443,16 @@ class ScoreCalcRanks extends ScoreCalcs
         // current PowerScore is "better" than X others, and "worse" than Y others
         $efficPercs = [
             "Facility"   => [ "better" => 0, "worse" => 0 ], 
+            "FacNon"     => [ "better" => 0, "worse" => 0 ], 
+            "FacAll"     => [ "better" => 0, "worse" => 0 ], 
             "Production" => [ "better" => 0, "worse" => 0 ], 
+            "ProdNon"    => [ "better" => 0, "worse" => 0 ], 
+            "ProdAll"    => [ "better" => 0, "worse" => 0 ], 
             "HVAC"       => [ "better" => 0, "worse" => 0 ], 
             "Lighting"   => [ "better" => 0, "worse" => 0 ],
-            "Carbon"     => [ "better" => 0, "worse" => 0 ], 
             "Water"      => [ "better" => 0, "worse" => 0 ], 
-            "Waste"      => [ "better" => 0, "worse" => 0 ]
+            "Waste"      => [ "better" => 0, "worse" => 0 ],
+            "Carbon"     => [ "better" => 0, "worse" => 0 ]
         ];
         foreach ($allscores as $s2) {
             $which = "worse";
@@ -428,11 +462,39 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["Facility"][$which]++;
             }
+            if ($s2->ps_effic_non_electric > 0 
+                && $s2->ps_effic_non_electric_status == $this->statusComplete) {
+                if ($s->ps_effic_non_electric <= $s2->ps_effic_non_electric) {
+                    $which = "better";
+                }
+                $efficPercs["FacNon"][$which]++;
+            }
+            if ($s2->ps_effic_fac_all > 0 
+                && $s2->ps_effic_fac_all_status == $this->statusComplete) {
+                if ($s->ps_effic_fac_all <= $s2->ps_effic_fac_all) {
+                    $which = "better";
+                }
+                $efficPercs["FacAll"][$which]++;
+            }
             if ($s2->ps_effic_production_status == $this->statusComplete) {
                 if ($s->ps_effic_production >= $s2->ps_effic_production) {
                     $which = "better";
                 }
                 $efficPercs["Production"][$which]++;
+            }
+            if ($s2->ps_effic_prod_non > 0 
+                && $s2->ps_effic_prod_non_status == $this->statusComplete) {
+                if ($s->ps_effic_prod_non <= $s2->ps_effic_prod_non) {
+                    $which = "better";
+                }
+                $efficPercs["ProdNon"][$which]++;
+            }
+            if ($s2->ps_effic_prod_all > 0 
+                && $s2->ps_effic_prod_all_status == $this->statusComplete) {
+                if ($s->ps_effic_prod_all <= $s2->ps_effic_prod_all) {
+                    $which = "better";
+                }
+                $efficPercs["ProdAll"][$which]++;
             }
             if ($s2->ps_effic_hvac_status == $this->statusComplete) {
                 if ($s->ps_effic_hvac <= $s2->ps_effic_hvac) {
@@ -502,6 +564,64 @@ class ScoreCalcRanks extends ScoreCalcs
                 );
                 $this->saveOneScoreRank($ps);
             }
+        }
+        return true;
+    }
+
+    public function chkPowerScoreRanked()
+    {
+        if (isset($this->sessData->dataSets["powerscore"])) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+
+            if (!isset($GLOBALS["SL"]->x["psCompany"][$ps->ps_id])) {
+                $GLOBALS["SL"]->x["psCompany"][$ps->ps_id] = '';
+                $chk = DB::table('rii_user_ps_perms')
+                    ->join('rii_user_facilities', function ($join) {
+                        $join->on('rii_user_ps_perms.usr_perm_facility_id', 
+                            '=', 'rii_user_facilities.usr_fac_id');
+                    })
+                    ->where('rii_user_ps_perms.usr_perm_psid', $ps->ps_id)
+                    ->first();
+                if ($chk 
+                    && isset($chk->usr_fac_name) 
+                    && trim($chk->usr_fac_name) != '') {
+                    $GLOBALS["SL"]->x["psCompany"][$ps->ps_id] = 'Facility: ' 
+                        . $chk->usr_fac_name;
+                } else {
+                    $chk = DB::table('rii_user_ps_perms')
+                        ->join('rii_user_companies', function ($join) {
+                            $join->on('rii_user_ps_perms.usr_perm_company_id', 
+                                '=', 'rii_user_companies.usr_com_id');
+                        })
+                        ->where('rii_user_ps_perms.usr_perm_psid', $ps->ps_id)
+                        ->first();
+                    if ($chk 
+                        && isset($chk->usr_com_name) 
+                        && trim($chk->usr_com_name) != '') {
+                        $GLOBALS["SL"]->x["psCompany"][$ps->ps_id] = $chk->usr_com_name;
+                    }
+                }
+            }
+
+
+        /*
+            if ((!isset($ps->ps_effic_over_similar)
+                    || $ps->ps_effic_over_similar <= 0)
+                && isset($ps->ps_kwh)
+                && intVal($ps->ps_kwh) > 0) {
+                $flt = '&fltFarm=' . $ps->ps_characterize;
+                $ranks = RIIPsRanks::where('ps_rnk_filters', $flt)
+                    ->first();
+                if ($ranks && isset($ranks->ps_rnk_overall_avg)) {
+                    $this->sessData->dataSets["powerscore"][0]->ps_effic_over_similar
+                        = $GLOBALS["SL"]->getArrPercentileStr($ranks->ps_rnk_overall_avg);
+                }
+
+                $ranks = RIIPsRanks::where('ps_rnk_filters', '&fltFarm=0')
+                    ->first();
+
+            }
+        */
         }
         return true;
     }

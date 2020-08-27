@@ -13,6 +13,7 @@ namespace CannabisScore\Controllers;
 use App\Models\RIIPsGrowingRooms;
 use App\Models\RIIPsLightTypes;
 use App\Models\RIIPsLinkHvacRoom;
+use App\Models\RIIPsOnsiteFuels;
 use CannabisScore\Controllers\ScoreCondsCustom;
 
 class ScoreFormsCustom extends ScoreCondsCustom
@@ -302,6 +303,40 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return $hvacDefID;
     }
 
+    protected function saveMonthKwh($nID)
+    {
+        $tot = 0;
+        if (isset($this->sessData->dataSets["ps_monthly"]) 
+            && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
+                if (isset($mon->ps_month_kwh1)) {
+                    $tot += intVal($mon->ps_month_kwh1);
+                }
+            }
+            $this->sessData->dataSets["powerscore"][0]->ps_kwh = $tot;
+            $this->sessData->dataSets["powerscore"][0]->save();
+        }
+        return $tot;
+    }
+
+    protected function saveOtherFuels($nID)
+    {
+//echo '<pre>'; print_r($GLOBALS["SL"]->REQ->all()); echo '</pre>'; exit;
+        if ($GLOBALS["SL"]->REQ->has('n1713fld')
+            && intVal($GLOBALS["SL"]->REQ->get('n1713fld')) == 1) {
+            return false;
+        }
+        if (isset($this->sessData->dataSets["ps_onsite_fuels"])
+            && sizeof($this->sessData->dataSets["ps_onsite_fuels"]) > 0) {
+            foreach ($this->sessData->dataSets["ps_onsite_fuels"] as $f) {
+                RIIPsOnsiteFuels::find($f->getKey())
+                    ->delete();
+            }
+            unset($this->sessData->dataSets["ps_onsite_fuels"]);
+        }
+        return true;
+    }
+
     protected function postRoomHvacType($nID, $nIDtxt)
     {
         $hvacTypes = [];
@@ -416,6 +451,62 @@ class ScoreFormsCustom extends ScoreCondsCustom
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
     }
 
+    protected function saveWaterStoreAny($nID)
+    {
+        if (isset($this->sessData->dataSets["ps_onsite"])
+            && isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_id)) {
+            if ($GLOBALS["SL"]->REQ->has('n1773fld')) {
+                $responses = $GLOBALS["SL"]->REQ->get('n1773fld');
+                if (is_array($responses) && sizeof($responses) > 0) {
+                    $responses = $GLOBALS["SL"]->arrayToInts($responses);
+                    if (in_array(0, $responses)) {
+                        $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source = 0;
+                        $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc = 0;
+                    } else {
+                        if (in_array(1, $responses)) {
+                            $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source = 1;
+                        } else {
+                            $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source = 0;
+                        }
+                        if (in_array(2, $responses)) {
+                            $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc = 1;
+                        } else {
+                            $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc = 0;
+                        }
+                    }
+                }
+            } else {
+                $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source = 0;
+                $this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc = 0;
+            }
+            $this->sessData->dataSets["ps_onsite"][0]->save();
+        }
+        return true;
+    }
+
+    protected function sessDataWaterStoreAny($nID)
+    {
+        $ret = [];
+        if (isset($this->sessData->dataSets["ps_onsite"])
+            && isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_id)) {
+            if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source)
+                && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source) == 0
+                && isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc)
+                && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc) == 0) {
+                $ret[] = 0;
+            } else {
+                if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source)
+                    && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_source) == 1) {
+                    $ret[] = 1;
+                }
+                if (isset($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc)
+                    && intVal($this->sessData->dataSets["ps_onsite"][0]->ps_on_water_store_recirc) == 1) {
+                    $ret[] = 2;
+                }
+            }
+        }
+        return $ret;
+    }
     
     protected function prepFeedbackSkipBtn()
     {

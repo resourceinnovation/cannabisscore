@@ -17,12 +17,18 @@
         </div>
     </div>
 @else
-    <h5><i class="fa fa-star" aria-hidden="true"></i> 
-       Your farm may be eligible for upgrade incentives from your utility.
-    </h5>
-    <p>
-        We encourage you to contact your electricity provider to 
-        ask about incentives on efficient lighting and HVAC.
-    </p>
+    <div class="fR w95">
+        <h5 class="mTn5">
+           Your facility may be eligible for upgrade incentives 
+           from your regional utilities <nobr>and efficiency programs.</nobr>
+        </h5>
+        <p>
+            We encourage you to contact your energy providers and local 
+            efficiency programs to ask about incentives on efficient lighting, 
+            HVAC and dehumidification, and controls technologies.
+        </p>
+    </div>
+    <h5 class="mT0"><i class="fa fa-star" aria-hidden="true"></i></h5>
+    <div class="fC"></div>
 @endif
 <style> #node501 { margin-top: 40px; } </style>

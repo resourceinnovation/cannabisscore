@@ -4,7 +4,7 @@
     @if (isset($importResult)) {!! $importResult !!} @endif
 
     <p>&nbsp;</p>
-    <h4>Recalculate All Sub-Scores</h4>
+    <h4>Recalculate All KPIs</h4>
     <p>
         This process wipes all PowerScore calculations clean, and re-performs them fresh.
         This is useful for anything cases of any changes to our scoring logic, big or small.
@@ -13,7 +13,7 @@
         Occasionally good for mysterious problems.
     </p>
     <p>
-        <a href="?recalc=1" class="btn btn-primary btn-lg">Recalculate All Sub-Scores</a>
+        <a href="?recalc=1" class="btn btn-primary btn-lg">Recalculate All KPIs</a>
     </p>
 
     <p>&nbsp;</p>

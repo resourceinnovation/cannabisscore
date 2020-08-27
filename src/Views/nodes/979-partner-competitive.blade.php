@@ -29,9 +29,9 @@
                 <p>
                   Submit a record to see comparative results:<br />
                   <a href="https://powerscore.resourceinnovation.org/start-for-{{ 
-                      $GLOBALS['SL']->x['usrInfo']->slug 
+                      $GLOBALS['SL']->x['usrInfo']->companies[0]->slug 
                       }}">https://powerscore.resourceinnovation.org/start-for-{{ 
-                      $GLOBALS['SL']->x['usrInfo']->slug }}</a>
+                      $GLOBALS['SL']->x['usrInfo']->companies[0]->slug }}</a>
                 </p>
             </div>
         </div>
@@ -45,7 +45,14 @@
         <div class="col-lg-8 pB20">
             <div class="slCard nodeWrap mB20">
                 <h5>{{ $leg[2] }} ( {{ $leg[3] }} )</h5>
-                <canvas id="chartDiv{{ $l }}" class="dataChart" width="100%"></canvas>
+            @if ($chartDataCnt[$leg[0]] == 0)
+                This report will populate over time as more PowerScore users submit records.
+                <div class="disNon">
+            @endif
+                    <canvas id="chartDiv{{ $l }}" class="dataChart" width="100%"></canvas>
+            @if ($chartDataCnt[$leg[0]] == 0)
+                </div>
+            @endif
             </div>
         </div>
         <div class="col-lg-2 pB20"></div>

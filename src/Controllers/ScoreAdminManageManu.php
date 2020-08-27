@@ -19,8 +19,12 @@ use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
+use App\Models\RIIUserCompanies;
+use App\Models\RIIUserFacilities;
+use App\Models\RIIUserPsPerms;
 use App\Models\SLUsersRoles;
 use App\Models\User;
+use CannabisScore\Controllers\ScoreUserInfo;
 
 class ScoreAdminManageManu
 {
@@ -29,7 +33,6 @@ class ScoreAdminManageManu
 
     public function __construct()
     {
-        $this->addManufacturers();
         $this->v["manuSrchWords"] = [];
         if ($GLOBALS["SL"]->REQ->has('manuSrch')) {
             $this->v["manuSrchWords"] = $GLOBALS["SL"]->mexplode(' ', 
@@ -55,7 +58,8 @@ class ScoreAdminManageManu
     public function printMgmtManufacturers($nID = -3)
     {
         $this->cntManufacturerAdoption();
-        if ($GLOBALS["SL"]->REQ->has('excel')) {
+        if ($GLOBALS["SL"]->REQ->has('excel')
+            && $GLOBALS["SL"]->x["partnerLevel"] > 4) {
             $innerTable = view(
                 'vendor.cannabisscore.nodes.914-manage-manufacturers-adoption-excel', 
                 $this->v
@@ -103,18 +107,19 @@ class ScoreAdminManageManu
         if ($GLOBALS["SL"]->REQ->has('addPartnerManu')
             && intVal($GLOBALS["SL"]->REQ->addPartnerManu) == 1) {
             $this->savePartnerInvite();
-        }
-        if ($GLOBALS["SL"]->REQ->has('edit')
+        } elseif ($GLOBALS["SL"]->REQ->has('edit')
             && intVal($GLOBALS["SL"]->REQ->edit) > 0) {
             $this->v["editPartner"] = new ScoreUserInfo;
             $this->v["editPartner"]->loadInvite(intVal($GLOBALS["SL"]->REQ->edit));
             if ($GLOBALS["SL"]->REQ->has('save')) {
                 $this->savePartnerInvite();
-                $this->v["editPartner"] = new ScoreUserInfo;
-                $this->v["editPartner"]->loadInvite(intVal($GLOBALS["SL"]->REQ->edit));
+                $this->v["editPartner"] = null;
             } else {
                 $this->v["isEditing"] = true;
             }
+        }
+        if ($this->v["editPartner"] === null) {
+            $this->v["editPartner"] = new ScoreUserInfo;
         }
         $this->loadPartnerUsers();
         $this->loadPartnerInvites();
@@ -131,79 +136,190 @@ class ScoreAdminManageManu
     }
 
     /**
-     * Process the custom admin form to add a new partner user.
+     * Print admin overview tools to manage partner 
+     * companies and their facilities.
      *
      * @param int $nID
      * @return string
      */
-    public function savePartnerInvite()
+    public function printMgmtCompanyFacs($nID = -3)
     {
-        $userID = $manu = 0;
-        $user = $userInfo = null;
-        $inviteEmail = '';
-        if ($GLOBALS["SL"]->REQ->has('partnerInviteEmail')
-            && trim($GLOBALS["SL"]->REQ->partnerInviteEmail) != '') {
-            $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
+        $this->v["facLimit"]    = 10;
+        $this->v["editPartner"] = null;
+        $this->v["isEditing"]   = false;
+
+        if ($GLOBALS["SL"]->REQ->has('save')
+            && intVal($GLOBALS["SL"]->REQ->save) == 1) {
+            $this->saveCompanyEdit();
         }
-        if (isset($this->v["editPartner"])) {
-            $userID = $this->v["editPartner"]->id;
-            $user = User::find($userID);
-            $userInfo = RIIUserInfo::find($this->v["editPartner"]->usrInfoID);
-        } else { // Create new invite records
-            if ($GLOBALS["SL"]->REQ->has('partnerUser')) {
-                $userID = intVal($GLOBALS["SL"]->REQ->partnerUser);
-                if ($userID > 0) {
-                    $user = User::find($userID);
-                }
-            }
-            if ((!$user || !isset($user->id)) && $inviteEmail != '') {
-                $user = User::where('email', 'LIKE', $inviteEmail)
-                    ->orderBy('id', 'asc')
-                    ->first();
-            }
-            if ($user && isset($user->id)) {
-                $userID = $user->id;
-                $userInfo = RIIUserInfo::where('usr_user_id', $userID)
-                    ->first();
-                if (!$userInfo || !isset($userInfo->usr_id)) {
-                    $userInfo = RIIUserInfo::where('usr_invite_email', $user->email)
-                        ->first();
-                }
-            } elseif ($inviteEmail != '') {
-                $userInfo = RIIUserInfo::where('usr_invite_email', $inviteEmail)
-                    ->first();
-            }
-            if (!$userInfo || !isset($userInfo->usr_id)) {
-                $userInfo = new RIIUserInfo;
-                $userInfo->usr_user_id = $userID;
+
+        if ($GLOBALS["SL"]->REQ->has('edit')
+            && intVal($GLOBALS["SL"]->REQ->edit) > 0
+            && !$GLOBALS["SL"]->REQ->has('save')) {
+            $this->v["isEditing"] = true;
+            $com = RIIUserCompanies::find(intVal($GLOBALS["SL"]->REQ->edit));
+            $this->v["editPartner"] = new ScoreUserCompanies($com);
+        } else {
+            $this->v["editPartner"] = new ScoreUserCompanies;
+        }
+
+        $this->v["companies"] = [];
+        $chk = RIIUserCompanies::whereNotNull('usr_com_name')
+            ->orderBy('usr_com_name', 'asc')
+            ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $com) {
+                $this->v["companies"][] = new ScoreUserCompanies($com);
             }
         }
-        $userInfo->usr_invite_email = $inviteEmail;
+        $this->v["manufacts"] = $GLOBALS["CUST"]->loadManufactIDs();
+//echo '<pre>'; print_r($this->v["companies"]); echo '</pre>'; exit;
+        $GLOBALS["SL"]->pageAJAX .= view(
+            'vendor.cannabisscore.nodes.1560-company-edit-ajax', 
+            $this->v
+        )->render() . view(
+            'vendor.cannabisscore.nodes.1560-facilities-edit-ajax', 
+            $this->v
+        )->render();
+        return view(
+            'vendor.cannabisscore.nodes.1560-company-edit', 
+            $this->v
+        )->render() . view(
+            'vendor.cannabisscore.nodes.1560-manage-company-facilities', 
+            $this->v
+        )->render();
+    }
+    
+    /**
+     * Update partner company details.
+     *
+     * @return boolean
+     */
+    protected function saveCompanyEdit()
+    {
+        $defNon = $GLOBALS["SL"]->def->getID('Permissions', 'None');
+        $defWrt = $GLOBALS["SL"]->def->getID('Permissions', 'Write');
+
+        $com = new RIIUserCompanies;
+        if ($GLOBALS["SL"]->REQ->has('edit')
+            && intVal($GLOBALS["SL"]->REQ->edit) > 0
+            && $GLOBALS["SL"]->REQ->has('save')) {
+            $com = RIIUserCompanies::find(intVal($GLOBALS["SL"]->REQ->edit));
+        }
         if ($GLOBALS["SL"]->REQ->has('partnerCompanyName')
-            && trim($GLOBALS["SL"]->REQ->partnerCompanyName) != '') {
-            $userInfo->usr_company_name = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
+            && trim($GLOBALS["SL"]->REQ->get('partnerCompanyName')) != '') {
+            $com->usr_com_name = trim($GLOBALS["SL"]->REQ->get('partnerCompanyName'));
         }
+        if ($GLOBALS["SL"]->REQ->has('partnerCompanySlug')
+            && trim($GLOBALS["SL"]->REQ->get('partnerCompanySlug')) != '') {
+            $com->usr_com_slug = trim($GLOBALS["SL"]->REQ->get('partnerCompanySlug'));
+        } else {
+            $com->usr_com_slug = $GLOBALS["SL"]->slugify($com->usr_com_name);
+        }
+        $com->save();
+
+        $chk = RIIUserManufacturers::where('usr_man_company_id', $com->usr_com_id)
+            ->delete();
         if ($GLOBALS["SL"]->REQ->has('partnerManu')
             && intVal($GLOBALS["SL"]->REQ->partnerManu) > 0) {
-            $chk = RIIUserManufacturers::where('usr_man_user_id', $userID)
-                ->delete();
-            $userInfo->usr_manu_ids = intVal($GLOBALS["SL"]->REQ->partnerManu);
+            $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
+            $perm = RIIUserManufacturers::where('usr_man_manu_id', $manu)
+                ->where('usr_man_company_id', $com->usr_com_id)
+                ->first();
+            if (!$perm || !isset($perm->usr_man_id)) {
+                $perm = new RIIUserManufacturers;
+                $perm->usr_man_company_id  = $com->usr_com_id;
+                $perm->usr_man_manu_id     = $manu;
+                $perm->save();
+            }
         }
-        if ($GLOBALS["SL"]->REQ->has('partnerLevel')
-            && trim($GLOBALS["SL"]->REQ->partnerLevel) != '') {
-            $userInfo->usr_level = trim($GLOBALS["SL"]->REQ->partnerLevel);
-        }
-        if ($GLOBALS["SL"]->REQ->has('partnerExpire')
-            && trim($GLOBALS["SL"]->REQ->partnerExpire) != '') {
-            $userInfo->usr_membership_expiration = trim($GLOBALS["SL"]->REQ->partnerExpire);
-        }
-        if ($inviteEmail != '') {
-            $userInfo->usr_invite_email = $inviteEmail;
-        }
-        $userInfo->save();
+        $this->saveCompanyFacilities($com->usr_com_id);
         return true;
     }
     
+    /**
+     * Update partner company details.
+     *
+     * @return boolean
+     */
+    protected function saveCompanyFacilities($companyID)
+    {
+        $defNon = $GLOBALS["SL"]->def->getID('Permissions', 'None');
+        $defWrt = $GLOBALS["SL"]->def->getID('Permissions', 'Write');
+        for ($i = 0; $i < $this->v["facLimit"]; $i++) {
+            $fac = null;
+            if ($GLOBALS["SL"]->REQ->has('facID' . $i)
+                && intVal($GLOBALS["SL"]->REQ->get('facID' . $i)) > 0) {
+                $fac = RIIUserFacilities::find($GLOBALS["SL"]->REQ->get('facID' . $i));
+            } else {
+                $fac = new RIIUserFacilities;
+            }
+            if ($GLOBALS["SL"]->REQ->has('facName' . $i)
+                && trim($GLOBALS["SL"]->REQ->get('facName' . $i)) != '') {
+                $fac->usr_fac_name = trim($GLOBALS["SL"]->REQ->get('facName' . $i));
+                $fac->usr_fac_slug = trim($GLOBALS["SL"]->REQ->get('facSlug' . $i));
+                if ($fac->usr_fac_slug == '') {
+                    $fac->usr_fac_slug = $GLOBALS["SL"]->slugify($fac->usr_fac_name);
+                }
+                $fac->save();
+                $perm = RIIUserPsPerms::where('usr_perm_company_id', $companyID)
+                    ->where('usr_perm_facility_id', $fac->usr_fac_id)
+                    ->where('usr_perm_permissions', 'NOT LIKE', $defNon)
+                    ->first();
+                if (!$perm || !isset($perm->usr_perm_facility_id)) {
+                    $perm = new RIIUserPsPerms;
+                    $perm->usr_perm_company_id  = $companyID;
+                    $perm->usr_perm_facility_id = $fac->usr_fac_id;
+                    $perm->usr_perm_permissions = $defWrt;
+                    $perm->save();
+                }
+            } elseif (isset($fac->usr_fac_id)) {
+                RIIUserPsPerms::where('usr_perm_company_id', $companyID)
+                    ->where('usr_perm_facility_id', $fac->usr_fac_id)
+                    ->delete();
+                $fac->delete();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Print admin overview tools to manage partner 
+     * companies and their facilities.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function printMyCompanyFacs($nID = -3)
+    {
+        $this->v["facLimit"]    = 10;
+        $com = null;
+        if (isset($GLOBALS["SL"]->x["usrInfo"])
+            && sizeof($GLOBALS["SL"]->x["usrInfo"]->companies) > 0) {
+            $com = $GLOBALS["SL"]->x["usrInfo"]->companies[0];
+            $com = RIIUserCompanies::find($com->id);
+        }
+        if (isset($com->usr_com_id)
+            && $GLOBALS["SL"]->REQ->has('save')
+            && intVal($GLOBALS["SL"]->REQ->save) == 1) {
+            $this->saveCompanyFacilities($com->usr_com_id);
+            echo '<script type="text/javascript"> '
+                . 'setTimeout("window.location=\'/dashboard#refLinks\'", 100); '
+                . '</script>';
+            exit;
+        }
+        $this->v["editPartner"] = new ScoreUserCompanies($com);
+//echo '<pre>'; print_r($this->v["editPartner"]); print_r($GLOBALS["SL"]->x["usrInfo"]); echo '</pre>'; exit;
+        $GLOBALS["SL"]->pageAJAX .= view(
+            'vendor.cannabisscore.nodes.1560-facilities-edit-ajax', 
+            $this->v
+        )->render();
+        return view(
+            'vendor.cannabisscore.nodes.1563-facilities-edit', 
+            $this->v
+        )->render();
+    }
+
     /**
      * Update manufacturer counts for how many rooms 
      * in the official data set use their lights.
@@ -280,6 +396,7 @@ class ScoreAdminManageManu
     {
         $GLOBALS["SL"]->x["partners"] 
             = $GLOBALS["SL"]->x["partnerLookup"] 
+            = $GLOBALS["SL"]->x["allCompanies"] 
             = [];
         $chk = User::whereIn('id', function($query){
                 $query->select('role_user_uid')
@@ -297,6 +414,9 @@ class ScoreAdminManageManu
             }
         }
         $this->v["manufacts"] = $GLOBALS["CUST"]->loadManufactIDs();
+        $GLOBALS["SL"]->x["allCompanies"] = RIIUserCompanies::whereNotNull('usr_com_name')
+            ->orderBy('usr_com_name', 'asc')
+            ->get();
         return true;
     }
     
@@ -307,9 +427,17 @@ class ScoreAdminManageManu
      */
     protected function loadPartnerInvites()
     {
-        $GLOBALS["SL"]->x["partnerInvites"] = RIIUserInfo::where('usr_user_id', 0)
+        $GLOBALS["SL"]->x["partnerInvites"] = [];
+        $chk = RIIUserInfo::where('usr_user_id', 0)
             ->whereNotNull('usr_invite_email')
             ->get();
+        if ($chk->isNotEmpty()) {
+            foreach ($chk as $partner) {
+                $info = new ScoreUserInfo;
+                $info->loadInviteRow($partner);
+                $GLOBALS["SL"]->x["partnerInvites"][] = $info;
+            }
+        }
         return true;
     }
     
@@ -360,18 +488,157 @@ class ScoreAdminManageManu
             $fld = 'manu_cnt_' . strtolower($nick);
             $this->v["manus"][$m]->{ $fld } += sizeof($found[$nick]);
             $fld = 'manu_ids_' . strtolower($nick);
-            $this->v["manus"][$m]->{ $fld } = ',' 
-                . implode(',', $found[$nick]) . ',';
+            $this->v["manus"][$m]->{ $fld } = ',' . implode(',', $found[$nick]) . ',';
+        }
+        return true;
+    }
+
+    /**
+     * Process the custom admin form to add a new partner user.
+     *
+     * @param int $nID
+     * @return string
+     */
+    public function savePartnerInvite()
+    {
+        $userID = $manu = 0;
+        $user = $userInfo = null;
+        $inviteEmail = '';
+        if ($GLOBALS["SL"]->REQ->has('partnerInviteEmail')
+            && trim($GLOBALS["SL"]->REQ->partnerInviteEmail) != '') {
+            $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
+        }
+        if (isset($this->v["editPartner"])) {
+            $user = User::find($this->v["editPartner"]->id);
+            $userInfo = RIIUserInfo::find($this->v["editPartner"]->usrInfoID);
+            if ($userInfo->usr_invite_email != $inviteEmail) {
+                $userInfo->usr_invite_email = $inviteEmail;
+                $userInfo->save();
+            }
+        } else { // Create new invite records
+            if ($GLOBALS["SL"]->REQ->has('partnerUser')) {
+                $userID = intVal($GLOBALS["SL"]->REQ->partnerUser);
+                if ($userID > 0) {
+                    $user = User::find($userID);
+                }
+            }
+            if ((!$user || !isset($user->id)) && $inviteEmail != '') {
+                $user = User::where('email', 'LIKE', $inviteEmail)
+                    ->orderBy('id', 'asc')
+                    ->first();
+            }
+            if ($user && isset($user->id)) {
+                $userID = $user->id;
+                $userInfo = RIIUserInfo::where('usr_user_id', $userID)
+                    ->first();
+                if (!$userInfo || !isset($userInfo->usr_id)) {
+                    $userInfo = RIIUserInfo::where('usr_invite_email', $user->email)
+                        ->first();
+                }
+            } elseif ($inviteEmail != '') {
+                $userInfo = RIIUserInfo::where('usr_invite_email', $inviteEmail)
+                    ->first();
+            }
+            if (!$userInfo || !isset($userInfo->usr_id)) {
+                $userInfo = new RIIUserInfo;
+                $userInfo->usr_user_id = $userID;
+                if ($inviteEmail != '') {
+                    $userInfo->usr_invite_email = $inviteEmail;
+                }
+                $userInfo->save();
+            }
+            $this->v["editPartner"] = new ScoreUserInfo;
+            $this->v["editPartner"]->loadInvite($userInfo->usr_id);
+        }
+        $this->savePartnerLevels($userInfo);
+        $this->savePartnerCompany($userInfo);
+        return true;
+    }
+    
+    /**
+     * Admins can manage partner access levels.
+     *
+     * @return boolean
+     */
+    private function savePartnerLevels(&$userInfo)
+    {
+        if ($this->v["editPartner"]->id > 0) {
+            // Then full user account was created, not just an invitation
+            $defPartner = 368;
+            $role = SLUsersRoles::where('role_user_rid', $defPartner)
+                ->where('role_user_uid', $this->v["editPartner"]->id)
+                ->first();
+            if (!$role || !isset($role->role_user_rid)) {
+                $role = new SLUsersRoles;
+                $role->role_user_uid = $this->v["editPartner"]->id;
+                $role->role_user_rid = $defPartner;
+                $role->save();
+            }
+        }
+        if ($GLOBALS["SL"]->REQ->has('partnerLevel')
+            && trim($GLOBALS["SL"]->REQ->partnerLevel) != '') {
+            $userInfo->usr_level = trim($GLOBALS["SL"]->REQ->partnerLevel);
+        }
+        if ($GLOBALS["SL"]->REQ->has('partnerExpire')
+            && trim($GLOBALS["SL"]->REQ->partnerExpire) != '') {
+            $userInfo->usr_membership_expiration = trim($GLOBALS["SL"]->REQ->partnerExpire);
+        }
+        $userInfo->save();
+        return true;
+    }
+    
+    /**
+     * Admins can manage company and manufacturer assignments to partners.
+     *
+     * @return boolean
+     */
+    public function savePartnerCompany(&$userInfo)
+    {
+        $this->clearUserCompanyPerms();
+        $defNon = $GLOBALS["SL"]->def->getID('Permissions', 'None');
+        $companyID = 0;
+        if ($GLOBALS["SL"]->REQ->has('partnerCompany')
+            && intVal($GLOBALS["SL"]->REQ->partnerCompany) > 0) {
+            $companyID = intVal($GLOBALS["SL"]->REQ->partnerCompany);
+        } elseif ($GLOBALS["SL"]->REQ->has('partnerCompanyName')
+            && trim($GLOBALS["SL"]->REQ->partnerCompanyName) != '') {
+            $userInfo->usr_company_name = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
+            $userInfo->save();
+            $chk = RIIUserCompanies::where('usr_com_name', 'LIKE', $userInfo->usr_company_name)
+                ->orderBy('usr_com_id', 'asc')
+                ->first();
+            if ($chk && isset($chk->usr_com_id)) {
+                $companyID = $chk->usr_com_id;
+            } else {
+                $companyID = $this->createPartnerCompanyRecord($userInfo->usr_company_name);
+            }
+        }
+        if ($companyID > 0) {
+            $this->makeUserCompanyPerm($companyID);
         }
         return true;
     }
     
     /**
+     * Admins can manage company and manufacturer assignments to partners.
+     *
+     * @return boolean
+     */
+    public function createPartnerCompanyRecord($name)
+    {
+        $com = new RIIUserCompanies;
+        $com->usr_com_name = trim($name);
+        $com->usr_com_slug = $GLOBALS["SL"]->slugify(trim($name));
+        $com->save();
+        return $com->usr_com_id;
+    }
+
+    /**
      * Admins can add manufacturers to the database.
      *
      * @return boolean
      */
-    public function addManufacturers()
+    private function addManufacturers()
     {
         if ($GLOBALS["SL"]->REQ->has('addManu') 
             && trim($GLOBALS["SL"]->REQ->get('addManu')) != '') {
@@ -393,76 +660,53 @@ class ScoreAdminManageManu
                     }
                 }
             }
-        } elseif ($GLOBALS["SL"]->REQ->has('partnerCompanyName')) {
-            $usrInfo = null;
-            $company = trim($GLOBALS["SL"]->REQ->partnerCompanyName);
-            if ($company != '') {
-                $usr = $manu = 0;
-                if ($GLOBALS["SL"]->REQ->has('partnerUser')
-                    && intVal($GLOBALS["SL"]->REQ->get('partnerUser')) > 0) {
-                    $usr = intVal($GLOBALS["SL"]->REQ->get('partnerUser'));
-                }
-                if ($GLOBALS["SL"]->REQ->has('partnerManu') 
-                    && intVal($GLOBALS["SL"]->REQ->get('partnerManu')) > 0) {
-                    $manu = intVal($GLOBALS["SL"]->REQ->partnerManu);
-                }
-                $inviteEmail = '';
-                if ($GLOBALS["SL"]->REQ->has('partnerInviteEmail') 
-                    && trim($GLOBALS["SL"]->REQ->partnerInviteEmail) != '') {
-                    $inviteEmail = trim($GLOBALS["SL"]->REQ->partnerInviteEmail);
-                }
-                if ($usr < 0 && $inviteEmail != '') {
-                    $usrChk = User::where('email', 'LIKE', $inviteEmail)
-                        ->first();
-                    if ($usrChk && isset($usrChk->id) && intVal($usrChk->id) > 0) {
-                        $usr = $usrChk->id;
-                    }
-                }
-                if ($usr > 0) {
-                    $role = SLUsersRoles::where('role_user_uid', $usr)
-                        ->where('role_user_rid', 368) // partner def ID
-                        ->first();
-                    if (!$role || !isset($role->role_user_rid)) {
-                        $role = new SLUsersRoles;
-                        $role->role_user_uid = $usr;
-                        $role->role_user_rid = 368;
-                        $role->save();
-                    }
-                    $usrInfo = RIIUserInfo::where('usr_user_id', $usr)
-                        ->first();
-                    if (!$usrInfo || !isset($usrInfo->usr_user_id)) {
-                        $usrInfo = new RIIUserInfo;
-                        $usrInfo->usr_user_id = $usr;
-                    }
-
-                    $usrInfo->usr_company_name = $company;
-                    $usrInfo->save();
-                    $this->addManuUserLink($usr, $manu);
-                }
-            }
         }
         return true;
     }
     
     /**
-     * Add a link between a user and a manufacturer.
+     * Add a link between a user and a company/organization.
      *
-     * @param  int $usr
-     * @param  int $manu
+     * @param  int $company
      * @return boolean
      */
-    protected function addManuUserLink($usr, $manu)
+    protected function makeUserCompanyPerm($companyID = 0, $usrInfoID = 0)
     {
-        $chk = RIIUserManufacturers::where('usr_man_user_id', $usr)
-            ->where('usr_man_manu_id', $manu)
-            ->first();
-        if (!$chk || !isset($chk->usr_man_manu_id)) {
-            $chk = new RIIUserManufacturers;
-            $chk->usr_man_user_id = $usr;
-            $chk->usr_man_manu_id = $manu;
-            $chk->save();
+        if ($usrInfoID <= 0 
+            && isset($this->v["editPartner"])
+            && isset($this->v["editPartner"]->usrInfoID)) {
+            $usrInfoID = $this->v["editPartner"]->usrInfoID;
         }
-        return true;
+        $perm = RIIUserPsPerms::where('usr_perm_company_id', $companyID)
+            ->where('usr_perm_user_id', $usrInfoID)
+            ->first();
+        if (!$perm || !isset($perm->usr_perm_user_id)) {
+            $defWrt = $GLOBALS["SL"]->def->getID('Permissions', 'Write');
+            $perm = new RIIUserPsPerms;
+            $perm->usr_perm_company_id  = $companyID;
+            $perm->usr_perm_user_id     = $usrInfoID;
+            $perm->usr_perm_permissions = $defWrt;
+            $perm->save();
+        }
+        return $perm;
+    }
+    
+    /**
+     * Delete any links between a user and a company/organization.
+     *
+     * @param  int $company
+     * @return boolean
+     */
+    protected function clearUserCompanyPerms($companyID = 0)
+    {
+        if ($companyID <= 0) {
+            return RIIUserPsPerms::where('usr_perm_company_id', '>', 0)
+                ->where('usr_perm_user_id', $this->v["editPartner"]->usrInfoID)
+                ->delete();
+        }
+        return RIIUserPsPerms::where('usr_perm_company_id', $companyID)
+            ->where('usr_perm_user_id', $this->v["editPartner"]->usrInfoID)
+            ->delete();
     }
 
 

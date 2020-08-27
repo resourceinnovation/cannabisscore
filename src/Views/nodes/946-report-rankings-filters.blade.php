@@ -71,11 +71,21 @@
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
     var spn = '<i class="fa-li fa fa-spinner fa-spin mL20 mT10"></i>';
     function reloadGuages() {
-        if (document.getElementById('psScoreOverall')) document.getElementById('psScoreOverall').innerHTML = spn;
-        if (document.getElementById('psScoreFacility')) document.getElementById('psScoreFacility').innerHTML = spn;
-        if (document.getElementById('psScoreProduction')) document.getElementById('psScoreProduction').innerHTML = spn;
-        if (document.getElementById('psScoreHvac')) document.getElementById('psScoreHvac').innerHTML = spn;
-        if (document.getElementById('psScoreLighting')) document.getElementById('psScoreLighting').innerHTML = spn;
+        if (document.getElementById('psScoreOverall')) {
+            document.getElementById('psScoreOverall').innerHTML = spn;
+        }
+        if (document.getElementById('psScoreFacility')) {
+            document.getElementById('psScoreFacility').innerHTML = spn;
+        }
+        if (document.getElementById('psScoreProduction')) {
+            document.getElementById('psScoreProduction').innerHTML = spn;
+        }
+        if (document.getElementById('psScoreHvac')) {
+            document.getElementById('psScoreHvac').innerHTML = spn;
+        }
+        if (document.getElementById('psScoreLighting')) {
+            document.getElementById('psScoreLighting').innerHTML = spn;
+        }
         var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}"+gatherFilts();
         setTimeout(function() { $("#psScoreOverall").load(   ""+baseUrl+"&eff=Overall"); },    2400);
         setTimeout(function() { $("#psScoreFacility").load(  ""+baseUrl+"&eff=Facility"); },   2000);

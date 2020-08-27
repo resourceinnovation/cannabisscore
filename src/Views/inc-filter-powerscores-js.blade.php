@@ -3,6 +3,9 @@
 function gatherFilts() {
     var baseUrl = "";
     @if ($GLOBALS["SL"]->REQ->has('lighting')) baseUrl += "&lighting=1"; @endif
+    if (document.getElementById("dataSetID")) {
+        baseUrl += "&dataSet="+document.getElementById("dataSetID").value.trim();
+    }
     if (document.getElementById("filtFarmID")) {
         baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }
@@ -24,32 +27,26 @@ function gatherFilts() {
     if (document.getElementById("fltSizeID") && parseInt(document.getElementById("fltSizeID").value) > 0) {
         baseUrl += "&fltSize="+parseInt(document.getElementById("fltSizeID").value);
     }
-    if (document.getElementById("fltPerpID") && document.getElementById("fltPerpID").checked) {
-        baseUrl += "&fltPerp=1";
+    if (document.getElementById("fltRenewID") && parseInt(document.getElementById("fltRenewID").value) > 0) {
+        baseUrl += "&fltRenew="+parseInt(document.getElementById("fltRenewID").value);
     }
-    if (document.getElementById("fltPumpID") && document.getElementById("fltPumpID").checked) {
-        baseUrl += "&fltPump=1";
+    if (document.getElementById("fltWaterSourceID") && parseInt(document.getElementById("fltWaterSourceID").value) > 0) {
+        baseUrl += "&fltWaterSource="+parseInt(document.getElementById("fltWaterSourceID").value);
     }
-    if (document.getElementById("fltWtrhID") && document.getElementById("fltWtrhID").checked) {
-        baseUrl += "&fltWtrh=1";
+    if (document.getElementById("fltWaterStoreID") && parseInt(document.getElementById("fltWaterStoreID").value) > 0) {
+        baseUrl += "&fltWaterStore="+parseInt(document.getElementById("fltWaterStoreID").value);
     }
-    if (document.getElementById("fltManuID") && document.getElementById("fltManuID").checked) {
-        baseUrl += "&fltManu=1";
+    if (document.getElementById("fltWaterStoreSysID") && parseInt(document.getElementById("fltWaterStoreSysID").value) > 0) {
+        baseUrl += "&fltWaterStoreSys="+parseInt(document.getElementById("fltWaterStoreSysID").value);
     }
-    if (document.getElementById("fltAutoID") && document.getElementById("fltAutoID").checked) {
-        baseUrl += "&fltAuto=1";
+    if (document.getElementById("fltWaterStoreMethID") && parseInt(document.getElementById("fltWaterStoreMethID").value) > 0) {
+        baseUrl += "&fltWaterStoreMeth="+parseInt(document.getElementById("fltWaterStoreMethID").value);
     }
-    if (document.getElementById("fltVertID") && document.getElementById("fltVertID").checked) {
-        baseUrl += "&fltVert=1";
+    if (document.getElementById("fltGrowMediaID") && parseInt(document.getElementById("fltGrowMediaID").value) > 0) {
+        baseUrl += "&fltGrowMedia="+parseInt(document.getElementById("fltGrowMediaID").value);
     }
-    var fltRenew = "";
-    for (var i=1; i <= 10; i++) {
-        if (document.getElementById("fltRenew"+i+"") && document.getElementById("fltRenew"+i+"").checked) {
-            fltRenew += ","+document.getElementById("fltRenew"+i+"").value;
-        }
-    }
-    if (fltRenew.trim() != '') {
-        baseUrl += "&fltRenew="+fltRenew.substring(1);
+    if (document.getElementById("fltTechniquesID") && parseInt(document.getElementById("fltTechniquesID").value) > 0) {
+        baseUrl += "&fltTechniques="+parseInt(document.getElementById("fltTechniquesID").value);
     }
     if (document.getElementById("fltCmplID") && document.getElementById("fltCmplID").value >= 0) {
         baseUrl += "&fltCmpl="+document.getElementById("fltCmplID").value;
@@ -62,6 +59,9 @@ function gatherFilts() {
     }
     if (document.getElementById("fltPartnerID") && document.getElementById("fltPartnerID").value > 0) {
         baseUrl += "&fltPartner="+document.getElementById("fltPartnerID").value;
+    }
+    if (document.getElementById("fltFacilityID") && document.getElementById("fltFacilityID").value > 0) {
+        baseUrl += "&fltFacility="+document.getElementById("fltFacilityID").value;
     }
     return baseUrl;
 }

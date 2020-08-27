@@ -18,6 +18,7 @@ use App\Models\RIIPsRanks;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
+use App\Models\RIIUserInfo;
 use CannabisScore\Controllers\ScoreStats;
 use CannabisScore\Controllers\ScoreListingsGraph;
 
@@ -61,12 +62,15 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         $this->v["statCompete"] = new ScoreStats;
         $this->initPartnerCompeteData();
 
-        $avgs = [];
+        $this->v["chartDataCnt"] = $avgs = [];
         foreach ($this->v["farmTypes"] as $label => $farm) {
             $avgs[$farm] = [];
             foreach ($this->v["dataLegend"] as $l => $leg) {
                 $avgs[$farm][$leg[0]] = [ 0, [] ];
             }
+        }
+        foreach ($this->v["dataLegend"] as $l => $leg) {
+            $this->v["chartDataCnt"][$leg[0]] = 0;
         }
         $this->searcherAvgs = new CannabisScoreSearcher;
         $this->searcherAvgs->getSearchFilts(1);
@@ -90,6 +94,7 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                 foreach ($this->v["dataLegend"] as $l => $leg) {
                     $sum = array_sum($avgs[$farm][$leg[0]][1]);
                     $cnt = count($avgs[$farm][$leg[0]][1]);
+                    $this->v["chartDataCnt"][$leg[0]] += $cnt;
                     if ($cnt > 0) {
                         $avgs[$farm][$leg[0]][0] = $sum/$cnt;
                     } else {
@@ -100,9 +105,14 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         }
 //echo '<pre>'; print_r($avgs); echo '</pre>'; exit;
 
-
         $this->searcher = new CannabisScoreSearcher;
-        $this->v["partnerPSIDs"] = $this->searcher->getPartnerPSIDs($uID);
+        $this->v["partnerPSIDs"] = [];
+        $usrInfo = RIIUserInfo::where('usr_user_id', $uID)
+            ->orderBy('usr_id', 'asc')
+            ->first();
+        if ($usrInfo && isset($usrInfo->usr_id)) {
+            $this->v["partnerPSIDs"] = $this->searcher->getPartnerPSIDs($usrInfo->usr_id);
+        }
         $this->searcher->getSearchFilts(1);
         $this->searcher->loadAllScoresPublic(
             "->whereIn('ps_id', [" 
@@ -114,21 +124,15 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         $this->v["totCnt"] = sizeof($this->searcher->v["allscores"]);
         if ($this->v["totCnt"] > 0) {
             foreach ($this->searcher->v["allscores"] as $i => $ps) {
-
                 $char = $ps->ps_characterize;
                 $this->v["statCompete"]->resetRecFilt();
                 $this->v["statCompete"]->addRecFilt('farm', $char, $ps->ps_id);
                 foreach ($this->v["dataLegend"] as $leg) {
                     $fld = 'ps_effic_' . $leg[1];
                     if (isset($ps->{ $fld }) && $ps->{ $fld } > 0) {
-                        $this->v["statCompete"]->addRecDat(
-                            $leg[0], 
-                            $ps->{ $fld }, 
-                            $ps->ps_id
-                        );
+                        $this->v["statCompete"]->addRecDat($leg[0], $ps->{ $fld }, $ps->ps_id);
                     }
                 }
-
             }
         }
         $this->v["statCompete"]->resetRecFilt();
@@ -137,22 +141,20 @@ class ScoreReportLightingManu extends ScoreListingsGraph
         $this->v["graphData"] = [];
         foreach ($this->v["dataLegend"] as $l => $leg) {
             $datLet = $this->v["statCompete"]->dAbr($leg[0]);
-            $this->v["graphData"][$l] = [
-                $leg[0],
-                [], 
-                0, 
-            ];
+            $this->v["graphData"][$l] = [ $leg[0], [], 0 ];
             foreach ($this->v["farmTypes"] as $label => $farm) {
                 $this->v["graphData"][$l][1][$farm] = [];
                 if (isset($this->v["statCompete"]->dat["a" . $farm])
                     && isset($this->v["statCompete"]->dat["a" . $farm]["cnt"])
                     && $this->v["statCompete"]->dat["a" . $farm]["cnt"] > 0) {
-                    $avg = $this->v["statCompete"]->dat["a" . $farm]["dat"][$datLet]["avg"];
-                    $this->v["graphData"][$l][1][$farm][] = [
-                        $avg,
-                        $this->v["statCompete"]->dat["a" . $farm]["cnt"],
-                        'Your ' . $label . ' Customers'
-                    ];
+                    $avg = 0;
+                    if (isset($this->v["statCompete"]->dat["a" . $farm]["dat"][$datLet])
+                        && isset($this->v["statCompete"]->dat["a" . $farm]["dat"][$datLet]["avg"])) {
+                        $avg = $this->v["statCompete"]->dat["a" . $farm]["dat"][$datLet]["avg"];
+                    }
+                    $cnt = $this->v["statCompete"]->dat["a" . $farm]["cnt"];
+                    $lab = 'Your ' . $label . ' Customers';
+                    $this->v["graphData"][$l][1][$farm][] = [ $avg, $cnt, $lab ];
                     if ($this->v["graphData"][$l][2] < $avg) {
                         $this->v["graphData"][$l][2] = $avg;
                     }
@@ -160,14 +162,12 @@ class ScoreReportLightingManu extends ScoreListingsGraph
             }
         }
 
-
         foreach ($this->v["farmTypes"] as $label => $farm) {
             foreach ($this->v["dataLegend"] as $l => $leg) {
-                $this->v["graphData"][$l][1][$farm][] = [
-                    $avgs[$farm][$leg[0]][0],
-                    sizeof($avgs[$farm][$leg[0]][1]),
-                    $label . ' Average'
-                ];
+                $avg = $avgs[$farm][$leg[0]][0];
+                $cnt = sizeof($avgs[$farm][$leg[0]][1]);
+                $lab = $label . ' Average';
+                $this->v["graphData"][$l][1][$farm][] = [ $avg, $cnt, $lab ];
                 if ($this->v["graphData"][$l][2] < $avgs[$farm][$leg[0]][0]) {
                     $this->v["graphData"][$l][2] = $avgs[$farm][$leg[0]][0];
                 }
@@ -177,13 +177,12 @@ class ScoreReportLightingManu extends ScoreListingsGraph
 //echo 'statComplete: <pre>'; print_r($this->v["statCompete"]); echo '</pre>'; exit;
 
         $this->searcher->v["nID"] = $nID;
-        $this->searcher->loadFilterCheckboxes();
         $this->v["psFilters"] = view(
             'vendor.cannabisscore.inc-filter-powerscores', 
             $this->searcher->v
         )->render();
         $GLOBALS['SL']->x['partnerVersion'] = true;
-        $GLOBALS["SL"]->x["needsCharts"] = true;
+        $GLOBALS["SL"]->x["needsCharts"]    = true;
         return view(
             'vendor.cannabisscore.nodes.979-partner-competitive', 
             $this->v
@@ -198,12 +197,16 @@ class ScoreReportLightingManu extends ScoreListingsGraph
     protected function initPartnerCompeteData()
     {
         $this->v["dataLegend"] = [
-            ['fac', 'facility',   'Facility Efficiency',   'kBtu / sq ft',    0, 0],
-            ['pro', 'production', 'Production Efficiency', 'g / kBtu',        0, 0],
-            ['lgt', 'lighting',   'Lighting Efficiency',   'kWh / day',       0, 0],
-            ['hvc', 'hvac',       'HVAC Efficiency',       'kBtu / sq ft',    0, 0],
-            ['wtr', 'water',      'Water Efficiency',      'gallons / sq ft', 0, 0],
-            ['wst', 'waste',      'Waste Efficiency',      'lbs / sq ft',     0, 0]
+            ['fAl', 'fac_all' ,   'Facility Efficiency',                'kBtu / sq ft',    0, 0],
+            ['fac', 'facility',   'Electric Facility Efficiency',       'kBtu / sq ft',    0, 0],
+            ['fNo', 'fac_non' ,   'Non-Electric Facility Efficiency',   'kBtu / sq ft',    0, 0],
+            ['pAl', 'prod_all',   'Production Efficiency',              'g / kBtu',        0, 0],
+            ['pro', 'production', 'Electric Production Efficiency',     'g / kBtu',        0, 0],
+            ['pNo', 'prod_non',   'Non-Electric Production Efficiency', 'g / kBtu',        0, 0],
+            ['wtr', 'water',      'Water Efficiency',                   'gallons / sq ft', 0, 0],
+            ['wst', 'waste',      'Waste Efficiency',                   'lbs / sq ft',     0, 0],
+            ['hvc', 'hvac',       'HVAC Efficiency',                    'kBtu / sq ft',    0, 0],
+            ['lgt', 'lighting',   'Lighting Efficiency',                'kWh / day',       0, 0]
         ];
         $this->v["farmTypes"] = [
             'Indoor'           => $GLOBALS["SL"]->def
@@ -272,10 +275,10 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                     if (isset($this->v["usrInfo"]->company)
                         && $manu == $this->v["usrInfo"]->company) {
                         $this->v["lightManuName"] = $manu;
-                    } elseif (isset($this->v["usrInfo"]->manufacturers)
-                        && sizeof($this->v["usrInfo"]->manufacturers) > 0) {
-                        foreach ($this->v["usrInfo"]->manufacturers as $m) {
-                            if ($m->manu_name == $manu) {
+                    } elseif (isset($this->v["usrInfo"]->companies[0]->manus)
+                        && sizeof($this->v["usrInfo"]->companies[0]->manus) > 0) {
+                        foreach ($this->v["usrInfo"]->companies[0]->manus as $m) {
+                            if ($m->name == $manu) {
                                 $this->v["lightManuName"] = $manu;
                             }
                         }
@@ -283,13 +286,14 @@ class ScoreReportLightingManu extends ScoreListingsGraph
                 }
             }
         } elseif ($this->v["user"]->hasRole('partner')
-            && sizeof($this->v["usrInfo"]->manufacturers) > 0
-            && isset($this->v["usrInfo"]->manufacturers[0]->manu_name)) {
-            $this->v["lightManuName"] = $this->v["usrInfo"]
-                ->manufacturers[0]->manu_name;
+            && sizeof($this->v["usrInfo"]->companies[0]->manus) > 0
+            && isset($this->v["usrInfo"]->companies[0]->manus[0]->name)) {
+            $this->v["lightManuName"] 
+                = $this->v["usrInfo"]->companies[0]->manus[0]->name;
         }
         if ($this->v["lightManuName"] != '') {
-            $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($this->v["lightManuName"]);
+            $name = $this->v["lightManuName"];
+            $this->v["yourPsIDs"] = $this->getLightManuScoreIDs($name);
             $validCnt = $this->cntValidScoreIn($this->v["yourPsIDs"]);
             if ($validCnt == 0) {
                 $this->v["lightManuName"] = '';
