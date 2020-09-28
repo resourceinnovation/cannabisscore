@@ -37,9 +37,9 @@ use ResourceInnovation\CannabisScore\Controllers\ScoreReportLighting;
 use ResourceInnovation\CannabisScore\Controllers\WaterBoardStats;
 use ResourceInnovation\CannabisScore\Controllers\ScoreListings;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReports;
-use ResourceInnovation\CannabisScore\Controllers\ScoreImports;
+use ResourceInnovation\CannabisScore\Controllers\ScorePrintReport;
 
-class CannabisScore extends ScoreImports
+class CannabisScore extends ScorePrintReport
 {
     protected function customNodePrint(&$curr = null)
     {
