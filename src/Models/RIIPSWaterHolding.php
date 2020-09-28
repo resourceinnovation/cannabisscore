@@ -14,6 +14,6 @@ class RIIPsWaterHolding extends Model
 		'ps_wtr_hld_holding', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

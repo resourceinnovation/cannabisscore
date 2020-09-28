@@ -14,6 +14,6 @@ class RIIPsLinkHvacRoom extends Model
 		'ps_lnk_hv_rm_hvac', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

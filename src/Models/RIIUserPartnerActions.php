@@ -15,6 +15,6 @@ class RIIUserPartnerActions extends Model
         'usr_prt_act_amount',
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

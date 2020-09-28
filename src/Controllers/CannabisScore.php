@@ -3,14 +3,14 @@
   * CannabisScore extends ScoreImports extends ScoreAdminMisc extends ScoreReports extends ScoreReports
   * extends ScoreCalcs extends ScoreUtils extends ScorePowerUtilities extends ScoreLightModels 
   * extends ScoreVars extends TreeSurvForm. This class contains the majority of 
-  * SurvLoop functions which are overwritten, and delegates most of the work.
+  * Survloop functions which are overwritten, and delegates most of the work.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -29,19 +29,24 @@ use App\Models\RIIPsRankings;
 use App\Models\RIICompetitors;
 use App\Models\RIIPsLicenses;
 use App\Models\RIIUserInfo;
-use CannabisScore\Controllers\ScoreFormsCustom;
-use CannabisScore\Controllers\ScoreReportFound;
-use CannabisScore\Controllers\ScoreReportAvgs;
-use CannabisScore\Controllers\ScoreReportHvac;
-use CannabisScore\Controllers\ScoreReportLighting;
-use CannabisScore\Controllers\ScoreListings;
-use CannabisScore\Controllers\ScoreReports;
-use CannabisScore\Controllers\ScoreAdminManageManu;
-use CannabisScore\Controllers\ScoreImports;
+use ResourceInnovation\CannabisScore\Controllers\ScoreFormsCustom;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportFound;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportAvgs;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportHvac;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportLighting;
+use ResourceInnovation\CannabisScore\Controllers\WaterBoardStats;
+use ResourceInnovation\CannabisScore\Controllers\ScoreListings;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReports;
+use ResourceInnovation\CannabisScore\Controllers\ScoreImports;
 
 class CannabisScore extends ScoreImports
 {
     protected function customNodePrint(&$curr = null)
+    {
+        return $this->customNodePrintPowerScore($curr);
+    }
+
+    protected function customNodePrintPowerScore(&$curr = null)
     {
         $ret = '';
         $nID = $curr->nID;
@@ -169,6 +174,9 @@ class CannabisScore extends ScoreImports
         } elseif ($nID == 859) {
             $report = new ScoreReportAvgs;
             $ret .= $report->getMorePowerStats();
+        } elseif ($nID == 1807) {
+            $report = new WaterBoardStats;
+            $ret .= $report->printWaterReport($nID);
         } elseif ($nID == 801) {
             $this->chkPartnerExpire();
             $report = new ScoreReportAvgs;
@@ -196,12 +204,6 @@ class CannabisScore extends ScoreImports
             $this->searcher->loadAllScoresPublic();
             $report = new ScoreReportFound;
             $ret .= $report->getFoundReport($nID, $this->searcher->v["allscores"]);
-        } elseif ($nID == 775) {
-            $ret .= $this->checkBadRecs();
-        } elseif ($nID == 786) {
-            $ret .= $this->adminSearchResults();
-        } elseif (in_array($nID, [726, 990])) {
-            $ret .= $this->printDashSessGraph();
         } elseif ($nID == 976) {
             $report = new ScoreReports;
             $ret .= $report->printBasicStats($nID);
@@ -225,32 +227,6 @@ class CannabisScore extends ScoreImports
             $GLOBALS["SL"]->setAdmMenuOnLoad(0);
             
             
-        // MA
-        } elseif ($nID == 1545) {
-            $this->completeMaCompliance($nID);
-        } elseif ($nID == 1403) {
-            $this->calcMaCompliance($nID);
-        } elseif ($nID == 1447) {
-            return $this->reportMaPSID($nID);
-        } elseif ($nID == 1420) {
-            $ret .= $this->reportMaMonths($nID);
-        } elseif ($nID == 1436) {
-            $ret .= $this->reportMaNextPro($nID);
-        } elseif ($nID == 1442) {
-            return $this->reportMaEfficProd($nID);
-        } elseif ($nID == 1418) {
-            return $this->reportMaWood($nID);
-        } elseif ($nID == 1449) {
-            return $this->reportMaProPdf($nID);
-        } elseif ($nID == 1407) {
-            if ($GLOBALS["SL"]->REQ->has('recalc') 
-                || $GLOBALS["SL"]->REQ->has('refresh')) {
-                $this->calcMaCompliance($nID);
-            }
-        } elseif ($nID == 1424) {
-            $this->loadRenewOtherMA($nID);
-        } elseif ($nID == 1522) {
-            return $this->reportMaID($nID);
             
 /*
         } elseif ($nID == 1120) {
@@ -266,94 +242,25 @@ class CannabisScore extends ScoreImports
             $ret .= $this->maMonthTblRenew($nID);
 */
             
-        // Admin Tools
-        } elseif ($nID == 914) {
-            $this->chkPartnerExpire();
-            if ($GLOBALS["SL"]->x["partnerLevel"] > 4) {
-                $this->initManuAdmin();
-                $ret .= $this->v["manuAdmin"]->printMgmtManufacturers($nID);
-            } else {
-                $ret .= '<p>
-                    <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
-                        >More data analysis is available with higher membership levels.</a>
-                </p>';
-            }
-        } elseif ($nID == 1514) {
-            $this->chkPartnerExpire();
-            if ($GLOBALS["SL"]->x["partnerLevel"] > 4) {
-                $report = new ScoreListings(
-                    $this->v["uID"], 
-                    $this->v["user"], 
-                    $this->v["usrInfo"]
-                );
-                $ret .= $report->printMakeModelAnalysis($nID);
-            } else {
-                $ret .= '<p>
-                    <a href="https://resourceinnovation.org/joinwithus/" target="_blank"
-                        >More data analysis is available with higher membership levels.</a>
-                </p>';
-            }
-        } elseif ($nID == 915) {
-            $this->initManuAdmin();
-            $ret .= $this->v["manuAdmin"]->printMgmtPartners($nID);
-        } elseif ($nID == 1560) {
-            $this->initManuAdmin();
-            $ret .= $this->v["manuAdmin"]->printMgmtCompanyFacs($nID);
-        } elseif ($nID == 1563) {
-            $this->initManuAdmin();
-            $ret .= $this->v["manuAdmin"]->printMyCompanyFacs($nID);
-        } elseif ($nID == 917) {
-            $ret .= $this->printMgmtLightModels($nID);
-        } elseif ($nID == 845) {
-            $ret .= $this->printAdminPsComms();
-        } elseif ($nID == 637) {
-            $ret .= $this->getEmailsList();
-        } elseif ($nID == 740) {
-            $ret .= $this->getTroubleshoot();
-        } elseif ($nID == 742) {
-            $ret .= $this->getProccessUploads();
-        } elseif ($nID == 777) {
-            $ret .= $this->reportPowerScoreFeedback();
-        } elseif ($nID == 838) {
-            $ret .= $this->reportInSurveyFeedback();
-        } elseif ($nID == 808) {
-            $ret .= $this->runNwpccImport();
-        } elseif ($nID == 968) {
-            return view(
-                'vendor.cannabisscore.nodes.968-lighting-manufacturers-comparison', 
-                [ "nID" => $nID ]
-            )->render();
-        } elseif ($nID == 1543) {
-            return $this->reportMaListing($nID);
-        } elseif ($nID == 1566) {
-            return $this->adminChangeScoreFacility($nID);
             
         // Misc
         } elseif ($nID == 1276) {
             $this->excelExportMyScores($nID);
         } elseif ($nID == 843) {
             $ret .= $this->printProfileExtraBtns();
-        } elseif ($nID == 1039) {
-            $ret .= $this->printPartnerProfileDashBtn($nID);
-        } elseif ($nID == 1040) {
-            $this->chkPartnerExpire();
-            $ret .= $this->printPartnerDashboard($nID);
         } elseif (in_array($nID, [1723, 1724])) {
             $ret .= $this->printProfileScores($nID);
 
         }
         return $ret;
     }
-
-    protected function initManuAdmin()
-    {
-        if (!isset($this->v["manuAdmin"])) {
-            $this->v["manuAdmin"] = new ScoreAdminManageManu;
-        }
-        return true;
-    }
     
     protected function customResponses($nID, &$curr)
+    {
+        return $this->customResponsesPowerScore($nID, $curr);
+    }
+    
+    protected function customResponsesPowerScore($nID, &$curr)
     {
         if (in_array($nID, [57, 1073])) {
             $curr->clearResponses();
@@ -420,6 +327,11 @@ class CannabisScore extends ScoreImports
     }
 
     protected function postNodePublicCustom(&$curr)
+    {
+        return $this->postNodePublicCustomPowerScore($curr);
+    }
+
+    protected function postNodePublicCustomPowerScore(&$curr)
     { 
         $nID = $curr->nID;
         if (empty($tmpSubTier)) {
@@ -486,11 +398,6 @@ class CannabisScore extends ScoreImports
                 }
             }
             return true;
-            
-
-        // MA Compliance
-        } elseif ($nID == 1424) {
-            $this->postRenewOtherMA($nID);
           
         /*  
         } elseif ($nID == 914) {
@@ -499,36 +406,41 @@ class CannabisScore extends ScoreImports
             }
             return $this->v["manuAdmin"]->addManufacturers($nID);
         */
-        } elseif ($nID == 917) {
-            return $this->addLightModels($nID);
         }
         return false; // false to continue standard post processing
     }
     
     public function ajaxChecksCustom(Request $request, $type = '')
     {
+        return $this->ajaxChecksCustomPowerScore($request, $type);
+    }
+    
+    protected function ajaxChecksCustomPowerScore(Request $request, $type = '')
+    {
         if ($type == 'report-ajax') {
             return $this->ajaxReportRefresh($request);
         } elseif ($type == 'powerscore-rank') {
             return $this->ajaxScorePercentiles();
-        } elseif ($type == 'powerscore-uploads') {
-            return $this->getProccessUploadsAjax();
         } elseif ($type == 'future-look') {
             return $this->ajaxFutureYields();
-        } elseif ($type == 'adm-comms') {
-            return $this->admCommsForm($request);
         } elseif ($type == 'light-search') {
             return $this->ajaxLightSearch($request);
-        } elseif ($type == 'check-slug') {
-            return $this->ajaxCheckSlug($request);
         } elseif ($type == 'adm-score-facility') {
             return $this->saveAdminChangeScoreFacility($request);
+        } elseif ($type == 'adm-lgt-edit') {
+            return $this->saveAdminLightEdit($request);
         }
         return '';
     }
     
     // returns an array of overrides for ($currNodeSessionData, ???... 
     protected function printNodeSessDataOverride(&$curr)
+    {
+        return $this->printNodeSessDataOverridePowerScore($curr);
+    }
+    
+    // returns an array of overrides for ($currNodeSessionData, ???... 
+    protected function printNodeSessDataOverridePowerScore(&$curr)
     {
         if (sizeof($this->sessData->dataSets) == 0) {
             return [];
@@ -722,19 +634,6 @@ class CannabisScore extends ScoreImports
         $this->loadPartnerSlug($prtnSlug);
         $this->loadPageVariation($request, 1, 89, '/start-for-');
         return $this->index($request);
-    }
-
-    private function chkPartnerExpire()
-    {
-        if ($this->isStaffOrAdmin()) {
-            return false;
-        }
-        if (isset($this->v["usrInfo"]) && $this->v["usrInfo"]->isExpired) {
-            echo '<script type="text/javascript"> setTimeout('
-                . '"window.location=\'/membership-expired\'", 10); </script>';
-            exit;
-        }
-        return false;
     }
 
 }

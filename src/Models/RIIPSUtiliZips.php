@@ -14,6 +14,6 @@ class RIIPsUtiliZips extends Model
 		'ps_ut_zp_util_id', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

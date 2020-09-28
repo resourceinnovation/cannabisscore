@@ -15,6 +15,6 @@ class RIIPsCommunications extends Model
 		'ps_com_description', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

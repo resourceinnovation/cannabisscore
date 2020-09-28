@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreCondsCustom is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreCondsCustom is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains functions used to check custom conditions.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,15 +8,20 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
-use CannabisScore\Controllers\ScoreUtils;
+use ResourceInnovation\CannabisScore\Controllers\ScoreUtils;
 
 class ScoreCondsCustom extends ScoreUtils
 {
     
     protected function checkNodeConditionsCustom($nID, $condition = '')
+    {
+        return $this->checkNodeConditionsCustomPowerScore($nID, $condition);
+    }
+    
+    protected function checkNodeConditionsCustomPowerScore($nID, $condition = '')
     {
         if ($condition == '#Competitor') {
             if ($GLOBALS["SL"]->REQ->has('cups')) {

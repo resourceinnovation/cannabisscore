@@ -16,6 +16,6 @@ class RIILightModels extends Model
 		'lgt_mod_wattage', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

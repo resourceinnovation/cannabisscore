@@ -1,13 +1,13 @@
 {
     "name": "resourceinnovation/cannabisscore",
-    "description": "SurvLoop is a Laravel-based engine for designing a database and creating a mobile-friendly user interface to fill it.",
+    "description": "The Cannabis PowerScore is the free energy, water and waste benchmarking platform of the non-profit Resource Innovation Institute.",
     "keywords": [
         "Resource Innovation Institute",
         "Cannabis PowerScore",
         "marijuana",
         "energy",
     	"laravel", 
-    	"SurvLoop", 
+    	"Survloop", 
     	"survey"
     ],
     "license": "GPL-3.0-or-later",
@@ -20,21 +20,20 @@
         }
     ],
     "require": {
-        "rockhopsoft/survloop": "*@dev"
+        "rockhopsoft/survloop": "^0.2"
     },
     "autoload": {
         "psr-4": {
-            "CannabisScore\\": "src/",
-            "CannabisScore\\Models\\": "storage/app/models/cannabisscore"
+            "ResourceInnovation\\CannabisScore\\": "src"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "CannabisScore\\CannabisScoreServiceProvider"
+                "ResourceInnovation\\CannabisScore\\CannabisScoreServiceProvider"
             ],
             "aliases": {
-                "CannabisScore": "CannabisScore\\CannabisScoreFacade"
+                "CannabisScore": "ResourceInnovation\\CannabisScore\\CannabisScoreFacade"
             }
         }
     }

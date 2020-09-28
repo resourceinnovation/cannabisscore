@@ -14,6 +14,6 @@ class RIIPsWasteGreen extends Model
 		'ps_wst_grn_method', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

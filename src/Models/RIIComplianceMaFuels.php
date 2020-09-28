@@ -14,6 +14,6 @@ class RIIComplianceMaFuels extends Model
 		'com_ma_fuel_type', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

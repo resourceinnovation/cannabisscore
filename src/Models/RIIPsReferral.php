@@ -23,6 +23,6 @@ class RIIPsReferral extends Model
 		'ps_ref_email', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

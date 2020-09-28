@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreAdminMisc is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreAdminMisc is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class handles the custom needs of printing an individual PowerScore's report.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,7 +8,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.4
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
@@ -16,12 +16,12 @@ use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
 use App\Models\RIIUserPsPerms;
 use App\Models\RIIUserCompanies;
-use SurvLoop\Controllers\Globals\Globals;
-use SurvLoop\Controllers\Tree\Report\ReportMonthly;
-use CannabisScore\Controllers\ScoreUserCompanies;
-use CannabisScore\Controllers\ComplyPrintReport;
+use RockHopSoft\Survloop\Controllers\Globals\Globals;
+use RockHopSoft\Survloop\Controllers\Tree\Report\ReportMonthly;
+use ResourceInnovation\CannabisScore\Controllers\ScoreUserCompanies;
+use ResourceInnovation\CannabisScore\Controllers\ScoreCalcsPrint;
 
-class ScorePrintReport extends ComplyPrintReport
+class ScorePrintReport extends ScoreCalcsPrint
 {
     public function printPreviewReport($isAdmin = false)
     {
@@ -188,7 +188,7 @@ class ScorePrintReport extends ComplyPrintReport
             && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) {
             $this->v["ajax-psid"] = intVal($GLOBALS["SL"]->REQ->get('psid'));
         }
-        if (!$request->has('refresh') || intVal($request->get('refresh')) == 1) {
+        if ($request->has('refresh') && intVal($request->get('refresh')) == 1) {
             $this->sessData->loadData('powerscore', $this->v["ajax-psid"]);
             if (isset($this->sessData->dataSets["powerscore"]) 
                 && sizeof($this->sessData->dataSets["powerscore"]) > 0) {
@@ -352,22 +352,19 @@ class ScorePrintReport extends ComplyPrintReport
             $ranks = RIIPsRanks::where('ps_rnk_filters', '')
                 ->first();
             $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
-            $this->searcher->v["powerscore"]->ps_effic_overall = $this->searcher
-                ->v["currRanks"]->ps_rnk_overall;
+            $this->searcher->v["powerscore"]->ps_effic_overall 
+                = $this->searcher->v["currRanks"]->ps_rnk_overall;
             $this->searcher->v["powerscore"]->save();
         } else {
             $urlFlts = $this->searcher->v["urlFlts"];
+            $psid = $this->searcher->v["powerscore"]->ps_id;
             $this->calcAllScoreRanks();
             $this->searcher->v["urlFlts"] = $urlFlts;
-            $this->searcher->v["currRanks"] = RIIPsRankings::where(
-                    'ps_rnk_psid', 
-                    $this->searcher->v["powerscore"]->ps_id
-                )
+            $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_psid', $psid)
                 ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
                 ->first();
-            if (!$this->searcher->v["currRanks"]) {
-                $ranks = RIIPsRanks::where('ps_rnk_filters', 
-                        $this->searcher->v["urlFlts"])
+            if (!$this->searcher->v["currRanks"] || $GLOBALS["SL"]->REQ->has('refresh')) {
+                $ranks = RIIPsRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
                     ->first();
                 $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
             }
@@ -534,52 +531,6 @@ class ScorePrintReport extends ComplyPrintReport
                 = 'Massachusetts_PowerScore_Comply_Report.pdf';
         }
         return true;
-    }
-
-    protected function adminChangeScoreFacility($nID)
-    {
-        if (!Auth::user() || !Auth::user()->hasRole('administrator|staff')) {
-            return '<!-- No Thank You -->';
-        }
-        $this->v["companies"] = [];
-        $chk = RIIUserCompanies::whereNotNull('usr_com_name')
-            ->orderBy('usr_com_name', 'asc')
-            ->get();
-        if ($chk->isNotEmpty()) {
-            foreach ($chk as $com) {
-                $this->v["companies"][] = new ScoreUserCompanies($com);
-            }
-        }
-        $this->v["coreID"] = $this->coreID;
-        $this->v["psComOwner"] = '';
-        $perms = RIIUserPsPerms::where('usr_perm_psid', $this->coreID)
-            ->where('usr_perm_company_id', '>', 0)
-            ->get();
-        if ($perms->isNotEmpty()) {
-            foreach ($perms as $p) {
-                if (isset($p->usr_perm_company_id)
-                    && intVal($p->usr_perm_company_id) > 0) {
-                    $this->v["psComOwner"] = 'C' . $p->usr_perm_company_id;
-                }
-            }
-        }
-        if ($this->v["psComOwner"] == '') {
-            $perms = RIIUserPsPerms::where('usr_perm_psid', $this->coreID)
-                ->where('usr_perm_facility_id', '>', 0)
-                ->get();
-            if ($perms->isNotEmpty()) {
-                foreach ($perms as $p) {
-                    if (isset($p->usr_perm_facility_id)
-                        && intVal($p->usr_perm_facility_id) > 0) {
-                        $this->v["psComOwner"] = 'F' . $p->usr_perm_facility_id;
-                    }
-                }
-            }
-        }
-        return view(
-            'vendor.cannabisscore.nodes.1566-change-score-facility', 
-            $this->v
-        )->render();
     }
 
     protected function saveAdminChangeScoreFacility(Request $request)

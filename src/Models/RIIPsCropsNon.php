@@ -14,6 +14,6 @@ class RIIPsCropsNon extends Model
 		'ps_ncrop_crop', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

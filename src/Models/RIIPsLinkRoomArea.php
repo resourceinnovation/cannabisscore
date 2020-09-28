@@ -14,6 +14,6 @@ class RIIPsLinkRoomArea extends Model
 		'ps_lnk_rm_ar_area_id', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

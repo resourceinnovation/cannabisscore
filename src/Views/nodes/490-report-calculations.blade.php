@@ -74,8 +74,8 @@
 
         @if (isset($sessData["powerscore"][0]->ps_effic_facility) 
             && $sessData["powerscore"][0]->ps_effic_facility > 0
-            && isset($sessData["powerscore"][0]->ps_effic_non_electric) 
-            && $sessData["powerscore"][0]->ps_effic_non_electric > 0)
+            && isset($sessData["powerscore"][0]->ps_effic_fac_non) 
+            && $sessData["powerscore"][0]->ps_effic_fac_non > 0)
             <?php $cnt++; ?>
             <tr id="scoreRowFacAll" @if ($cnt%2 == 0) class="rw2" @endif >
             <td><div class="efficBlock">
@@ -141,8 +141,8 @@
             </tr>
         @endif
 
-        @if (isset($sessData["powerscore"][0]->ps_effic_non_electric) 
-            && $sessData["powerscore"][0]->ps_effic_non_electric > 0)
+        @if (isset($sessData["powerscore"][0]->ps_effic_fac_non) 
+            && $sessData["powerscore"][0]->ps_effic_fac_non > 0)
             <?php $cnt++; ?>
             <tr id="scoreRowFacNon" @if ($cnt%2 == 0) class="rw2" @endif >
             <td><div class="efficBlock">
@@ -154,10 +154,10 @@
                             ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
                     </div>
                     <div class="col-lg-2 col-md-2 col-6"><div class="efficHeadScore"><nobr>
-                        @if (isset($sessData["powerscore"][0]->ps_effic_non_electric)
-                            && $sessData["powerscore"][0]->ps_effic_non_electric > 0.00001) 
+                        @if (isset($sessData["powerscore"][0]->ps_effic_fac_non)
+                            && $sessData["powerscore"][0]->ps_effic_fac_non > 0.00001) 
                             {{ $GLOBALS["SL"]->sigFigs(
-                                $sessData["powerscore"][0]->ps_effic_non_electric
+                                $sessData["powerscore"][0]->ps_effic_fac_non
                             , 3) }}
                         @else 0 @endif
                         <nobr>kBtu / sq ft</nobr>

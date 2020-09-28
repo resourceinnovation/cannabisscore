@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreVars is the mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreVars is the mid-level extension of the Survloop class, TreeSurvForm.
   * This class handles lookups and processes for lighting makes and models.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,13 +8,13 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
 use App\Models\RIIManufacturers;
 use App\Models\RIILightModels;
-use CannabisScore\Controllers\ScoreVars;
+use ResourceInnovation\CannabisScore\Controllers\ScoreVars;
 
 class ScoreLightModels extends ScoreVars
 {
@@ -121,13 +121,37 @@ class ScoreLightModels extends ScoreVars
         )->render();
     }
     
+    protected function saveAdminLightEdit(Request $request)
+    {
+        if ($this->isStaffOrAdmin() 
+            && $request->has('lgt')
+            && intVal($request->get('lgt')) > 0) {
+            $lgtID = intVal($request->get('lgt'));
+            $lgt = RIILightModels::find($lgtID);
+            if ($lgt && isset($lgt->lgt_mod_id)) {
+                $lgt->lgt_mod_type 
+                    = $lgt->lgt_mod_is_dlc
+                    = null;
+                if ($request->has('type')) {
+                    $lgt->lgt_mod_type = intVal($request->get('type'));
+                }
+                if ($request->has('dlc')) {
+                    $lgt->lgt_mod_is_dlc = intVal($request->get('dlc'));
+                }
+                $lgt->save();
+                return $GLOBALS["SL"]->saveIconAnim();
+            }
+        }
+        return '.';
+    }
+    
     protected function ajaxLightSearchReqs(Request $request)
     {
         $this->v["results"] = [
             "ids"   => [],
             "set"   => [],
             "manus" => [],
-            "types" => []
+            "type"  => 0
         ];
         $this->v["lgtSrch"] = [
             "type"  => '',
@@ -139,9 +163,7 @@ class ScoreLightModels extends ScoreVars
                 'PowerScore Light Types', 
                 intVal($request->get('group'))
             );
-            $this->v["results"]["types"] = $this->convertLightScoreType2ImportType(
-                $request->get('group')
-            );
+            $this->v["results"]["type"] = intVal($request->get('group'));
         }
         if ($request->has('make') && trim($request->get('make')) != '') {
             $this->v["lgtSrch"]["make"] = trim($request->get('make'));
@@ -160,10 +182,11 @@ class ScoreLightModels extends ScoreVars
         } elseif ($this->v["lgtSrch"]["type"] != '' 
             && $this->v["lgtSrch"]["make"] == '' 
             && $this->v["lgtSrch"]["model"] == '') {
-            $models = RIILightModels::whereIn('lgt_mod_tech', $this->v["results"]["types"])
+            $models = RIILightModels::where('lgt_mod_type', 
+                    $this->v["results"]["type"])
                 ->get();
             $this->addModelResults($models);
-        } elseif ($this->v["lgtSrch"]["type"] > 0 
+        } elseif ($this->v["lgtSrch"]["type"] != ''
             || $this->v["lgtSrch"]["make"] != '' 
             || $this->v["lgtSrch"]["model"] != '') {
             $this->addModelResults(DB::table('rii_light_models')
@@ -173,7 +196,8 @@ class ScoreLightModels extends ScoreVars
                     'LIKE', '%' . $this->v["lgtSrch"]["make"] . '%')
                 ->where('rii_light_models.lgt_mod_name', 
                     'LIKE', '%' . $this->v["lgtSrch"]["model"] . '%')
-                ->whereIn('rii_light_models.lgt_mod_tech', $this->v["results"]["types"])
+                ->where('rii_light_models.lgt_mod_type', 
+                    $this->v["results"]["type"])
                 ->orderBy('rii_manufacturers.manu_name', 'asc')
                 ->orderBy('rii_light_models.lgt_mod_name', 'asc')
                 ->select('rii_light_models.*')

@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreCalcRanks is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreCalcRanks is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the processes which report 
   * Sub-Score calculations for transparency.
   *
@@ -9,7 +9,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use App\Models\RIIPowerscore;
@@ -17,8 +17,8 @@ use App\Models\RIIPsAreas;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
 use App\Models\RIIUserPsPerms;
-use SurvLoop\Controllers\Globals\Globals;
-use CannabisScore\Controllers\ScoreCalcs;
+use RockHopSoft\Survloop\Controllers\Globals\Globals;
+use ResourceInnovation\CannabisScore\Controllers\ScoreCalcs;
 
 class ScoreCalcRanks extends ScoreCalcs
 {
@@ -57,7 +57,7 @@ class ScoreCalcRanks extends ScoreCalcs
         }
         
         // Now store listed raw sub-score values for filter...
-        $this->v["ranksCache"]->ps_rnk_tot_cnt = $allscores->count();
+        $this->v["ranksCache"]->ps_rnk_tot_cnt     = $allscores->count();
         $this->v["ranksCache"]->ps_rnk_overall_avg = implode(',', $this->v["rankList"]["oraw"]);
         $this->v["ranksCache"]->ps_rnk_facility    = implode(',', $this->v["rankList"]["faci"]);
         $this->v["ranksCache"]->ps_rnk_fac_non     = implode(',', $this->v["rankList"]["facN"]);
@@ -119,9 +119,9 @@ class ScoreCalcRanks extends ScoreCalcs
                 && $ps->ps_effic_facility_status == $this->statusComplete) {
                 $this->v["rankList"]["faci"][] = $ps->ps_effic_facility;
             }
-            if ($ps->ps_effic_non_electric > 0 
-                && $ps->ps_effic_non_electric_status == $this->statusComplete) {
-                $this->v["rankList"]["facN"][] = $ps->ps_effic_non_electric;
+            if ($ps->ps_effic_fac_non > 0 
+                && $ps->ps_effic_fac_non_status == $this->statusComplete) {
+                $this->v["rankList"]["facN"][] = $ps->ps_effic_fac_non;
             }
             if ($ps->ps_effic_fac_all > 0 
                 && $ps->ps_effic_fac_all_status == $this->statusComplete) {
@@ -239,14 +239,15 @@ class ScoreCalcRanks extends ScoreCalcs
             if (!in_array($effic[1], ['facA', 'proA'])
                 && isset($ps->{ 'ps_effic_' . $effic[0] })
                 && $ps->{ 'ps_effic_' . $effic[0] } > 0) {
-                $this->v["rank"][$ps->ps_id]["oraw"] += $this->v["rank"][$ps->ps_id][$effic[1]];
+                $this->v["rank"][$ps->ps_id]["oraw"] 
+                    += $this->v["rank"][$ps->ps_id][$effic[1]];
                 $cnt++;
             }
         }
         if ($cnt > 0) {
-            $this->v["rank"][$ps->ps_id]["oraw"] = $this->v["rank"][$ps->ps_id]["oraw"]/$cnt;
+            $this->v["rank"][$ps->ps_id]["oraw"] 
+                = $this->v["rank"][$ps->ps_id]["oraw"]/$cnt;
         }
-//if ($ps->ps_id == 47495975) { echo '<pre>'; print_r($this->v["rank"][$ps->ps_id]); echo '</pre>'; exit; }
         return true;
     }
     
@@ -432,9 +433,9 @@ class ScoreCalcRanks extends ScoreCalcs
         }
         return '<br /><br /><div class="slCard nodeWrap">'
             . '<h3>All Rankings Recalculated!</h3>'
-            . '<a href="/dash/powerscore-software-troubleshooting"'
-            . ' class="btn btn-primary btn-lg">Back</a>'
-            . '<br /><style> #nodeSubBtns { display: none; } </style></div>';
+            . '<a href="/dash/powerscore-software-troubleshooting" '
+            . 'class="btn btn-primary btn-lg">Back</a><br />'
+            . '<style> #nodeSubBtns { display: none; } </style></div>';
     }
     
     
@@ -462,13 +463,15 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["Facility"][$which]++;
             }
-            if ($s2->ps_effic_non_electric > 0 
-                && $s2->ps_effic_non_electric_status == $this->statusComplete) {
-                if ($s->ps_effic_non_electric <= $s2->ps_effic_non_electric) {
+            $which = "worse";
+            if ($s2->ps_effic_fac_non > 0 
+                && $s2->ps_effic_fac_non_status == $this->statusComplete) {
+                if ($s->ps_effic_fac_non <= $s2->ps_effic_fac_non) {
                     $which = "better";
                 }
                 $efficPercs["FacNon"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_fac_all > 0 
                 && $s2->ps_effic_fac_all_status == $this->statusComplete) {
                 if ($s->ps_effic_fac_all <= $s2->ps_effic_fac_all) {
@@ -476,12 +479,14 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["FacAll"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_production_status == $this->statusComplete) {
                 if ($s->ps_effic_production >= $s2->ps_effic_production) {
                     $which = "better";
                 }
                 $efficPercs["Production"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_prod_non > 0 
                 && $s2->ps_effic_prod_non_status == $this->statusComplete) {
                 if ($s->ps_effic_prod_non <= $s2->ps_effic_prod_non) {
@@ -489,6 +494,7 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["ProdNon"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_prod_all > 0 
                 && $s2->ps_effic_prod_all_status == $this->statusComplete) {
                 if ($s->ps_effic_prod_all <= $s2->ps_effic_prod_all) {
@@ -496,18 +502,21 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["ProdAll"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_hvac_status == $this->statusComplete) {
                 if ($s->ps_effic_hvac <= $s2->ps_effic_hvac) {
                     $which = "better";
                 }
                 $efficPercs["HVAC"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_lightingFacilityStatus == $this->statusComplete) {
                 if ($s->ps_effic_lighting <= $s2->ps_effic_lighting) {
                     $which = "better";
                 }
                 $efficPercs["Lighting"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_water > 0 
                 && $s2->ps_effic_water_status == $this->statusComplete) {
                 if ($s->ps_effic_water <= $s2->ps_effic_water) {
@@ -515,6 +524,7 @@ class ScoreCalcRanks extends ScoreCalcs
                 }
                 $efficPercs["Water"][$which]++;
             }
+            $which = "worse";
             if ($s2->ps_effic_waste > 0 
                 && $s2->ps_effic_waste_status == $this->statusComplete) {
                 if ($s->ps_effic_waste <= $s2->ps_effic_waste) {

@@ -48,6 +48,6 @@ class RIIPsGrowingRooms extends Model
 		'ps_room_hoophouse', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

@@ -7,12 +7,12 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use Auth;
 use App\Models\SLDefinitions;
 use App\Models\RIIUserInfo;
-use SurvLoop\Controllers\Admin\AdminMenu;
+use RockHopSoft\Survloop\Controllers\Admin\AdminMenu;
 
 class CannabisScoreAdminMenu extends AdminMenu
 {
@@ -96,6 +96,10 @@ class CannabisScoreAdminMenu extends AdminMenu
                         $this->admMenuLnk(
                             '/dash/average-powerscores-hvac',
                             'HVAC'
+                        ),
+                        $this->admMenuLnk(
+                            '/dash/water-report',
+                            'Water'
                         ),
                         $this->admMenuLnk(
                             '/dash/more-power-statistics',
@@ -226,6 +230,10 @@ class CannabisScoreAdminMenu extends AdminMenu
                 $this->admMenuLnk(
                     '/dash/average-powerscores-hvac',
                     'HVAC'
+                ),
+                $this->admMenuLnk(
+                    '/dash/water-report',
+                    'Water'
                 ),
                 $this->admMenuLnk(
                     '/dash/more-power-statistics',

@@ -14,6 +14,6 @@ class RIIPsLicenses extends Model
 		'ps_lic_license', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

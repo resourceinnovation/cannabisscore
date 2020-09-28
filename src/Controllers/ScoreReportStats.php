@@ -7,14 +7,14 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
-use SurvLoop\Controllers\Stats\SurvStatsGraph;
-use CannabisScore\Controllers\ScoreLookups;
-use CannabisScore\Controllers\ScoreStats;
+use RockHopSoft\Survloop\Controllers\Stats\SurvStatsGraph;
+use ResourceInnovation\CannabisScore\Controllers\ScoreLookups;
+use ResourceInnovation\CannabisScore\Controllers\ScoreStats;
 
 class ScoreReportStats
 {

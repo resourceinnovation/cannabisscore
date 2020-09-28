@@ -15,6 +15,6 @@ class RIIUserManufacturers extends Model
 		'usr_man_manu_id', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

@@ -52,6 +52,6 @@ class RIIPsAreas extends Model
 		'ps_area_water_recirc_min', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

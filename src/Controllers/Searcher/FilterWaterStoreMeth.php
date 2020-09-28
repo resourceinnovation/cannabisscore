@@ -1,17 +1,17 @@
 <?php
 /**
-  * FilterWaterStoreMeth extends the SurvLoop SearcherFilter for some hard-coded overrides.
+  * FilterWaterStoreMeth extends the Survloop SearcherFilter for some hard-coded overrides.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabis
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.2.18
   */
-namespace CannabisScore\Controllers\Searcher;
+namespace ResourceInnovation\CannabisScore\Controllers\Searcher;
 
 use App\Models\RIIPsWaterHolding;
 use App\Models\RIIPsWaterHoldingRecirc;
-use SurvLoop\Controllers\SearcherFilter;
+use RockHopSoft\Survloop\Controllers\SearcherFilter;
 
 class FilterWaterStoreMeth extends SearcherFilter
 {

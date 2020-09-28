@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScorePowerUtilities is the mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScorePowerUtilities is the mid-level extension of the Survloop class, TreeSurvForm.
   * This class handles lookups and processes for electric utilities.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,13 +8,13 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use Illuminate\Support\Facades\Storage;
 use App\Models\SLZips;
 use App\Models\RIIPsUtilities;
 use App\Models\RIIPsUtiliZips;
-use CannabisScore\Controllers\ScoreLightModels;
+use ResourceInnovation\CannabisScore\Controllers\ScoreLightModels;
 
 class ScorePowerUtilities extends ScoreLightModels
 {

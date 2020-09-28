@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreFormsCustom is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreFormsCustom is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains functions used to override survey nodes.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,13 +8,13 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIPsGrowingRooms;
 use App\Models\RIIPsLightTypes;
 use App\Models\RIIPsLinkHvacRoom;
 use App\Models\RIIPsOnsiteFuels;
-use CannabisScore\Controllers\ScoreCondsCustom;
+use ResourceInnovation\CannabisScore\Controllers\ScoreCondsCustom;
 
 class ScoreFormsCustom extends ScoreCondsCustom
 {
@@ -107,33 +107,6 @@ class ScoreFormsCustom extends ScoreCondsCustom
                 $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
                     . "document.getElementById(\"otherRenewable1075ID\").value=" 
                     . json_encode($ps->ps_on_produce_renewable_other) . "', 10); ";
-            }
-        }
-        return true;
-    }
-    
-    protected function postRenewOtherMA($nID)
-    {
-        if ($GLOBALS["SL"]->REQ->has('otherRenewable1424')
-            && trim($GLOBALS["SL"]->REQ->otherRenewable1424) != ''
-            && isset($this->sessData->dataSets["compliance_ma"])
-            && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_id)) {
-            $this->sessData->dataSets["compliance_ma"][0]->com_ma_renewable_other
-                = trim($GLOBALS["SL"]->REQ->otherRenewable1424);
-            $this->sessData->dataSets["compliance_ma"][0]->save();
-        }
-        return true;
-    }
-    
-    protected function loadRenewOtherMA($nID)
-    {
-        if (isset($this->sessData->dataSets["compliance_ma"])) {
-            $ma = $this->sessData->dataSets["compliance_ma"][0];
-            if (isset($ma->com_ma_renewable_other)
-                && trim($ma->com_ma_renewable_other) != '') {
-                $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
-                    . "document.getElementById(\"otherRenewable1424ID\").value=" 
-                    . json_encode($ma->com_ma_renewable_other) . "', 10); ";
             }
         }
         return true;

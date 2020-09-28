@@ -25,7 +25,7 @@
 
         <td class="slGrey">{{ number_format($psCnt->ps_effic_fac_all) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_facility) }}</td>
-        <td class="slGrey">{{ number_format($psCnt->ps_effic_non_electric) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_fac_non) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_prod_all) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_production) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_prod_non) }}</td>
@@ -95,7 +95,7 @@
 
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_fac_all, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</b></th>
-        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_non_electric, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_fac_non, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_prod_all, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_prod_non, 3) }}</b></th>
@@ -315,11 +315,11 @@
             @endif
             </td>
             <td>
-            @if ((isset($ps->ps_effic_non_electric_status) 
-                    && intVal($ps->ps_effic_non_electric_status) == $defCmplt)
+            @if ((isset($ps->ps_effic_fac_non_status) 
+                    && intVal($ps->ps_effic_fac_non_status) == $defCmplt)
                 || (isset($fltPartner) && $fltPartner > 0))
-                @if ($ps->ps_effic_non_electric < 0.000001) 0
-                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_non_electric, 3) }}
+                @if ($ps->ps_effic_fac_non < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_fac_non, 3) }}
                 @endif
                 @if (!$isExcel 
                     && isset($allranks) 

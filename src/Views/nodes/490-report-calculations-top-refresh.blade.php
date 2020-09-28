@@ -6,7 +6,7 @@
 <script type="text/javascript"> $(document).ready(function() { 
     function nextRecalc() {
         if (document.getElementById("ajax490refresh")) {
-            $("#ajax490refresh").load("/ajax/report-ajax/?psid={{ $psid }}&recalc=1");
+            $("#ajax490refresh").load("/ajax/report-ajax/?psid={{ $psid }}");
         }
         return true;
     }

@@ -17,6 +17,6 @@ class RIIUserPsPerms extends Model
 		'usr_perm_psid', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

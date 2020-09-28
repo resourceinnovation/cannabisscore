@@ -38,6 +38,6 @@ class RIIPsRankings extends Model
 		'ps_rnk_waste_cnt', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

@@ -23,6 +23,6 @@ class RIIComplianceMaMonths extends Model
 		'com_ma_month_water', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

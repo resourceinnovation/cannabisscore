@@ -14,6 +14,6 @@ class RIIComplianceMaRenewables extends Model
 		'com_ma_rnw_renewable', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

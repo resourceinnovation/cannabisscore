@@ -1,14 +1,14 @@
 <?php
 /**
   * CannabisScoreGlobals allows the attachment of custom variables and processes
-  * in SurvLoop's main Globals class.
+  * in Survloop's main Globals class.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabisscore
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIManufacturers;
 

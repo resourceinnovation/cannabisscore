@@ -70,7 +70,7 @@
         <th><b>{{ number_format($allscores->count()) }}</b></th>
         <td>{{ number_format($psCnt->ps_effic_fac_all) }}</td>
         <td>{{ number_format($psCnt->ps_effic_facility) }}</td>
-        <td>{{ number_format($psCnt->ps_effic_non_electric) }}</td>
+        <td>{{ number_format($psCnt->ps_effic_fac_non) }}</td>
         <td>{{ number_format($psCnt->ps_effic_prod_all) }}</td>
         <td>{{ number_format($psCnt->ps_effic_production) }}</td>
         <td>{{ number_format($psCnt->ps_effic_prod_non) }}</td>
@@ -100,7 +100,7 @@
     @endif
         <th>{{ round($psAvg->ps_effic_overall) }}%</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_facility, 3) }}</th>
-        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_non_electric, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_fac_non, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_water, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_waste, 3) }}</th>
@@ -161,11 +161,11 @@
         @endif
         </td>
         <td>
-        @if ((isset($ps->ps_effic_non_electric_status) 
-            && intVal($ps->ps_effic_non_electric_status) == $defCmplt)
+        @if ((isset($ps->ps_effic_fac_non_status) 
+            && intVal($ps->ps_effic_fac_non_status) == $defCmplt)
             || (isset($fltPartner) && $fltPartner > 0))
-            @if ($ps->ps_effic_non_electric < 0.000001) 0
-            @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_non_electric, 3) }}
+            @if ($ps->ps_effic_fac_non < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_fac_non, 3) }}
             @endif
         @endif
         </td>

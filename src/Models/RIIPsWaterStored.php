@@ -14,6 +14,6 @@ class RIIPsWaterStored extends Model
 		'ps_wtr_str_stored', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

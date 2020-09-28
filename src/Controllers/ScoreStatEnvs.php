@@ -8,11 +8,11 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIPsAreasBlds;
-use SurvLoop\Controllers\Stats\SurvStatsTbl;
-use SurvLoop\Controllers\Stats\SurvStatsGraph;
+use RockHopSoft\Survloop\Controllers\Stats\SurvStatsTbl;
+use RockHopSoft\Survloop\Controllers\Stats\SurvStatsGraph;
 
 class ScoreStatEnvs extends SurvStatsGraph
 {

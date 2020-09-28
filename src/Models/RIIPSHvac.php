@@ -22,6 +22,6 @@ class RIIPsHvac extends Model
 		'ps_hvc_unit_type_other', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

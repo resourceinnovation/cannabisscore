@@ -32,12 +32,12 @@
                 <td><nobr>kBtu / sq ft</nobr></td>
             </tr>
         @endif
-        @if (isset($sessData["powerscore"][0]->ps_effic_non_electric) 
-            && $sessData["powerscore"][0]->ps_effic_non_electric > 0)
+        @if (isset($sessData["powerscore"][0]->ps_effic_fac_non) 
+            && $sessData["powerscore"][0]->ps_effic_fac_non > 0)
             <tr>
                 <td><nobr>Non-Electric Facility</nobr></td>
                 <td>{!! $GLOBALS["SL"]->sigFigs(
-                    $sessData["powerscore"][0]->ps_effic_non_electric, 
+                    $sessData["powerscore"][0]->ps_effic_fac_non, 
                     3
                 ) !!}</td>
                 <td><nobr>kBtu / sq ft</nobr></td>
@@ -103,10 +103,10 @@
     <div class="col-4 pB10 slGrey">
         <div>
             <a href="/calculated/read-{{ $sessData['powerscore'][0]->getKey() }}"
-                ><i class="slGrey">PowerScore ID<br />
-                    #{{ $sessData["powerscore"][0]->getKey() }}</i></a><br />
-            <i>Submitted: 
-            {{ date('n/j/y', strtotime($sessData["powerscore"][0]->created_at)) }}</i>
+                >PowerScore ID<br />
+                #{{ $sessData["powerscore"][0]->getKey() }}</a><br />
+            Started: 
+            {{ date('n/j/y', strtotime($sessData["powerscore"][0]->created_at)) }}
         </div>
         @if (isset($GLOBALS["SL"]->x["psCompany"][$sessData["powerscore"][0]->ps_id])
             && trim($GLOBALS["SL"]->x["psCompany"][$sessData["powerscore"][0]->ps_id]) != '')

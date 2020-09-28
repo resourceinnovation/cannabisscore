@@ -14,6 +14,6 @@ class RIIConsumerPurchase extends Model
 		'ConPurchWhatKinds', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

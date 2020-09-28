@@ -1,10 +1,10 @@
 <?php
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
-use CannabisScore\Controllers\CannabisScore;
-use SurvLoop\Controllers\Admin\AdminController;
+use ResourceInnovation\CannabisScore\Controllers\CannabisScore;
+use RockHopSoft\Survloop\Controllers\Admin\AdminController;
 
 class CannabisScoreAdmin extends AdminController
 {

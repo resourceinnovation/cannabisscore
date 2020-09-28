@@ -15,20 +15,20 @@ Route::group(['middleware' => ['web']], function () {
     
     Route::get(
         '/frame/animate/guage/{percent}',       
-        'CannabisScore\Controllers\CannabisScore@printFrameAnimPerc'
+        'ResourceInnovation\CannabisScore\Controllers\CannabisScore@printFrameAnimPerc'
     );
     Route::get(
         '/frame/animate/meter/{percent}/{row}', 
-        'CannabisScore\Controllers\CannabisScore@printFrameAnimPercMeter'
+        'ResourceInnovation\CannabisScore\Controllers\CannabisScore@printFrameAnimPercMeter'
     );
     
     Route::get(
         '/start-for-{prtnSlug}',       
-        'CannabisScore\Controllers\CannabisScore@startForPartner'
+        'ResourceInnovation\CannabisScore\Controllers\CannabisScore@startForPartner'
     );
     Route::get(
         '/go-pro-for-{prtnSlug}',       
-        'CannabisScore\Controllers\CannabisScore@startForPartner'
+        'ResourceInnovation\CannabisScore\Controllers\CannabisScore@startForPartner'
     );
 
 });    

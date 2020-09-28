@@ -7,7 +7,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use App\Models\RIIPowerscore;
@@ -16,10 +16,10 @@ use App\Models\RIIPsLightTypes;
 use App\Models\RIIPsRenewables;
 use App\Models\RIIPsForCup;
 use App\Models\RIIPsLicenses;
-use SurvLoop\Controllers\Stats\SurvStatsGraph;
-use CannabisScore\Controllers\ScoreStats;
-use CannabisScore\Controllers\CannabisScoreSearcher;
-use CannabisScore\Controllers\ScoreReportStats;
+use RockHopSoft\Survloop\Controllers\Stats\SurvStatsGraph;
+use ResourceInnovation\CannabisScore\Controllers\ScoreStats;
+use ResourceInnovation\CannabisScore\Controllers\CannabisScoreSearcher;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportStats;
 
 class ScoreReportAvgs extends ScoreReportStats
 {
@@ -592,3 +592,5 @@ class ScoreReportSet
     }
     
 }
+
+

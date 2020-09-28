@@ -15,6 +15,6 @@ class RIIUserFacilities extends Model
 		'usr_fac_count', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

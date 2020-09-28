@@ -1,13 +1,13 @@
 <?php
 /**
-  * CannabisScoreSearcher extends the SurvLoop Searcher for some hard-coded overrides.
+  * CannabisScoreSearcher extends the Survloop Searcher for some hard-coded overrides.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
   * @package  resourceinnovation/cannabis
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -21,14 +21,14 @@ use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
 use App\Models\RIIUserManufacturers;
 use App\Models\RIIUserPsPerms;
-use CannabisScore\Controllers\ScoreUserInfo;
-use CannabisScore\Controllers\Searcher\FilterRenewable;
-use CannabisScore\Controllers\Searcher\FilterWaterSource;
-use CannabisScore\Controllers\Searcher\FilterWaterStore;
-use CannabisScore\Controllers\Searcher\FilterWaterStoreSys;
-use CannabisScore\Controllers\Searcher\FilterWaterStoreMeth;
-use CannabisScore\Controllers\Searcher\FilterGrowMedia;
-use SurvLoop\Controllers\Searcher;
+use ResourceInnovation\CannabisScore\Controllers\ScoreUserInfo;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterRenewable;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterWaterSource;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterWaterStore;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterWaterStoreSys;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterWaterStoreMeth;
+use ResourceInnovation\CannabisScore\Controllers\Searcher\FilterGrowMedia;
+use RockHopSoft\Survloop\Controllers\Searcher;
 
 class CannabisScoreSearcher extends Searcher
 {
@@ -881,7 +881,7 @@ class CannabisScoreSearcher extends Searcher
         $this->v["avgFlds"] = [
             'ps_effic_over_similar',
             'ps_effic_facility',
-            'ps_effic_non_electric', 
+            'ps_effic_fac_non', 
             'ps_effic_fac_all', 
             'ps_effic_production',
             'ps_effic_prod_non', 
@@ -923,7 +923,7 @@ class CannabisScoreSearcher extends Searcher
         if ($this->v["allscores"] && $this->v["allscores"]->isNotEmpty()) {
             $statusFlds = [
                 'ps_effic_facility',
-                'ps_effic_non_electric',
+                'ps_effic_fac_non',
                 'ps_effic_fac_all', 
                 'ps_effic_production',
                 'ps_effic_prod_non', 
@@ -971,7 +971,7 @@ class CannabisScoreSearcher extends Searcher
                 }
             }
             //$this->v["psAvg"]->ps_effic_facility 
-            //    = $this->v["psAvg"]->ps_kwh/$this->v["psAvg"]->ps_total_size;
+            //    = $this->v["psAvg"]->ps_kwh/$this->v["psAvg"]->ps_total_canopy_size;
             //$this->v["psAvg"]->ps_effic_production 
             //    = $this->v["psAvg"]->ps_grams/$this->v["psAvg"]->ps_kwh;
         }

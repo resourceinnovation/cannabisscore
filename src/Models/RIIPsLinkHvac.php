@@ -14,6 +14,6 @@ class RIIPsLinkHvac extends Model
 		'ps_lnk_hv_hvac', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

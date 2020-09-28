@@ -28,6 +28,6 @@ class RIIPsRanks extends Model
 		'ps_rnk_avg_sqft_grm', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

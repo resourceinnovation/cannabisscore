@@ -14,6 +14,6 @@ class RIIPsOnsiteThermal extends Model
 		'ps_therm_tech', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

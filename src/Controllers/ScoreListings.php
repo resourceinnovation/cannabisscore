@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreListings is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreListings is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the main processes which crunch heavier filters of raw PowerScore data.
   *
   * Cannabis PowerScore, by the Resource Innovation Institute
@@ -8,7 +8,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -19,8 +19,8 @@ use App\Models\RIIPsRankings;
 use App\Models\RIICompetitors;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
-use CannabisScore\Controllers\CannabisScoreSearcher;
-use CannabisScore\Controllers\ScoreReportLightingManu;
+use ResourceInnovation\CannabisScore\Controllers\CannabisScoreSearcher;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportLightingManu;
 
 class ScoreListings extends ScoreReportLightingManu
 {
@@ -680,7 +680,7 @@ class ScoreListings extends ScoreReportLightingManu
         }
         $this->v["outlierCols"] = [
             ['Facility Electric',       'ps_effic_facility'], 
-            ['Facility Non-Electric',   'ps_effic_non_electric'], 
+            ['Facility Non-Electric',   'ps_effic_fac_non'], 
             ['Production Electric',     'ps_effic_production'], 
             ['Production Non-Electric', 'ps_effic_prod_non'], 
             ['Water',                   'ps_effic_water'], 
@@ -729,7 +729,7 @@ class ScoreListings extends ScoreReportLightingManu
                 'rii_powerscore.ps_effic_overall',
                 'rii_powerscore.ps_effic_fac_all', 
                 'rii_powerscore.ps_effic_facility', 
-                'rii_powerscore.ps_effic_non_electric',
+                'rii_powerscore.ps_effic_fac_non',
                 'rii_powerscore.ps_effic_prod_all', 
                 'rii_powerscore.ps_effic_production', 
                 'rii_powerscore.ps_effic_prod_non', 
@@ -740,7 +740,7 @@ class ScoreListings extends ScoreReportLightingManu
                 'rii_powerscore.ps_effic_waste', 
                 'rii_powerscore.ps_effic_fac_all_status', 
                 'rii_powerscore.ps_effic_facility_status', 
-                'rii_powerscore.ps_effic_non_electric_status',
+                'rii_powerscore.ps_effic_fac_non_status',
                 'rii_powerscore.ps_effic_prod_all_status', 
                 'rii_powerscore.ps_effic_production_status', 
                 'rii_powerscore.ps_effic_prod_non_status', 
@@ -854,10 +854,10 @@ class ScoreListings extends ScoreReportLightingManu
                 && $ps->ps_effic_facility > 0
                 && isset($ps->ps_effic_facility_status)
                 && $ps->ps_effic_facility_status == $this->v["defCmplt"]
-                && isset($ps->ps_effic_non_electric)
-                && $ps->ps_effic_non_electric > 0
-                && isset($ps->ps_effic_non_electric_status)
-                && $ps->ps_effic_non_electric_status == $this->v["defCmplt"]
+                && isset($ps->ps_effic_fac_non)
+                && $ps->ps_effic_fac_non > 0
+                && isset($ps->ps_effic_fac_non_status)
+                && $ps->ps_effic_fac_non_status == $this->v["defCmplt"]
                 && isset($ps->ps_effic_fac_all)
                 && $ps->ps_effic_fac_all > 0) {
                 $ps->ps_effic_fac_all_status = $this->v["defCmplt"];

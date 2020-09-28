@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreReports is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreReports is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the majority of processes which crunch heavier PowerScore
   * aggregation calculations to be printed into reports generated live.
   *
@@ -9,7 +9,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.3
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -19,8 +19,8 @@ use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
 use App\Models\RIIManufacturers;
 use App\Models\RIIUserInfo;
-use CannabisScore\Controllers\ScoreStats;
-use CannabisScore\Controllers\ScoreListingsGraph;
+use ResourceInnovation\CannabisScore\Controllers\ScoreStats;
+use ResourceInnovation\CannabisScore\Controllers\ScoreListingsGraph;
 
 class ScoreReportLightingManu extends ScoreListingsGraph
 {

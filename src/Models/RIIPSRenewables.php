@@ -16,6 +16,6 @@ class RIIPsRenewables extends Model
 		'ps_rnw_kwh', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

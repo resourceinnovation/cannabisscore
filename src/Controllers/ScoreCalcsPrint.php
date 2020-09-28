@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreCalcsPrint is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreCalcsPrint is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the majority of processes which report 
   * Sub-Score calculations for transparency.
   *
@@ -9,15 +9,15 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\SLNodeSaves;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
-use SurvLoop\Controllers\Globals\Globals;
-use CannabisScore\Controllers\ScoreCalcRanks;
+use RockHopSoft\Survloop\Controllers\Globals\Globals;
+use ResourceInnovation\CannabisScore\Controllers\ScoreCalcRanks;
 
 class ScoreCalcsPrint extends ScoreCalcRanks
 {

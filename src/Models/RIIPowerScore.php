@@ -39,8 +39,8 @@ class RIIPowerscore extends Model
 		'ps_effic_water_status', 
 		'ps_effic_waste', 
 		'ps_effic_waste_status', 
-		'ps_effic_non_electric', 
-		'ps_effic_non_electric_status', 
+		'ps_effic_fac_non', 
+		'ps_effic_fac_non_status', 
 		'ps_grams', 
 		'ps_kwh', 
 		'ps_total_size', 
@@ -118,6 +118,6 @@ class RIIPowerscore extends Model
 		'ps_unit_distances', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

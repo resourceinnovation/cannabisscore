@@ -1,17 +1,17 @@
 
 # resourceinnovation/cannabisscore
 
-[![Laravel](https://img.shields.io/badge/Laravel-7.6-orange.svg?style=flat-square)](http://laravel.com)
-[![SurvLoop](https://img.shields.io/badge/SurvLoop-0.2-orange.svg?style=flat-square)](https://github.com/rockhopsoft/survloop)
+[![Laravel](https://img.shields.io/badge/Laravel-8.0-orange.svg?style=flat-square)](http://laravel.com)
+[![Survloop](https://img.shields.io/badge/Survloop-0.2-orange.svg?style=flat-square)](https://github.com/rockhopsoft/survloop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Resource Innovation Institute's Cannabis PowerScore&trade; database is an open-source web app empowering the cannabis community, and the industry, to prepare, track, and grow in ever more sustainable directions. The Cannabis PowerScore database is built using 
-<a href="https://github.com/rockhopsoft/survloop" target="_blank">SurvLoop</a>, atop 
+<a href="https://github.com/rockhopsoft/survloop" target="_blank">Survloop</a>, atop 
 <a href="https://laravel.com/" target="_blank">Laravel</a>. <br />
 <a href="http://ResourceInnovation.org" target="_blank">ResourceInnovation.org</a><br />
 <a href="http://CannabisPowerScore.org" target="_blank">CannabisPowerScore.org</a><br />
 <a href="http://PowerScore.ResourceInnovation.org" target="_blank">PowerScore.ResourceInnovation.org</a><br />
-SurvLoop is a Laravel-based engine for designing a database and creating a mobile-friendly user interface to fill it. 
+Survloop is a Laravel-based engine for designing a database and creating a mobile-friendly user interface to fill it. 
 
 # Table of Contents
 * [Requirements](#requirements)
@@ -24,16 +24,16 @@ SurvLoop is a Laravel-based engine for designing a database and creating a mobil
 
 # <a name="requirements"></a>Requirements
 
-* php: >=7.2.15
-* <a href="https://packagist.org/packages/laravel/laravel" target="_blank">laravel/laravel</a>: 7.6.*
-* <a href="https://packagist.org/packages/rockhopsoft/survloop" target="_blank">rockhopsoft/survloop</a>: >=0.2.14
+* php: >=7.4
+* <a href="https://packagist.org/packages/laravel/laravel" target="_blank">laravel/laravel</a>: 8.0.*
+* <a href="https://packagist.org/packages/rockhopsoft/survloop" target="_blank">rockhopsoft/survloop</a>: >=0.2.*
 
 
 # <a name="getting-started"></a>Getting Started
 
 ## Install Laravel Using Composer
 ```
-$ composer create-project laravel/laravel powerscore "7.6.*"
+$ composer create-project laravel/laravel powerscore "8.0.*"
 $ cd powerscore
 
 ```
@@ -65,7 +65,7 @@ $ nano composer.json
 ...
 "require": {
     ...
-    "rockhopsoft/survloop": "^0.2.18",
+    "rockhopsoft/survloop": "^0.2.29",
     "resourceinnovation/cannabisscore": "^0.2.5",
     ...
 },
@@ -74,8 +74,8 @@ $ nano composer.json
     ...
     "psr-4": {
         ...
-        "SurvLoop\\": "vendor/rockhopsoft/survloop/src/",
-        "CannabisScore\\": "vendor/resourceinnovation/cannabisscore/src/",
+        "RockHopSoft\\Survloop\\": "vendor/rockhopsoft/survloop/src/",
+        "ResourceInnovation\\CannabisScore\\": "vendor/resourceinnovation/cannabisscore/src/",
     }
     ...
 }, ...
@@ -94,15 +94,15 @@ $ nano config/app.php
 ...
 'providers' => [
     ...
-    SurvLoop\SurvLoopServiceProvider::class,
-    CannabisScore\CannabisScoreServiceProvider::class,
+    RockHopSoft\Survloop\SurvloopServiceProvider::class,
+    ResourceInnovation\CannabisScore\CannabisScoreServiceProvider::class,
     Intervention\Image\ImageServiceProvider::class,
     ...
 ],
 ...
 'aliases' => [
     ...
-    'SurvLoop' => 'RockHopSoft\SurvLoop\SurvLoopFacade',
+    'Survloop' => 'RockHopSoft\Survloop\SurvloopFacade',
     'CannabisScore' => 'ResourceInnovation\CannabisScore\CannabisScoreFacade',
     'Image' => Intervention\Image\Facades\Image::class,
     ...
@@ -130,7 +130,7 @@ $ cd code/powerscore
 $ php artisan optimize:clear
 $ composer dump-autoload
 $ php artisan migrate
-# php artisan db:seed --class=SurvLoopSeeder
+# php artisan db:seed --class=SurvloopSeeder
 $ php artisan db:seed --class=ZipCodeSeeder
 # php artisan db:seed --class=CannabisScoreSeeder
 ```
@@ -144,7 +144,7 @@ $ chown -R www-data:33 database
 $ chown -R www-data:33 storage
 ```
 
-### Initialize SurvLoop Installation
+### Initialize Survloop Installation
 
 Then browsing to the home page should prompt you to create the first admin user account:
 
@@ -164,7 +164,7 @@ http://powerscore.local/dashboard/settings?refresh=2
 Once installed, documentation of this system's database design can be found at /dashboard/db/all . This system's user 
 experience design for data entry can be found at /dashboard/tree/map?all=1&alt=1 .
 
-More on the SurvLoop level is also starting here: <a href="https://survloop.org/package-files-folders-classes" target="_blank">https://survloop.org/package-files-folders-classes</a>.
+More on the Survloop level is also starting here: <a href="https://survloop.org/package-files-folders-classes" target="_blank">https://survloop.org/package-files-folders-classes</a>.
 
 Utility companies linked to zip codes collected from <a href="https://openei.org/datasets/dataset/u-s-electric-utility-companies-and-rates-look-up-by-zipcode-feb-2011/resource/3f00482e-8ea0-4b48-8243-a212b6322e74"
 target="_blank">OpenEI.org</a>.

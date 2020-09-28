@@ -14,6 +14,6 @@ class RIIPsFarm extends Model
 		'ps_frm_type', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

@@ -14,6 +14,6 @@ class RIIPsWaterFilter extends Model
 		'ps_wtr_flt_filter', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

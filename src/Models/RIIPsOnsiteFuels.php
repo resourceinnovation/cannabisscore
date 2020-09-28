@@ -14,6 +14,6 @@ class RIIPsOnsiteFuels extends Model
 		'ps_fuel_type', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

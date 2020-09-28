@@ -21,6 +21,6 @@ class RIIManufacturers extends Model
 		'manu_ids_mother', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

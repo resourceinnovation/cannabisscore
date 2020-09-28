@@ -7,7 +7,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.2
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -166,10 +166,15 @@ class ScoreUserInfo extends ScoreCollector
                 date("j", $expDate)+$this->expiration+1, 
                 date("Y", $expDate)
             );
-            if ($this->expireTime < time()) {
+            if (time() < $this->expireTime) {
+                $this->isExpired = false;
+            } else {
                 $this->isExpired = true;
             }
+        } else {
+            $this->isExpired = false;
         }
+//if ($this->usrInfoID == 43) { echo 'date: ' . date("n/j/y", $this->expireTime) . ' ? ' . time() . '<pre>'; print_r($this); echo '</pre>'; exit; }
         return true;
     }
 
@@ -216,8 +221,8 @@ class ScoreUserInfo extends ScoreCollector
             }
 //echo 'id: ' . $this->id . ', email: ' . $this->email . ', company: ' . $this->company . ', levelDef: ' . $this->levelDef . ', partnerDef: ' . $this->partnerDef . '<br />info: <pre>'; print_r($role); print_r($info); echo '</pre>'; exit;
 
-        } elseif ($hasPartnerFlag) {
-            $this->isExpired = false;
+        //} elseif ($hasPartnerFlag) {
+        //    $this->isExpired = false;
         }
         $this->chkEpiration();
         return true;

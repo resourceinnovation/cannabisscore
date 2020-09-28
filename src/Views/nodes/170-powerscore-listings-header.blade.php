@@ -65,7 +65,7 @@
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Non-Electric <br />Facility KPI '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
-            "srtVal" => 'ps_effic_non_electric',
+            "srtVal" => 'ps_effic_fac_non',
             "sort"   => $sort
         ])->render() !!}
     </div></th>

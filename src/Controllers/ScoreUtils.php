@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreUtils is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreUtils is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the majority of simplest PowerScore-specific utilities functions like
   * looking up common definition lists, translating single PowerScores, and prepping various proccesses.
   *
@@ -9,7 +9,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ use App\Models\RIIComplianceMaFuels;
 use App\Models\RIIComplianceMaRenewables;
 use App\Models\RIIPsOnsiteFuels;
 use App\Models\SLZips;
-use CannabisScore\Controllers\ScorePowerUtilities;
+use ResourceInnovation\CannabisScore\Controllers\ScorePowerUtilities;
 
 class ScoreUtils extends ScorePowerUtilities
 {   
@@ -1014,11 +1014,12 @@ class ScoreUtils extends ScorePowerUtilities
         }
         if ($ret == '') {
             $ret = '<div class="p15"><i>None found.</i></div>';
+        } else {
+            $ret = '<p>You can create a copy of a past PowerScore to update it '
+                . 'for this year. You might only need to update your annual '
+                . 'totals for grams grown and wattage used.</p>' . $ret;
         }
-        return '<h2 class="slBlueDark">Your Calculated PowerScores</h2>
-            <p>You can create a copy of a past PowerScore to update it 
-            for this year. You might only need to update your annual 
-            totals for grams grown and wattage used.</p>' 
+        return '<h2 class="slBlueDark">Your Calculated PowerScores</h2>'
             . $ret . '<div class="p30"></div>';
     }
     
@@ -1239,21 +1240,6 @@ class ScoreUtils extends ScorePowerUtilities
         );
     }
     
-    
-    protected function tmpDebug($str = '')
-    {
-        $tmp = ' - tmpDebug - ' . $str;
-        $chk = RIIPsAreas::where('ps_area_psid', 169)
-            ->get();
-        if ($chk->isNotEmpty()) {
-            foreach ($chk as $i => $row) {
-                $tmp .= ', ' . $row->getKey();
-            }
-        }
-        echo $tmp . '<br />';
-        return true;
-    }
-    
     protected function deepCopyCoreSkips($cid)
     {
         $this->v["sessDataCopySkips"] = [];
@@ -1293,6 +1279,19 @@ class ScoreUtils extends ScorePowerUtilities
             'ps_effic_waste'        => 0
         ]);
         return true;
+    }
+
+    private function chkPartnerExpire()
+    {
+        if ($this->isStaffOrAdmin()) {
+            return false;
+        }
+        if (isset($this->v["usrInfo"]) && $this->v["usrInfo"]->isExpired) {
+            echo '<script type="text/javascript"> setTimeout('
+                . '"window.location=\'/membership-expired\'", 10); </script>';
+            exit;
+        }
+        return false;
     }
     
 }

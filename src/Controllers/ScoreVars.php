@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreVars is the bottom-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreVars is the bottom-level extension of the Survloop class, TreeSurvForm.
   * This class initializes the majority of simplest PowerScore-specific variables
   * and prepping various proccesses.
   *
@@ -9,7 +9,7 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Auth;
@@ -26,10 +26,10 @@ use App\Models\RIIUserPsPerms;
 use App\Models\RIIComplianceMaMonths;
 use App\Models\SLUsersRoles;
 use App\Models\User;
-use CannabisScore\Controllers\ScoreUserInfo;
-use CannabisScore\Controllers\CannabisScoreSearcher;
-use CannabisScore\Controllers\ScoreLookups;
-use SurvLoop\Controllers\Tree\TreeSurvForm;
+use ResourceInnovation\CannabisScore\Controllers\ScoreUserInfo;
+use ResourceInnovation\CannabisScore\Controllers\CannabisScoreSearcher;
+use ResourceInnovation\CannabisScore\Controllers\ScoreLookups;
+use RockHopSoft\Survloop\Controllers\Tree\TreeSurvForm;
 
 class ScoreVars extends TreeSurvForm
 {

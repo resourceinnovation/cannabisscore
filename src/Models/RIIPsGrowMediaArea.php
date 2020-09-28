@@ -14,6 +14,6 @@ class RIIPsGrowMediaArea extends Model
 		'ps_ar_grw_med_media', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

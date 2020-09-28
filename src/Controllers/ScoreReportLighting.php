@@ -7,15 +7,15 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since v0.2.3
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
 use App\Models\RIIPsLightTypes;
-use SurvLoop\Controllers\Stats\SurvStatsGraph;
-use CannabisScore\Controllers\ScoreStats;
-use CannabisScore\Controllers\ScoreReportStats;
+use RockHopSoft\Survloop\Controllers\Stats\SurvStatsGraph;
+use ResourceInnovation\CannabisScore\Controllers\ScoreStats;
+use ResourceInnovation\CannabisScore\Controllers\ScoreReportStats;
 
 class ScoreReportLighting extends ScoreReportStats
 {

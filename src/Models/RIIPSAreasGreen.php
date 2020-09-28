@@ -14,6 +14,6 @@ class RIIPsAreasGreen extends Model
 		'ps_ar_grn_type', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

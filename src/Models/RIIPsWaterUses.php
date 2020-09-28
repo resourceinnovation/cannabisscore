@@ -14,6 +14,6 @@ class RIIPsWaterUses extends Model
 		'ps_wtr_use_how', 
     ];
     
-    // END SurvLoop auto-generated portion of Model
+    // END Survloop auto-generated portion of Model
     
 }

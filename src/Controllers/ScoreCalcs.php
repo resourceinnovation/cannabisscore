@@ -1,6 +1,6 @@
 <?php
 /**
-  * ScoreCalcs is a mid-level extension of the SurvLoop class, TreeSurvForm.
+  * ScoreCalcs is a mid-level extension of the Survloop class, TreeSurvForm.
   * This class contains the majority of processes which collectively create PowerScore
   * calculations, first calculating raw metrics, then relative efficiency rankings.
   *
@@ -9,15 +9,15 @@
   * @author  Morgan Lesko <rockhoppers@runbox.com>
   * @since 0.0
   */
-namespace CannabisScore\Controllers;
+namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIPsRanks;
 use App\Models\RIIPsRankings;
 use App\Models\RIIPsWaterSources;
 use App\Models\RIIPsGrowMedia;
 use App\Models\RIIPsGrowMediaArea;
-use SurvLoop\Controllers\Globals\Globals;
-use CannabisScore\Controllers\ScoreFormsCustom;
+use RockHopSoft\Survloop\Controllers\Globals\Globals;
+use ResourceInnovation\CannabisScore\Controllers\ScoreFormsCustom;
 
 class ScoreCalcs extends ScoreFormsCustom
 {
@@ -29,8 +29,8 @@ class ScoreCalcs extends ScoreFormsCustom
             && isset($this->sessData->dataSets["ps_areas"])) {
 
             if ($force
-                || !isset($ps->ps_effic_facility) 
-                || $GLOBALS["SL"]->REQ->has('refresh') 
+                || !isset($this->sessData->dataSets["powerscore"][0]->ps_effic_facility) 
+                //|| $GLOBALS["SL"]->REQ->has('refresh') 
                 || $GLOBALS["SL"]->REQ->has('recalc')) {
                 $this->calcClearScores();
                 $this->calcMonthly();
@@ -54,7 +54,6 @@ class ScoreCalcs extends ScoreFormsCustom
                 $this->calcNonElectric();
             }
         }
-//echo 'ps: <pre>'; print_r($this->sessData->dataSets["powerscore"][0]); echo '</pre>'; exit;
         return true;
     }
 
@@ -148,9 +147,11 @@ class ScoreCalcs extends ScoreFormsCustom
     {
         $tbl = 'powerscore';
         $this->sessData->dataSets[$tbl][0]->ps_effic_facility
-            = $this->sessData->dataSets[$tbl][0]->ps_effic_non_electric
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_fac_non
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_fac_all
             = $this->sessData->dataSets[$tbl][0]->ps_effic_production
             = $this->sessData->dataSets[$tbl][0]->ps_effic_prod_non
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_prod_all
             = $this->sessData->dataSets[$tbl][0]->ps_effic_hvac
             = $this->sessData->dataSets[$tbl][0]->ps_effic_hvac_orig
             = $this->sessData->dataSets[$tbl][0]->ps_effic_lighting
@@ -201,7 +202,9 @@ class ScoreCalcs extends ScoreFormsCustom
             $addWaste = true;
         }
         
-        $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc = $renew = 0;
+        $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc 
+            = $this->sessData->dataSets[$tbl][0]->ps_tot_kwh_renewable
+            = 0;
         if (isset($this->sessData->dataSets["ps_monthly"])
             && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
             foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
@@ -211,7 +214,8 @@ class ScoreCalcs extends ScoreFormsCustom
                 }
                 if (isset($mon->ps_month_kwh_renewable)
                     && intVal($mon->ps_month_kwh_renewable) > 0) {
-                    $renew += $mon->ps_month_kwh_renewable;
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_kwh_renewable 
+                        += $mon->ps_month_kwh_renewable;
                 }
                 if ($addWaste 
                     && isset($mon->ps_month_waste_lbs)
@@ -238,9 +242,10 @@ class ScoreCalcs extends ScoreFormsCustom
                     = $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc;
             }
         }
-        if (isset($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables)
-            && intVal($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables) == 0) {
-            $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc += $renew;
+        if (!isset($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables)
+            || intVal($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables) == 1) {
+            $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc 
+                += $this->sessData->dataSets[$tbl][0]->ps_tot_kwh_renewable;
         }
         $defCCF = $GLOBALS["SL"]->def->getID('Natural Gas Units', 'CCF');
         if (isset($ps->ps_unit_natural_gas) 
@@ -856,7 +861,7 @@ class ScoreCalcs extends ScoreFormsCustom
         $tbl = 'powerscore';
         $ps = $this->sessData->dataSets[$tbl][0];
         if (isset($ps->ps_tot_natural_gas) && $ps->ps_tot_natural_gas > 0) {
-            $this->sessData->dataSets["powerscore"][0]->ps_tot_btu_non_electric
+            $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
                 += $ps->ps_tot_natural_gas*99.97612449;
 // https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu
         }
@@ -887,11 +892,14 @@ class ScoreCalcs extends ScoreFormsCustom
         $this->sessData->dataSets[$tbl][0]->save();
         $ps = $this->sessData->dataSets[$tbl][0];
         
-        $btus = $ps->ps_tot_btu_non_electric+$GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
-        if (isset($this->v["totFlwrSqFt"]) && intVal($this->v["totFlwrSqFt"]) > 0) {
-            $this->sessData->dataSets[$tbl][0]->ps_effic_non_electric
+        $btus = $ps->ps_tot_btu_non_electric
+            + $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
+        if (isset($this->v["totFlwrSqFt"]) 
+            && intVal($this->v["totFlwrSqFt"]) > 0) {
+            $this->sessData->dataSets[$tbl][0]->ps_effic_fac_non
                 = $ps->ps_tot_btu_non_electric/$this->v["totFlwrSqFt"];
-            $this->sessData->dataSets[$tbl][0]->ps_effic_fac_all = $btus/$this->v["totFlwrSqFt"];
+            $this->sessData->dataSets[$tbl][0]->ps_effic_fac_all 
+                = $btus/$this->v["totFlwrSqFt"];
         }
         if ($ps->ps_tot_btu_non_electric > 0) {
             $this->sessData->dataSets[$tbl][0]->ps_effic_prod_non 
