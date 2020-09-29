@@ -27,11 +27,13 @@
             <div class="slCard">
                 <h5>No completed records found.</h5>
                 <p>
-                  Submit a record to see comparative results:<br />
-                  <a href="https://powerscore.resourceinnovation.org/start-for-{{ 
-                      $GLOBALS['SL']->x['usrInfo']->companies[0]->slug 
-                      }}">https://powerscore.resourceinnovation.org/start-for-{{ 
-                      $GLOBALS['SL']->x['usrInfo']->companies[0]->slug }}</a>
+                @if (isset($GLOBALS['SL']->x['usrInfo']->companies[0]))
+                    Submit a record to see comparative results:<br />
+                    <a href="https://powerscore.resourceinnovation.org/start-for-{{ 
+                        $GLOBALS['SL']->x['usrInfo']->companies[0]->slug 
+                        }}">https://powerscore.resourceinnovation.org/start-for-{{ 
+                        $GLOBALS['SL']->x['usrInfo']->companies[0]->slug }}</a>
+                @endif
                 </p>
             </div>
         </div>

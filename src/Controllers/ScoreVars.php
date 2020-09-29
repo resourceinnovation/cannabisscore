@@ -27,7 +27,6 @@ use App\Models\RIIComplianceMaMonths;
 use App\Models\SLUsersRoles;
 use App\Models\User;
 use ResourceInnovation\CannabisScore\Controllers\ScoreUserInfo;
-use ResourceInnovation\CannabisScore\Controllers\CannabisScoreSearcher;
 use ResourceInnovation\CannabisScore\Controllers\ScoreLookups;
 use RockHopSoft\Survloop\Controllers\Tree\TreeSurvForm;
 
@@ -549,6 +548,19 @@ class ScoreVars extends TreeSurvForm
         }
         $this->sessData->dataSets["compliance_ma_months"] = $tmp;
         return true;
+    }
+
+    protected function chkPartnerExpire()
+    {
+        if ($this->isStaffOrAdmin()) {
+            return false;
+        }
+        if (isset($this->v["usrInfo"]) && $this->v["usrInfo"]->isExpired) {
+            echo '<script type="text/javascript"> setTimeout('
+                . '"window.location=\'/membership-expired\'", 10); </script>';
+            exit;
+        }
+        return false;
     }
     
 }

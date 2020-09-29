@@ -1280,18 +1280,5 @@ class ScoreUtils extends ScorePowerUtilities
         ]);
         return true;
     }
-
-    private function chkPartnerExpire()
-    {
-        if ($this->isStaffOrAdmin()) {
-            return false;
-        }
-        if (isset($this->v["usrInfo"]) && $this->v["usrInfo"]->isExpired) {
-            echo '<script type="text/javascript"> setTimeout('
-                . '"window.location=\'/membership-expired\'", 10); </script>';
-            exit;
-        }
-        return false;
-    }
     
 }

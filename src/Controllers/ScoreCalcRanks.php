@@ -24,6 +24,7 @@ class ScoreCalcRanks extends ScoreCalcs
 {
     protected function calcCurrScoreRanks()
     {
+//echo '<pre>'; print_r($this->searcher->v); echo '</pre>'; exit;
         $this->v["ranksCache"] = RIIPsRanks::where(
                 'ps_rnk_filters', $this->searcher->v["urlFlts"])
             ->first();
@@ -380,6 +381,7 @@ class ScoreCalcRanks extends ScoreCalcs
         if ($GLOBALS["SL"]->REQ->has('currFlt')) {
             $curr = $GLOBALS["SL"]->REQ->get('currFlt');
         } else {
+            $this->searcher->searchFiltsURLXtra();
             $this->calcCurrScoreRanks();
             $this->calcArchiveRanks();
         }

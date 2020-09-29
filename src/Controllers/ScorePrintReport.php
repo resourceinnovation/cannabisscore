@@ -18,7 +18,6 @@ use App\Models\RIIUserPsPerms;
 use App\Models\RIIUserCompanies;
 use RockHopSoft\Survloop\Controllers\Globals\Globals;
 use RockHopSoft\Survloop\Controllers\Tree\Report\ReportMonthly;
-use ResourceInnovation\CannabisScore\Controllers\ScoreUserCompanies;
 use ResourceInnovation\CannabisScore\Controllers\ScoreCalcsPrint;
 
 class ScorePrintReport extends ScoreCalcsPrint

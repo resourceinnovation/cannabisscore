@@ -6,7 +6,8 @@
     function nextRecalc() {
         if (document.getElementById("ajax490refresh")) {
             $("#ajax490refresh").load("/ajax/report-ajax/?psid={{ $psid }}&refresh={!! 
-                ((isset($nextFlt)) ? (($nextFlt == 'done') ? '-1' : '2&currFlt=' . $nextFlt) : '2') !!}");
+                ((isset($nextFlt)) ? (($nextFlt == 'done') ? '-1' : '2&currFlt=' . $nextFlt) : '2')
+                !!}");
         }
         return true;
     }

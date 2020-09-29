@@ -18,7 +18,6 @@ use App\Models\RIIPsForCup;
 use App\Models\RIIPsLicenses;
 use RockHopSoft\Survloop\Controllers\Stats\SurvStatsGraph;
 use ResourceInnovation\CannabisScore\Controllers\ScoreStats;
-use ResourceInnovation\CannabisScore\Controllers\CannabisScoreSearcher;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReportStats;
 
 class ScoreReportAvgs extends ScoreReportStats
