@@ -20,8 +20,8 @@ use App\Models\RIIManufacturers;
 
 class ScoreListingsGraph
 {
-    protected $v        = [];
-    protected $searcher = null;
+    public $v        = [];
+    public $searcher = null;
     
     public function __construct($uID = 0, $user = null, $usrInfo = null)
     {
@@ -31,6 +31,7 @@ class ScoreListingsGraph
         $this->v["isAdmin"] = ($this->v["user"] 
             && $this->v["user"]->hasRole('administrator|staff'));
 
+        $this->v["defNew"]   = 556;
         $this->v["defCmplt"] = 243;
         $this->v["defArch"]  = 364;
         $this->v["defInc"]   = 242;

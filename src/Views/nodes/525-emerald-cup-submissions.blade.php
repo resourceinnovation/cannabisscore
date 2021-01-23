@@ -54,7 +54,7 @@ For now, please use Ctrl+F to search this page for farm names, emails, etc. &lt;
         @if (in_array($s->ps_id, $cultClassicIds)) <br /><span class="slBlueDark"
             ><i class="fa fa-certificate" aria-hidden="true"></i> Cultivation Classic</span> @endif
     </td>
-    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'))
+    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Cannabis Ranked Data Set'))
         <td class="psOpen" data-psid="{{ $s->ps_id }}">
             <b class="fPerc133">{{ round($s->ps_effic_overall) }}%</b> 
             <div class="fPerc80">

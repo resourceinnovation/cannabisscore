@@ -31,7 +31,7 @@
         }
         .meterLines .box1, .meterLines .box1fill {
             float: left;
-            width: {{ round(($width-110)/10) }}px;
+            width: {{ round(($width-120)/10) }}px;
             height: {{ ($height-6) }}px;
             border: 3px #9AC356 solid;
         }
@@ -40,7 +40,7 @@
         }
         .meterLines .box2 {
             float: left;
-            width: 5px;
+            width: 4px;
             height: {{ ($height-6) }}px;
             background: #{{ $bg }};
         }

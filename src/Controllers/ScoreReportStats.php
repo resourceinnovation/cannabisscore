@@ -22,7 +22,7 @@ class ScoreReportStats
     public $searcher = null;
     public $lgts     = [];
     
-    protected function prepStatFilts()
+    public function prepStatFilts()
     {
         $lookups = new ScoreLookups;
         foreach ($lookups->v as $var => $val) {
@@ -69,7 +69,8 @@ class ScoreReportStats
             [ 'Lighting Score',   'kBtu / day'      ], 
             [ 'HVAC Score',       'kBtu / sq ft'    ], 
             [ 'HVAC Score',       'kWh / sq ft'     ], 
-            [ 'Water Score',      'gallons / sq ft' ], 
+            [ 'Water Facility',   'gallons / sq ft' ], 
+            [ 'Water Productivity', 'g / gallons'     ], 
             [ 'Waste Score',      'lbs / sq ft'     ]
         ];
         $defSet = 'PowerScore Growth Stages';
@@ -125,8 +126,12 @@ class ScoreReportStats
         $GLOBALS["SL"]->loadStates();
         $this->initSearcher();
         $this->v["fltStateClim"] = '';
+        $this->v["fltStateClimTag"] = [];
         if (isset($this->searcher->searchFilts["fltStateClim"])) {
             $this->v["fltStateClim"] = trim($this->searcher->searchFilts["fltStateClim"]);
+        }
+        if (isset($this->searcher->searchFilts["fltStateClimTag"])) {
+            $this->v["fltStateClimTag"] = $this->searcher->searchFilts["fltStateClimTag"];
         }
         $this->v["fltFacility"] = 0;
         if ($GLOBALS["SL"]->REQ->has('fltFacility')) {

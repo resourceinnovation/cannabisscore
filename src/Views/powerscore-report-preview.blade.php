@@ -79,12 +79,23 @@
         @if (isset($sessData["powerscore"][0]->ps_effic_water) 
             && $sessData["powerscore"][0]->ps_effic_water > 0)
             <tr>
-                <td><nobr>Water</nobr></td>
+                <td><nobr>Water Facility</nobr></td>
                 <td>{!! $GLOBALS["SL"]->sigFigs(
                     $sessData["powerscore"][0]->ps_effic_water, 
                     3
                 ) !!}</td>
                 <td><nobr>gallons / sq ft</nobr></td>
+            </tr>
+        @endif
+        @if (isset($sessData["powerscore"][0]->ps_effic_water_prod) 
+            && $sessData["powerscore"][0]->ps_effic_water_prod > 0)
+            <tr>
+                <td><nobr>Water Productivity</nobr></td>
+                <td>{!! $GLOBALS["SL"]->sigFigs(
+                    $sessData["powerscore"][0]->ps_effic_water_prod, 
+                    3
+                ) !!}</td>
+                <td><nobr>grams / gallons</nobr></td>
             </tr>
         @endif
         @if (isset($sessData["powerscore"][0]->ps_effic_waste) 

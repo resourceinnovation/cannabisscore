@@ -47,31 +47,40 @@
             <div class="col-sm-2">
                 <select name="lgtType{{ $model->lgt_mod_id }}"
                     id="lgtType{{ $model->lgt_mod_id }}ID"
-                    data-lgt-id="{{ $model->lgt_mod_id }}"
+                    data-lgt-id="{{ $model->lgt_mod_id }}" autocomplete="off"
                     class="form-control form-control-sm changeLgtType">
                     <option value="0"
-                    @if (!isset($model->lgt_mod_type) 
-                        || intVal($model->lgt_mod_type) == 0) SELECTED
-                    @endif >no type linked</option>
+                        @if (!isset($model->lgt_mod_type) 
+                            || intVal($model->lgt_mod_type) == 0) SELECTED
+                        @endif >no type linked</option>
                 {!! $GLOBALS["SL"]->def->getSetDrop(
                     'PowerScore Light Types', 
                     $model->lgt_mod_type
                 ) !!}
                 </select>
             </div>
-            <div class="col-sm-2 pT5 pB5">
+            <div class="col-sm-1">
                 {{ $model->lgt_mod_tech }}
             </div>
-            <div class="col-sm-2 pT5 pB5">
-                <div id="lgtSave{{ $model->lgt_mod_id }}" class="pull-right"></div>
-                <label>
-                    <input type="checkbox" name="lgtDlc{{ $model->lgt_mod_id }}"
-                        id="lgtDlc{{ $model->lgt_mod_id }}ID" value="dlc"
-                        data-lgt-id="{{ $model->lgt_mod_id }}" class="clickLgtType"
+            <div class="col-sm-2">
+                <select class="clickLgtType form-control form-control-sm" 
+                    name="lgtDlc{{ $model->lgt_mod_id }}"
+                    id="lgtDlc{{ $model->lgt_mod_id }}ID" autocomplete="off"
+                    data-lgt-id="{{ $model->lgt_mod_id }}">
+                    <option value=""
+                        @if (!isset($model->lgt_mod_is_dlc)
+                            || intVal($model->lgt_mod_is_dlc) == 0) SELECTED
+                        @endif >No DLC bonus points</option>
+                @for ($i = 2; $i < 6; $i++)
+                    <option value="{{ $i }}"
                         @if (isset($model->lgt_mod_is_dlc)
-                            && intVal($model->lgt_mod_is_dlc) == 1) CHECKED
-                        @endif > DLC
-                </label>
+                            && intVal($model->lgt_mod_is_dlc) == $i) SELECTED
+                        @endif >+{{ $i }} DLC bonus points</option>
+                @endfor
+                </select>
+            </div>
+            <div class="col-sm-1 pT5 pB5">
+                <div id="lgtSave{{ $model->lgt_mod_id }}"></div>
             </div>
         </div>
     </div>
@@ -89,8 +98,8 @@ function updateLgtType(lgtID) {
     if (document.getElementById("lgtType"+lgtID+"ID")) {
         url += document.getElementById("lgtType"+lgtID+"ID").value;
     }
-    if (document.getElementById("lgtDlc"+lgtID+"ID") && document.getElementById("lgtDlc"+lgtID+"ID").checked) {
-        url += "&dlc=1";
+    if (document.getElementById("lgtDlc"+lgtID+"ID")) {
+        url += "&dlc="+document.getElementById("lgtDlc"+lgtID+"ID").value;
     }
     console.log(url);
     $("#lgtSave"+lgtID+"").load(url);

@@ -29,11 +29,11 @@
     <td> @if (isset($s->ps_email) && trim($s->ps_email) != '') {{ $s->ps_email }} @endif </td>
     <td>{{ $s->ps_county }} {{ $s->ps_state }}</td>
     <td>{{ date("n/j/Y", strtotime($s->created_at)) }}</td>
-    <td> @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set')) Yes 
+    <td> @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Cannabis Ranked Data Set')) Yes 
         @else No @endif </td>
     <td> @if (in_array($s->ps_id, $cultClassicIds)) Yes @endif </td>
     <td> @if (in_array($s->ps_id, $emeraldIds)) Yes @endif </td>
-    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Ranked Data Set'))
+    @if ($s->ps_status == $GLOBALS["SL"]->def->getID('PowerScore Status', 'Cannabis Ranked Data Set'))
         <td>{{ round($s->ps_effic_overall) }}%</td>
         <td>{{ round($s->ps_rnk_facility) }}%</td>
         <td>{{ round($s->ps_rnk_production) }}%</td>

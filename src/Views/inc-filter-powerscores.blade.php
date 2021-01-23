@@ -40,13 +40,6 @@
             )->render() !!}
         @endif
 
-        @if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
-            {!! view(
-                'vendor.cannabisscore.inc-filter-powerscores-flt-climate', 
-                [ "fltStateClim" => $fltStateClim ]
-            )->render() !!}
-        @endif
-
         {!! view(
             'vendor.cannabisscore.inc-filter-powerscores-flt-lght', 
             [
@@ -68,6 +61,7 @@
             )->render() !!}
         @endif
 
+    <?php $wrap1 = '<div class="w100 round5" style="background: #fff;">'; ?>
     @if ($GLOBALS["SL"]->x["partnerLevel"] >= 4
         || !isset($GLOBALS["SL"]->x["partnerVersion"]) 
         || !$GLOBALS["SL"]->x["partnerVersion"])
@@ -77,17 +71,19 @@
                 [ "fltSize" => $fltSize ]
             )->render() !!}
 
-            {!! $flts["fltRenew"]->printDropdownColWrap('psChageFilter') !!}
+            
+            {!! $flts["fltRenew"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
+            
 
-            {!! $flts["fltWaterSource"]->printDropdownColWrap('psChageFilter') !!}
+            {!! $flts["fltWaterSource"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
 
-            {!! $flts["fltWaterStore"]->printDropdownColWrap('psChageFilter') !!}
+            {!! $flts["fltWaterStore"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
 
-            {!! $flts["fltWaterStoreSys"]->printDropdownColWrap('psChageFilter') !!}
+            {!! $flts["fltWaterStoreSys"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
 
-            {!! $flts["fltWaterStoreMeth"]->printDropdownColWrap('psChageFilter') !!}
+            {!! $flts["fltWaterStoreMeth"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
 
-            {!! $flts["fltGrowMedia"]->printDropdownColWrap('psChageFilter') !!}
+            {!! $flts["fltGrowMedia"]->printDropdownColWraps('psChangeFilter', $wrap1, '</div>') !!}
 
             {!! view(
                 'vendor.cannabisscore.inc-filter-powerscores-flt-techniques', 
@@ -131,6 +127,27 @@
         <input id="fltAdvShowing" name="fltAdvShow" type="hidden" value="0">
 
     @endif
+
+        @if ($GLOBALS["SL"]->x["partnerLevel"] > 2)
+            <div class="row">
+                <div class="col-md-4 pB10">
+                    <div class="w100 round5" style="background: #fff;">{!! 
+                        $GLOBALS["SL"]->states->stateClimateTagsSelect($fltStateClimTag, $nID, 'psChangeFilterDelay') 
+                    !!}</div>
+                </div>
+                <div class="col-md-8 pT0 pB10">
+                    <div class="w100 round5" style="background: #fff;">{!! 
+                        $GLOBALS["SL"]->states->stateClimateTagsList($fltStateClimTag, $nID) 
+                    !!}</div>
+                </div>
+            </div>
+            {!! $GLOBALS["SL"]->states->stateClimateTagsJS(
+                $fltStateClimTag, 
+                $nID, 
+                'psClickFilterDelay'
+            ) !!}
+            <style> .slTagList { margin-top: 0px; } </style>
+        @endif
 
     </div>
     <div class="col-md-3">
@@ -193,11 +210,19 @@
             var newTop = (1+getAnchorOffset()+$("#calculations").offset().top);
             $('html, body').animate({ scrollTop: newTop }, 800, 'swing', function(){ });
         }
-        applyFilts(); 
+        applyFilts();
     });
-    $(document).on("change", ".psChageFilter", function() {
-        applyFilts(); 
+    $(document).on("change", ".psChangeFilter", function() {
+        applyFilts();
         return true; 
+    });
+    $(document).on("change", ".psChangeFilterDelay", function() {
+        setTimeout(function() { applyFilts(); }, 200);
+        return true;
+    });
+    $(document).on("click", ".psClickFilterDelay", function() {
+        setTimeout(function() { applyFilts(); }, 200);
+        return true;
     });
 @endif
 

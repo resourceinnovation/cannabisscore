@@ -35,7 +35,12 @@
 @forelse ($allscores as $i => $ps)
     @if (in_array($ps->ps_id, $allPublicFiltIDs))
         <tr>
-        <td>#{{ $ps->ps_id }}</td>
+        <td>#{{ 
+            $ps->ps_id
+            . ((isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) ? 'F' 
+                : ((!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1) ? 'G' 
+                    : 'P'))
+        }}</td>
         @if (isset($showFarmNames) && $showFarmNames) <td> @if (isset($ps->ps_name)) {{ $ps->ps_name }} @endif </td> @endif
         <td>{{ round($ps->ps_effic_overall) }}%</td>
         <td>{{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_facility, 3) }}</td>

@@ -140,7 +140,8 @@ class ScorePrintReport extends ScoreCalcsPrint
         } else {
             $ret .= $this->printReport490();
         }
-        return ' <!-- customPrint490.start --> ' . $ret . ' <!-- customPrint490.end --> ';
+        return ' <!-- customPrint490.start --> ' 
+            . $ret . ' <!-- customPrint490.end --> ';
     }
     
     public function printReport490()
@@ -165,6 +166,7 @@ class ScorePrintReport extends ScoreCalcsPrint
         if (Auth::user()) {
             $this->v["usr"] = Auth::user();
         }
+        $this->v["canEdit"] = $this->isPartnerStaffAdminOrOwner();
 
         $GLOBALS["SL"]->pageJAVA .= view(
             'vendor.cannabisscore.nodes.490-report-calculations-js',
@@ -274,6 +276,7 @@ class ScorePrintReport extends ScoreCalcsPrint
     {
         $effTypes = [
             'Overall', 
+            'CatEnr', 
             'Facility', 
             'FacNon', 
             'FacAll', 
@@ -282,8 +285,12 @@ class ScorePrintReport extends ScoreCalcsPrint
             'ProdAll', 
             'HVAC', 
             'Lighting', 
+            'CatWtr', 
             'Water', 
-            'Waste'
+            'WaterProd', 
+            'CatWst', 
+            'Waste',
+            'WasteProd'
         ];
         if (!$GLOBALS["SL"]->REQ->has('ps') 
             || intVal($GLOBALS["SL"]->REQ->get('ps')) <= 0 
@@ -299,14 +306,15 @@ class ScorePrintReport extends ScoreCalcsPrint
         if (isset($this->searcher->v["powerscore"])
             && isset($this->searcher->v["powerscore"]->ps_id)) {
             $pastDef = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past');
-            $this->searcher->v["isPast"] = ($this->searcher->v["powerscore"]->ps_time_type == $pastDef);
+            $this->searcher->v["isPast"] 
+                = ($this->searcher->v["powerscore"]->ps_time_type == $pastDef);
             $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_filters', 
                     $this->searcher->v["urlFlts"])
                 ->where('ps_rnk_psid', $this->searcher->v["powerscore"]->ps_id)
                 ->first();
             if ($GLOBALS["SL"]->REQ->has('refresh') 
                 || !isset($this->searcher->v["currRanks"]->ps_rnk_overall)
-                || !isset($this->searcher->v["currRanks"]->ps_rnk_overall->ps_rnk_overall)) {
+                || in_array(intVal($this->searcher->v["currRanks"]->ps_rnk_overall), [0, 100])) {
                 $this->ajaxScorePercentilesCalcRanks();
             }
 
@@ -320,18 +328,21 @@ class ScorePrintReport extends ScoreCalcsPrint
             }
 
             $this->searcher->v["currGuage"] = 0;
-            $this->searcher->v["hasOverall"] = (isset($this->searcher->v["powerscore"]->ps_effic_facility) 
-                && isset($this->searcher->v["powerscore"]->ps_effic_production) 
-                && $this->searcher->v["powerscore"]->ps_effic_facility > 0
-                && $this->searcher->v["powerscore"]->ps_effic_production > 0);
+            $this->searcher->v["hasOverall"] 
+                = (isset($this->searcher->v["powerscore"]->ps_effic_facility) 
+                    && isset($this->searcher->v["powerscore"]->ps_effic_production) 
+                    && $this->searcher->v["powerscore"]->ps_effic_facility > 0
+                    && $this->searcher->v["powerscore"]->ps_effic_production > 0);
             $overRank = round($this->searcher->v["currRanks"]->ps_rnk_overall);
             if ($overRank == 0) {
                 $overRank = 1;
             }
             $superscript = $GLOBALS["SL"]->numSupscript($overRank);
-            $this->searcher->v["overallScoreTitle"] = '<center><h1 class="m0 scoreBig">' 
-                . $overRank . $superscript . '</h1><b>percentile</b></center>';
+            $this->searcher->v["overallScoreTitle"] = '<center>'
+                . '<h1 class="m0 scoreBig">' . $overRank . $superscript
+                . '</h1><b>percentile</b></center>';
 // number_format($ranksCache->ps_rnk_tot_cnt) }} past growing @if ($ranksCache->ps_rnk_tot_cnt > 1) years @else year @endif of
+//echo '<pre>'; print_r($this->searcher->v["currRanks"]); echo '</pre>'; exit;
             $this->searcher->searchResultsXtra(1);
             $this->searcher->searchFiltsURL();
             $this->searcher->loadFiltersDesc();
@@ -345,9 +356,9 @@ class ScorePrintReport extends ScoreCalcsPrint
     
     protected function ajaxScorePercentilesCalcRanks()
     {
+        $futDef = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future');
         if (isset($this->searcher->v["powerscore"]->ps_time_type) 
-            && $this->searcher->v["powerscore"]->ps_time_type 
-                == $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Future')) {
+            && $this->searcher->v["powerscore"]->ps_time_type == $futDef) {
             $ranks = RIIPsRanks::where('ps_rnk_filters', '')
                 ->first();
             $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
@@ -358,15 +369,36 @@ class ScorePrintReport extends ScoreCalcsPrint
             $urlFlts = $this->searcher->v["urlFlts"];
             $psid = $this->searcher->v["powerscore"]->ps_id;
             $this->calcAllScoreRanks();
+            $urlFlts = str_replace('&fltFut=232', '', $urlFlts);
             $this->searcher->v["urlFlts"] = $urlFlts;
-            $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_psid', $psid)
-                ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
-                ->first();
-            if (!$this->searcher->v["currRanks"] || $GLOBALS["SL"]->REQ->has('refresh')) {
+            if (trim($urlFlts) != '') {
+                $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_psid', $psid)
+                    ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
+                    ->first();
+            } else {
+                $this->searcher->v["currRanks"] = RIIPsRankings::where('ps_rnk_psid', $psid)
+                    ->where(function($query) {
+                        $query->where('ps_rnk_filters', 'LIKE', '')
+                              ->whereNull('ps_rnk_filters');
+                    })
+                    ->first();
+            }
+            if ($GLOBALS["SL"]->REQ->has('refresh')
+                || !$this->searcher->v["currRanks"] 
+                || (isset($this->searcher->v["currRanks"]->ps_rnk_overall)
+                    && in_array(
+                        intVal($this->searcher->v["currRanks"]->ps_rnk_overall), 
+                        [0, 100]
+                    ))) {
+                if ($this->searcher->v["currRanks"]) {
+                    RIIPsRankings::find($this->searcher->v["currRanks"]->getKey())
+                        ->delete();
+                }
                 $ranks = RIIPsRanks::where('ps_rnk_filters', $this->searcher->v["urlFlts"])
                     ->first();
                 $this->searcher->v["currRanks"] = $this->ajaxScorePercNewRank($ranks);
             }
+//echo '<h2>ajaxScorePercentilesCalcRanks(' . $this->searcher->v["urlFlts"] . '</h2><pre>'; print_r($this->searcher->v["currRanks"]); echo '</pre>'; exit;
         }
         return true;
     }
@@ -374,65 +406,117 @@ class ScorePrintReport extends ScoreCalcsPrint
     // returns an array of overrides for ($currNodeSessionData, ???... 
     protected function ajaxScorePercNewRank($ranks)
     {
+        $ps = $this->searcher->v["powerscore"];
+        RIIPsRankings::where('ps_rnk_psid', $ps->ps_id)
+            ->where('ps_rnk_filters', $this->searcher->v["urlFlts"])
+            ->delete();
         $currRanks = new RIIPsRankings;
-        $currRanks->ps_rnk_psid = $this->searcher->v["powerscore"]->ps_id;
+        $currRanks->ps_rnk_psid = $ps->ps_id;
+        $currRanks->ps_rnk_filters = $this->searcher->v["urlFlts"];
+//echo '<h2>ajaxScorePercNewRank(PSID#' . $ps->ps_id . '</h2> <pre>'; print_r($ranks); echo '</pre>';
         if ($ranks && isset($ranks->ps_rnk_facility)) {
-            $currRanks->ps_rnk_facility = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_facility, 
-                $this->searcher->v["powerscore"]->ps_effic_facility, 
-                true
+            $efficsOver = $this->basicEfficFlds();
+            foreach ($efficsOver as $effic) {
+                $rank = 0;
+                $list = $ranks->{ 'ps_rnk_' . $effic[0] };
+                if (isset($ps->{ 'ps_effic_' . $effic[0] })
+                    && $ps->{ 'ps_effic_' . $effic[0] } > 0) {
+                    $val = $ps->{ 'ps_effic_' . $effic[0] };
+                    if ($val < 0.000001) {
+                        $val = 0;
+                    }
+                    $isGolf = (strpos($effic[0], 'prod') === false);
+                    $rank = $GLOBALS["SL"]->getArrPercentileStr($list, $val, $isGolf);
+                }
+                $list = $GLOBALS["SL"]->mexplode(',', $list);
+                $currRanks->{ 'ps_rnk_' . $effic[0] } = $rank;
+                $currRanks->{ 'ps_rnk_' . $effic[0] . '_cnt' } = sizeof($list);
+            }
+            $currRanks->ps_rnk_cat_energy
+                = $currRanks->ps_rnk_cat_water
+                = $currRanks->ps_rnk_cat_waste
+                = $cntOenr
+                = $cntOwtr
+                = $cntOwst
+                = 0;
+            foreach ($efficsOver as $effic) {
+                if (isset($currRanks->{ 'ps_rnk_' . $effic[0] })
+                    && $currRanks->{ 'ps_rnk_' . $effic[0] } > 0) {
+                    if (in_array($effic[1], ['faci', 'facN', 'prod', 'proN'])) {
+                        $currRanks->ps_rnk_cat_energy 
+                            += $currRanks->{ 'ps_rnk_' . $effic[0] };
+                        $cntOenr++;
+//echo 'adding energy ' . $effic[1] . ' += ' . $currRanks->{ 'ps_rnk_' . $effic[0] } . ' (' . $cntOenr . ')<br />';
+                    } elseif (in_array($effic[1], ['watr', 'watP'])) {
+                        $currRanks->ps_rnk_cat_water 
+                            += $currRanks->{ 'ps_rnk_' . $effic[0] };
+                        $cntOwtr++;
+                    } elseif (in_array($effic[1], ['wste', 'wstP'])) {
+                        $currRanks->ps_rnk_cat_waste
+                            += $currRanks->{ 'ps_rnk_' . $effic[0] };
+                        $cntOwst++;
+                    }
+                }
+            }
+            if ($cntOenr > 0) {
+                $currRanks->ps_rnk_cat_energy 
+                    = $currRanks->ps_rnk_cat_energy/$cntOenr;
+                if (isset($ps->ps_dlc_bonus)) {
+                    $currRanks->ps_rnk_cat_energy += $ps->ps_dlc_bonus;
+                }
+            }
+            if ($cntOwtr > 0) {
+                $currRanks->ps_rnk_cat_water
+                    = $currRanks->ps_rnk_cat_water/$cntOwtr;
+            }
+            if ($cntOwst > 0) {
+                $currRanks->ps_rnk_cat_waste
+                    = $currRanks->ps_rnk_cat_waste/$cntOwst;
+            }
+
+            $currRanks->ps_rnk_cat_energy = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_cat_energy, 
+                $currRanks->ps_rnk_cat_energy
             );
-            $currRanks->ps_rnk_fac_non = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_fac_non, 
-                $this->searcher->v["powerscore"]->ps_effic_fac_non, 
-                true
+            $list = $GLOBALS["SL"]->mexplode(',', $ranks->ps_rnk_cat_energy);
+            $currRanks->ps_rnk_cat_energy_cnt = sizeof($list);
+
+            $currRanks->ps_rnk_cat_water = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_cat_water, 
+                $currRanks->ps_rnk_cat_water
             );
-            $currRanks->ps_rnk_fac_all = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_fac_all, 
-                $this->searcher->v["powerscore"]->ps_effic_fac_all, 
-                true
+            $list = $GLOBALS["SL"]->mexplode(',', $ranks->ps_rnk_cat_water);
+            $currRanks->ps_rnk_cat_water_cnt = sizeof($list);
+
+            $currRanks->ps_rnk_cat_waste = $GLOBALS["SL"]->getArrPercentileStr(
+                $ranks->ps_rnk_cat_waste, 
+                $currRanks->ps_rnk_cat_waste
             );
-            $currRanks->ps_rnk_production = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_production, 
-                $this->searcher->v["powerscore"]->ps_effic_production
+            $list = $GLOBALS["SL"]->mexplode(',', $ranks->ps_rnk_cat_waste);
+            $currRanks->ps_rnk_cat_waste_cnt = sizeof($list);
+
+            $currRanks->ps_rnk_overall_avg = $this->calcOverallRawScore(
+                $currRanks->ps_rnk_cat_energy, 
+                $currRanks->ps_rnk_cat_water, 
+                $currRanks->ps_rnk_cat_waste
             );
-            $currRanks->ps_rnk_prod_non = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_prod_non, 
-                $this->searcher->v["powerscore"]->ps_effic_prod_non
-            );
-            $currRanks->ps_rnk_prod_all = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_prod_all, 
-                $this->searcher->v["powerscore"]->ps_effic_prod_all
-            );
-            $currRanks->ps_rnk_lighting = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_lighting, 
-                $this->searcher->v["powerscore"]->ps_effic_lighting, 
-                true
-            );
-            $currRanks->ps_rnk_hvac = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_hvac, 
-                $this->searcher->v["powerscore"]->ps_effic_hvac, 
-                true
-            );
-            $currRanks->ps_rnk_water = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_water, 
-                $this->searcher->v["powerscore"]->ps_effic_water, 
-                true
-            );
-            $currRanks->ps_rnk_waste = $GLOBALS["SL"]->getArrPercentileStr(
-                $ranks->ps_rnk_waste, 
-                $this->searcher->v["powerscore"]->ps_effic_waste, 
-                true
-            );
-            $currRanks->ps_rnk_overall_avg = ($currRanks->ps_rnk_facility
-                +$currRanks->ps_rnk_production+$currRanks->ps_rnk_lighting
-                +$currRanks->ps_rnk_hvac+$currRanks->ps_rnk_water
-                +$currRanks->ps_rnk_waste)/6;
             $currRanks->ps_rnk_overall = $GLOBALS["SL"]->getArrPercentileStr(
                 $ranks->ps_rnk_overall_avg, 
                 $currRanks->ps_rnk_overall_avg
             );
+            $list = $GLOBALS["SL"]->mexplode(',', $ranks->ps_rnk_overall_avg);
+            $currRanks->ps_rnk_tot_cnt = sizeof($list);
+
             $currRanks->save();
+            if ($this->searcher->v["urlFlts"] 
+                == '&fltFarm=' . $ps->ps_characterize) {
+                $ps->ps_effic_cat_energy   = $currRanks->ps_rnk_cat_energy;
+                $ps->ps_effic_cat_water    = $currRanks->ps_rnk_cat_water;
+                $ps->ps_effic_cat_waste    = $currRanks->ps_rnk_cat_waste;
+                $ps->ps_effic_over_similar = $currRanks->ps_rnk_overall;
+                $ps->save();
+                $this->searcher->v["powerscore"] = $ps;
+            }
         }
         return $currRanks;
     }
@@ -483,11 +567,22 @@ class ScorePrintReport extends ScoreCalcsPrint
         $report->setStartMonth($startMonth);
         $report->addCol('ps_month_grams', 'Dried Flower Produced', 'Grams');
         $report->addCol('ps_month_kwh1', 'Electricity Usage', 'kWh');
-        $report->addCol('ps_month_kw', 'Peak Electricity Usage', 'kW');
+        $unit = 'Therms';
+        if (isset($ps->ps_unit_peak) && intVal($ps->ps_unit_peak) > 0) {
+            $unit = $GLOBALS["SL"]->def->getVal(
+                'Peak Electricity Measurement Unit', 
+                $ps->ps_unit_peak
+            );
+        }
+        $report->addCol('ps_month_kw', 'Peak Electricity Usage', $unit);
         $report->addCol('ps_month_kwh_renewable', 'Renewable Electricity Generated', 'kWh');
         $unit = 'Gallons';
         if ($this->isWaterInLiters()) {
             $unit = 'Liters';
+        } elseif ($this->isWaterInCF()) {
+            $unit = 'CF';
+        } elseif ($this->isWaterInCCF()) {
+            $unit = 'CCF';
         }
         $report->addCol('ps_month_water', 'Water Usage', $unit);
         $report->addCol('ps_month_water_storage_source', 'Source Water Storage', $unit);
@@ -517,6 +612,18 @@ class ScorePrintReport extends ScoreCalcsPrint
         $report->addCol('ps_month_propane', 'Propane', 'Gallons');
         $report->addCol('ps_month_fuel_oil', 'Fuel Oil', 'Gallons');
         $report->setTitle($title, $footer);
+
+        $peakKW = 0;
+        foreach ($this->sessData->dataSets["ps_monthly"] as $month) {
+            if (isset($month->ps_month_kw) 
+                && $peakKW < $month->ps_month_kw) {
+                $peakKW = $month->ps_month_kw;
+            }
+        }
+        $GLOBALS["SL"]->pageJAVA .= ' setTimeout("document.getElementById'
+            . '(\'colTotpeakelectricityusage\').innerHTML=\'<b>' 
+            . number_format($peakKW) . '</b>\'", 1); ';
+        
         return $report->printTables() . '<!-- end printTables() -->';
     }
 
@@ -527,7 +634,8 @@ class ScorePrintReport extends ScoreCalcsPrint
             $GLOBALS["SL"]->x["pdfFilename"] = 'PowerScore_Report.pdf';
         } elseif (in_array($this->treeID, [71, 93])) {
             $GLOBALS["SL"]->x["pdfFilename"] 
-                = 'Massachusetts_PowerScore_Comply_Report.pdf';
+                = 'Massachusetts_PowerScore_Comply_Report-'
+                    . date('Y_m_d-H_i_s') . '.pdf';
         }
         return true;
     }

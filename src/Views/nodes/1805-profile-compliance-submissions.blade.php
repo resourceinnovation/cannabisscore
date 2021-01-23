@@ -37,7 +37,7 @@
                 <div class="col-lg-4 pT5">
                 <a href="/ma-report/read-{{ $comply->com_ma_id }}/full"
                     >MA Compliance #{{ $comply->com_ma_id }}</a><br />
-                Started: {{ date('n/j/y', $comply->created_at) }}<br />
+                Started: {{ date('n/j/y', strtotime($comply->created_at)) }}<br />
                 <a href="/start/calculator?new=1&go=pro&time=232&cpyMa={{ 
                     $comply->com_ma_id }}-{{ $comply->com_ma_unique_str }}" 
                     class="btn btn-sm btn-secondary mT10 mB30"

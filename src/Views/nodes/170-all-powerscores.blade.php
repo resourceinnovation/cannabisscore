@@ -91,7 +91,7 @@
         </div>
         <div class="col-lg-3 pT10">
             <select name="dataSet" id="dataSetID" 
-                class="form-control psChageFilter ntrStp slTab"
+                class="form-control psChangeFilter ntrStp slTab"
                 autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
                 <option DISABLED >Select columns to show
                     @if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
@@ -102,6 +102,10 @@
                         || in_array(trim($dataSet), ['', 'kpi'])) 
                         SELECTED
                     @endif >Facility & Production Indicators</option>
+                <option value="emissions"
+                    @if (isset($dataSet) && trim($dataSet) == 'emissions') 
+                        SELECTED
+                    @endif >Emissions Indicators</option>
                 <option value="lighting"
                     @if (isset($dataSet) && trim($dataSet) == 'lighting') 
                         SELECTED
@@ -114,6 +118,12 @@
                     @if (isset($dataSet) && trim($dataSet) == 'totals') 
                         SELECTED
                     @endif >Annual Totals</option>
+            @if (Auth::user() && Auth::user()->hasRole('administrator|staff'))
+                <option value="names"
+                    @if (isset($dataSet) && trim($dataSet) == 'names') 
+                        SELECTED
+                    @endif >Facility Names</option>
+            @endif
             </select>
         </div>
     </div>

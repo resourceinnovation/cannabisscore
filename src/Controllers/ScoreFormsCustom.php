@@ -11,8 +11,9 @@
 namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIPsGrowingRooms;
-use App\Models\RIIPsLightTypes;
+use App\Models\RIIPsLinkRoomArea;
 use App\Models\RIIPsLinkHvacRoom;
+use App\Models\RIIPsLightTypes;
 use App\Models\RIIPsOnsiteFuels;
 use ResourceInnovation\CannabisScore\Controllers\ScoreCondsCustom;
 
@@ -55,6 +56,39 @@ class ScoreFormsCustom extends ScoreCondsCustom
                 $this->sessData->dataSets["powerscore"][0]->ps_year = intVal(date("Y"))-1;
             }
             $this->sessData->dataSets["powerscore"][0]->save();
+        }
+        return false;
+    }
+
+    protected function postPsNotProSetRoom($nID)
+    {
+        if (isset($this->sessData->dataSets["ps_areas"])
+            && isset($this->sessData->dataSets["ps_growing_rooms"])
+            && sizeof($this->sessData->dataSets["ps_growing_rooms"]) == 1) {
+            $roomID = intVal($this->sessData->dataSets["ps_growing_rooms"][0]->ps_room_id);
+            foreach ($this->sessData->dataSets["ps_areas"] as $a => $area) {
+                if ($area->ps_area_type == $this->v["areaTypes"]["Flower"]
+                    && isset($area->ps_area_id)) {
+                    $found = false;
+                    if (isset($this->sessData->dataSets["ps_link_room_area"])) {
+                        foreach ($this->sessData->dataSets["ps_link_room_area"] as $lnk) {
+                            if (isset($lnk->ps_lnk_rm_ar_room_id)
+                                && $lnk->ps_lnk_rm_ar_room_id == $roomID
+                                && isset($lnk->ps_lnk_rm_ar_area_id)
+                                && intVal($lnk->ps_lnk_rm_ar_area_id) 
+                                    == intVal($area->ps_area_id)) {
+                                $found = true;
+                            }
+                        }
+                    }
+                    if (!$found) {
+                        $new = new RIIPsLinkRoomArea;
+                        $new->ps_lnk_rm_ar_room_id = $roomID;
+                        $new->ps_lnk_rm_ar_area_id = $area->ps_area_id;
+                        $new->save();
+                    }
+                }
+            }
         }
         return false;
     }
@@ -413,8 +447,12 @@ class ScoreFormsCustom extends ScoreCondsCustom
             $this->v["currSessData"] = $this->sessData
                 ->dataSets["compliance_ma"][0]->com_ma_grams;
         }
+        $min = 0.00000001;
+        if ($nID == 1124) {
+            $min = 0;
+        }
         $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt 
-            . "', 'reqFormFldGreater', 0.00000001);\n";
+            . "', 'reqFormFldGreater', " . $min . ");\n";
         $presel = $this->monthlyCalcPreselections($nID, $nIDtxt);
         $this->v["gramFormMonths"] = $this->printMonthlyCalculator(
             $nIDtxt, 

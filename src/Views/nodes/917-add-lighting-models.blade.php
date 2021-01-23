@@ -18,7 +18,7 @@
         Model List</a>
     <a href="?add=1"><h2>Add/Update Lighting Models</h2></a>
 
-    <h4>Import From Excel</h4>
+    <h4>Import From Excel/CSV</h4>
 
     <form method="post" name="modelImportExcel" 
         action="/dash/manage-lighting-models?add=1&import=excel" 
@@ -64,9 +64,9 @@
             </div>
             <div id="importDescDLC" class="disNon">
                 <ol>
-                    <li><a href="https://www.designlights.org/lighting-controls/download-the-qpl/"
+                    <li><a href="https://www.designlights.org/horticultural-lighting/search/"
                         target="_blank">Download the DLC QPL</a>.</li>
-                    <li>Upload that file below:</li>
+                    <li>Upload that CSV file below:</li>
                 </ol>
             </div>
         </div>

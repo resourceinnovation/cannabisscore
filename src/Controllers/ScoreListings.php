@@ -314,11 +314,7 @@ class ScoreListings extends ScoreReportLightingManu
         }
         $this->searcher->loadCupScoreIDs();
         $this->loadAllRanksAllScores();
-        $this->searcher->v["scoreYearMonths"] = [];
-        foreach ($this->searcher->v["allscores"] as $i => $ps) {
-            $this->searcher->v["scoreYearMonths"][$ps->ps_id] 
-                = $GLOBALS["SL"]->lastMonths12($ps, 'ps_start_month');
-        }
+        $this->searcher->loadScoreYearMonths();
         if ($GLOBALS["SL"]->REQ->has('lighting')) {
             $ret .= view(
                 'vendor.cannabisscore.nodes.170-all-powerscores-lighting', 
@@ -333,7 +329,7 @@ class ScoreListings extends ScoreReportLightingManu
         return $ret;
     }
     
-    protected function loadAllRanksAllScores()
+    public function loadAllRanksAllScores()
     {
         $this->v["allranks"] = [];
         if ($this->searcher->v["allscores"]->isNotEmpty()) {
@@ -683,8 +679,10 @@ class ScoreListings extends ScoreReportLightingManu
             ['Facility Non-Electric',   'ps_effic_fac_non'], 
             ['Production Electric',     'ps_effic_production'], 
             ['Production Non-Electric', 'ps_effic_prod_non'], 
-            ['Water',                   'ps_effic_water'], 
-            ['Waste',                   'ps_effic_waste'], 
+            ['Water Facility',          'ps_effic_water'], 
+            ['Water Productivity',      'ps_effic_water_prod'], 
+            ['Waste Facility',          'ps_effic_waste'], 
+            ['Waste Productivity',      'ps_effic_waste_prod'], 
             ['HVAC',                    'ps_effic_hvac'], 
             ['Lighting',                'ps_effic_lighting'], 
             ['Flow SqFt/Fix',           'lgt_sqft_fix_flower'], 
@@ -714,12 +712,12 @@ class ScoreListings extends ScoreReportLightingManu
                 $this->v["catAlerts"][$type][$size] = 0;
             }
         }
-
+        $def = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past');
         $this->v["scores"] = DB::table('rii_powerscore')
-            ->join('rii_ps_areas', 'rii_powerscore.ps_id', '=', 'rii_ps_areas.ps_area_psid')
+            ->join('rii_ps_areas', 'rii_powerscore.ps_id', 
+                '=', 'rii_ps_areas.ps_area_psid')
             ->whereIn('rii_powerscore.ps_status', $status)
-            ->where('rii_powerscore.ps_time_type', 
-                $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past'))
+            ->where('rii_powerscore.ps_time_type', $def)
             //->where('rii_powerscore.ps_effic_facility', '>', 0)
             //->where('rii_powerscore.ps_effic_production', '>', 0)
             ->where('rii_ps_areas.ps_area_type', 162) // flower
@@ -727,6 +725,9 @@ class ScoreListings extends ScoreReportLightingManu
                 'rii_powerscore.ps_id', 
                 'rii_powerscore.ps_characterize', 
                 'rii_powerscore.ps_effic_overall',
+                'rii_powerscore.ps_effic_cat_energy', 
+                'rii_powerscore.ps_effic_cat_water', 
+                'rii_powerscore.ps_effic_cat_waste', 
                 'rii_powerscore.ps_effic_fac_all', 
                 'rii_powerscore.ps_effic_facility', 
                 'rii_powerscore.ps_effic_fac_non',
@@ -737,7 +738,9 @@ class ScoreListings extends ScoreReportLightingManu
                 'rii_powerscore.ps_effic_hvac', 
                 'rii_powerscore.ps_effic_carbon', 
                 'rii_powerscore.ps_effic_water', 
+                'rii_powerscore.ps_effic_water_prod', 
                 'rii_powerscore.ps_effic_waste', 
+                'rii_powerscore.ps_effic_waste_prod', 
                 'rii_powerscore.ps_effic_fac_all_status', 
                 'rii_powerscore.ps_effic_facility_status', 
                 'rii_powerscore.ps_effic_fac_non_status',
@@ -748,7 +751,9 @@ class ScoreListings extends ScoreReportLightingManu
                 'rii_powerscore.ps_effic_hvac_status', 
                 'rii_powerscore.ps_effic_carbon_status', 
                 'rii_powerscore.ps_effic_water_status', 
+                'rii_powerscore.ps_effic_water_prod_status', 
                 'rii_powerscore.ps_effic_waste_status', 
+                'rii_powerscore.ps_effic_waste_prod_status', 
                 'rii_powerscore.ps_grams', 
                 'rii_powerscore.ps_kwh', 
                 'rii_powerscore.ps_county', 
@@ -799,7 +804,7 @@ class ScoreListings extends ScoreReportLightingManu
                 }
                 if (!isset($ps->ps_effic_facility_status)
                     && isset($ps->ps_status)
-                    && $ps->ps_status == $this->v["defCmplt"]) {
+                    && $ps->ps_status == $this->v["defNew"]) {
                     $sizeDef = $GLOBALS["CUST"]->getSizeDefID($ps->ps_area_size);
                     $this->v["catAlerts"][$ps->ps_characterize][$sizeDef]++;
                 }
@@ -851,29 +856,25 @@ class ScoreListings extends ScoreReportLightingManu
                 }
             }
             if (isset($ps->ps_effic_facility)
-                && $ps->ps_effic_facility > 0
-                && isset($ps->ps_effic_facility_status)
-                && $ps->ps_effic_facility_status == $this->v["defCmplt"]
                 && isset($ps->ps_effic_fac_non)
-                && $ps->ps_effic_fac_non > 0
+                && isset($ps->ps_effic_facility_status)
                 && isset($ps->ps_effic_fac_non_status)
-                && $ps->ps_effic_fac_non_status == $this->v["defCmplt"]
-                && isset($ps->ps_effic_fac_all)
-                && $ps->ps_effic_fac_all > 0) {
+                && $ps->ps_effic_facility > 0
+                && $ps->ps_effic_fac_non > 0
+                && $ps->ps_effic_facility_status == $this->v["defCmplt"]
+                && $ps->ps_effic_fac_non_status == $this->v["defCmplt"]) {
                 $ps->ps_effic_fac_all_status = $this->v["defCmplt"];
             } else {
                 $ps->ps_effic_fac_all_status = $this->v["defArch"];
             }
             if (isset($ps->ps_effic_production)
-                && $ps->ps_effic_production > 0
-                && isset($ps->ps_effic_production_status)
-                && $ps->ps_effic_production_status == $this->v["defCmplt"]
                 && isset($ps->ps_effic_prod_non)
-                && $ps->ps_effic_prod_non > 0
+                && isset($ps->ps_effic_production_status)
                 && isset($ps->ps_effic_prod_non_status)
-                && $ps->ps_effic_prod_non_status == $this->v["defCmplt"]
-                && isset($ps->ps_effic_prod_all)
-                && $ps->ps_effic_prod_all > 0) {
+                && $ps->ps_effic_production > 0
+                && $ps->ps_effic_prod_non > 0
+                && $ps->ps_effic_production_status == $this->v["defCmplt"]
+                && $ps->ps_effic_prod_non_status == $this->v["defCmplt"]) {
                 $ps->ps_effic_prod_all_status = $this->v["defCmplt"];
             } else {
                 $ps->ps_effic_prod_all_status = $this->v["defArch"];

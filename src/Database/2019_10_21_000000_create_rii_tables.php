@@ -80,6 +80,7 @@ class RIICreateTables extends Migration
 			$table->string('PsCropOther')->nullable();
 			$table->integer('PsOnsiteType')->unsigned()->nullable();
 			$table->double('ps_effic_water')->nullable();
+			$table->double('ps_effic_water_prod')->nullable();
 			$table->double('ps_effic_waste')->nullable();
 			$table->timestamps();
 		});

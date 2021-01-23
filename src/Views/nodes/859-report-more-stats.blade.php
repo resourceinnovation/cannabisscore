@@ -22,13 +22,9 @@
             </p>
         </div>
         <div class="col-4">
-            <select name="fltStateClim" id="fltStateClimID" class="form-control form-control-lg"
-                onChange="window.location='?fltStateClim='+this.value;" autocomplete="off">
-                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
-                    >All Climates and States</option>
-                <option disabled ></option>
-                {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
-            </select>
+            {!! $GLOBALS["SL"]->states->stateClimateTagsSelect($fltStateClimTag, 859, 'psChangeFilterDelay') !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsList($fltStateClimTag, 859) !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsJS($fltStateClimTag, 859, 'psClickFilterDelay') !!}
         </div>
     </div>
 </div>
@@ -226,3 +222,24 @@
     #{!! implode(', #', $enrgys["extra"][1]) !!}
 </i></div>
 </div>
+
+<script type="text/javascript"> $(document).ready(function(){
+
+function applyFilts() {
+    var baseUrl = "?filt=1";
+    if (document.getElementById("n859tagIDsID") && document.getElementById("n859tagIDsID").value.trim() != '') {
+        baseUrl += "&fltStateClimTag="+document.getElementById("n859tagIDsID").value.trim();
+    }
+    window.location = baseUrl;
+    return false;
+}
+$(document).on("change", ".psChangeFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
+$(document).on("click", ".psClickFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
+
+}); </script>

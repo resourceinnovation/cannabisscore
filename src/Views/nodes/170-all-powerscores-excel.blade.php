@@ -15,8 +15,10 @@
 <th>Production KPI (g / kBtu)</th>
 <th>Electric Production KPI (g / kBtu)</th>
 <th>Non-Electric Production KPI (g / kBtu)</th>
-<th>Water KPI (gallons / sq ft)</th>
-<th>Waste KPI (lbs / sq ft)</th>
+<th>Water Facility KPI (gallons / sq ft)</th>
+<th>Water Productivity KPI (g / gal)</th>
+<th>Waste Facility KPI (lbs / sq ft)</th>
+<th>Waste Productivity KPI (g / lbs)</th>
 <th>HVAC KPI (kBtu / sq ft)</th>
 <th>Lighting KPI (kWh / day)</th>
 <th>LPD: Overall (W / sq ft)</th>
@@ -75,7 +77,9 @@
         <td>{{ number_format($psCnt->ps_effic_production) }}</td>
         <td>{{ number_format($psCnt->ps_effic_prod_non) }}</td>
         <td>{{ number_format($psCnt->ps_effic_water) }}</td>
+        <td>{{ number_format($psCnt->ps_effic_water_prod) }}</td>
         <td>{{ number_format($psCnt->ps_effic_waste) }}</td>
+        <td>{{ number_format($psCnt->ps_effic_waste_prod) }}</td>
         <td>{{ number_format($psCnt->ps_effic_hvac) }}</td>
         <td>{{ number_format($psCnt->ps_effic_lighting) }}</td>
         <td>{{ number_format($psCnt->ps_lighting_power_density) }}</td>
@@ -103,7 +107,9 @@
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_fac_non, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_water, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_water_prod, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_waste, 3) }}</th>
+        <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_waste_prod, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</th>
         <th>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_lighting_power_density, 3) }}</th>
@@ -130,7 +136,12 @@
         @if ($nID == 1373 && $GLOBALS["SL"]->x["partnerLevel"] < 5)
             <td>{{ (1+$i) }})</td>
         @else
-            <td>#{{ $ps->ps_id }}</td>
+            <td>#{{
+                $ps->ps_id
+                . ((isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) ? 'F' 
+                    : ((!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1) ? 'G' 
+                        : 'P'))
+            }}</td>
         @endif
         @if (isset($fltCmpl) && $fltCmpl != 243)
             <td>{{ $GLOBALS["SL"]->def->getVal(
@@ -206,11 +217,29 @@
         @endif
         </td>
         <td>
+        @if ((isset($ps->ps_effic_water_prod_status) 
+            && intVal($ps->ps_effic_water_prod_status) == $defCmplt)
+            || (isset($fltPartner) && $fltPartner > 0))
+            @if ($ps->ps_effic_water_prod < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_water_prod, 3) }}
+            @endif
+        @endif
+        </td>
+        <td>
         @if ((isset($ps->ps_effic_waste_status) 
             && intVal($ps->ps_effic_waste_status) == $defCmplt)
             || (isset($fltPartner) && $fltPartner > 0))
             @if ($ps->ps_effic_waste < 0.000001) 0
             @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_waste, 3) }}
+            @endif
+        @endif
+        </td>
+        <td>
+        @if ((isset($ps->ps_effic_waste_prod_status) 
+            && intVal($ps->ps_effic_waste_prod_status) == $defCmplt)
+            || (isset($fltPartner) && $fltPartner > 0))
+            @if ($ps->ps_effic_waste_prod < 0.000001) 0
+            @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_waste_prod, 3) }}
             @endif
         @endif
         </td>

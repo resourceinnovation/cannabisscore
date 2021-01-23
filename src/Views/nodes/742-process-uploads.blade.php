@@ -18,7 +18,12 @@
     <td>
         <div class="nodeAnchor"><a name="ps{{ $ps->ps_id }}"></a></div>
         <a href="/calculated/u-{{ $ps->ps_id }}" target="_blank"
-            ><h4 class="disIn mB0 mR20 slBlueDark">PowerScore #{{ $ps->ps_id }}</h4></a>
+            ><h4 class="disIn mB0 mR20 slBlueDark">PowerScore #{{
+                $ps->ps_id
+                . ((isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) ? 'F' 
+                    : ((!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1) ? 'G' 
+                        : 'P'))
+            }}</h4></a>
         Status: 
         <select name="status{{ $ps->ps_id }}" >
             <option value="242" @if ($ps->ps_status == 242) SELECTED @endif 

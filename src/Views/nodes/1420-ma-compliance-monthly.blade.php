@@ -11,9 +11,26 @@
         @if ($rec->com_ma_tot_renew > 0)
             <th>Renewable Energy Generated (kWh)</th>
         @endif
-            <th>Peak Electric Demand (kW)</th>
+            <th>Peak Electric Demand
+            @if (isset($rec->com_ma_unit_peak))
+                ({!! $GLOBALS["SL"]->def->getVal(
+                    'Peak Electricity Measurement Unit', 
+                    $rec->com_ma_unit_peak
+                ) !!})
+            @else (kW)
+            @endif
+            </th>
         @if ($rec->com_ma_tot_water > 0)
-            <th>Water (Gallons)</th>
+            <th>Water 
+            @if (isset($rec->com_ma_unit_water))
+                ({!! str_replace(' (Cubic Feet)', '', 
+                    str_replace(' (100 Cubic Feet)', '', $GLOBALS["SL"]->def->getVal(
+                    'Water Measure Unit', 
+                    $rec->com_ma_unit_water
+                ))) !!})
+            @else (Gallons)
+            @endif
+            </th>
         @endif
     @if (!$GLOBALS["SL"]->REQ->has('print') && !$GLOBALS["SL"]->REQ->has('ajax'))
         {!! view(

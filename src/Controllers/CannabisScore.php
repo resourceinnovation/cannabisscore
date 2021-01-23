@@ -34,7 +34,6 @@ use ResourceInnovation\CannabisScore\Controllers\ScoreReportFound;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReportAvgs;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReportHvac;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReportLighting;
-use ResourceInnovation\CannabisScore\Controllers\WaterBoardStats;
 use ResourceInnovation\CannabisScore\Controllers\ScoreListings;
 use ResourceInnovation\CannabisScore\Controllers\ScoreReports;
 use ResourceInnovation\CannabisScore\Controllers\ScorePrintReport;
@@ -82,6 +81,9 @@ class CannabisScore extends ScorePrintReport
             $this->loadRenewOther($nID);
         } elseif ($nID == 1328) {
             $this->loadHeatPumpOther($nID);
+        } elseif (in_array($nID, [1468, 1590, 1589, 1785, 1794, 
+            1793, 1798, 1792, 1795, 1799, 1796, 1797])) {
+            $this->switchWaterUnits($nID);
         } elseif ($nID == 536) {
             $this->prepFeedbackSkipBtn();
             $GLOBALS["SL"]->pageJAVA .= view(
@@ -94,6 +96,8 @@ class CannabisScore extends ScorePrintReport
                 'vendor.cannabisscore.nodes.548-powerscore-feedback-score-link', 
                 $this->v
             )->render();
+        } elseif ($nID == 851) {
+            $this->chkPsLightsDlc($this->coreID);
         } elseif ($nID == 148) { // this should be built-in
             $defNew = $GLOBALS["SL"]->def->getID('PowerScore Status', 'New / Unreviewed');
             $this->sessData->dataSets["powerscore"][0]->ps_status = $defNew;
@@ -174,9 +178,6 @@ class CannabisScore extends ScorePrintReport
         } elseif ($nID == 859) {
             $report = new ScoreReportAvgs;
             $ret .= $report->getMorePowerStats();
-        } elseif ($nID == 1807) {
-            $report = new WaterBoardStats;
-            $ret .= $report->printWaterReport($nID);
         } elseif ($nID == 801) {
             $this->chkPartnerExpire();
             $report = new ScoreReportAvgs;
@@ -338,10 +339,12 @@ class CannabisScore extends ScorePrintReport
             $tmpSubTier = $this->loadNodeSubTier($nID);
         }
         
-        if ($nID == 47) {
+        if (in_array($nID, [47, 1823])) {
             $this->postZipCode($nID);
         } elseif ($nID == 1508) {
             $this->postPsReportingMonth($nID);
+        } elseif ($nID == 1835) {
+            $this->postPsNotProSetRoom($nID);
         } elseif ($nID == 1075) {
             $this->postRenewOther($nID);
         } elseif ($nID == 1328) {

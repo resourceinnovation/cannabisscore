@@ -12,8 +12,12 @@ namespace ResourceInnovation\CannabisScore\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
-use App\Models\RIIManufacturers;
+use App\Models\RIIPowerscore;
+use App\Models\RIIPsGrowingRooms;
+use App\Models\RIIPsAreas;
+use App\Models\RIIPsLightTypes;
 use App\Models\RIILightModels;
+use App\Models\RIIManufacturers;
 use ResourceInnovation\CannabisScore\Controllers\ScoreVars;
 
 class ScoreLightModels extends ScoreVars
@@ -255,13 +259,14 @@ class ScoreLightModels extends ScoreVars
     protected function addModelSearch($model = '')
     {
         if (trim($model) != '') {
+//echo '<pre>'; print_r($this->v["results"]); echo '</pre>'; exit;
             $models = null;
             if (isset($this->v["results"]["manus"]) 
                 && sizeof($this->v["results"]["manus"]) > 0) {
                 if ($this->v["lgtSrch"]["type"] != '') {
                     $models = RIILightModels::where('lgt_mod_name', 'LIKE', '%' . trim($model) . '%')
                         ->whereIn('lgt_mod_manu_id', $this->v["results"]["manus"])
-                        ->whereIn('lgt_mod_tech', $this->v["results"]["types"])
+                        ->where('lgt_mod_tech', $this->v["results"]["type"])
                         ->orderBy('lgt_mod_manu_id', 'asc')
                         ->orderBy('lgt_mod_name', 'asc')
                         ->get();
@@ -275,7 +280,7 @@ class ScoreLightModels extends ScoreVars
             } else {
                 if ($this->v["lgtSrch"]["type"] != '') {
                     $models = RIILightModels::where('lgt_mod_name', 'LIKE', '%' . trim($model) . '%')
-                        ->whereIn('lgt_mod_tech', $this->v["results"]["types"])
+                        ->where('lgt_mod_tech', $this->v["results"]["type"])
                         ->orderBy('lgt_mod_manu_id', 'asc')
                         ->orderBy('lgt_mod_name', 'asc')
                         ->get();
@@ -302,6 +307,73 @@ class ScoreLightModels extends ScoreVars
             }
         }
         return true;
+    }
+    
+    protected function chkPsLightsDlc($psid)
+    {
+        $ps = RIIPowerscore::find($psid);
+        if (!$ps || !isset($ps->ps_id)) {
+            return -1;
+        }
+        $dlcBonus = 0;
+        $idAreas = [];
+        $idRooms = [];
+        $areas = RIIPsAreas::where('ps_area_psid', intVal($psid))
+            ->select('ps_area_id')
+            ->get();
+        if ($areas->isNotEmpty()) {
+            foreach ($areas as $area) {
+                $idAreas[] = $area->ps_area_id;
+            }
+        }
+        $rooms = RIIPsGrowingRooms::where('ps_room_psid', intVal($psid))
+            ->select('ps_room_id')
+            ->get();
+        if ($rooms->isNotEmpty()) {
+            foreach ($rooms as $room) {
+                $idRooms[] = $room->ps_room_id;
+            }
+        }
+        $lgts = RIIPsLightTypes::whereIn('ps_lg_typ_area_id', $idAreas)
+            ->orWhereIn('ps_lg_typ_room_id', $idRooms)
+            ->get();
+        foreach ($lgts as $lgt) {
+            $manuID = $modID = $dlc = 0;
+            $manuRec = RIIManufacturers::where('manu_name', $lgt->ps_lg_typ_make)
+                ->first();
+            if ($manuRec && isset($manuRec->manu_id)) {
+                $manuID = $manuRec->manu_id;
+            }
+            $modelRec = RIILightModels::where('lgt_mod_manu_id', $manuID)
+                ->where('lgt_mod_name', 'LIKE', '%' . $lgt->ps_lg_typ_model . '%')
+                ->orderBy('lgt_mod_is_dlc', 'desc')
+                ->first();
+            if ($modelRec && isset($modelRec->lgt_mod_id)) {
+                $modID = $modelRec->lgt_mod_id;
+                $dlc = $modelRec->lgt_mod_is_dlc;
+                if (isset($modelRec->lgt_mod_type)
+                    && intVal($modelRec->lgt_mod_type) > 0
+                    && $lgt->ps_lg_typ_light != $modelRec->lgt_mod_type) {
+                    $lgt->ps_lg_typ_light = $modelRec->lgt_mod_type;
+                    $lgt->save();
+                }
+            }
+            if ($lgt->ps_lg_typ_model_id != $modID
+                || $lgt->ps_lg_typ_dlc_bonus != $dlc) {
+                $lgt->ps_lg_typ_model_id = $modID;
+                $lgt->ps_lg_typ_dlc_bonus = $dlc;
+                $lgt->save();
+            }
+            if ($dlcBonus < $dlc) {
+                $dlcBonus = $dlc;
+            }
+        }
+        if (!isset($ps->ps_dlc_bonus)
+            || $ps->ps_dlc_bonus != $dlcBonus) {
+            $ps->ps_dlc_bonus = $dlcBonus;
+            $ps->save();
+        }
+        return $dlcBonus;
     }
     
 }

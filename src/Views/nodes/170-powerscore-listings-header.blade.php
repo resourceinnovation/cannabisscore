@@ -21,20 +21,21 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}2">
         State, Type
+    </div></th>
     <th><div id="fixHead{{ $fixed }}3">
         Months
+    </div></th>
 @if (isset($fltCmpl) && $fltCmpl == 0 
     && Auth::user()->hasRole('administrator|staff'))
-    </th>
-    <th>
+    <th><div id="fixHead{{ $fixed }}3b">
     {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
         "eng"    => 'Status',
         "srtVal" => 'ps_status',
         "sort"   => $sort
     ])->render() !!}
+    </div></th>
 @endif
 
-    </div></th>
     <th><div id="fixHead{{ $fixed }}4">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
             "eng"    => 'Overall<br />Ranking',
@@ -47,7 +48,7 @@
 
     <th><div id="fixHead{{ $fixed }}5">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Facility <br />KPI '
+            "eng"    => 'Energy <br />Efficiency <br />KPI '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_fac_all',
             "sort"   => $sort
@@ -55,7 +56,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}6">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Electric <br />Facility KPI '
+            "eng"    => 'Electric <br />Efficiency <br />KPI '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_facility',
             "sort"   => $sort
@@ -63,7 +64,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}7">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Non-Electric <br />Facility KPI '
+            "eng"    => 'Non-Electric <br />Efficiency <br />KPI '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_fac_non',
             "sort"   => $sort
@@ -71,7 +72,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}8">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Production <br />KPI '
+            "eng"    => 'Energy <br />Productivity <br />KPI '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_prod_all',
             "sort"   => $sort
@@ -79,7 +80,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}9">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Electric <br />Production KPI '
+            "eng"    => 'Electric <br />Productivity <br />KPI '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_production',
             "sort"   => $sort
@@ -87,9 +88,28 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}10">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Non-Electric <br />Production KPI '
+            "eng"    => 'Non-Electric <br />Productivity <br />KPI '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_prod_non',
+            "sort"   => $sort
+        ])->render() !!}
+    </div></th>
+
+@elseif ($dataSet == 'emissions')
+
+    <th><div id="fixHead{{ $fixed }}5">
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Emissions <br />Efficiency KPI '
+                . '<div class="fPerc66 slGrey">kg CO<sub>2</sub>e / sq ft</div>',
+            "srtVal" => 'ps_effic_emis',
+            "sort"   => $sort
+        ])->render() !!}
+    </div></th>
+    <th><div id="fixHead{{ $fixed }}6">
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Emissions <br />Productivity KPI '
+                . '<div class="fPerc66 slGrey">g / kg CO<sub>2</sub>e</div>',
+            "srtVal" => 'ps_effic_emis_prod',
             "sort"   => $sort
         ])->render() !!}
     </div></th>
@@ -151,15 +171,29 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}6">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Water <br />KPI <div class="fPerc66 slGrey">gallons / sq ft</div>',
+            "eng"    => 'Water Facility <br />KPI <div class="fPerc66 slGrey">gallons / sq ft</div>',
             "srtVal" => 'ps_effic_water',
             "sort"   => $sort
         ])->render() !!}
     </div></th>
     <th><div id="fixHead{{ $fixed }}7">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Waste <br />KPI <div class="fPerc66 slGrey">lbs / sq ft</div>',
+            "eng"    => 'Water Productivity <br />KPI <div class="fPerc66 slGrey">g / gallons</div>',
+            "srtVal" => 'ps_effic_water_prod',
+            "sort"   => $sort
+        ])->render() !!}
+    </div></th>
+    <th><div id="fixHead{{ $fixed }}8">
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Waste Facility<br />KPI <div class="fPerc66 slGrey">lbs / sq ft</div>',
             "srtVal" => 'ps_effic_waste',
+            "sort"   => $sort
+        ])->render() !!}
+    </div></th>
+    <th><div id="fixHead{{ $fixed }}9">
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Waste Productivity<br />KPI <div class="fPerc66 slGrey">g / lbs</div>',
+            "srtVal" => 'ps_effic_waste_prod',
             "sort"   => $sort
         ])->render() !!}
     </div></th>
@@ -266,6 +300,16 @@
             ])->render() !!}
         </div></th>
     @endif
+
+@elseif ($dataSet == 'names' && Auth::user() && Auth::user()->hasRole('administrator|staff'))
+    
+    <th><div id="fixHead{{ $fixed }}5">
+        {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
+            "eng"    => 'Facility Name',
+            "srtVal" => 'ps_name',
+            "sort"   => $sort
+        ])->render() !!}
+    </div></th>
 
 @endif
 

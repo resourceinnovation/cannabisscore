@@ -46,6 +46,8 @@ class RIIComplianceMa extends Model
 		'com_ma_start_month', 
 		'com_ma_renewal_application_date', 
 		'com_ma_status', 
+		'com_ma_unit_water', 
+		'com_ma_unit_peak',
     ];
     
     // END Survloop auto-generated portion of Model

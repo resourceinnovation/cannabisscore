@@ -35,9 +35,8 @@ class ScoreReportAvgs extends ScoreReportStats
                 $this->v
             )->render();
             $filename = 'PowerScore_Averages' 
-                . ((trim($this->v["fltStateClim"]) != '') 
-                    ? '-' . str_replace(' ', '_', $this->v["fltStateClim"]) 
-                    : '')
+                . ((sizeof($this->v["fltStateClimTag"]) > 0) 
+                    ? implode('_', $this->v["fltStateClimTag"]) : '')
                 . '-' . date("ymd") . '.xls';
             $GLOBALS["SL"]->exportExcelOldSchool($innerTable, $filename);
             exit;

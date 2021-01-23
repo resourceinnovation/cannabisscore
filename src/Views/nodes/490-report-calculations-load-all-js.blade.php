@@ -1,23 +1,42 @@
-<!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations-load-all-js.blade.php -->
+    <!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations-load-all-js.blade.php -->
 <script type="text/javascript">
 
 function updateRanks() {
-@foreach (['Overall', 'FacAll', 'Facility', 'FacNon', 'ProdAll', 'Production', 'ProdNon', 
-    'HVAC', 'Lighting', 'Water', 'Waste'] as $i => $eff)
-<?php
-$fld = 'ps_rnk_' . strtolower($eff);
-if ($eff == 'FacAll') {
-    $fld = 'ps_rnk_fac_all';
-} elseif ($eff == 'FacNon') {
-    $fld = 'ps_rnk_fac_non';
-} elseif ($eff == 'ProdAll') {
-    $fld = 'ps_rnk_prod_all';
-} elseif ($eff == 'ProdNon') {
-    $fld = 'ps_rnk_prod_non';
-}
-?>
+@foreach ([
+        'Overall', 'CatEnr', 'FacAll', 'Facility', 'FacNon', 
+        'ProdAll', 'Production', 'ProdNon', 'Emis', 'EmisProd', 
+        'Lighting', 'Hvac',
+        'CatWtr', 'Water', 'WaterProd', 
+        'CatWst', 'Waste', 'WasteProd'
+    ] as $i => $eff)
+    <?php
+    $fld = 'ps_rnk_' . strtolower($eff);
+    if ($eff == 'FacAll') {
+        $fld = 'ps_rnk_fac_all';
+    } elseif ($eff == 'FacNon') {
+        $fld = 'ps_rnk_fac_non';
+    } elseif ($eff == 'ProdAll') {
+        $fld = 'ps_rnk_prod_all';
+    } elseif ($eff == 'ProdNon') {
+        $fld = 'ps_rnk_prod_non';
+    } elseif ($eff == 'EmisProd') {
+        $fld = 'ps_rnk_emis_prod';
+    } elseif ($eff == 'WaterProd') {
+        $fld = 'ps_rnk_water_prod';
+    } elseif ($eff == 'WasteProd') {
+        $fld = 'ps_rnk_waste_prod';
+    } elseif ($eff == 'CatEnr') {
+        $fld = 'ps_rnk_cat_energy';
+    } elseif ($eff == 'CatWtr') {
+        $fld = 'ps_rnk_cat_water';
+    } elseif ($eff == 'CatWst') {
+        $fld = 'ps_rnk_cat_waste';
+    }
+    ?>
+    // 
+    // {{ $fld }}
     @if (isset($currRanks->{ $fld }))
-    <?php $perc = round($currRanks->{ $fld }); ?>
+<?php $perc = round($currRanks->{ $fld }); ?>
         guageList[{{ $i }}][2] = {!! $perc !!};
         @if ($eff == 'Overall')
             guageList[{{ $i }}][3] = {!! json_encode($withinFilters) !!};

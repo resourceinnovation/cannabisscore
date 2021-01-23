@@ -2,17 +2,24 @@
 
 var spn = '<i class="fa-li fa fa-spinner fa-spin mL30 mT20"></i>';
 var guageList = new Array();
-guageList[guageList.length] = new Array('Overall',    4400, 0, '', '', '');
-guageList[guageList.length] = new Array('FacAll',     4000, 0, '', '', '');
-guageList[guageList.length] = new Array('Facility',   3600, 0, '', '', '');
-guageList[guageList.length] = new Array('FacNon',     3200, 0, '', '', '');
-guageList[guageList.length] = new Array('ProdAll',    2800, 0, '', '', '');
-guageList[guageList.length] = new Array('Production', 2400, 0, '', '', '');
-guageList[guageList.length] = new Array('ProdNon',    2000, 0, '', '', '');
-guageList[guageList.length] = new Array('Hvac',       1600, 0, '', '', '');
+guageList[guageList.length] = new Array('Overall',    3200, 0, '', '', '');
+guageList[guageList.length] = new Array('CatEnr',     3000, 0, '', '', '');
+guageList[guageList.length] = new Array('FacAll',     2800, 0, '', '', '');
+guageList[guageList.length] = new Array('Facility',   2600, 0, '', '', '');
+guageList[guageList.length] = new Array('FacNon',     2400, 0, '', '', '');
+guageList[guageList.length] = new Array('ProdAll',    2200, 0, '', '', '');
+guageList[guageList.length] = new Array('Production', 2000, 0, '', '', '');
+guageList[guageList.length] = new Array('ProdNon',    1800, 0, '', '', '');
+guageList[guageList.length] = new Array('Emis',       1600, 0, '', '', '');
+guageList[guageList.length] = new Array('EmisProd',   1400, 0, '', '', '');
 guageList[guageList.length] = new Array('Lighting',   1200, 0, '', '', '');
-guageList[guageList.length] = new Array('Water',      800,  0, '', '', '');
-guageList[guageList.length] = new Array('Waste',      400,  0, '', '', '');
+guageList[guageList.length] = new Array('Hvac',       1000, 0, '', '', '');
+guageList[guageList.length] = new Array('CatWtr',      800, 0, '', '', '');
+guageList[guageList.length] = new Array('Water',       600, 0, '', '', '');
+guageList[guageList.length] = new Array('WaterProd',   400, 0, '', '', '');
+guageList[guageList.length] = new Array('CatWst',      200, 0, '', '', '');
+guageList[guageList.length] = new Array('Waste',       100, 0, '', '', '');
+guageList[guageList.length] = new Array('WasteProd',    10, 0, '', '', '');
 var reloadComplete = false;
 var g = 0;
 
@@ -30,12 +37,14 @@ $(document).ready(function() {
                 document.getElementById("efficGuageTxt"+guageList[g][0]+"2").innerHTML=guageList[g][4];
             }
         }
-        if (document.getElementById("guageFrame"+guageList[g][0]+"") && document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
-            document.getElementById("guageFrame"+guageList[g][0]+"").style.display='none';
-            document.getElementById("guageFrame"+guageList[g][0]+"").src=guageUrl;
+        if (document.getElementById("efficGuageTxt"+guageList[g][0]+"")) {
             document.getElementById("efficGuageTxt"+guageList[g][0]+"").style.display='none';
             document.getElementById("efficGuageTxt"+guageList[g][0]+"").innerHTML=guageList[g][3];
-            $("#guageFrame"+guageList[g][0]+"").fadeIn(3000);
+            if (document.getElementById("guageFrame"+guageList[g][0]+"")) {
+                document.getElementById("guageFrame"+guageList[g][0]+"").style.display='none';
+                document.getElementById("guageFrame"+guageList[g][0]+"").src=guageUrl;
+                $("#guageFrame"+guageList[g][0]+"").fadeIn(3000);
+            }
             $("#efficGuageTxt"+guageList[g][0]+"").fadeIn(3000);
         }
         return true;

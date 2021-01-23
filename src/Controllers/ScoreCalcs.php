@@ -12,10 +12,10 @@
 namespace ResourceInnovation\CannabisScore\Controllers;
 
 use App\Models\RIIPsRanks;
-use App\Models\RIIPsRankings;
 use App\Models\RIIPsWaterSources;
 use App\Models\RIIPsGrowMedia;
 use App\Models\RIIPsGrowMediaArea;
+use App\Models\RIIEiaStateElectricityProfiles;
 use RockHopSoft\Survloop\Controllers\Globals\Globals;
 use ResourceInnovation\CannabisScore\Controllers\ScoreFormsCustom;
 
@@ -157,7 +157,11 @@ class ScoreCalcs extends ScoreFormsCustom
             = $this->sessData->dataSets[$tbl][0]->ps_effic_lighting
             = $this->sessData->dataSets[$tbl][0]->ps_effic_carbon
             = $this->sessData->dataSets[$tbl][0]->ps_effic_water
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_water_prod
             = $this->sessData->dataSets[$tbl][0]->ps_effic_waste
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_waste_prod
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_emis
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_emis_prod
             = $this->sessData->dataSets[$tbl][0]->ps_lighting_power_density 
             = $this->sessData->dataSets[$tbl][0]->ps_lpd_flower
             = $this->sessData->dataSets[$tbl][0]->ps_lpd_veg
@@ -204,6 +208,7 @@ class ScoreCalcs extends ScoreFormsCustom
         
         $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc 
             = $this->sessData->dataSets[$tbl][0]->ps_tot_kwh_renewable
+            = $this->sessData->dataSets[$tbl][0]->ps_tot_kw_peak
             = 0;
         if (isset($this->sessData->dataSets["ps_monthly"])
             && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
@@ -211,6 +216,12 @@ class ScoreCalcs extends ScoreFormsCustom
                 if (isset($mon->ps_month_kwh1)) {
                     $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc 
                         += intVal($mon->ps_month_kwh1);
+                }
+                if (isset($mon->ps_month_kw)
+                    && $this->sessData->dataSets[$tbl][0]->ps_tot_kw_peak 
+                        < $mon->ps_month_kw) {
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_kw_peak 
+                        = $mon->ps_month_kw;
                 }
                 if (isset($mon->ps_month_kwh_renewable)
                     && intVal($mon->ps_month_kwh_renewable) > 0) {
@@ -241,6 +252,12 @@ class ScoreCalcs extends ScoreFormsCustom
                 $this->sessData->dataSets[$tbl][0]->ps_kwh 
                     = $this->sessData->dataSets[$tbl][0]->ps_kwh_tot_calc;
             }
+        }
+        $defKVA = $GLOBALS["SL"]->def->getID('Peak Electricity Measurement Unit', 'kVA');
+        if (isset($this->sessData->dataSets[$tbl][0]->ps_unit_peak)
+            && $this->sessData->dataSets[$tbl][0]->ps_unit_peak == $defKVA) {
+            $this->sessData->dataSets[$tbl][0]->ps_tot_kw_peak
+                = 0.9*$this->sessData->dataSets[$tbl][0]->ps_tot_kw_peak;
         }
         if (!isset($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables)
             || intVal($this->sessData->dataSets[$tbl][0]->ps_kwh_include_renewables) == 1) {
@@ -288,12 +305,18 @@ class ScoreCalcs extends ScoreFormsCustom
                 $this->sessData->dataSets[$tbl][0]->ps_effic_facility 
                     = $btus/$this->v["totFlwrSqFt"];
             }
-            if (isset($this->sessData->dataSets[$tbl][0]->ps_tot_waste_lbs) 
-                && intVal($this->sessData->dataSets[$tbl][0]->ps_tot_waste_lbs) > 0) {
+            if (isset($this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs) 
+                && intVal($this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs) > 0) {
                 $this->sessData->dataSets[$tbl][0]->ps_effic_waste 
-                    = $this->sessData->dataSets[$tbl][0]->ps_tot_waste_lbs
+                    = $this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs
                         /$this->v["totFlwrSqFt"];
             }
+        }
+        if (isset($this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs) 
+            && intVal($this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs) > 0) {
+            $this->sessData->dataSets[$tbl][0]->ps_effic_waste_prod
+                = $this->sessData->dataSets[$tbl][0]->ps_grams_dry
+                    /$this->sessData->dataSets[$tbl][0]->ps_green_waste_lbs;
         }
         $this->sessData->dataSets[$tbl][0]->save();
         return true;
@@ -347,7 +370,7 @@ class ScoreCalcs extends ScoreFormsCustom
             $this->sessData->dataSets[$tbl][0]->ps_lighting_power_density = 0;
         }
         if ($this->sessData->dataSets[$tbl][0]->ps_lighting_power_density  < 0.000001) {
-            $this->sessData->dataSets[$tbl][0]->ps_lighting_power_density  = 0;
+            $this->sessData->dataSets[$tbl][0]->ps_lighting_power_density = 0;
         }
         $types = [ 'Flower', 'Veg', 'Clone' ];
         foreach ($types as $typ) {
@@ -414,10 +437,13 @@ class ScoreCalcs extends ScoreFormsCustom
 
     protected function calcEachRoomAddLgtW(&$room, $lgt, $defaultHours = 18)
     {
-        $room->ps_room_total_light_watts += $lgt->ps_lg_typ_wattage*$lgt->ps_lg_typ_count;
+        $room->ps_room_total_light_watts += $lgt->ps_lg_typ_wattage
+            *$lgt->ps_lg_typ_count;
         $hours = $defaultHours;
-        if (isset($lgt->ps_lg_typ_hours) && intVal($lgt->ps_lg_typ_hours) > 0) {
-            $hours = $lgt->ps_lg_typ_hours; // grower-entered data is preferred
+        if (isset($lgt->ps_lg_typ_hours) 
+            && intVal($lgt->ps_lg_typ_hours) > 0) {
+            // grower-entered data is preferred
+            $hours = $lgt->ps_lg_typ_hours;
         }
         $room->ps_room_lighting_effic += $hours*$room->ps_room_total_light_watts;
         $room->save();
@@ -600,34 +626,37 @@ class ScoreCalcs extends ScoreFormsCustom
 
     protected function calcWaterScore()
     {
+        $tbl = "powerscore";
         $this->chkWaterSourceResponses();
         $this->chkGrowingMediaResponses();
-        $this->sessData->dataSets["powerscore"][0]->ps_effic_water 
-            = $this->sessData->dataSets["powerscore"][0]->ps_tot_water 
-            = $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_source
-            = $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_recirc
+        $this->sessData->dataSets[$tbl][0]->ps_effic_water 
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_water_prod
+            = $this->sessData->dataSets[$tbl][0]->ps_tot_water 
+            = $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source
+            = $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc
             = $totGal
             = 0;
         if (isset($this->sessData->dataSets["ps_monthly"])
             && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
             foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
-                if (isset($mon->ps_month_water) && intVal($mon->ps_month_water) > 0) {
+                if (isset($mon->ps_month_water) 
+                    && intVal($mon->ps_month_water) > 0) {
                     $totGal += $mon->ps_month_water;
                 }
                 if (isset($mon->ps_month_water_storage_source) 
                     && intVal($mon->ps_month_water_storage_source) > 0) {
-                    $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_source 
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source 
                         += $mon->ps_month_water_storage_source;
                 }
                 if (isset($mon->ps_month_water_storage_recirc) 
                     && intVal($mon->ps_month_water_storage_recirc) > 0) {
-                    $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_recirc 
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc 
                         += $mon->ps_month_water_storage_recirc;
                 }
             }
         }
         if ($totGal == 0
-            && $this->sessData->dataSets["powerscore"][0]->ps_tot_water == 0 
+            && $this->sessData->dataSets[$tbl][0]->ps_tot_water == 0 
             && isset($this->sessData->dataSets["ps_areas"])
             && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
             foreach ($this->sessData->dataSets["ps_areas"] as $a => $area) {
@@ -641,26 +670,49 @@ class ScoreCalcs extends ScoreFormsCustom
         }
         if ($this->isWaterInLiters()) {
             $totGal = $GLOBALS["SL"]->cnvrtLiter2Gal($totGal);
-            $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_source 
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source 
                 = $GLOBALS["SL"]->cnvrtLiter2Gal(
-                    $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_source);
-            $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_recirc 
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source);
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc 
                 = $GLOBALS["SL"]->cnvrtLiter2Gal(
-                    $this->sessData->dataSets["powerscore"][0]->ps_tot_water_storage_recirc);
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc);
+        } elseif ($this->isWaterInCF()) {
+            $totGal = $GLOBALS["SL"]->cnvrtCF2Gal($totGal);
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source 
+                = $GLOBALS["SL"]->cnvrtCF2Gal(
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source);
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc 
+                = $GLOBALS["SL"]->cnvrtCF2Gal(
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc);
+        } elseif ($this->isWaterInCCF()) {
+            $totGal = $GLOBALS["SL"]->cnvrtCCF2Gal($totGal);
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source 
+                = $GLOBALS["SL"]->cnvrtCCF2Gal(
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_source);
+            $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc 
+                = $GLOBALS["SL"]->cnvrtCCF2Gal(
+                    $this->sessData->dataSets[$tbl][0]->ps_tot_water_storage_recirc);
         }
-        $this->sessData->dataSets["powerscore"][0]->ps_tot_water = $totGal;
+        $this->sessData->dataSets[$tbl][0]->ps_tot_water = $totGal;
         if ($this->v["totFlwrSqFt"] > 0) {
-            $this->sessData->dataSets["powerscore"][0]->ps_effic_water 
+            $this->sessData->dataSets[$tbl][0]->ps_effic_water 
                 = $totGal/$this->v["totFlwrSqFt"];
         }
-        $this->sessData->dataSets["powerscore"][0]->save();
+        if ($totGal > 0
+            && isset($this->sessData->dataSets[$tbl][0]->ps_grams_dry)) {
+            $this->sessData->dataSets[$tbl][0]->ps_effic_water_prod
+                = $this->sessData->dataSets[$tbl][0]->ps_grams_dry/$totGal;
+        }
+        $this->sessData->dataSets[$tbl][0]->save();
         return true;
     }
 
     protected function calcHvacScore()
     {
-        $this->sessData->dataSets["powerscore"][0]->ps_effic_hvac = 0;
-            //= $this->sessData->dataSets["powerscore"][0]->ps_effic_hvac_orig;
+        $tbl = "powerscore";
+        $this->sessData->dataSets[$tbl][0]->ps_effic_hvac = 0;
+            //= $this->sessData->dataSets[$tbl][0]->ps_effic_hvac_orig;
+        $totCanopy = $this->sessData->dataSets[$tbl][0]->ps_total_canopy_size;
         foreach ($this->sessData->dataSets["ps_growing_rooms"] as $roomInd => $room) {
             if (isset($this->sessData->dataSets["ps_link_hvac_room"])
                 && sizeof($this->sessData->dataSets["ps_link_hvac_room"]) > 0) {
@@ -673,10 +725,9 @@ class ScoreCalcs extends ScoreFormsCustom
                             && intVal($room->ps_room_canopy_sqft) > 0
                             && isset($hvac->ps_lnk_hv_rm_hvac) 
                             && intVal($hvac->ps_lnk_hv_rm_hvac) > 0
-                            && $this->sessData->dataSets["powerscore"][0]->ps_total_canopy_size > 0) {
-                            $sqftWeight = $room->ps_room_canopy_sqft
-                                /$this->sessData->dataSets["powerscore"][0]->ps_total_canopy_size;
-                            $this->sessData->dataSets["powerscore"][0]->ps_effic_hvac 
+                            && $totCanopy > 0) {
+                            $sqftWeight = $room->ps_room_canopy_sqft/$totCanopy;
+                            $this->sessData->dataSets[$tbl][0]->ps_effic_hvac 
                                 += $sqftWeight*$room->ps_room_hvac_effic;
                         }
                         $room->save();
@@ -685,9 +736,9 @@ class ScoreCalcs extends ScoreFormsCustom
                 }
             }
         }
-        $this->sessData->dataSets["powerscore"][0]->ps_effic_hvac_orig
-            = $this->sessData->dataSets["powerscore"][0]->ps_effic_hvac;
-        $this->sessData->dataSets["powerscore"][0]->save();
+        $this->sessData->dataSets[$tbl][0]->ps_effic_hvac_orig
+            = $this->sessData->dataSets[$tbl][0]->ps_effic_hvac;
+        $this->sessData->dataSets[$tbl][0]->save();
         return true;
     }
 
@@ -860,38 +911,79 @@ class ScoreCalcs extends ScoreFormsCustom
     {
         $tbl = 'powerscore';
         $ps = $this->sessData->dataSets[$tbl][0];
+        $totBTU = $totKgCO2e = 0;
+        // KgCO2e: https://www.eia.gov/electricity/annual/html/epa_a_03.html
         if (isset($ps->ps_tot_natural_gas) && $ps->ps_tot_natural_gas > 0) {
-            $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
-                += $ps->ps_tot_natural_gas*99.97612449;
-// https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu
+            $totBTU += $ps->ps_tot_natural_gas*99.97612449;
+            // https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu
+            $totKgCO2e += $ps->ps_tot_natural_gas*10*53.12;
         }
         if (isset($ps->ps_tot_generator) && $ps->ps_tot_generator > 0) {
             $set = 'Compliance MA Generator Units';
             $unit = $GLOBALS["SL"]->def->getID($set, 'Diesel (Gallons)');
-            if (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) == $unit) {
-                $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
-                    += $ps->ps_tot_generator*138.87415823;
-// https://www.convertunits.com/from/gallon+%5bU.S.%5d+of+diesel+oil/to/Btu
+            $unit2 = $GLOBALS["SL"]->def->getID($set, 'Natural Gas (Therms)');
+            $unit3 = $GLOBALS["SL"]->def->getID($set, 'Natural Gas (CCF)');
+            if (isset($ps->ps_unit_generator) 
+                && intVal($ps->ps_unit_generator) == $unit) {
+                $totBTU += $ps->ps_tot_generator*138.87415823;
+                // convertunits.com/from/gallon+%5bU.S.%5d+of+diesel+oil/to/Btu
+                $totKgCO2e += $ps->ps_tot_generator*10.16;
+            } elseif (isset($ps->ps_unit_generator) 
+                && intVal($ps->ps_unit_generator) == $unit2) {
+                $totBTU += $ps->ps_tot_generator*99.976124487811;
+                // convertunits.com/from/therm+%5bU.S.%5d/to/Btu
+                $totKgCO2e += $ps->ps_tot_generator*10*53.12;
+            } elseif (isset($ps->ps_unit_generator) 
+                && intVal($ps->ps_unit_generator) == $unit3) {
+                $totBTU += $ps->ps_tot_generator*1;
+                // kylesconverter.com/energy,-work,-and-heat/cubic-feet-of-natural-gas-to-british-thermal-units
+                $totKgCO2e += $ps->ps_tot_generator*0.1*53.12;
             } else {
-                $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
-                    += $ps->ps_tot_generator*124.9679542;
-// https://www.convertunits.com/from/gallon+[U.S.]+of+automotive+gasoline/to/Btu+[thermochemical]
+                $totBTU += $ps->ps_tot_generator*124.9679542;
+                // convertunits.com/from/gallon+[U.S.]+of+automotive+gasoline/to/Btu+[thermochemical]
+                $totKgCO2e += $ps->ps_tot_generator*8.89;
             }
         }
         if (isset($ps->ps_tot_fuel_oil) && $ps->ps_tot_fuel_oil > 0) {
-            $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
-                += $ps->ps_tot_fuel_oil*138.87415823;
-// https://www.convertunits.com/from/gallon+%5BU.S.%5D+of+distillate+no.+2+fuel+oil/to/Btus
+            $totBTU += $ps->ps_tot_fuel_oil*138.87415823;
+            // convertunits.com/from/gallon+%5BU.S.%5D+of+distillate+no.+2+fuel+oil/to/Btus
+            $totKgCO2e += $ps->ps_tot_fuel_oil*10.16;
         }
         if (isset($ps->ps_tot_propane) && $ps->ps_tot_propane > 0) {
-            $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric
-                += $ps->ps_tot_propane*95.500;
-// https://www.convertunits.com/from/gallon+[U.S.]+of+LPG/to/Btu
+            $totBTU += $ps->ps_tot_propane*95.500;
+            // convertunits.com/from/gallon+[U.S.]+of+LPG/to/Btu
+            $totKgCO2e += $ps->ps_tot_propane*5.76;
         }
 
+        $this->sessData->dataSets[$tbl][0]->ps_tot_btu_non_electric = $totBTU;
         $this->sessData->dataSets[$tbl][0]->save();
-        $ps = $this->sessData->dataSets[$tbl][0];
-        
+        if ($totBTU == 0 
+            && (!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1)) {
+            return false;
+        }
+
+        if (isset($ps->ps_kwh_tot_calc) && $ps->ps_kwh_tot_calc > 0) {
+            $mwh = $GLOBALS["SL"]->cnvrtKwh2Mwh($ps->ps_kwh_tot_calc);
+            $profile = $this->calcEmisStateProfile();
+            if ($profile && isset($profile->eia_state_id)) {
+                if (isset($profile->eia_state_sulfur_dioxide_lbs_mwh)
+                    && $profile->eia_state_sulfur_dioxide_lbs_mwh > 0) {
+                    $sulfur = $mwh*$profile->eia_state_sulfur_dioxide_lbs_mwh;
+                    $totKgCO2e += $GLOBALS["SL"]->cnvrtLbs2KgCarbonEq($sulfur, 'SO2');
+                }
+                if (isset($profile->eia_state_nitrogen_oxide_lbs_mwh)
+                    && $profile->eia_state_nitrogen_oxide_lbs_mwh > 0) {
+                    $nitrogen = $mwh*$profile->eia_state_nitrogen_oxide_lbs_mwh;
+                    $totKgCO2e += $GLOBALS["SL"]->cnvrtLbs2KgCarbonEq($nitrogen, 'N2O');
+                }
+                if (isset($profile->eia_state_carbon_dioxide_lbs_mwh)
+                    && $profile->eia_state_carbon_dioxide_lbs_mwh > 0) {
+                    $carbon = $mwh*$profile->eia_state_carbon_dioxide_lbs_mwh;
+                    $totKgCO2e += $GLOBALS["SL"]->cnvrtLbs2Kg($carbon);
+                }
+            }
+        }
+
         $btus = $ps->ps_tot_btu_non_electric
             + $GLOBALS["SL"]->cnvrtKwh2Kbtu($ps->ps_kwh_tot_calc);
         if (isset($this->v["totFlwrSqFt"]) 
@@ -908,8 +1000,41 @@ class ScoreCalcs extends ScoreFormsCustom
         if ($btus > 0) {
             $this->sessData->dataSets[$tbl][0]->ps_effic_prod_all = $ps->ps_grams_dry/$btus;
         }
+        $this->sessData->dataSets[$tbl][0]->ps_tot_kgco2e = $totKgCO2e;
+        if ($totKgCO2e > 0) {
+            if ($this->v["totFlwrSqFt"] > 0) {
+                $this->sessData->dataSets[$tbl][0]->ps_effic_emis 
+                    = $totKgCO2e/$this->v["totFlwrSqFt"];
+            }
+            $this->sessData->dataSets[$tbl][0]->ps_effic_emis_prod 
+                = $ps->ps_grams_dry/$totKgCO2e;
+        }
         $this->sessData->dataSets[$tbl][0]->save();
         return true;
+    }
+
+    protected function calcEmisStateProfile()
+    {
+        $tbl = 'powerscore';
+        $ps = $this->sessData->dataSets[$tbl][0];
+        $year = intVal(date("Y"));
+        if (isset($ps->ps_year) && intVal($ps->ps_year) > 0) {
+            $year = intVal($ps->ps_year);
+        }
+        $state = 'US';
+        if (isset($ps->ps_state) && trim($ps->ps_state) != '') {
+            $state = trim($ps->ps_state);
+        }
+        // https://www.eia.gov/electricity/state/
+        $profile = RIIEiaStateElectricityProfiles::where('eia_state_state', $state)
+            ->where('eia_state_year', $year)
+            ->first();
+        if (!$profile || !isset($profile->eia_state_id)) {
+            $profile = RIIEiaStateElectricityProfiles::where('eia_state_state', $state)
+                ->orderBy('eia_state_year', 'desc')
+                ->first();
+        }
+        return $profile;
     }
     
 }

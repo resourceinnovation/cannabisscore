@@ -26,13 +26,10 @@
             </p>
         </div>
         <div class="col-4">
-            <select name="fltStateClim" id="fltStateClimID" class="form-control"
-                onChange="return gatherFilts();" autocomplete="off">
-                <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
-                    >All Climates and States</option>
-                <option disabled ></option>
-                {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
-            </select>
+            {!! $GLOBALS["SL"]->states->stateClimateTagsSelect($fltStateClimTag, 983, 'psChangeFilterDelay') !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsList($fltStateClimTag, 983) !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsJS($fltStateClimTag, 983, 'psClickFilterDelay') !!}
+            
         @if ($GLOBALS["SL"]->x["partnerLevel"] > 6)
             <label class="disBlo mT10">
                 <input type="checkbox" autocomplete="off" class="mR5"
@@ -111,31 +108,31 @@
     </div>
 @endforeach
 
-<script type="text/javascript">
+<script type="text/javascript"> $(document).ready(function(){
 
 function loadExcel() {
     if (document.getElementById("toExcelID")) {
         document.getElementById("toExcelID").value = 1;
-        gatherFilts();
+        applyFilts();
     }
     return false;
 }
 function loadRawCalcs() {
     if (document.getElementById("rawCalcsID")) {
         document.getElementById("rawCalcsID").value = 1;
-        gatherFilts();
+        applyFilts();
     }
     return false;
 }
-function gatherFilts() {
+function applyFilts() {
     var baseUrl = "?filt=1";
     if (document.getElementById("toExcelID") && parseInt(document.getElementById("toExcelID").value) == 1) {
         baseUrl = "?excel=1&refresh=1";
     } else if (document.getElementById("rawCalcsID") && parseInt(document.getElementById("rawCalcsID").value) == 1) {
         baseUrl = "?rawCalcs=1";
     }
-    if (document.getElementById("fltStateClimID") && document.getElementById("fltStateClimID").value.trim() != '') {
-        baseUrl += "&fltStateClim="+document.getElementById("fltStateClimID").value.trim();
+    if (document.getElementById("n983tagIDsID") && document.getElementById("n983tagIDsID").value.trim() != '') {
+        baseUrl += "&fltStateClimTag="+document.getElementById("n983tagIDsID").value.trim();
     }
     if (document.getElementById("fltNoNWPCCID") && document.getElementById("fltNoNWPCCID").checked) {
         baseUrl += "&fltNoNWPCC=1";
@@ -147,10 +144,17 @@ function gatherFilts() {
     return false;
 }
 
+$(document).on("change", ".psChangeFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
+$(document).on("click", ".psClickFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
 
 
-
-</script>
+}); </script>
 
 
 <?php /*

@@ -22,6 +22,8 @@ class RIIPsLightTypes extends Model
 		'ps_lg_typ_model', 
 		'ps_lg_typ_complete', 
 		'ps_lg_typ_days_per_year', 
+        'ps_lg_typ_dlc_bonus',
+        'ps_lg_typ_model_id',
     ];
     
     // END Survloop auto-generated portion of Model

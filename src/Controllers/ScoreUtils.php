@@ -97,9 +97,141 @@ class ScoreUtils extends ScorePowerUtilities
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 0;
             $this->sessData->dataSets["powerscore"][0]->save();
         }
+        if ($GLOBALS["SL"]->REQ->has('go') 
+            && trim($GLOBALS["SL"]->REQ->get('go')) == 'flow') {
+            $this->sessData->dataSets["powerscore"][0]->ps_is_flow = 1;
+            $this->sessData->dataSets["powerscore"][0]->save();
+            $this->tweakExtraSurveyNav();
+        }
         $this->sortMonths();
-        $this->firstPageChecksCups();
-        $this->firstPageChecksCopyMa();
+        $this->firstPageCheckCopies();
+        $this->firstPageChecksExtra();
+        return true;
+    }
+    
+    /**
+     * Initializing extra things for RII.
+     *
+     * @return boolean
+     */
+    protected function firstPageCheckCopies()
+    {
+        $cpyOrig = $cpyFlow = $cpyGrow = '';
+        if ($GLOBALS["SL"]->REQ->has('cpyGrow') 
+            && trim($GLOBALS["SL"]->REQ->get('cpyGrow')) != '') {
+            $cpyGrow = trim($GLOBALS["SL"]->REQ->get('cpyGrow'));
+        } elseif ($GLOBALS["SL"]->REQ->has('cpyFlow') 
+            && trim($GLOBALS["SL"]->REQ->get('cpyFlow')) != '') {
+            $cpyFlow = trim($GLOBALS["SL"]->REQ->get('cpyFlow'));
+        }
+        if (($cpyFlow != '' || $cpyGrow != '')
+            && $this->isPartnerStaffAdminOrOwner()) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            $psOn = $this->sessData->dataSets["ps_onsite"][0];
+            $ps->ps_is_pro = 1;
+            $typeDef = 'PowerScore Submission Type';
+            $ps->ps_time_type = $GLOBALS["SL"]->def->getID($typeDef, 'Past');
+            if ($cpyGrow != '') {
+                $cpyOrig = $cpyGrow;
+            } elseif ($cpyFlow != '') {
+                $cpyOrig = $cpyFlow;
+            }
+            $cpyOrig = $GLOBALS["SL"]->mexplode('-', $cpyOrig);
+            if (sizeof($cpyOrig) == 2) {
+                $psOrig = RIIPowerscore::where('ps_id', $cpyOrig[0])
+                    ->where('ps_unique_str', $cpyOrig[1])
+                    ->first();
+                if ($psOrig && isset($psOrig->ps_id)) {
+                    $this->firstPageChecksCopyPsCore($ps, $psOrig);
+                    $months = RIIPsMonthly::where('ps_month_psid', $psOrig->ps_id)
+                        ->get();
+                    if ($months && sizeof($months) > 0) {
+                        $psMonths = $this->sortMonths();
+                        foreach ($months as $mon) {
+                            foreach ($psMonths as $psMon) {
+                                if ($psMon->ps_month_month == $mon->ps_month_month) {
+                                    $this->firstPageChecksCopyPsMonth($psMon, $mon);
+                                    if (isset($mon->com_ma_month_renew_kwh)
+                                        && intVal($mon->com_ma_month_renew_kwh) > 0) {
+                                        $ps->ps_kwh_include_renewables = 1;
+                                    }
+                                    if (isset($mon->com_ma_month_water)
+                                        && intVal($mon->com_ma_month_water) > 0) {
+                                        $psOn->ps_on_water_by_months = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $chk = RIIPsRenewables::where('ps_rnw_psid', $ps->ps_id)
+                        ->get();
+                    $renews = RIIPsRenewables::where('ps_rnw_psid', $psOrig->ps_id)
+                        ->get();
+                    if ($renews && sizeof($renews) > 0) {
+                        foreach ($renews as $renew) {
+                            $found = false;
+                            if ($chk && sizeof($chk) > 0) {
+                                foreach ($chk as $psRenew) {
+                                    if (isset($psRenew->ps_rnw_renewable)
+                                        && $psRenew->ps_rnw_renewable 
+                                            == $renew->ps_rnw_renewable) {
+                                        $found = true;
+                                    }
+                                }
+                            }
+                            if (!$found) {
+                                $new = new RIIPsRenewables;
+                                $new->ps_rnw_psid = $ps->ps_id;
+                                $new->ps_rnw_renewable = $renew->ps_rnw_renewable;
+                                $new->save();
+                            }
+                        }
+                    }
+
+                }
+            }
+            $ps->save();
+            $psOn->save();
+            $this->sessData->dataSets["powerscore"][0] = $ps;
+        }
+        return true;
+    }
+
+    protected function firstPageChecksCopyPsCore(&$ps, &$psOrig)
+    {
+        $ps->ps_copied_from            = $psOrig->ps_id;
+        $ps->ps_year                   = $psOrig->ps_year;
+        $ps->ps_start_month            = $psOrig->ps_start_month;
+        $ps->ps_name                   = $psOrig->ps_name;
+        $ps->ps_zip_code               = $psOrig->ps_zip_code;
+        $ps->ps_flower_weight_type     = $psOrig->ps_flower_weight_type;
+        $ps->ps_grams                  = $psOrig->ps_grams;
+        $ps->ps_kwh                    = $psOrig->ps_kwh;
+        $ps->ps_tot_kw_peak            = $psOrig->ps_tot_kw_peak;
+        $ps->ps_source_renew           = $psOrig->ps_source_renew;
+        $ps->ps_kwh_include_renewables = $psOrig->ps_kwh_include_renewables;
+        $ps->save();
+        return true;
+    }
+    
+    protected function firstPageChecksCopyPsMonth($psMon, $monOrig)
+    {
+        $psMon->ps_month_kwh1          = $monOrig->ps_month_kwh1;
+        $psMon->ps_month_kw            = $monOrig->ps_month_kw;
+        $psMon->ps_month_kwh_renewable = $monOrig->ps_month_kwh_renewable;
+        $psMon->ps_month_water         = $monOrig->ps_month_water;
+        $psMon->save();
+        return true;
+    }
+    
+    /**
+     * Initializing extra things for RII.
+     *
+     * @return boolean
+     */
+    protected function firstPageChecksExtra()
+    {
         return true;
     }
 
@@ -196,173 +328,6 @@ class ScoreUtils extends ScorePowerUtilities
             WHERE `rii_compliance_ma_months`.`com_ma_month_com_ma_id` NOT IN 
                 (SELECT `rii_compliance_ma`.`com_ma_id` FROM `rii_compliance_ma`)"
         ));
-        return true;
-    }
-    
-    protected function firstPageChecksCups()
-    {
-        if ($GLOBALS["SL"]->REQ->has('cups') 
-            && trim($GLOBALS["SL"]->REQ->get('cups')) != '') {
-            $cupsIn = urldecode($GLOBALS["SL"]->REQ->get('cups'));
-            $cupsIn = $GLOBALS["SL"]->mexplode(',', $cupsIn);
-            $cupList = $GLOBALS["SL"]->def->getSet('PowerScore Competitions');
-            if (sizeof($cupList) > 0) {
-                foreach ($cupList as $c) {
-                    if (in_array($c->def_id, $cupsIn)) {
-                        $chk = RIIPsForCup::where('ps_cup_psid', $this->coreID)
-                            ->where('ps_cup_cup_id', $c->def_id)
-                            ->first();
-                        if (!$chk || !isset($chk->ps_cup_cup_id)) {
-                            $chk = new RIIPsForCup;
-                            $chk->ps_cup_psid  = $this->coreID;
-                            $chk->ps_cup_cup_id = $c->def_id;
-                            $chk->save();
-                        }
-                    } else {
-                        RIIPsForCup::where('ps_cup_psid', $this->coreID)
-                            ->where('ps_cup_cup_id', $c->def_id)
-                            ->delete();
-                    }
-                }
-            }
-        }
-        return true;
-    }
-    
-    protected function firstPageChecksCopyMa()
-    {
-        if ($GLOBALS["SL"]->REQ->has('cpyMa') 
-            && trim($GLOBALS["SL"]->REQ->get('cpyMa')) != '') {
-            $ps = $this->sessData->dataSets["powerscore"][0];
-            $psOn = $this->sessData->dataSets["ps_onsite"][0];
-            $ps->ps_is_pro = 1;
-            $ps->ps_time_type 
-                = $GLOBALS["SL"]->def->getID('PowerScore Submission Type', 'Past');
-            $copyMa = trim($GLOBALS["SL"]->REQ->get('cpyMa'));
-            $copyMa = $GLOBALS["SL"]->mexplode('-', $copyMa);
-            if (sizeof($copyMa) == 2) {
-                $ma = RIIComplianceMa::where('com_ma_id', $copyMa[0])
-                    ->where('com_ma_unique_str', $copyMa[1])
-                    ->first();
-                if ($ma && isset($ma->com_ma_id)) {
-                    $this->firstPageChecksCopyMaCore($ps, $ma);
-                    $idFld = 'com_ma_month_com_ma_id';
-                    $maMonths = RIIComplianceMaMonths::where($idFld, $ma->com_ma_id)
-                        ->get();
-                    if ($maMonths && sizeof($maMonths) > 0) {
-                        $psMonths = $this->sortMonths();
-                        foreach ($maMonths as $maMon) {
-                            foreach ($psMonths as $psMon) {
-                                if ($psMon->ps_month_month == $maMon->com_ma_month_month) {
-                                    $this->firstPageChecksCopyMaMonth($psMon, $maMon);
-                                    if (isset($maMon->com_ma_month_renew_kwh)
-                                        && intVal($maMon->com_ma_month_renew_kwh) > 0) {
-                                        $ps->ps_kwh_include_renewables = 1;
-                                    }
-                                    if (isset($maMon->com_ma_month_water)
-                                        && intVal($maMon->com_ma_month_water) > 0) {
-                                        $psOn->ps_on_water_by_months = 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $chk = RIIPsOnsiteFuels::where('ps_fuel_ps_id', $ma->com_ma_ps_id)
-                        ->get();
-                    $maFuels = RIIComplianceMaFuels::where('com_ma_fuel_com_ma_id', $ma->com_ma_id)
-                        ->get();
-                    if ($maFuels && sizeof($maFuels) > 0) {
-                        foreach ($maFuels as $maFuel) {
-                            $found = false;
-                            if ($chk && sizeof($chk) > 0) {
-                                foreach ($chk as $psFuel) {
-                                    if (isset($psFuel->ps_fuel_type)
-                                        && $psFuel->ps_fuel_type == $maFuel->com_ma_fuel_type) {
-                                        $found = true;
-                                    }
-                                }
-                            }
-                            if (!$found) {
-                                $psFuel = new RIIPsOnsiteFuels;
-                                $psFuel->ps_fuel_ps_id = $ps->ps_id;
-                                $psFuel->ps_fuel_type = $maFuel->com_ma_fuel_type;
-                                $psFuel->save();
-                            }
-                        }
-                    }
-
-                    $chk = RIIPsRenewables::where('ps_rnw_psid', $ma->com_ma_ps_id)
-                        ->get();
-                    $renews = RIIComplianceMaRenewables::where('com_ma_rnw_com_ma_id', $ma->com_ma_id)
-                        ->get();
-                    if ($renews && sizeof($renews) > 0) {
-                        foreach ($renews as $renew) {
-                            $found = false;
-                            if ($chk && sizeof($chk) > 0) {
-                                foreach ($chk as $psRenew) {
-                                    if (isset($psRenew->ps_rnw_renewable)
-                                        && $psRenew->ps_rnw_renewable == $renew->com_ma_rnw_renewable) {
-                                        $found = true;
-                                    }
-                                }
-                            }
-                            if (!$found) {
-                                $psRenew = new RIIPsRenewables;
-                                $psRenew->ps_rnw_psid = $ps->ps_id;
-                                $psRenew->ps_rnw_renewable = $renew->com_ma_rnw_renewable;
-                                $psRenew->save();
-                            }
-                        }
-                    }
-                }
-            }
-            $ps->save();
-            $psOn->save();
-            $this->sessData->dataSets["powerscore"][0] = $ps;
-        }
-        return true;
-    }
-    
-    protected function firstPageChecksCopyMaCore(&$ps, &$ma)
-    {
-        $ma->com_ma_ps_id          = $ps->ps_id;
-        $ma->save();
-        $ps->ps_com_ma_id          = $ma->com_ma_id;
-        $ps->ps_year               = $ma->com_ma_year;
-        $ps->ps_start_month        = $ma->com_ma_start_month;
-        $ps->ps_name               = $ma->com_ma_name;
-        $ps->ps_zip_code           = $ma->com_ma_postal_code;
-        $ps->ps_flower_weight_type = $ma->com_ma_flower_weight_type;
-        $ps->ps_grams              = $ma->com_ma_grams;
-        $ps->ps_kwh                = $ma->com_ma_tot_kwh;
-        $ps->ps_tot_kw_peak        = $ma->ps_tot_kw_peak;
-        $ps->ps_no_natural_gas     = $ma->com_ma_no_natural_gas;
-        $ps->ps_unit_natural_gas   = $ma->com_ma_unit_natural_gas;
-        $ps->ps_unit_wood          = $ma->com_ma_unit_wood;
-        $ps->ps_unit_generator     = $ma->com_ma_unit_generator;
-        if (isset($ma->com_ma_no_renewable_electricity)) {
-            if (intVal($ma->com_ma_no_renewable_electricity) == 1) {
-                $ps->ps_source_renew = 0;
-            } else {
-                $ps->ps_source_renew = 1;
-            }
-        }
-        $ps->save();
-        return true;
-    }
-    
-    protected function firstPageChecksCopyMaMonth($psMon, $maMon)
-    {
-        $psMon->ps_month_kwh1          = $maMon->com_ma_month_kwh;
-        $psMon->ps_month_kw            = $maMon->com_ma_month_kw;
-        $psMon->ps_month_kwh_renewable = $maMon->com_ma_month_renew_kwh;
-        $psMon->ps_month_natural_gas   = $maMon->com_ma_month_natural_gas_therms;
-        $psMon->ps_month_generator     = $maMon->com_ma_month_diesel_gallons;
-        $psMon->ps_month_biofuel_wood  = $maMon->com_ma_month_biofuel_wood_tons;
-        $psMon->ps_month_propane       = $maMon->com_ma_month_propane;
-        $psMon->ps_month_fuel_oil      = $maMon->com_ma_month_fuel_oil;
-        $psMon->ps_month_water         = $maMon->com_ma_month_water;
-        $psMon->save();
         return true;
     }
     
@@ -510,6 +475,48 @@ class ScoreUtils extends ScorePowerUtilities
             && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
             && intVal($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
                 == $GLOBALS["SL"]->def->getID('Water Measure Unit', 'Liters'));
+    }
+
+    protected function isWaterInCF()
+    {
+        return (isset($this->sessData->dataSets["powerscore"]) 
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+                == $GLOBALS["SL"]->def->getID('Water Measure Unit', 'CF (Cubic Feet)'));
+    }
+
+    protected function isWaterInCCF()
+    {
+        return (isset($this->sessData->dataSets["powerscore"]) 
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+            && intVal($this->sessData->dataSets["powerscore"][0]->ps_unit_water)
+                == $GLOBALS["SL"]->def->getID('Water Measure Unit', 'CCF (100 Cubic Feet)'));
+    }
+
+    protected function switchWaterUnits($nID)
+    {
+        if ($this->allNodes[$nID]
+            && isset($this->sessData->dataSets["powerscore"]) 
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0
+            && isset($this->sessData->dataSets["powerscore"][0]->ps_unit_water)) {
+            $unit = $GLOBALS["SL"]->def->getVal(
+                'Water Measure Unit', 
+                $this->sessData->dataSets["powerscore"][0]->ps_unit_water
+            );
+            $unit = str_replace(' (Cubic Feet)', '', $unit);
+            $unit = str_replace(' (100 Cubic Feet)', '', $unit);
+            if (!isset($this->allNodes[$nID]->nodeRow->node_prompt_text)) {
+                $this->allNodes[$nID]->fillNodeRow();
+            }
+            $this->allNodes[$nID]->nodeRow->node_prompt_text = str_replace(
+                '(Gallons)', 
+                '(' . $unit . ')', 
+                $this->allNodes[$nID]->nodeRow->node_prompt_text
+            );
+        }
+        return true;
     }
     
     protected function customLabels($curr, $str = '')
@@ -903,22 +910,26 @@ class ScoreUtils extends ScorePowerUtilities
 
         if ($this->hasRooms()) { // post-3.0
             $this->loadRoomIndsByStage();
-            foreach (['Flower', 'Veg', 'Clone'] as $typ) {
-                if ($this->v["totFlwrSqFt"] == 0) {
-                    if (isset($this->v["stageRooms"][$typ]) 
-                        && sizeof($this->v["stageRooms"][$typ]) > 0) {
-                        foreach ($this->v["stageRooms"][$typ] as $roomInd) {
-                            if (isset($this->sessData->dataSets["ps_growing_rooms"][$roomInd])) {
-                                $room = $this->sessData->dataSets["ps_growing_rooms"][$roomInd];
-                                if (isset($room->ps_room_canopy_sqft)) {
-                                    $this->v["totFlwrSqFt"] += intVal($room->ps_room_canopy_sqft);
-                                }
-                            }
-                        }
+            $type = 'Flower';
+            if (isset($this->v["stageRooms"]["Flower"]) 
+                && sizeof($this->v["stageRooms"]["Flower"]) > 0) {
+                $type = 'Flower';
+            } elseif (isset($this->v["stageRooms"]["Veg"]) 
+                && sizeof($this->v["stageRooms"]["Veg"]) > 0) {
+                $type = 'Veg';
+            } elseif (isset($this->v["stageRooms"]["Clone"]) 
+                && sizeof($this->v["stageRooms"]["Clone"]) > 0) {
+                $type = 'Clone';
+            }
+            foreach ($this->v["stageRooms"][$type] as $roomInd) {
+                if (isset($this->sessData->dataSets["ps_growing_rooms"][$roomInd])) {
+                    $room = $this->sessData->dataSets["ps_growing_rooms"][$roomInd];
+                    if (isset($room->ps_room_canopy_sqft)) {
+                        $this->v["totFlwrSqFt"] += intVal($room->ps_room_canopy_sqft);
                     }
                 }
             }
-//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? ' . (($this->hasRooms()) ? 'true' : 'false') . '<pre>'; print_r($this->v["stageRooms"]); echo '</pre>'; exit;
+//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? true<pre>'; print_r($this->v["stageRooms"]); print_r($this->sessData->dataSets["ps_growing_rooms"]); echo '</pre>'; exit;
         } else { // pre-3.0 method
             $this->v["totFlwrSqFt"] = $this->getAreaFld('Flower', 'ps_area_size');
             if (intVal($this->v["totFlwrSqFt"]) == 0) {
@@ -932,12 +943,14 @@ class ScoreUtils extends ScorePowerUtilities
                     }
                 }
             }
-//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? ' . (($this->hasRooms()) ? 'true' : 'false') . '<pre>'; print_r($this->sessData->dataSets["ps_areas"]); echo '</pre>'; exit;
+//echo 'totFlwrSqFt: ' . $this->v["totFlwrSqFt"] . ', hasRooms? false<pre>'; print_r($this->sessData->dataSets["ps_areas"]); echo '</pre>'; exit;
         }
         if ($this->isDistanceInMeters()) {
-            $this->v["totFlwrSqFt"] = $GLOBALS["SL"]->cnvrtSqFt2SqMeters($this->v["totFlwrSqFt"]);
+            $this->v["totFlwrSqFt"] 
+                = $GLOBALS["SL"]->cnvrtSqFt2SqMeters($this->v["totFlwrSqFt"]);
         }
-        $this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size = $this->v["totFlwrSqFt"];
+        $this->sessData->dataSets["powerscore"][0]->ps_flower_canopy_size 
+            = $this->v["totFlwrSqFt"];
         $this->sessData->dataSets["powerscore"][0]->save();
         return $this->v["totFlwrSqFt"];
     }
@@ -1181,7 +1194,12 @@ class ScoreUtils extends ScorePowerUtilities
         if (!isset($ps->ps_effic_water) 
             || !$ps->ps_effic_water 
             || $ps->ps_effic_water == 0) {
-            $noprints[] = 'water';
+            $noprints[] = 'water facility';
+        }
+        if (!isset($ps->ps_effic_water_prod) 
+            || !$ps->ps_effic_water_prod 
+            || $ps->ps_effic_water_prod == 0) {
+            $noprints[] = 'water production';
         }
         if (!isset($ps->ps_effic_waste) 
             || !$ps->ps_effic_waste 
@@ -1276,6 +1294,7 @@ class ScoreUtils extends ScorePowerUtilities
             'ps_effic_hvac'         => 0,
             'ps_effic_carbon'       => 0,
             'ps_effic_water'        => 0,
+            'ps_effic_water_prod'   => 0,
             'ps_effic_waste'        => 0
         ]);
         return true;

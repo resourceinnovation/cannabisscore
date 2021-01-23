@@ -15,9 +15,13 @@ class ScoreLookups
 
     public function __construct()
     {
+        $this->v["defNew"]   = $GLOBALS["SL"]->def->getID(
+            'PowerScore Status', 
+            'New / Unreviewed'
+        );
         $this->v["defCmplt"] = $GLOBALS["SL"]->def->getID(
             'PowerScore Status', 
-            'Ranked Data Set'
+            'Cannabis Ranked Data Set'
         );
         $this->v["farmTypes"] = [
             'Indoor'           => $GLOBALS["SL"]->def

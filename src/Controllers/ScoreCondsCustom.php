@@ -27,6 +27,10 @@ class ScoreCondsCustom extends ScoreUtils
             if ($GLOBALS["SL"]->REQ->has('cups')) {
                 return 1;
             }
+        } elseif ($condition == '#IsPowerScoreGrow') {
+            return $this->runCondIsPowerScoreGrow();
+        } elseif ($condition == '#IsPowerScoreFlow') {
+            return $this->runCondIsPowerScoreFlow();
         } elseif ($condition == '#GeneratesRenewable') {
             return $this->hasRenewable();
         } elseif ($condition == '#MotherHas') {
@@ -41,6 +45,8 @@ class ScoreCondsCustom extends ScoreUtils
             return $this->runCondHasArea('Dry');
         } elseif ($condition == '#GrowthStageProLoop') {
             return $this->runCondGrowthStageProLoop();
+        } elseif ($condition == '#HasNoGrowthStages') {
+            return $this->runCondHasNoGrowthStages();
 
         } elseif ($condition == '#MotherArtificialLight') {
             return $this->runCondArtifArea('Mother');
@@ -84,6 +90,10 @@ class ScoreCondsCustom extends ScoreUtils
             return $this->runCondScoreNotLeader();
         } elseif ($condition == '#ShowReportCureDeets') {
             return $this->runCondShowReportCureDeets();
+        } elseif ($condition == '#ShowReportWater') {
+            return $this->runCondShowReportWater();
+        } elseif ($condition == '#ShowReportWaste') {
+            return $this->runCondShowReportWaste();
         } elseif ($condition == '#ReportDetailsPublic') { 
             return $this->runCondReportDetailsPublic();
 
@@ -107,34 +117,30 @@ class ScoreCondsCustom extends ScoreUtils
         } elseif ($condition == '#UsesAnyOtherFuels') {
             return $this->runCondUsesAnyOtherFuels();
 
-        } elseif ($condition == '#MACompliancePowerScore') {
-            return $this->hasMaCompliancePowerScore();
-        } elseif ($condition == '#MACompliancePowerScoreOwner') {
-            return $this->isMaCompliancePowerScoreOwner();
         }
         return -1;
     }
-    
-    private function hasMaCompliancePowerScore()
+
+    private function runCondIsPowerScoreGrow()
     {
         if (isset($this->sessData->dataSets["powerscore"])
-            && sizeof($this->sessData->dataSets["powerscore"]) == 1
-            && isset($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id)
-            && intVal($this->sessData->dataSets["powerscore"][0]->ps_com_ma_id) > 0) {
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            if ((isset($ps->ps_is_pro) && intVal($ps->ps_is_pro) == 1)
+                || (isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1)) {
+                return 0;
+            }
             return 1;
         }
         return 0;
     }
-    
-    private function isMaCompliancePowerScoreOwner()
+
+    private function runCondIsPowerScoreFlow()
     {
-        if ($this->hasMaCompliancePowerScore() == 1) {
-            $maID = $this->sessData->dataSets["powerscore"][0]->ps_com_ma_id;
-            if ($this->v["isOwner"]
-                || $this->isPartnerStaffAdminOrOwner()
-                || (session()->has('coreID71') 
-                    && session()->get('coreID71') == $maID)
-                || $maID == 431) { // temporary
+        if (isset($this->sessData->dataSets["powerscore"])
+            && sizeof($this->sessData->dataSets["powerscore"]) > 0) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            if (isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) {
                 return 1;
             }
         }
@@ -178,6 +184,31 @@ class ScoreCondsCustom extends ScoreUtils
         }
 //echo '<pre>'; print_r($area); echo '</pre>'; exit;
         return 0;
+    }
+
+    private function runCondHasNoGrowthStages()
+    {
+        $found = false;
+        if (isset($this->sessData->dataSets["ps_areas"]) 
+            && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
+            $defs = [
+                $this->v["areaTypes"]["Flower"],
+                $this->v["areaTypes"]["Veg"],
+                $this->v["areaTypes"]["Clone"]
+            ];
+            foreach ($this->sessData->dataSets["ps_areas"] as $area) {
+                if (isset($area->ps_area_has_stage)
+                    && intVal($area->ps_area_has_stage) == 1
+                    && isset($area->ps_area_type)
+                    && in_array($area->ps_area_type, $defs)) {
+                    $found = true;
+                }
+            }
+        }
+        if ($found) {
+            return 0;
+        }
+        return 1;
     }
     
     private function runCondHasArea($areaName)
@@ -425,13 +456,16 @@ class ScoreCondsCustom extends ScoreUtils
     private function runCondShowReportWaste()
     {
         $ps = $this->sessData->dataSets["powerscore"][0];
-        if (isset($ps->ps_green_waste_lbs) && intVal($ps->ps_green_waste_lbs) > 0) {
+        if (isset($ps->ps_green_waste_lbs) 
+            && intVal($ps->ps_green_waste_lbs) > 0) {
             return 1;
         }
-        if (isset($ps->ps_green_waste_mixed) && intVal($ps->ps_green_waste_mixed) > 0) {
+        if (isset($ps->ps_green_waste_mixed) 
+            && intVal($ps->ps_green_waste_mixed) > 0) {
             return 1;
         }
-        if (isset($ps->ps_compliance_waste_track) && trim($ps->ps_compliance_waste_track) != '') {
+        if (isset($ps->ps_compliance_waste_track) 
+            && trim($ps->ps_compliance_waste_track) != '') {
             return 1;
         }
         if (isset($this->sessData->dataSets["ps_waste_green"])

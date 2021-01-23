@@ -14,8 +14,6 @@ namespace ResourceInnovation\CannabisScore\Controllers;
 use App\Models\SLNodeSaves;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
-use App\Models\RIIPsRanks;
-use App\Models\RIIPsRankings;
 use RockHopSoft\Survloop\Controllers\Globals\Globals;
 use ResourceInnovation\CannabisScore\Controllers\ScoreCalcRanks;
 
@@ -101,45 +99,151 @@ class ScoreCalcsPrint extends ScoreCalcRanks
     protected function prepPrintEfficFacNon()
     {
         $ps = $this->sessData->dataSets["powerscore"][0];
-        $addLines = $addLines2 = [];
+        $emisUrl = 'https://www.eia.gov/electricity/state/'
+            . $GLOBALS["SL"]->states->getStateSlug($ps->ps_state);
+        $addLines = [ [], [], [], [] ];
         if (isset($ps->ps_tot_natural_gas) && $ps->ps_tot_natural_gas > 0) {
-            $addLines[] = '( ' . number_format($ps->ps_tot_natural_gas) . ' Natural Gas Therms x <a '
+            $addLines[0][] = '( ' . number_format($ps->ps_tot_natural_gas) 
+                . ' Natural Gas Therms x <a '
                 . 'href="https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu"'
                 . ' target="_blank">99.976</a> ) kBtu';
-            $addLines2[] = number_format($ps->ps_tot_natural_gas*99.97612449) 
+            $addLines[1][] = number_format($ps->ps_tot_natural_gas*99.97612449) 
                 . ' Natural Gas kBtu';
+            $addLines[2][] = '( ' . number_format($ps->ps_tot_natural_gas) 
+                . ' Natural Gas Therms x <a '
+                . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                . ' target="_blank">531.2</a> ) kg CO<sub>2</sub>e';
+            $addLines[3][] = number_format($ps->ps_tot_natural_gas*531.2) 
+                . ' Natural Gas kg CO<sub>2</sub>e';
         }
         if (isset($ps->ps_tot_generator) && $ps->ps_tot_generator > 0) {
             $set = 'Compliance MA Generator Units';
             $unit = $GLOBALS["SL"]->def->getID($set, 'Diesel (Gallons)');
+            $unit2 = $GLOBALS["SL"]->def->getID($set, 'Natural Gas (Therms)');
+            $unit3 = $GLOBALS["SL"]->def->getID($set, 'Natural Gas (CCF)');
             if (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) == $unit) {
-                $addLines[] = '( ' . number_format($ps->ps_tot_generator) . ' Diesel Gallons x <a '
+                $addLines[0][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Diesel Gallons x <a '
                     . 'href="https://www.convertunits.com/from/gallon+%5bU.S.%5d+of+diesel+oil/to/Btu"'
                     . ' target="_blank">138.87</a> ) kBtu';
-                $addLines2[] = number_format($ps->ps_tot_generator*138.87415823) . ' Diesel kBtu';
+                $addLines[1][] = number_format($ps->ps_tot_generator*138.87415823) 
+                    . ' Diesel kBtu';
+                $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) . ' Diesel Gallons x <a '
+                    . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                    . ' target="_blank">10.16</a> ) kg CO<sub>2</sub>e';
+                $addLines[3][] = number_format($ps->ps_tot_generator*10.16) 
+                    . ' Diesel kg CO<sub>2</sub>e';
+            } elseif (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) == $unit2) {
+                $addLines[0][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Natural Gas Generator Therms x <a '
+                    . 'href="https://www.convertunits.com/from/therm+%5bU.S.%5d/to/Btu"'
+                    . ' target="_blank">99.976</a> ) kBtu';
+                $addLines[1][] = number_format($ps->ps_tot_generator*99.976124487811) 
+                    . ' Natural Gas Generator kBtu';
+                $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Natural Gas Generator x <a '
+                    . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                    . ' target="_blank">531.2</a> ) kg CO<sub>2</sub>e';
+                $addLines[3][] = number_format($ps->ps_tot_generator*531.2) 
+                    . ' Diesel kg CO<sub>2</sub>e';
+            } elseif (isset($ps->ps_unit_generator) && intVal($ps->ps_unit_generator) == $unit3) {
+                $addLines[0][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Natural Gas Generator CCF )';
+                $addLines[1][] = number_format($ps->ps_tot_generator) 
+                    . ' Natural Gas Generator kBtu';
+                $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Natural Gas Generator x <a '
+                    . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                    . ' target="_blank">5.312</a> ) kg CO<sub>2</sub>e';
+                $addLines[3][] = number_format($ps->ps_tot_generator*5.312) 
+                    . ' Natural Gas Generator CO<sub>2</sub>e';
             } else {
-                $addLines[] = '( ' . number_format($ps->ps_tot_generator) . ' Gasoline Gallons x <a '
+                $addLines[0][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Gasoline Gallons x <a '
                     . 'href="https://www.convertunits.com/from/gallon+[U.S.]+of+automotive+gasoline/to/Btu+[thermochemical]"'
                     . ' target="_blank">124.97</a> ) kBtu';
-                $addLines2[] = number_format($ps->ps_tot_generator*124.9679542) . ' Gasoline kBtu';
+                $addLines[1][] = number_format($ps->ps_tot_generator*124.9679542) 
+                    . ' Gasoline kBtu';
+                $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) 
+                    . ' Gasoline Gallons x <a '
+                    . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                    . ' target="_blank">8.89</a> ) kg CO<sub>2</sub>e';
+                $addLines[3][] = number_format($ps->ps_tot_generator*8.89) 
+                    . ' Gasoline kg CO<sub>2</sub>e';
             }
         }
         if (isset($ps->ps_tot_fuel_oil) && $ps->ps_tot_fuel_oil > 0) {
-            $addLines[] = '( ' . number_format($ps->ps_tot_fuel_oil) . ' Fuel Oil Gallons x '
+            $addLines[0][] = '( ' . number_format($ps->ps_tot_fuel_oil) 
+                . ' Fuel Oil Gallons x '
                 . '<a href="https://www.convertunits.com/from/gallon+%5BU.S.%5D+of'
                 . '+distillate+no.+2+fuel+oil/to/Btus" target="_blank">138.87</a> ) kBtu';
-                $addLines2[] = number_format($ps->ps_tot_generator*138.87415823) . ' Fuel Oil kBtu';
+            $addLines[1][] = number_format($ps->ps_tot_generator*138.87415823) 
+                . ' Fuel Oil kBtu';
+            $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) 
+                . ' Fuel Oil Gallons x <a '
+                . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                . ' target="_blank">10.16</a> ) kg CO<sub>2</sub>e';
+            $addLines[3][] = number_format($ps->ps_tot_generator*10.16) 
+                . ' Fuel Oil kg CO<sub>2</sub>e';
         }
         if (isset($ps->ps_tot_propane) && $ps->ps_tot_propane > 0) {
-            $addLines[] = '( ' . number_format($ps->ps_tot_propane) . ' Propane Gallons x <a '
+            $addLines[0][] = '( ' . number_format($ps->ps_tot_propane) 
+                . ' Propane Gallons x <a '
                 . 'href="https://www.convertunits.com/from/gallon+[U.S.]+of+LPG/to/Btu"'
                 . ' target="_blank">95.500</a> ) kBtu';
-            $addLines2[] = number_format($ps->ps_tot_propane*95.500) . ' Propane kBtu';
+            $addLines[1][] = number_format($ps->ps_tot_propane*95.500) 
+                . ' Propane kBtu';
+            $addLines[2][] = '( ' . number_format($ps->ps_tot_generator) 
+                . ' Propane Gallons x <a '
+                . 'href="https://www.eia.gov/electricity/annual/html/epa_a_03.html"'
+                . ' target="_blank">5.76</a> ) kg CO<sub>2</sub>e';
+            $addLines[3][] = number_format($ps->ps_tot_generator*5.76) 
+                . ' Propane kg CO<sub>2</sub>e';
         }
-        return $this->prepPrintEfficFacNonViews($addLines, $addLines2);
+        if (isset($ps->ps_kwh_tot_calc) && $ps->ps_kwh_tot_calc > 0) {
+            $mwh = $GLOBALS["SL"]->cnvrtKwh2Mwh($ps->ps_kwh_tot_calc);
+            $profile = $this->calcEmisStateProfile();
+            if ($profile && isset($profile->eia_state_id)) {
+                /*
+                if (isset($profile->eia_state_sulfur_dioxide_lbs_mwh)
+                    && $profile->eia_state_sulfur_dioxide_lbs_mwh > 0) {
+                    $sulfur = $mwh*$profile->eia_state_sulfur_dioxide_lbs_mwh;
+                    $totKgCO2e += $GLOBALS["SL"]->cnvrtLbs2KgCarbonEq($sulfur, 'SO2');
+                }
+                */
+                if (isset($profile->eia_state_nitrogen_oxide_lbs_mwh)
+                    && $profile->eia_state_nitrogen_oxide_lbs_mwh > 0) {
+                    $nitrogen = $mwh*$profile->eia_state_nitrogen_oxide_lbs_mwh;
+                    $kgCO2e = $GLOBALS["SL"]->cnvrtLbs2KgCarbonEq($nitrogen, 'N2O');
+                    $addLines[2][] = '( ( ( ' . number_format($mwh) 
+                        . ' Electricity MWh x <a target="_blank" href="' . $emisUrl . '">' 
+                        . $GLOBALS["SL"]->sigFigs(
+                            $GLOBALS["SL"]->cnvrtLbs2Kg($profile->eia_state_nitrogen_oxide_lbs_mwh),
+                            3
+                        ) . '</a> ) kg N<sub>2</sub>O ) x <a target="_blank" '
+                        . 'href="https://www.epa.gov/sites/production/files/2020-04/documents/ghg-emission-factors-hub.pdf">298</a> ) kg CO<sub>2</sub>e';
+                    $addLines[3][] = number_format($kgCO2e) 
+                        . ' kg CO<sub>2</sub>e from Electricity N<sub>2</sub>O';
+                }
+                if (isset($profile->eia_state_carbon_dioxide_lbs_mwh)
+                    && $profile->eia_state_carbon_dioxide_lbs_mwh > 0) {
+                    $carbon = $mwh*$profile->eia_state_carbon_dioxide_lbs_mwh;
+                    $kgCO2e = $GLOBALS["SL"]->cnvrtLbs2Kg($carbon);
+                    $addLines[2][] = '( ' . number_format($mwh) 
+                        . ' Electricity MWh x <a target="_blank" href="h' . $emisUrl . '">' 
+                        . $GLOBALS["SL"]->sigFigs(
+                            $GLOBALS["SL"]->cnvrtLbs2Kg($profile->eia_state_carbon_dioxide_lbs_mwh),
+                            3
+                        ) . '</a> ) kg CO<sub>2</sub>';
+                    $addLines[3][] = number_format($kgCO2e) 
+                        . ' kg CO<sub>2</sub> from Electricity';
+                }
+            }
+        }
+        return $this->prepPrintEfficFacNonViews($addLines);
     }
     
-    protected function prepPrintEfficFacNonViews($addLines, $addLines2)
+    protected function prepPrintEfficFacNonViews($addLines)
     {
         $this->v["printEfficFacNon"] 
             = $this->v["printEfficFacAll"]
@@ -165,32 +269,42 @@ class ScoreCalcsPrint extends ScoreCalcRanks
                 'vendor.cannabisscore.nodes.490-report-calculations-fac-non', 
                 [
                     "ps"        => $this->sessData->dataSets["powerscore"][0],
-                    "addLines"  => $addLines,
-                    "addLines2" => $addLines2
+                    "addLines"  => $addLines
                 ]
             )->render();
             $this->v["printEfficFacAll"] = view(
                 'vendor.cannabisscore.nodes.490-report-calculations-fac-all', 
                 [
                     "ps"        => $this->sessData->dataSets["powerscore"][0],
-                    "addLines"  => $addLines,
-                    "addLines2" => $addLines2
+                    "addLines"  => $addLines
                 ]
             )->render();
             $this->v["printEfficProdNon"] = view(
                 'vendor.cannabisscore.nodes.490-report-calculations-prod-non', 
                 [
                     "ps"        => $this->sessData->dataSets["powerscore"][0],
-                    "addLines"  => $addLines,
-                    "addLines2" => $addLines2
+                    "addLines"  => $addLines
                 ]
             )->render();
             $this->v["printEfficProdAll"] = view(
                 'vendor.cannabisscore.nodes.490-report-calculations-prod-all', 
                 [
                     "ps"        => $this->sessData->dataSets["powerscore"][0],
-                    "addLines"  => $addLines,
-                    "addLines2" => $addLines2
+                    "addLines"  => $addLines
+                ]
+            )->render();
+            $this->v["printEfficEmis"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-emis', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines
+                ]
+            )->render();
+            $this->v["printEfficEmisProd"] = view(
+                'vendor.cannabisscore.nodes.490-report-calculations-emis-prod', 
+                [
+                    "ps"        => $this->sessData->dataSets["powerscore"][0],
+                    "addLines"  => $addLines
                 ]
             )->render();
         }
@@ -225,11 +339,11 @@ class ScoreCalcsPrint extends ScoreCalcRanks
     {
         $this->v["printEfficWtr"] = view(
             'vendor.cannabisscore.nodes.490-report-calculations-water', 
-            [
-                "ps"          => $this->sessData->dataSets["powerscore"][0],
-                "areas"       => $this->v["areas"],
-                "areaNicks"   => $this->v["areaNicks"]
-            ]
+            [ "ps" => $this->sessData->dataSets["powerscore"][0] ]
+        )->render();
+        $this->v["printEfficWtrProd"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-water-prod', 
+            [ "ps" => $this->sessData->dataSets["powerscore"][0] ]
         )->render();
         return true;
     }
@@ -238,6 +352,10 @@ class ScoreCalcsPrint extends ScoreCalcRanks
     {
         $this->v["printEfficWst"] = view(
             'vendor.cannabisscore.nodes.490-report-calculations-waste', 
+            [ "ps" => $this->sessData->dataSets["powerscore"][0] ]
+        )->render();
+        $this->v["printEfficWstProd"] = view(
+            'vendor.cannabisscore.nodes.490-report-calculations-waste-prod', 
             [ "ps" => $this->sessData->dataSets["powerscore"][0] ]
         )->render();
         return true;
@@ -253,7 +371,7 @@ class ScoreCalcsPrint extends ScoreCalcRanks
         }
         if (!isset($this->v["scoreYearMonths"][$ps->ps_id])) {
             $this->v["scoreYearMonths"][$ps->ps_id] 
-                = $GLOBALS["SL"]->lastMonths12($ps, 'ps_start_month');
+                = $GLOBALS["SL"]->lastMonths12($ps, 'ps_start_month', 'ps_year');
         }
         return $this->v["scoreYearMonths"][$ps->ps_id];
     }

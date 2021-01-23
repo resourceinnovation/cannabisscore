@@ -9,6 +9,12 @@ function gatherFilts() {
     if (document.getElementById("filtFarmID")) {
         baseUrl += "&fltFarm="+document.getElementById("filtFarmID").value.trim();
     }
+    if (document.getElementById("fltStateClimNIDID") && document.getElementById("fltStateClimNIDID").value.trim() != '') {
+        var climNID = document.getElementById("fltStateClimNIDID").value.trim();
+        if (document.getElementById("n"+climNID+"tagIDsID") && document.getElementById("n"+climNID+"tagIDsID").value.trim() != '') {
+            baseUrl += "&fltStateClimTag="+document.getElementById("n"+climNID+"tagIDsID").value.trim();
+        }
+    }
     if (document.getElementById("fltStateClimID") && document.getElementById("fltStateClimID").value.trim() != '') {
         baseUrl += "&fltStateClim="+document.getElementById("fltStateClimID").value.trim();
     }

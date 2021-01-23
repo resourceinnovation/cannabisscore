@@ -30,6 +30,11 @@
         <td class="slGrey">{{ number_format($psCnt->ps_effic_production) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_prod_non) }}</td>
 
+@elseif ($dataSet == 'emissions')
+
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_emis) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_emis_prod) }}</td>
+
 @elseif ($dataSet == 'lighting')
 
         <td class="slGrey">{{ number_format($psCnt->ps_effic_lighting) }}</td>
@@ -43,37 +48,39 @@
 
         <td class="slGrey">{{ number_format($psCnt->ps_effic_hvac) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_water) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_water_prod) }}</td>
         <td class="slGrey">{{ number_format($psCnt->ps_effic_waste) }}</td>
+        <td class="slGrey">{{ number_format($psCnt->ps_effic_waste_prod) }}</td>
 
 @elseif ($dataSet == 'totals')
 
-        <th></td>
-        <th></td>
-        <th></td>
-        <th></td>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
         @if (isset($psSum->ps_tot_kw_peak) && intVal($psSum->ps_tot_kw_peak) > 0)
-            <th></td>
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_water) > 0)
-            <th></td>
+            <th></th>
         @endif
-        @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_waste_lbs) > 0)
-            <th></td>
+        @if (isset($psSum->ps_tot_waste) && intVal($psSum->ps_tot_waste_lbs) > 0)
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_natural_gas) && intVal($psSum->ps_tot_natural_gas) > 0)
-            <th></td>
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_generator) && intVal($psSum->ps_tot_generator) > 0)
-            <th></td>
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_biofuel_wood) && intVal($psSum->ps_tot_biofuel_wood) > 0)
-            <th></td>
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_propane) && intVal($psSum->ps_tot_propane) > 0)
-            <th></td>
+            <th></th>
         @endif
         @if (isset($psSum->ps_tot_fuel_oil) && intVal($psSum->ps_tot_fuel_oil) > 0)
-            <th></td>
+            <th></th>
         @endif
 
 @endif
@@ -100,6 +107,11 @@
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_production, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_prod_non, 3) }}</b></th>
 
+@elseif ($dataSet == 'emissions')
+
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_emis, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_emis_prod, 3) }}</b></th>
+
 @elseif ($dataSet == 'lighting')
 
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_lighting, 3) }}</b></th>
@@ -113,38 +125,40 @@
 
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_hvac, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_water, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_water_prod, 3) }}</b></th>
         <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_waste, 3) }}</b></th>
+        <th><b>{{ $GLOBALS["SL"]->sigFigs($psAvg->ps_effic_waste_prod, 3) }}</b></th>
 
 @elseif ($dataSet == 'totals')
 
     @if (!$isExcel)
-        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_flower_canopy_size) }}</td>
-        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_total_canopy_size) }}</td>
-        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_grams_dry) }}</td>
-        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_kwh) }}</td>
+        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_flower_canopy_size) }}</b></td>
+        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_total_canopy_size) }}</b></td>
+        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_grams_dry) }}</b></td>
+        <th><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_kwh) }}</b></td>
         @if (isset($psSum->ps_tot_kw_peak) && intVal($psSum->ps_tot_kw_peak) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_kw_peak) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_kw_peak) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_water) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_water) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_water) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_waste) && intVal($psSum->ps_tot_waste) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_waste) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_waste) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_natural_gas) && intVal($psSum->ps_tot_natural_gas) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_natural_gas) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_natural_gas) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_generator) && intVal($psSum->ps_tot_generator) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_generator) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_generator) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_biofuel_wood) && intVal($psSum->ps_tot_biofuel_wood) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_biofuel_wood) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_biofuel_wood) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_propane) && intVal($psSum->ps_tot_propane) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_propane) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_propane) }}</b></td>
         @endif
         @if (isset($psSum->ps_tot_fuel_oil) && intVal($psSum->ps_tot_fuel_oil) > 0)
-            <td>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_fuel_oil) }}</td>
+            <td><b>{{ $GLOBALS["SL"]->numKMBT($psAvg->ps_tot_fuel_oil) }}</b></td>
         @endif
     @else
         <td>{{ number_format($psAvg->ps_grams) }}</td>
@@ -193,56 +207,19 @@
         @if (!$GLOBALS["SL"]->REQ->has('test') || $i < 25)
 
             <tr @if ($i%2 == 0) class="row2" @endif >
+            {!! view(
+                'vendor.cannabisscore.nodes.170-powerscore-listing-first-cols',
+                [
+                    "nID"             => $nID,
+                    "ps"              => $ps,
+                    "i"               => $i,
+                    "scoreYearMonths" => $scoreYearMonths
+                ]
+            )->render() !!}
 
-            <td>
-            @if (Auth::user()->hasRole('administrator|staff')
-                && $ps->ps_status == 556)
-                <div class="relDiv">
-                    <div class="absDiv slRedDark" 
-                        style="left: -20px; top: 2px;">
-                        <i class="fa fa-star-half-o" aria-hidden="true"></i>
-                    </div>
-                </div>
-            @endif
-            @if ($nID == 1373 && $GLOBALS["SL"]->x["partnerLevel"] < 5)
-                {{ (1+$i) }})
-            @else
-                <a href="/calculated/read-{{ $ps->ps_id }}" 
-                    @if (Auth::user()->hasRole('administrator|staff')
-                        && $ps->ps_status == 556)
-                        class="slRedDark"
-                    @endif target="_blank">
-                    @if ($nID == 808) {{ $ps->ps_name }} 
-                    @else #{{ $ps->ps_id }} 
-                    @endif </a>
-            @endif
-            </td>
-            <td>
-                <nobr>{{ $ps->ps_state }}
-                {{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', 
-                    $GLOBALS["SL"]->def->getVal(
-                        'PowerScore Farm Types', 
-                        $ps->ps_characterize
-                    )) 
-                }}</nobr>
-            </td>
-            <td>
-            @if (isset($ps->ps_start_month) 
-                && intVal($ps->ps_start_month) > 0
-                && $scoreYearMonths[$ps->ps_id]["has"])
-                <nobr>{{ 
-                date("n/y", mktime(0, 0, 0, 
-                    $scoreYearMonths[$ps->ps_id]["endMonth"], 1, 
-                    $scoreYearMonths[$ps->ps_id]["endYear"])) }}-{{ 
-                date("n/y", mktime(0, 0, 0, 
-                    $scoreYearMonths[$ps->ps_id]["startMonth"], 1, 
-                    $scoreYearMonths[$ps->ps_id]["startYear"])) 
-                }}</nobr> 
-            @endif
         @if (isset($fltCmpl) 
             && $fltCmpl == 0 
             && Auth::user()->hasRole('administrator|staff'))
-            </td>
             <td>
             @if ($ps->ps_status == 243)
                 <span class="slBlueDark">Complete</span>
@@ -252,14 +229,14 @@
                 <span class="slRedDark">
                 <i class="fa fa-star-half-o mR3" aria-hidden="true"></i>
                 New</span>
-            @else 
+            @else
                 {{ $GLOBALS["SL"]->def->getVal(
                     'PowerScore Status', 
                     $ps->ps_status
                 ) }}
             @endif
-        @endif
             </td>
+        @endif
             <td>
                 {{ round($ps->ps_effic_over_similar) }}%
                 @if (!$isExcel 
@@ -395,6 +372,49 @@
             @endif
             </td>
 
+@elseif ($dataSet == 'emissions')
+
+            <td>
+            @if ((isset($ps->ps_effic_emis_status) 
+                && intVal($ps->ps_effic_emis_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
+                @if ($ps->ps_effic_emis < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_emis, 3) }}
+                @endif
+                @if (!$isExcel 
+                    && isset($allranks) 
+                    && isset($allranks[$ps->ps_id]) 
+                    && isset($allranks[$ps->ps_id]->ps_rnk_emis)) 
+                    <div class="slGrey fPerc66">
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allranks[$ps->ps_id]->ps_rnk_emis
+                    ) }}%
+                    </div>
+                @endif
+            @else -
+            @endif
+            </td>
+            <td>
+            @if ((isset($ps->ps_effic_emis_prod_status) 
+                && intVal($ps->ps_effic_emis_prod_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
+                @if ($ps->ps_effic_emis_prod < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_emis_prod, 3) }}
+                @endif
+                @if (!$isExcel 
+                    && isset($allranks) 
+                    && isset($allranks[$ps->ps_id]) 
+                    && isset($allranks[$ps->ps_id]->ps_rnk_emis_prod)) 
+                    <div class="slGrey fPerc66">
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allranks[$ps->ps_id]->ps_rnk_emis_prod
+                    ) }}%
+                    </div>
+                @endif
+            @else -
+            @endif
+            </td>
+
 @elseif ($dataSet == 'lighting')
 
             <td>
@@ -517,6 +537,26 @@
             @endif 
             </td>
             <td>
+            @if ((isset($ps->ps_effic_water_prod_status) 
+                && intVal($ps->ps_effic_water_prod_status) == $defCmplt)
+                || (isset($fltPartner) && $fltPartner > 0))
+                @if ($ps->ps_effic_water_prod < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_water_prod, 3) }}
+                @endif
+                @if (!$isExcel 
+                    && isset($allranks) 
+                    && isset($allranks[$ps->ps_id]) 
+                    && isset($allranks[$ps->ps_id]->ps_rnk_water_prod)) 
+                    <div class="slGrey fPerc66">
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allranks[$ps->ps_id]->ps_rnk_water_prod
+                    ) }}%
+                    </div>
+                @endif
+            @else -
+            @endif 
+            </td>
+            <td>
             @if ((isset($ps->ps_effic_waste_status) 
                 && intVal($ps->ps_effic_waste_status) == $defCmplt)
                     || (isset($fltPartner) && $fltPartner > 0))
@@ -536,6 +576,26 @@
             @else -
             @endif 
             </td>
+            <td>
+            @if ((isset($ps->ps_effic_waste_prod_status) 
+                && intVal($ps->ps_effic_waste_prod_status) == $defCmplt)
+                    || (isset($fltPartner) && $fltPartner > 0))
+                @if ($ps->ps_effic_waste_prod < 0.000001) 0
+                @else {{ $GLOBALS["SL"]->sigFigs($ps->ps_effic_waste_prod, 3) }}
+                @endif
+                @if (!$isExcel 
+                    && isset($allranks) 
+                    && isset($allranks[$ps->ps_id]) 
+                    && isset($allranks[$ps->ps_id]->ps_rnk_waste_prod)) 
+                    <div class="slGrey fPerc66">
+                    {{ $GLOBALS["SL"]->sigFigs(
+                        $allranks[$ps->ps_id]->ps_rnk_waste_prod
+                    ) }}%
+                    </div>
+                @endif
+            @else -
+            @endif 
+            </td>
 
 @elseif ($dataSet == 'totals')
 
@@ -544,59 +604,99 @@
             <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_total_canopy_size) }}</td>
             <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_grams_dry) }}</td>
             <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_kwh) }}</td>
-            @if (isset($psSum->ps_tot_kw_peak) && intVal($psSum->ps_tot_kw_peak) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_kw_peak) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_water) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_water) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_waste) && intVal($psSum->ps_tot_waste) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_waste) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_natural_gas) && intVal($psSum->ps_tot_natural_gas) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_natural_gas) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_generator) && intVal($psSum->ps_tot_generator) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_generator) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_biofuel_wood) && intVal($psSum->ps_tot_biofuel_wood) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_biofuel_wood) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_propane) && intVal($psSum->ps_tot_propane) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_propane) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_fuel_oil) && intVal($psSum->ps_tot_fuel_oil) > 0)
-                <td class="slGrey">{{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_fuel_oil) }}</td>
-            @endif
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_kw_peak) && intVal($ps->ps_tot_kw_peak) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_kw_peak) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_water) && intVal($ps->ps_tot_water) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_water) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_waste) && intVal($ps->ps_tot_waste) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_waste) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_natural_gas) && intVal($ps->ps_tot_natural_gas) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_natural_gas) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_generator) && intVal($ps->ps_tot_generator) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_generator) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_biofuel_wood) && intVal($ps->ps_tot_biofuel_wood) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_biofuel_wood) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_propane) && intVal($ps->ps_tot_propane) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_propane) }}
+                @endif
+            </td>
+            <td class="slGrey">
+                @if (isset($ps->ps_tot_fuel_oil) && intVal($ps->ps_tot_fuel_oil) > 0)
+                    {{ $GLOBALS["SL"]->numKMBT($ps->ps_tot_fuel_oil) }}
+                @endif
+            </td>
         @else
             <td>{{ number_format($ps->ps_grams) }}</td>
             <td>{{ number_format($ps->ps_kwh_tot_calc) }}</td>
             <td>{{ number_format($ps->ps_flower_canopy_size) }}</td>
-            @if (isset($psSum->ps_tot_kw_peak) && intVal($psSum->ps_tot_kw_peak) > 0)
-                <td>{{ number_format($ps->ps_tot_kw_peak) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_water) > 0)
-                <td>{{ number_format($ps->ps_tot_water) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_waste) && intVal($psSum->ps_tot_waste) > 0)
-                <td>{{ number_format($ps->ps_tot_waste) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_natural_gas) && intVal($psSum->ps_tot_natural_gas) > 0)
-                <td>{{ number_format($ps->ps_tot_natural_gas) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_generator) && intVal($psSum->ps_tot_generator) > 0)
-                <td>{{ number_format($ps->ps_tot_generator) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_biofuel_wood) && intVal($psSum->ps_tot_biofuel_wood) > 0)
-                <td>{{ number_format($ps->ps_tot_biofuel_wood) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_propane) && intVal($psSum->ps_tot_propane) > 0)
-                <td>{{ number_format($ps->ps_tot_propane) }}</td>
-            @endif
-            @if (isset($psSum->ps_tot_fuel_oil) && intVal($psSum->ps_tot_fuel_oil) > 0)
-                <td>{{ number_format($ps->ps_tot_fuel_oil) }}</td>
-            @endif
+            <td>
+                @if (isset($psSum->ps_tot_kw_peak) && intVal($psSum->ps_tot_kw_peak) > 0)
+                    {{ number_format($ps->ps_tot_kw_peak) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_water) && intVal($psSum->ps_tot_water) > 0)
+                    {{ number_format($ps->ps_tot_water) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_waste) && intVal($psSum->ps_tot_waste) > 0)
+                    {{ number_format($ps->ps_tot_waste) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_natural_gas) && intVal($psSum->ps_tot_natural_gas) > 0)
+                    {{ number_format($ps->ps_tot_natural_gas) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_generator) && intVal($psSum->ps_tot_generator) > 0)
+                    {{ number_format($ps->ps_tot_generator) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_biofuel_wood) && intVal($psSum->ps_tot_biofuel_wood) > 0)
+                    {{ number_format($ps->ps_tot_biofuel_wood) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_propane) && intVal($psSum->ps_tot_propane) > 0)
+                    {{ number_format($ps->ps_tot_propane) }}
+                @endif
+            </td>
+            <td>
+                @if (isset($psSum->ps_tot_fuel_oil) && intVal($psSum->ps_tot_fuel_oil) > 0)
+                    {{ number_format($ps->ps_tot_fuel_oil) }}
+                @endif
+            </td>
         @endif 
+
+@elseif ($dataSet == 'names' && Auth::user() && Auth::user()->hasRole('administrator|staff'))
+    
+    <td>
+        @if (isset($ps->ps_name) && trim($ps->ps_name) != '')
+            {{ trim($ps->ps_name) }}
+        @endif
+    </td>
 
 @endif
 

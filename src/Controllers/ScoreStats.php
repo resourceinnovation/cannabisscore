@@ -26,7 +26,7 @@ class ScoreStats extends SurvStatsGraph
     public $sfLgts  = [];
     public $baseUrl = '/dash/compare-powerscores';
     
-    function __construct($filts = ['farm'])
+    function __construct($filts = ['farm'], $standardSet = true)
     {
         $this->v["psComplete"] = 243;
         $lgtTypes = [
@@ -132,7 +132,9 @@ class ScoreStats extends SurvStatsGraph
         $this->sfLgts = [];
 
         $this->v["filts"] = $filts;
-        $this->constructScoreBasicData();
+        if ($standardSet) {
+            $this->constructScoreBasicData();
+        }
         if (sizeof($filts) > 0) {
             foreach ($filts as $f) {
                 if ($f == 'farm') {
@@ -256,7 +258,11 @@ class ScoreStats extends SurvStatsGraph
         );
         $this->addDataType(
             'wtr',  
-            '<nobr>Water <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
+            '<nobr>Water Facility <sup class="slBlueDark">gallons / sq ft</sup></nobr>'
+        );
+        $this->addDataType(
+            'wtrPro',  
+            '<nobr>Water Productivity <sup class="slBlueDark">g / gallons</sup></nobr>'
         );
         $this->addDataType(
             'wst',  
@@ -393,12 +399,13 @@ class ScoreStats extends SurvStatsGraph
     {
         if ($ps && isset($ps->ps_id)) {
             $dataPoints = [
-                ['fac', 'facility'],
-                ['pro', 'production'],
-                ['wtr', 'water'],
-                ['wst', 'waste'],
-                ['hvc', 'hvac'],
-                ['lgt', 'lighting']
+                ['fac',    'facility'],
+                ['pro',    'production'],
+                ['wtr',    'water'],
+                ['wtrPro', 'water_prod'],
+                ['wst',    'waste'],
+                ['hvc',    'hvac'],
+                ['lgt',    'lighting']
             ];
             foreach ($dataPoints as $type) {
                 $fld = 'ps_effic_' . $type[1];
@@ -407,10 +414,12 @@ class ScoreStats extends SurvStatsGraph
                         && intVal($ps->{ $fld . '_status' }) == $this->v["psComplete"])) {
                     $val = $ps->{ $fld };
                     $this->addRecDat($type[0], $val, $ps->ps_id);
-                    if (in_array($type[0], ['pro', 'lgt'])) {
-                        $val *= 3.412;
-                    } else {
-                        $val /= 3.412;
+                    if (!in_array($type[0], ['wtr', 'wtrPro', 'wst'])) {
+                        if (in_array($type[0], ['pro', 'lgt'])) {
+                            $val *= 3.412;
+                        } else {
+                            $val /= 3.412;
+                        }
                     }
                     $this->addRecDat($type[0] . 'W', $val, $ps->ps_id);
                 }
@@ -444,7 +453,7 @@ class ScoreStats extends SurvStatsGraph
             $lnk = $this->baseUrl;
         }
         $fLet = $this->fAbr($fltAbbr);
-        $tbl = new SurvStatsTbl('', [0, 2, 4, 6, 8, 10, 14], [1]);
+        $tbl = new SurvStatsTbl('', [0, 2, 4, 7, 9, 11, 15], [1]);
         if ($fLet != '' && !isset($this->filts[$fLet])) {
             echo 'error in printScoreAvgsTblPrep(' . $fltAbbr;
             exit;

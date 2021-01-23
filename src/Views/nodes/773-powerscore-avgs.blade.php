@@ -3,8 +3,8 @@
 <div class="slCard nodeWrap">
 @if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
-        @if (trim($fltStateClim) != '') 
-            href="?excel=1&fltStateClim={{ $fltStateClim }}"
+        @if (sizeof($fltStateClimTag) > 0) 
+            href="?excel=1&fltStateClimTag={{ implode(',', $fltStateClimTag) }}"
         @else 
             href="?excel=1"
         @endif
@@ -45,7 +45,7 @@
                 && sizeof($GLOBALS['SL']->x['usrInfo']->companies) > 0
                 && sizeof($GLOBALS['SL']->x['usrInfo']->companies[0]->facs) > 0)
                 <select name="fltFacility" id="fltFacilityID" 
-                    class="form-control form-control-lg psChageFilter ntrStp slTab mB15"
+                    class="form-control psChangeFilter ntrStp slTab mB15"
                     onChange="window.location='?fltFacility='+this.value;"
                     autocomplete="off" {!! $GLOBALS["SL"]->tabInd() !!} >
                     <option value="0"
@@ -61,14 +61,9 @@
                 </select>
             @endif
 
-                <select name="fltStateClim" id="fltStateClimID" 
-                    class="form-control form-control-lg psChageFilter" autocomplete="off"
-                    onChange="window.location='?fltStateClim='+this.value;">
-                    <option value="" @if (trim($fltStateClim) == '') SELECTED @endif
-                        >All Climates and States</option>
-                    <option disabled ></option>
-                    {!! $GLOBALS["SL"]->states->stateClimateDrop($fltStateClim) !!}
-                </select>
+            {!! $GLOBALS["SL"]->states->stateClimateTagsSelect($fltStateClimTag, $nID, 'psChangeFilterDelay') !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsList($fltStateClimTag, $nID) !!}
+            {!! $GLOBALS["SL"]->states->stateClimateTagsJS($fltStateClimTag, $nID, 'psClickFilterDelay') !!}
 
             </div>
         </div>
@@ -84,6 +79,26 @@
     @endif
     </div>
 @endforeach
+
+<script type="text/javascript"> $(document).ready(function(){
+
+function applyFilts() {
+    baseUrl = "?filt=1";
+    if (document.getElementById("n{{ $nID }}tagIDsID") && document.getElementById("n{{ $nID }}tagIDsID").value.trim() != '') {
+        baseUrl += "&fltStateClimTag="+document.getElementById("n{{ $nID }}tagIDsID").value.trim();
+    }
+    window.location=baseUrl;
+}
+$(document).on("change", ".psChangeFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
+$(document).on("click", ".psClickFilterDelay", function() {
+    setTimeout(function() { applyFilts(); }, 200);
+    return true;
+});
+
+}); </script>
 
 <style>
 body { overflow-x: visible; }

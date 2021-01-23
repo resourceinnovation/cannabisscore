@@ -7,7 +7,7 @@
         <tr class="slGrey">
             <th class="brdRgtGrey"><b>Average</b>, SD</th>
         @foreach ($outlierCols as $scr)
-            <th @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
+            <th @if (in_array($scr[0], ['Water Facility', 'Lighting'])) class="brdLftGrey" @endif >
             <b>{{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["avg"], 3) }}</b>, 
             {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["sd"], 3) }}
             </th>
@@ -16,7 +16,7 @@
         <tr class="slGrey">
             <th class="brdRgtGrey">Median, IQR</th>
         @foreach ($outlierCols as $scr)
-            <th @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
+            <th @if (in_array($scr[0], ['Water Facility', 'Lighting'])) class="brdLftGrey" @endif >
             {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["med"], 3) }}, 
             {{ $GLOBALS["SL"]->sigFigs($stats[$type][$size][$scr[0]]["iqr"], 3) }}
             </th>
@@ -32,10 +32,14 @@
                 ({{ number_format($stats[$type][$size]["Production Electric"]["cnt"]) }})</th>
             <th>Production Non-Electric
                 ({{ number_format($stats[$type][$size]["Production Non-Electric"]["cnt"]) }})</th>
-            <th class="brdLftGrey">Water
-                ({{ number_format($stats[$type][$size]["Water"]["cnt"]) }})</th>
+            <th class="brdLftGrey">Water Facility
+                ({{ number_format($stats[$type][$size]["Water Facility"]["cnt"]) }})</th>
+            <th>Water Productivity
+                ({{ number_format($stats[$type][$size]["Water Productivity"]["cnt"]) }})</th>
             <th>Waste
-                ({{ number_format($stats[$type][$size]["Waste"]["cnt"]) }})</th>
+                ({{ number_format($stats[$type][$size]["Waste Facility"]["cnt"]) }})</th>
+            <th>Waste
+                ({{ number_format($stats[$type][$size]["Waste Productivity"]["cnt"]) }})</th>
             <th>HVAC
                 ({{ number_format($stats[$type][$size]["HVAC"]["cnt"]) }})</th>
             <th class="brdLftGrey">Lighting
@@ -52,7 +56,12 @@
                     @if ($ps->ps_status == 364) slRedDark bld @endif " >
                     <a href="/calculated/read-{{ $ps->ps_id }}" target="_blank" 
                         @if ($ps->ps_status == 364) class="slRedDark" @endif 
-                        >#{{ $ps->ps_id }}</a><div class="pL5 fPerc80">
+                        >#{{
+                            $ps->ps_id
+                            . ((isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) ? 'F' 
+                                : ((!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1) ? 'G' 
+                                    : 'P'))
+                        }}</a><div class="pL5 fPerc80">
                     {{ $ps->ps_county }} {{ $ps->ps_state }}<br />
                     {{ $GLOBALS["SL"]->def->getVal(
                         'PowerScore Status', 
@@ -68,7 +77,9 @@
                     @endif
                 </div></td>
                 @foreach ($outlierCols as $scr)
-                    <td @if (in_array($scr[0], ['Water', 'Lighting'])) class="brdLftGrey" @endif >
+                    <td @if (in_array($scr[0], ['Water Facility', 'Lighting'])) 
+                            class="brdLftGrey"
+                        @endif >
                     {!! view(
                         'vendor.cannabisscore.nodes.966-score-outliers-cell', 
                         [
