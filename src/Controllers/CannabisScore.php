@@ -256,14 +256,14 @@ class CannabisScore extends ScorePrintReport
         return $ret;
     }
     
-    protected function customResponses($nID, &$curr)
+    protected function customResponses(&$curr)
     {
-        return $this->customResponsesPowerScore($nID, $curr);
+        return $this->customResponsesPowerScore($curr);
     }
     
-    protected function customResponsesPowerScore($nID, &$curr)
+    protected function customResponsesPowerScore(&$curr)
     {
-        if (in_array($nID, [57, 1073])) {
+        if (in_array($curr->nID, [57, 1073])) {
             $curr->clearResponses();
             if (isset($this->sessData->dataSets["powerscore"]) 
                 && isset($this->sessData->dataSets["powerscore"][0]->ps_zip_code)) {
@@ -288,21 +288,21 @@ class CannabisScore extends ScorePrintReport
             $curr->dataStore = 'powerscore:ps_source_utility';
             $curr->chkFldOther();
             $curr->dataStore = 'ps_utili_links:ps_ut_lnk_utility_id';
-        } elseif (in_array($nID, [1074])) {
+        } elseif (in_array($curr->nID, [1074])) {
             $curr->clearResponses();
             $curr->addTmpResponse(1, 'Generated On-site');
             $curr->addTmpResponse(2, 'PEPCO');
             $curr->addTmpResponse(0, 'Other:');
             $curr->dataStore = 'powerscore:ps_source_utility';
             $curr->chkFldOther();
-        } elseif (in_array($nID, [1509, 1508])) {
+        } elseif (in_array($curr->nID, [1509, 1508])) {
             $curr->clearResponses();
             for ($i = 0; $i < 12; $i++) {
                 $time = mktime(0, 0, 0, date("n")-$i, date("j"), date("Y"));
                 $curr->addTmpResponse(date('n', $time), date('F Y', $time));
             }
             $curr->defaultVal = intVal(date("n"))-1;
-        } elseif (in_array($nID, [1248])
+        } elseif (in_array($curr->nID, [1248])
             && isset($this->sessData->dataSets["ps_areas"]) 
             && sizeof($this->sessData->dataSets["ps_areas"]) > 0) {
             $curr->clearResponses();
