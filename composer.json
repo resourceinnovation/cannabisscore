@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "rockhopsoft/survloop": "^0.2"
+        "rockhopsoft/survloop": "^0.3.*"
     },
     "autoload": {
         "psr-4": {
