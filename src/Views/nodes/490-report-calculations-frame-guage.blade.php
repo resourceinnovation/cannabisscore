@@ -45,8 +45,10 @@
 </head><body>
 
 <div class="guageWrap">
-    <img src="/cannabisscore/uploads/greenometer2-foreground-dial.png" id="dialID" class="guageImgDial" border=0 >
-    <img src="/cannabisscore/uploads/greenometer2-background-meter.png" class="guageImgMeter" border=0 >
+    <img src="/cannabisscore/uploads/greenometer2-foreground-dial.png" 
+        id="dialID" class="guageImgDial" >
+    <img src="/cannabisscore/uploads/greenometer2-background-meter.png" 
+        class="guageImgMeter">
 </div>
 
 <script type="text/javascript"> $(document).ready(function() {

@@ -39,8 +39,8 @@ class ScoreVars extends TreeSurvForm
     protected $frmTypOut = 0;
     protected $frmTypIn  = 0;
     protected $frmTypGrn = 0;
-    
-    // Initializing a bunch of things which are 
+
+    // Initializing a bunch of things which are
     // not [yet] automatically determined by the software
     protected function initExtra(Request $request)
     {
@@ -50,7 +50,7 @@ class ScoreVars extends TreeSurvForm
         }
         $this->loadCommonVars();
         $this->loadScoreUserVars();
-            
+
         // Establishing Main Navigation Organization, with Node ID# and Section Titles
         $this->majorSections = [];
         if ($GLOBALS["SL"]->treeID == 1) {
@@ -75,37 +75,33 @@ class ScoreVars extends TreeSurvForm
             $this->minorSections[3][] = [67,   'Contact & Options'];
             $this->minorSections[3][] = [848,  'Confirm & Submit'];
         }
-        
+
         //$GLOBALS["SL"]->addTopNavItem('Calculate PowerScore', '/start/calculator');
         return true;
     }
 
     protected function tweakExtraSurveyNav()
     {
-        if (isset($this->sessData->dataSets["powerscore"])
-            && sizeof($this->sessData->dataSets["powerscore"]) == 1) {
-            $ps = $this->sessData->dataSets["powerscore"][0];
-            if (isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) {
-                $this->majorSections   = [];
-                $this->majorSections[] = [971,  'Your Facility',         'active'];
-                $this->majorSections[] = [1493, 'Water Sources & Usage', 'active'];
-                $this->majorSections[] = [65,   'Annual Production',     'active'];
-                $this->majorSections[] = [970,  'Confirm & Submit',      'active'];
-                $this->minorSections   = [ [], [], [], [] ];
-                return true;
-            } elseif (!isset($ps->ps_is_pro) || intVal($ps->ps_is_pro) != 1) {
-                $this->majorSections   = [];
-                $this->majorSections[] = [971,  'Your Facility',     'active'];
-                $this->majorSections[] = [1494, 'Electricity Usage', 'active'];
-                $this->majorSections[] = [65,   'Annual Production', 'active'];
-                $this->majorSections[] = [970,  'Confirm & Submit',  'active'];
-                $this->minorSections   = [ [], [], [], [] ];
-                return true;
-            }
+        if ($this->v["isFlow"]) {
+            $this->majorSections   = [];
+            $this->majorSections[] = [971,  'Your Facility',         'active'];
+            $this->majorSections[] = [1493, 'Water Sources & Usage', 'active'];
+            $this->majorSections[] = [65,   'Annual Production',     'active'];
+            $this->majorSections[] = [970,  'Confirm & Submit',      'active'];
+            $this->minorSections   = [ [], [], [], [] ];
+            return true;
+        } elseif ($this->v["isGrow"]) {
+            $this->majorSections   = [];
+            $this->majorSections[] = [971,  'Your Facility',     'active'];
+            $this->majorSections[] = [1494, 'Electricity Usage', 'active'];
+            $this->majorSections[] = [65,   'Annual Production', 'active'];
+            $this->majorSections[] = [970,  'Confirm & Submit',  'active'];
+            $this->minorSections   = [ [], [], [], [] ];
+            return true;
         }
         return false;
     }
-    
+
     public function authMinimalInit(Request $request, $currPage = '')
     {
         if ($request->has('pro')) {
@@ -115,7 +111,7 @@ class ScoreVars extends TreeSurvForm
         }
         return true;
     }
-    
+
     protected function loadCommonVars()
     {
         $set = 'PowerScore Farm Types';
@@ -128,10 +124,15 @@ class ScoreVars extends TreeSurvForm
         $this->statusArchive = $GLOBALS["SL"]->def->getID($set, 'Archived');
         return true;
     }
-    
+
+    protected function getNewCurrUserInfo()
+    {
+        return new ScoreUserInfo;
+    }
+
     protected function loadScoreUserVars()
     {
-        $this->v["usrInfo"] = new ScoreUserInfo;
+        $this->v["usrInfo"] = $this->getNewCurrUserInfo();
         if (isset($this->v["uID"]) && $this->v["uID"] > 0) {
             $this->v["usrInfo"]->loadUser($this->v["uID"], $this->v["user"]);
             $GLOBALS["SL"]->x["usrInfo"] = $this->v["usrInfo"];
@@ -142,16 +143,16 @@ class ScoreVars extends TreeSurvForm
         }
         return true;
     }
-    
+
     protected function loadMiscUserVars($uID, $user)
     {
-        $usrInfo = new ScoreUserInfo;
+        $usrInfo = $this->getNewCurrUserInfo();
         if (isset($uID) && $uID > 0 && $user && isset($user->id)) {
             $usrInfo->loadUser($uID, $user);
         }
         return $usrInfo;
     }
-    
+
     protected function getUserCompany($userID)
     {
         if ($userID <= 0 && isset($this->v["uID"])) {
@@ -164,20 +165,20 @@ class ScoreVars extends TreeSurvForm
         }
         return '';
     }
-    
+
     public function getPartnerCompany($userID = 0)
     {
-        if ($userID <= 0 
-            && isset($this->v["uID"]) 
-            && $this->v["uID"] > 0 
-            && isset($this->v["usrInfo"]) 
+        if ($userID <= 0
+            && isset($this->v["uID"])
+            && $this->v["uID"] > 0
+            && isset($this->v["usrInfo"])
             && isset($this->v["usrInfo"]->company)
             && trim($this->v["usrInfo"]->company) != '') {
             return $this->v["usrInfo"]->company;
         }
         return $this->getUserCompany($userID);
     }
-    
+
     protected function autoLabelClass($nIDtxt = '')
     {
         if ($GLOBALS["SL"]->treeID == 1) {
@@ -185,7 +186,7 @@ class ScoreVars extends TreeSurvForm
         }
         return 'slBlueDark';
     }
-    
+
     protected function getAreaAbbr($typeDefID)
     {
         foreach ($this->v["areaTypes"] as $abbr => $defID) {
@@ -195,14 +196,25 @@ class ScoreVars extends TreeSurvForm
         }
         return '';
     }
-    
-    // Initializing a bunch of things which are 
+
+    // Initializing a bunch of things which are
     // not [yet] automatically determined by the software
     protected function loadExtra()
     {
+        if (isset($this->sessData->dataSets["powerscore"])
+            && sizeof($this->sessData->dataSets["powerscore"]) == 1) {
+            $ps = $this->sessData->dataSets["powerscore"][0];
+            if (isset($ps->ps_is_pro) && intVal($ps->ps_is_pro) == 1) {
+                $this->v["isPro"] = true;
+            } elseif (isset($ps->ps_is_flow) && intVal($ps->ps_is_flow) == 1) {
+                $this->v["isFlow"] = true;
+            } else {
+                $this->v["isGrow"] = true;
+            }
+        }
         if ($this->treeID == 1) {
             // these are supposed to be auto-generated by survey data structures :(
-            if (isset($this->sessData->dataSets["powerscore"]) 
+            if (isset($this->sessData->dataSets["powerscore"])
                 && $this->coreID > 0) {
                 $this->tweakExtraSurveyNav();
                 if (!isset($this->sessData->dataSets["ps_onsite"])) {
@@ -211,11 +223,11 @@ class ScoreVars extends TreeSurvForm
                     $rec->save();
                     $this->sessData->dataSets["ps_onsite"] = [ $rec ];
                     $this->sessData->addToMap(
-                        'powerscore', 
-                        $this->coreID, 
-                        0, 
-                        'ps_onsite', 
-                        $rec->ps_on_id, 
+                        'powerscore',
+                        $this->coreID,
+                        0,
+                        'ps_onsite',
+                        $rec->ps_on_id,
                         0
                     );
                 }
@@ -225,11 +237,11 @@ class ScoreVars extends TreeSurvForm
                     $rec->save();
                     $this->sessData->dataSets["ps_page_feedback"] = [ $rec ];
                     $this->sessData->addToMap(
-                        'powerscore', 
-                        $this->coreID, 
-                        0, 
-                        'ps_page_feedback', 
-                        $rec->ps_pag_feed_id, 
+                        'powerscore',
+                        $this->coreID,
+                        0,
+                        'ps_page_feedback',
+                        $rec->ps_pag_feed_id,
                         0
                     );
                 }
@@ -240,9 +252,9 @@ class ScoreVars extends TreeSurvForm
             $this->checkComplianceMonths();
         }
 
-        if (!session()->has('PowerScoreChecks') 
+        if (!session()->has('PowerScoreChecks')
             || $GLOBALS["SL"]->REQ->has('refresh')) {
-            $chk = RIIPowerscore::where('ps_submission_progress', 'LIKE', '147') 
+            $chk = RIIPowerscore::where('ps_submission_progress', 'LIKE', '147')
                     // redirection page
                 ->where('ps_status', '=', $this->statusIncomplete)
                 ->update([ 'ps_status' => $this->v["defCmplt"] ]);
@@ -291,7 +303,7 @@ class ScoreVars extends TreeSurvForm
                 if ($perm && isset($perm->usr_perm_company_id)) {
                     $com = RIIUserCompanies::find($perm->usr_perm_company_id);
                     if ($com && isset($com->usr_com_id)) {
-                        $this->v["partnerName"] = $com->usr_com_name 
+                        $this->v["partnerName"] = $com->usr_com_name
                             . ' (' . $this->v["partnerName"] . ')';
                     }
                 }
@@ -364,18 +376,18 @@ class ScoreVars extends TreeSurvForm
             if (!$coreRec) {
                 return false;
             }
-            if (!isset($coreRec->ps_submission_progress) 
+            if (!isset($coreRec->ps_submission_progress)
                 || intVal($coreRec->ps_submission_progress) <= 0) {
                 return true;
             }
-            if (!isset($coreRec->ps_zip_code) 
+            if (!isset($coreRec->ps_zip_code)
                 || trim($coreRec->ps_zip_code) == '') {
                 return true;
             }
         }
         return false;
     }
-    
+
     protected function recordIsIncomplete($coreTbl, $coreID, $coreRec = NULL)
     {
         if ($coreID > 0) {
@@ -383,13 +395,13 @@ class ScoreVars extends TreeSurvForm
                 if (!isset($coreRec->ps_id)) {
                     $coreRec = RIIPowerscore::find($coreID);
                 }
-                return (!isset($coreRec->ps_status) 
+                return (!isset($coreRec->ps_status)
                     || $coreRec->ps_status == $this->statusIncomplete);
             }
         }
         return false;
     }
-    
+
     public function tblsInPackage()
     {
         if ($this->dbID == 1) {
@@ -397,7 +409,7 @@ class ScoreVars extends TreeSurvForm
         }
         return [];
     }
-    
+
     public function getStageNick($defID)
     {
         $defSet = 'PowerScore Growth Stages';
@@ -406,7 +418,7 @@ class ScoreVars extends TreeSurvForm
                 return 'Mother';
             case $GLOBALS["SL"]->def->getID($defSet, 'Clone or Mother Plants'):
                 return 'Clone';
-            case $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants'): 
+            case $GLOBALS["SL"]->def->getID($defSet, 'Vegetating Plants'):
                 return 'Veg';
             case $GLOBALS["SL"]->def->getID($defSet, 'Flowering Plants'):
                 return 'Flower';
@@ -415,39 +427,39 @@ class ScoreVars extends TreeSurvForm
         }
         return '';
     }
-    
+
     protected function getAreaIdTypeName($areaID)
     {
         $area = $this->sessData->getRowById('ps_areas', $areaID);
         if ($area && isset($area->ps_area_type)) {
             return $GLOBALS["SL"]->def->getVal(
-                'PowerScore Growth Stages', 
+                'PowerScore Growth Stages',
                 $area->ps_area_type
             );
         }
         return '';
     }
-    
+
     protected function xmlAccess()
     {
-        if (isset($this->v["user"]) 
-            && $this->v["user"] 
+        if (isset($this->v["user"])
+            && $this->v["user"]
             && $this->v["user"]->hasRole('administrator|staff')) {
             return true;
         }
         return false;
     }
-    
+
     protected function xmlAllAccess()
     {
-        if (isset($this->v["user"]) 
-            && $this->v["user"] 
+        if (isset($this->v["user"])
+            && $this->v["user"]
             && $this->v["user"]->hasRole('administrator|staff')) {
             return true;
         }
         return false;
     }
-    
+
     protected function allTechEmpty()
     {
         $ret = [
@@ -462,7 +474,7 @@ class ScoreVars extends TreeSurvForm
         }
         return $ret;
     }
-    
+
     protected function loadManufactIDs()
     {
         if (!isset($this->v["manufacts"])) {
@@ -477,7 +489,7 @@ class ScoreVars extends TreeSurvForm
         asort($this->v["manufacts"]);
         return $this->v["manufacts"];
     }
-    
+
     protected function convertLightScoreType2ImportType($scoreType = 0)
     {
         $defSet = 'PowerScore Light Types';
@@ -497,34 +509,34 @@ class ScoreVars extends TreeSurvForm
         }
         return [];
     }
-    
+
     protected function convertLightImportType2ScoreType($importType = '')
     {
         $defSet = 'PowerScore Light Types';
         switch (trim($importType)) {
-            case 'Double Ended HPS': 
+            case 'Double Ended HPS':
             case 'HID':
             case 'HPS':
                 return $GLOBALS["SL"]->def->getID($defSet, 'HID (double-ended HPS)');
-            case 'Single Ended HPS': 
+            case 'Single Ended HPS':
                 return $GLOBALS["SL"]->def->getID($defSet, 'HID (single-ended HPS)');
-            case 'MH': 
+            case 'MH':
                 return $GLOBALS["SL"]->def->getID($defSet, 'HID (double-ended MH)');
             case 'Ceramic Metal Halide':
                 return $GLOBALS["SL"]->def->getID($defSet, 'CMH');
-            case 'Fluorescent': 
-            case 'Fluorescent + Halogen': 
-            case 'Fluorescent Induction': 
+            case 'Fluorescent':
+            case 'Fluorescent + Halogen':
+            case 'Fluorescent Induction':
                 return $GLOBALS["SL"]->def->getID($defSet, 'Fluorescent');
             case 'LED':
                 return $GLOBALS["SL"]->def->getID($defSet, 'LED');
-            case 'MH/HPS Lamps': 
-            case 'CFL': 
-            case 'Plasma': 
+            case 'MH/HPS Lamps':
+            case 'CFL':
+            case 'Plasma':
         }
         return 0;
     }
-    
+
     protected function loadLightImportTypeConverts()
     {
         $this->v["lightImportTypeConvert"] = [];
@@ -534,13 +546,13 @@ class ScoreVars extends TreeSurvForm
             ->get();
         if ($chk->isNotEmpty()) {
             foreach ($chk as $mod) {
-                $this->v["lightImportTypeConvert"][$mod->lgt_mod_tech] 
+                $this->v["lightImportTypeConvert"][$mod->lgt_mod_tech]
                     = $this->convertLightImportType2ScoreType($mod->lgt_mod_tech);
             }
         }
         return $this->v["lightImportTypeConvert"];
     }
-    
+
     protected function checkComplianceMonths()
     {
         $t = "compliance_ma";
@@ -552,14 +564,14 @@ class ScoreVars extends TreeSurvForm
             && !isset($this->sessData->dataSets[$t][0]->com_ma_start_month)) {
             $this->sessData->dataSets[$t][0]->com_ma_start_month = intVal(date("n"));
         }
-        if ($GLOBALS["SL"]->REQ->has('go') 
+        if ($GLOBALS["SL"]->REQ->has('go')
             && trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
             $this->sessData->dataSets[$t][0]->com_ma_go_pro = 1;
         } elseif (!isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_go_pro)) {
             $this->sessData->dataSets[$t][0]->com_ma_go_pro = 0;
         }
         $this->sessData->dataSets[$t][0]->save();
-        if (!isset($this->sessData->dataSets["compliance_ma_months"]) 
+        if (!isset($this->sessData->dataSets["compliance_ma_months"])
             || sizeof($this->sessData->dataSets["compliance_ma_months"]) == 0) {
             $this->sessData->dataSets["compliance_ma_months"] = [];
             for ($m = 1; $m <= 12; $m++) {
@@ -590,5 +602,5 @@ class ScoreVars extends TreeSurvForm
         }
         return false;
     }
-    
+
 }

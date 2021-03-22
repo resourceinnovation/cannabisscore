@@ -92,61 +92,18 @@
                 {{ $sfFarms[1][$i] }} Square Footage
             </h2>
 
-        <table class="table table-striped w100" border="0">
-            <tbody><tr class="brdBot">
-             <th>
-         </th>              <th class="brdRgt">
-        Averages<!--- <sub class="slGrey">13</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-247" target="_blank">System A</a>
-        <!--- <sub class="slGrey">5</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-248" target="_blank">System B</a>
-        <!--- <sub class="slGrey">1</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-249" target="_blank">System C</a>
-        <!--- <sub class="slGrey">0</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-250" target="_blank">System D</a>
-        <!--- <sub class="slGrey">0</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-356" target="_blank">System E</a>
-        <!--- <sub class="slGrey">0</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-357" target="_blank">System F</a>
-        <!--- <sub class="slGrey">0</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-251" target="_blank">Other System</a>
-        <!--- <sub class="slGrey">0</sub> --->
-         </th>              <th>
-        <a href="/dash/compare-powerscores?fltFarm={{ $farmDef 
-            }}&amp;fltHvac=160-360" target="_blank">None</a>
-        <!--- <sub class="slGrey">2</sub> --->
-         </th>         </tr>
+            <?php $scoreSets["hvacSqft"]->addCurrFilt('farm', $farmDef); ?>
+            {!! $scoreSets["hvacSqft"]->printTblFltRowsCalc(
+                'hvac', 
+                'area', 
+                'sqft', 
+                'avg', 
+                '', 
+                '/dash/compare-powerscores?fltFarm=' . $farmDef . '&fltHvac=160-[[val]]',
+                false
+            ) !!}
+            <?php $scoreSets["hvacSqft"]->resetRecFilt(); ?>
 
-        @foreach ($sfAreasGrow[0] as $i => $areaDef)
-            <tr><th><nobr>{{ $sfAreasGrow[1][$i] }}</nobr></th>
-                <td class="brdRgt">
-                    {{ number_format($hvacSqft[$farmDef][$areaDef][0]) }}
-                    <sub class="slGrey">{{ $hvacSqft[$farmDef][$areaDef][1] }}</sub>
-                </td>
-            @foreach ($sfHvac[0] as $i => $hvacDef)
-                <td>
-                    {{ number_format($hvacSqft[$farmDef][$areaDef][2][$hvacDef][0]) }}
-                    <sub class="slGrey">{{ count($hvacSqft[$farmDef][$areaDef][2][$hvacDef][1]) }}</sub>
-                </td>
-            @endforeach
-            </tr>
-        @endforeach
-
-        </tbody></table>
         </div>
 
     @endif

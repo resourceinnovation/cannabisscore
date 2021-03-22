@@ -282,7 +282,7 @@
         that use each lighting style for at least 
         one growth stage which they operate.
     </div>
-    {!! $statLgts->printTblPercHas('area', 'lgty') !!}
+    {!! $statLgts->printTblMultiPercHas('area', 'lgty') !!}
 </div>
 
 <div class="slCard nodeWrap">
@@ -337,18 +337,17 @@
 
 <div class="slCard nodeWrap">
     <h3>Table 8: Energy Efficiency Interest</h3>
-    <table class="table w100">
-    {!! $statMisc->tblHeaderRow('farm') !!}
-    {!! $statMisc->tblPercHasDat(
+    {!! $statMisc->printTblPercHasDat(
         'farm', 
         [
             'ps_consider_upgrade', 
             'ps_incentive_wants', 
             'ps_incentive_used', 
             'ps_newsletter' 
-        ]
+        ],
+        [],
+        '/dash/compare-powerscores?fltFarm=[[val]]'
     ) !!}
-    </table>
 </div>
 
 </div>

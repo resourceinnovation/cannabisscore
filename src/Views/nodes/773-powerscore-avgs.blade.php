@@ -1,6 +1,7 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/773-powerscore-avgs.blade.php -->
 
 <div class="slCard nodeWrap">
+
 @if ($GLOBALS["SL"]->x["partnerLevel"] > 4)
     <a class="float-right btn btn-secondary btn-sm mT5 mB15" 
         @if (sizeof($fltStateClimTag) > 0) 
@@ -11,6 +12,7 @@
         ><i class="fa fa-file-excel-o mR5" aria-hidden="true"></i> 
         Excel</a>
 @endif
+
     <h2 class="mT0 slBlueDark">
         @if ($nID == 801
             && isset($GLOBALS["SL"]->x["partnerCompany"])

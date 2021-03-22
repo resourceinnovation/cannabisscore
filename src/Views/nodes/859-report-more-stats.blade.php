@@ -29,126 +29,144 @@
     </div>
 </div>
 
+
 <div class="nodeAnchor"><a name="sqft"></a></div>
 <div class="slCard nodeWrap">
-<h3 class="slBlueDark">1. Square Footage by Growth Stage</h3>
-<table border=0 class="table table-striped w100">
-{!! $statSqft->tblHeaderRow('area') !!}
-{!! $statSqft->tblFltRowsCalc('area', 'farm', 'sqft', 'avg') !!}
-{!! $statSqft->tblSpacerRow('area') !!}
-{!! $statSqft->tblFltRowsCalc('area', 'farm', 'sqft') !!}
-{!! $statSqft->tblSpacerRow('area') !!}
-{!! $statSqft->tblHeaderRow('area') !!}
-{!! $statSqft->tblFltDatColPerc('area', 'farm', 'sqft', 'Percent Canopy Square Feet') !!}
-{!! $statSqft->tblSpacerRow('area') !!}
-{!! $statSqft->tblFltDatRatio2Col('area', 'farm', 'sqft', 162, 'Average Ratios to Flowering') !!}
-</table>
+    <h3 class="slBlueDark">1. Square Footage by Growth Stage</h3>
+
+    <table class="table table-striped w100">
+    {!! $statSqft->printInnerTblFltRowsCalc('area', 'farm', 'sqft', 'avg', '', $colLnk) !!}
+    {!! $statSqft->tblPercSpacerRowHtml('area') !!}
+
+    {!! $statSqft->printInnerTblFltRowsCalc('area', 'farm', 'sqft', 'sum', '', $colLnk) !!}
+    {!! $statSqft->tblPercSpacerRowHtml('area') !!}
+    </table>
+
+    <table class="table table-striped w100">
+    {!! $statSqft->printInnerTblFltDatColPerc('area', 'farm', 'sqft', 'Percent Canopy Square Feet', $colLnk) !!}
+    {!! $statSqft->tblPercSpacerRowHtml('area') !!}
+
+    {!! $statSqft->printInnerTblFltDatRatio2Col('area', 'farm', 'sqft', 162, 'Average Ratios to Flowering', $colLnk) !!}
+    </table>
 </div>
 
 <div class="nodeAnchor"><a name="prod"></a></div>
 <div class="slCard nodeWrap">
-<h3 class="slBlueDark">2. Stats & Techniques by Production Types</h3>
-<table border=0 class="table table-striped w100">
-{!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statMisc->tblAvgTotScale('farm', 'g', 0.002204623, 'Pounds') !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblAvgTot('farm', 'g') !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblAvgTot('farm', 'kWh') !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statSqft->tblPercHas('farm', 'area') !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [
-    'ps_harvest_batch', 'ps_has_water_pump', 'ps_heat_water', 
-    'ps_controls', 'ps_controls_auto', 'ps_vertical_stack' 
-]) !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [
-    'rnw149', 'rnw159', 'rnw151', 'rnw150', 'rnw158', 'rnw153', 
-    'rnw154', 'rnw155', 'rnw156', 'rnw157', 'rnw241'
-]) !!}
-{!! $statMisc->tblSpacerRow('farm') !!}
-{!! $statMisc->tblHeaderRow('farm') !!}
-{!! $statMisc->tblPercHasDat('farm', [ 
-    'ps_consider_upgrade', 'ps_incentive_wants', 
-    'ps_incentive_used', 'ps_newsletter' 
-]) !!}
-</table>
+    <h3 class="slBlueDark">2. Stats & Techniques by Production Types</h3>
+    <table class="table table-striped w100">
+    {!! $statMisc->printInnerTblFltHeaderRow('sum', 'farm', 'brdBotGrey', $colLnk, 2) !!}
+    {!! $statMisc->printInnerTblCalcRecCntRow('farm', 'sum', '1', 'brdBotBlue2') !!}
+    {!! $statMisc->printInnerTblAvgTotScale('farm', 'g', 0.002204623, ' Pounds') !!}
+    {!! $statMisc->tblPercSpacerRowHtml('farm') !!}
+
+    {!! $statMisc->printInnerTblAvgTot('farm', 'g') !!}
+    {!! $statMisc->tblPercSpacerRowHtml('farm') !!}
+
+    {!! $statMisc->printInnerTblAvgTot('farm', 'kWh') !!}
+    </table>
+
+    <p><br /></p>
+
+    <table class="table table-striped w100">
+    {!! $statSqft->printInnerTblMultiPercHas('area', 'farm', $colLnk) !!}
+    {!! $statMisc->tblSpacerRowHtml('farm') !!}
+
+    {!! $statMisc->printInnerTblPercHasDat(
+        'farm', 
+        [
+            'ps_has_water_pump', 'ps_heat_water', // 'ps_harvest_batch'
+            'ps_controls', 'ps_controls_auto', 'ps_vertical_stack' 
+        ], 
+        [],
+        $colLnk
+    ) !!}
+    {!! $statMisc->tblPercSpacerRowHtml('farm') !!}
+    {!! $statMisc->printInnerTblPercHasDat(
+        'farm', 
+        [
+            'rnw149', 'rnw159', 'rnw151', 'rnw150', 'rnw158', 'rnw153', 
+            'rnw154', 'rnw155', 'rnw156', 'rnw157', 'rnw241'
+        ], 
+        [],
+        $colLnk
+    ) !!}
+    {!! $statMisc->tblPercSpacerRowHtml('farm') !!}
+    {!! $statMisc->printInnerTblPercHasDat(
+        'farm', 
+        [ 
+            'ps_consider_upgrade', 'ps_incentive_wants', 
+            'ps_incentive_used', 'ps_newsletter' 
+        ], 
+        [],
+        $colLnk
+    ) !!}
+    </table>
 </div>
+
 
 <div class="nodeAnchor"><a name="lighting"></a></div>
 <div class="slCard nodeWrap">
 <h1 class="slBlueDark">3. Lighting Techniques By Growth Stage</h1>
-<table border=0 class="table table-striped w100">
-{!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltBlksPercHasDat('area', 'farm', [ 'arf', 'dep', 'sun' ]) !!}
-</table>
+{!! $statLgts->printTblFltBlksPercHasDat(
+    'area', 
+    'farm', 
+    [ 'arf', 'dep', 'sun' ], 
+    $colLnk
+) !!}
 </div>
 
 <div class="slCard nodeWrap">
 <h1 class="slBlueDark">4. Lighting Kilowatt Hours (kWh)</h1>
 <table border=0 class="table table-striped w100">
-{!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltRowsCalc('area', 'farm', 'kWh', 'avg') !!}
-{!! $statLgts->tblSpacerRow('area') !!}
-{!! $statLgts->tblFltRowsCalc('area', 'farm', 'kWh') !!}
-{!! $statLgts->tblSpacerRow('area') !!}
-{!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'kWh', 'sqft') !!}
-{!! $statLgts->tblSpacerRow('area') !!}
-{!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltDatRowPerc('area', 'farm', 'kWh') !!}
-{!! $statLgts->tblSpacerRow('area') !!}
-{!! $statLgts->tblFltDatColPerc('area', 'farm', 'kWh') !!}
-{!! $statLgts->tblSpacerRow('area') !!}
-{!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltRowsCalcDiv('area', 'farm', 'W', 'sqft') !!}
+{!! $statLgts->printInnerTblFltRowsCalc('area', 'farm', 'kWh', 'avg', '', $colLnk) !!}
+{!! $statLgts->tblPercSpacerRowHtml('area') !!}
+
+{!! $statLgts->printInnerTblFltRowsCalc('area', 'farm', 'kWh', 'sum', '', $colLnk) !!}
+{!! $statLgts->tblPercSpacerRowHtml('area') !!}
+
+{!! $statLgts->printInnerTblFltRowsCalcDiv('area', 'farm', 'kWh', 'sqft', '', $colLnk) !!}
+{!! $statLgts->tblPercSpacerRowHtml('area') !!}
+
+{!! $statLgts->printInnerTblFltRowsCalcDiv('area', 'farm', 'W', 'sqft', '', $colLnk) !!}
+</table>
+
+<p><br /></p>
+
+<table border=0 class="table table-striped w100">
+{!! $statLgts->printInnerTblFltDatRowPerc('area', 'farm', 'kWh', '', $colLnk) !!}
+{!! $statLgts->tblSpacerRowHtml('area') !!}
+
+{!! $statLgts->printInnerTblFltDatColPerc('area', 'farm', 'kWh', '', $colLnk) !!}
 </table>
 </div>
 
+
 <div class="nodeAnchor"><a name="lightAdopt"></a></div>
 <div class="slCard nodeWrap">
-<?php /* <h3 class="slBlueDark">5. Lighting Adoption: All Farms</h3>
-{!! $statLgts->pieTblPercHas('area', 'lgty') !!} */ ?>
-{!! $statLgts->pieTblBlksPercHas('area', 'lgty', 'farm', '5. Lighting Adoption: ') !!}
+<h3 class="slBlueDark">5. Lighting Adoption: All Farms</h3>
+{!! $statLgts->pieTblMutliPercHas('lgty', 'area') !!}
+{!! $statLgts->pieTblBlksMultiPercHas('area', 'lgty', 'farm', '5. Lighting Adoption: ') !!}
 </div>
 
 <div class="nodeAnchor"><a name="sqftFixture"></a></div>
 <div class="slCard nodeWrap">
 <h3 class="slBlueDark">6. Square Feet per Lighting Fixture</h3>
 <table border=0 class="table table-striped w100">
-{!! $statLgts->tblHeaderRow('area') !!}
-{!! $statLgts->tblFltRowsCalcDiv(
-    'area', 
-    'farm', 
-    'sqft', 
-    'lgtfx', 
-    'Square Feet per Fixture'
-) !!}
-{!! $statLgts->tblSpacerRow('area') !!}
+
+{!! $statLgts->printInnerTblFltRowsCalcDiv('area', 'farm', 'sqft', 'lgtfx', 'Square Feet per Fixture') !!}
+{!! $statLgts->tblSpacerRowHtml('area') !!}
+
 {!! $statLgts->addCurrHide('lgty', 2) !!}
-{!! $statLgts->tblFltRowsCalc(
-    'area', 
-    'lgty', 
-    'sqft/lgtfx', 
-    'sum', 
-    'Square Feet per Fixture', 
-    false
-) !!}
+{!! $statLgts->printInnerTblFltRowsCalc('area', 'lgty', 'sqft/lgtfx', 'sum', 'Square Feet per Fixture', '', false) !!}
+{!! $statLgts->tblSpacerRowHtml('area') !!}
+
 {!! str_replace(
     'Total Square Feet per Fixture', 
     'Square Feet per Fixture', 
-    $statLgts->tblFltRowsBlksCalc(
-        'area', 
-        'lgty', 
-        'farm', 
-        'sqft/lgtfx', 
-        'sum', 
-        'Square Feet per Fixture: '
-    )
+    $statLgts->printTblFltRowsBlksCalc('area', 'lgty', 'farm', 'sqft/lgtfx', 'sum', 'Square Feet per Fixture: ',$colLnk,false)
 ) !!}
 {!! $statLgts->delCurrHide('lgty') !!}
+
 </table>
 </div>
 
@@ -171,9 +189,12 @@
 <li><b>System E</b> - Chilled Water Dehumidification System</li>
 <li><b>System F</b> - Greenhouse HVAC Systems</li>
 </ul>
-<?php /* {!! $statHvac->pieTblPercHas('area', 'hvac') !!} */ ?>
-{!! $statHvac->pieTblBlksPercHas('area', 'hvac', 'farm', 'HVAC Adoption: ') !!}
+<?php 
+// {!! $statHvac->pieTblMutliPercHas('hvac', 'area') !!}
+?>
+{!! $statHvac->pieTblBlksMultiPercHas('area', 'hvac', 'farm', 'HVAC Adoption: ') !!}
 </div>
+
 
 <div class="nodeAnchor"><a name="sources"></a></div>
 <div class="slCard nodeWrap">

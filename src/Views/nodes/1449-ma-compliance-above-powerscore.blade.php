@@ -6,7 +6,7 @@
 <div class="row mT30 mB30">
     <div class="col-3 taL">
         <img src="/cannabisscore/uploads/CannabisPowerscore-logo-md.png" 
-            class="w100 mT15" border="0">
+            class="w100 mT15">
     </div>
     <div class="col-2 taC" style="font-size: 30px;">
         <i class="fa fa-arrow-right pT30" aria-hidden="true"></i>
@@ -24,7 +24,7 @@
     </div>
     <div class="col-3 taR">
     <img src="https://mass-cannabis-control.com/wp-content/uploads/2018/03/CNB_logo_rgb_web-300x139.png" 
-        class="w100 mT15" border="0">
+        class="w100 mT15">
     </div>
 </div>
 

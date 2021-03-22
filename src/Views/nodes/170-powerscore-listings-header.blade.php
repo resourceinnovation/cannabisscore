@@ -48,7 +48,7 @@
 
     <th><div id="fixHead{{ $fixed }}5">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Energy <br />Efficiency <br />KPI '
+            "eng"    => 'Energy <br />Efficiency '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_fac_all',
             "sort"   => $sort
@@ -56,7 +56,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}6">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Electric <br />Efficiency <br />KPI '
+            "eng"    => 'Electric <br />Efficiency '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_facility',
             "sort"   => $sort
@@ -64,7 +64,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}7">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Non-Electric <br />Efficiency <br />KPI '
+            "eng"    => 'Non-Electric <br />Efficiency '
                 . '<div class="fPerc66 slGrey">kBtu / sq ft</div>',
             "srtVal" => 'ps_effic_fac_non',
             "sort"   => $sort
@@ -72,7 +72,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}8">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Energy <br />Productivity <br />KPI '
+            "eng"    => 'Energy <br />Productivity '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_prod_all',
             "sort"   => $sort
@@ -80,7 +80,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}9">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Electric <br />Productivity <br />KPI '
+            "eng"    => 'Electric <br />Productivity '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_production',
             "sort"   => $sort
@@ -88,7 +88,7 @@
     </div></th>
     <th><div id="fixHead{{ $fixed }}10">
         {!! view('vendor.survloop.reports.inc-tbl-head-sort', [
-            "eng"    => 'Non-Electric <br />Productivity <br />KPI '
+            "eng"    => 'Non-Electric <br />Productivity '
                 . '<div class="fPerc66 slGrey">g / kBtu</div>',
             "srtVal" => 'ps_effic_prod_non',
             "sort"   => $sort

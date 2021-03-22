@@ -2,7 +2,7 @@
 <p>&nbsp;</p>
 <div id="animLoadingUploads" class="float-right disBlo slBlueDark">
     <i>Loading...</i> 
-    <img src="/cannabisscore/uploads/greenometer-spinner.gif" border=0 height=40 >
+    <img src="/cannabisscore/uploads/greenometer-spinner.gif" height=40 >
 </div>
 <h2>Processing Uploads</h2>
 <div class="p20 m20"></div>

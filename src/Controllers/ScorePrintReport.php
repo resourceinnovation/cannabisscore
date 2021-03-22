@@ -151,6 +151,9 @@ class ScorePrintReport extends ScoreCalcsPrint
             && trim($GLOBALS["SL"]->REQ->get('postAction')) != '') {
             return $this->redir($GLOBALS["SL"]->REQ->get('postAction'), true);
         }
+        if ($GLOBALS["SL"]->REQ->has('isPreview')) {
+            return '<!-- Has Preview Param -->';
+        }
         $this->initSearcher();
         $this->searcher->getSearchFilts();
         $this->getAllReportCalcs();
@@ -167,7 +170,7 @@ class ScorePrintReport extends ScoreCalcsPrint
             $this->v["usr"] = Auth::user();
         }
         $this->v["canEdit"] = $this->isPartnerStaffAdminOrOwner();
-
+        $this->v["cnt"] = 0;
         $GLOBALS["SL"]->pageJAVA .= view(
             'vendor.cannabisscore.nodes.490-report-calculations-js',
             $this->v
@@ -620,9 +623,10 @@ class ScorePrintReport extends ScoreCalcsPrint
                 $peakKW = $month->ps_month_kw;
             }
         }
-        $GLOBALS["SL"]->pageJAVA .= ' setTimeout("document.getElementById'
+        $GLOBALS["SL"]->pageJAVA .= ' if (document.getElementById'
+            . '(\'colTotpeakelectricityusage\')) { setTimeout("document.getElementById'
             . '(\'colTotpeakelectricityusage\').innerHTML=\'<b>' 
-            . number_format($peakKW) . '</b>\'", 1); ';
+            . number_format($peakKW) . '</b>\'", 1); } ';
         
         return $report->printTables() . '<!-- end printTables() -->';
     }

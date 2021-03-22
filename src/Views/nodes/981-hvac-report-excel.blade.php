@@ -64,30 +64,17 @@
             {{ $sfFarms[1][$i] }} Square Footage
         </th></tr>
 
-        <tr>
-        <th></th>
-        <th class="brdRgt">Averages</th><th>(count)</th>
-        <th>System A</th><th>(count)</th>
-        <th>System B</th><th>(count)</th>
-        <th>System C</th><th>(count)</th>
-        <th>System D</th><th>(count)</th>
-        <th>System E</th><th>(count)</th>
-        <th>System F</th><th>(count)</th>
-        <th>Other System</th><th>(count)</th>
-        <th>None</th><th>(count)</th>
-        </tr>
-
-        @foreach ($sfAreasGrow[0] as $i => $areaDef)
-            <tr>
-                <th align="left" ><nobr>{{ $sfAreasGrow[1][$i] }}</nobr></th>
-                <td style="border-right: 1px #777 solid;">{{ number_format($hvacSqft[$farmDef][$areaDef][0]) }}</td>
-                <td style="color: #777;">{{ $hvacSqft[$farmDef][$areaDef][1] }}</td>
-            @foreach ($sfHvac[0] as $i => $hvacDef)
-                <td>{{ number_format($hvacSqft[$farmDef][$areaDef][2][$hvacDef][0]) }}</td>
-                <td style="color: #777;">{{ count($hvacSqft[$farmDef][$areaDef][2][$hvacDef][1]) }}</td>
-            @endforeach
-            </tr>
-        @endforeach
+        <?php $scoreSets["hvacSqft"]->addCurrFilt('farm', $farmDef); ?>
+        {!! $scoreSets["hvacSqft"]->printInnerTblFltRowsCalc(
+            'hvac', 
+            'area', 
+            'sqft', 
+            'avg', 
+            '', 
+            '/dash/compare-powerscores?fltFarm=' . $farmDef . '&fltHvac=160-[[val]]',
+            false
+        ) !!}
+        <?php $scoreSets["hvacSqft"]->resetRecFilt(); ?>
 
     @endif
 @endforeach

@@ -1,7 +1,12 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/1381-cult-classic-multi-year.blade.php -->
 
 <div class="slCard nodeWrap">
-    <h1 class="slBlueDark">Cultivation Classic Multi-Year Report</h1>
+    <h1 class="mT0 slBlueDark">Cultivation Classic Multi-Year Report</h1>
+    <div class="mB5">
+        <a class="btn btn-secondary" 
+            href="/dash/cultivation-classic-final-report"
+            >Back to Cultivation Classic Final Report</a>
+    </div>
 </div>
 
 <div class="slCard nodeWrap">
@@ -23,10 +28,12 @@
             <td>{{ $year }}</td>
             <td><a href="/calculated/u-{{ $f['ps']->ps_id }}" 
                 target="_blank">#{{ $f["ps"]->ps_id }}</a></td>
-            <td>{{ $GLOBALS["SL"]->def->getVal(
-                'PowerScore Status', 
-                $f["ps"]->ps_status
-            ) }}</td>
+            <td>{{
+                str_replace('Cannabis Ranked Data Set', 'Ranked Data Set', $GLOBALS["SL"]->def->getVal(
+                    'PowerScore Status', 
+                    $f["ps"]->ps_status
+                ))
+            }}</td>
             <td>{{ str_replace('Greenhouse/Hybrid/Mixed Light', 'Hybrid', $GLOBALS["SL"]->def->getVal(
                 'PowerScore Farm Types', 
                 $f["ps"]->ps_characterize

@@ -15,14 +15,18 @@ use DB;
 use Illuminate\Http\Request;
 use App\Models\RIIPowerscore;
 use App\Models\RIIPsAreas;
-use App\Models\RIIPsRenewables;
-use App\Models\RIIPsMonthly;
 use App\Models\RIIPsForCup;
+use App\Models\RIIPsGrowingRooms;
+use App\Models\RIIPsMonthly;
+use App\Models\RIIPsOnsite;
+use App\Models\RIIPsOnsiteFuels;
+use App\Models\RIIPsPageFeedback;
+use App\Models\RIIPsRenewables;
 use App\Models\RIIComplianceMa;
 use App\Models\RIIComplianceMaMonths;
 use App\Models\RIIComplianceMaFuels;
 use App\Models\RIIComplianceMaRenewables;
-use App\Models\RIIPsOnsiteFuels;
+use App\Models\SLSess;
 use App\Models\SLZips;
 use ResourceInnovation\CannabisScore\Controllers\ScorePowerUtilities;
 
@@ -90,18 +94,17 @@ class ScoreUtils extends ScorePowerUtilities
             $this->sessData->dataSets["powerscore"][0]->save();
         }
         if ($GLOBALS["SL"]->REQ->has('go') 
+            && trim($GLOBALS["SL"]->REQ->get('go')) == 'flow') {
+            $this->sessData->dataSets["powerscore"][0]->ps_is_flow = 1;
+            $this->sessData->dataSets["powerscore"][0]->save();
+            $this->tweakExtraSurveyNav();
+        } elseif ($GLOBALS["SL"]->REQ->has('go') 
             && trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 1;
             $this->sessData->dataSets["powerscore"][0]->save();
         } elseif (!isset($this->sessData->dataSets["powerscore"][0]->ps_is_pro)) {
             $this->sessData->dataSets["powerscore"][0]->ps_is_pro = 0;
             $this->sessData->dataSets["powerscore"][0]->save();
-        }
-        if ($GLOBALS["SL"]->REQ->has('go') 
-            && trim($GLOBALS["SL"]->REQ->get('go')) == 'flow') {
-            $this->sessData->dataSets["powerscore"][0]->ps_is_flow = 1;
-            $this->sessData->dataSets["powerscore"][0]->save();
-            $this->tweakExtraSurveyNav();
         }
         $this->sortMonths();
         $this->firstPageCheckCopies();
@@ -243,35 +246,47 @@ class ScoreUtils extends ScorePowerUtilities
      */
     protected function constructorExtra()
     {
-        $this->runPowerScoreChecks();
+        $this->v["isPro"] = $this->v["isGrow"] = $this->v["isFlow"] = false;
+        if ($GLOBALS["SL"]->REQ->has('go')) {
+            if (trim($GLOBALS["SL"]->REQ->get('go')) == 'pro') {
+                $this->v["isPro"] = true;
+            } elseif (trim($GLOBALS["SL"]->REQ->get('go')) == 'grow') {
+                $this->v["isGrow"] = true;
+            } elseif (trim($GLOBALS["SL"]->REQ->get('go')) == 'flow') {
+                $this->v["isFlow"] = true;
+            }
+        }
         return true;
     }
     
     /**
-     * Run any validation and cleanup needed specific to PowerScore.
+     * Hook into Survloop's Admin Cleaning Scripts
+     * /dashboard/systems-clean
      *
-     * @return boolean
+     * @return int
      */
-    protected function runPowerScoreChecks()
+    protected function customSysClean($step = 0)
     {
-        if (!isset($this->v["uID"]) 
-            || $this->v["uID"] <= 0 
-            || !isset($this->v["user"])
-            || !$this->v["user"]->hasRole('administrator|staff')) {
-            return false;
+        if (!$this->isStaffOrAdmin()) {
+            return 1;
         }
-        if (!session()->has('powerChks') 
-                || !session()->get('powerChks') 
-                || $GLOBALS["SL"]->REQ->has('refresh')) {
-            $cutoff = mktime(date("H"), date("i"), date("s"), 
-                date("n"), date("j")-14, date("Y"));
-            $cutoff = date("Y-m-d H:i:s", $cutoff);
+        $cutoff = mktime(date("H"), date("i"), date("s"), 
+            date("n"), date("j")-14, date("Y"));
+        $cutoff = date("Y-m-d H:i:s", $cutoff);
+        if ($step == 4) {
             $this->clearEmptyPowerScores($cutoff);
+        } elseif ($step == 5) {
+            $this->clearEmptyScoreHelpers();
+        } elseif ($step == 6) {
             $this->clearEmptyComply($cutoff);
-            $this->clearLostSessionHelpers();
-            session()->put('powerChks', true);
+        } elseif ($step == 7) {
+            $this->clearOldSessions();
         }
-        return true;
+        $step++;
+        if ($step == 8) {
+            $step = 1;
+        }
+        return $step;
     }
     
     /**
@@ -279,27 +294,53 @@ class ScoreUtils extends ScorePowerUtilities
      *
      * @return boolean
      */
-    protected function clearEmptyPowerScores($cutoff)
+    private function clearEmptyPowerScores($cutoff)
     {
-        DB::select(DB::raw(
-            "DELETE FROM `rii_powerscore` 
-            WHERE `created_at` < '" . $cutoff . "'
-                AND `ps_status` LIKE '" . $this->statusIncomplete . "'
-                AND (`ps_user_id` IS NULL OR `ps_user_id` <= 0)
-                AND (`ps_zip_code` IS NULL OR `ps_zip_code` LIKE '')
-            LIMIT 2000"
-        ));
-        DB::select(DB::raw(
-            "DELETE FROM `sl_sess` 
-            WHERE `sl_sess`.`sess_tree` = 1
-                AND `sl_sess`.`sess_core_id` NOT IN 
-                    (SELECT `rii_powerscore`.`ps_id` FROM `rii_powerscore`)"
-        ));
-        DB::select(DB::raw(
-            "DELETE FROM `rii_ps_monthly` 
-            WHERE `rii_ps_monthly`.`ps_month_psid` NOT IN 
-                (SELECT `rii_powerscore`.`ps_id` FROM `rii_powerscore`)"
-        ));
+        DB::table('rii_powerscore')
+            ->where('created_at', '<', $cutoff)
+            ->where('ps_status', 'LIKE', $this->statusIncomplete)
+            ->where(function($query) {
+                $query->whereNull('ps_user_id')
+                      ->orWhere('ps_user_id', '<=', 0);
+            })
+            ->where(function($query) {
+                $query->whereNull('ps_zip_code')
+                      ->orWhere('ps_zip_code', 'LIKE', '');
+            })
+            ->limit(2000)
+            ->delete();
+        return true;
+    }
+    
+    /**
+     * Clean out old PowerScores data helpers.
+     *
+     * @return boolean
+     */
+    private function clearEmptyScoreHelpers()
+    {
+        $chk = RIIPowerScore::select('ps_id')
+            ->get();
+        $ids = $GLOBALS["SL"]->resultsToArrIds($chk, 'ps_id');
+        SLSess::where('sess_tree', 1)
+            ->whereNotIn('sess_core_id', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIPsMonthly::whereNotIn('ps_month_psid', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIPsAreas::whereNotIn('ps_area_psid', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIPsGrowingRooms::whereNotIn('ps_room_psid', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIPsOnsite::whereNotIn('ps_on_psid', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIPsPageFeedback::whereNotIn('ps_pag_feed_psid', $ids)
+            ->limit(2000)
+            ->delete();
         return true;
     }
     
@@ -308,26 +349,45 @@ class ScoreUtils extends ScorePowerUtilities
      *
      * @return boolean
      */
-    protected function clearEmptyComply($cutoff)
+    private function clearEmptyComply($cutoff)
     {
-        DB::select(DB::raw(
-            "DELETE FROM `rii_compliance_ma` 
-            WHERE `created_at` < '" . $cutoff . "'
-                AND (`com_ma_user_id` IS NULL OR `com_ma_user_id` <= 0)
-                AND (`com_ma_postal_code` IS NULL OR `com_ma_postal_code` LIKE '')
-            LIMIT 2000"
-        ));
-        DB::select(DB::raw(
-            "DELETE FROM `sl_sess` 
-            WHERE `sl_sess`.`sess_tree` = 71
-                AND `sl_sess`.`sess_core_id` NOT IN 
-                    (SELECT `rii_compliance_ma`.`com_ma_id` FROM `rii_compliance_ma`)"
-        ));
-        DB::select(DB::raw(
-            "DELETE FROM `rii_compliance_ma_months` 
-            WHERE `rii_compliance_ma_months`.`com_ma_month_com_ma_id` NOT IN 
-                (SELECT `rii_compliance_ma`.`com_ma_id` FROM `rii_compliance_ma`)"
-        ));
+        DB::table('rii_compliance_ma')
+            ->where('created_at', '<', $cutoff)
+            ->where(function($query) {
+                $query->whereNull('com_ma_user_id')
+                      ->orWhere('com_ma_user_id', '<=', 0);
+            })
+            ->where(function($query) {
+                $query->whereNull('com_ma_postal_code')
+                      ->orWhere('com_ma_postal_code', 'LIKE', '');
+            })
+            ->limit(2000)
+            ->delete();
+        $chk = RIIComplianceMa::select('com_ma_id')
+            ->get();
+        $ids = $GLOBALS["SL"]->resultsToArrIds($chk, 'com_ma_id');
+        SLSess::where('sess_tree', 71)
+            ->whereNotIn('sess_core_id', $ids)
+            ->limit(2000)
+            ->delete();
+        RIIComplianceMaMonths::whereNotIn('com_ma_month_com_ma_id', $ids)
+            ->limit(2000)
+            ->delete();
+        return true;
+    }
+    
+    /**
+     * Clean out old session details (which will also clear Node Saves).
+     *
+     * @return boolean
+     */
+    private function clearOldSessions()
+    {
+        $cutoff = mktime(date("H"), date("i"), date("s"), 
+            date("n")-6, date("j"), date("Y"));
+        $cutoff = date("Y-m-d H:i:s", $cutoff);
+        SLSess::where('created_at', '<', $cutoff)
+            ->delete();
         return true;
     }
     

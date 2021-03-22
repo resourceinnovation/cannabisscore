@@ -15,8 +15,7 @@
     <div class="col-lg-4">
         <center>
         <img src="/cannabisscore/uploads/CannabisPowerscore-logo-dial.png" 
-            class="mT30 mB30" border="0"
-            style="width: 90%; max-width: 200px;" >
+            class="mT30 mB30" style="width: 90%; max-width: 200px;" >
         </center>
     </div>
 </div>

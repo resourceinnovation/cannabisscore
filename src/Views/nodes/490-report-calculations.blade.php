@@ -1,69 +1,66 @@
 <!-- generated from resources/views/vendor/cannabisscore/nodes/490-report-calculations.blade.php -->
-@if (!$GLOBALS["SL"]->REQ->has('isPreview'))
 
 <div id="efficScoreMainTitle" class="row">
     <div class="col-12 mLn15">
         <h3 id="efficBlockOverTitle" class="m0 scoreBig">
-            @if ($isPast) 
-                @if (isset($sessData["powerscore"][0]->ps_is_flow)
-                    && intVal($sessData["powerscore"][0]->ps_is_flow) == 1)
-                    Calculated PowerScore Flow
-                @elseif (isset($sessData["powerscore"][0]->ps_is_pro)
-                    && intVal($sessData["powerscore"][0]->ps_is_pro) == 1)
-                    Calculated PowerScore
-                @else
-                    Calculated PowerScore Grow 
-                @endif
-            @else 
-                PowerScore Estimate 
+        @if ($isPast) 
+            @if ($isFlow)
+                Calculated PowerScore Flow
+            @elseif ($isPro)
+                Calculated PowerScore
+            @else
+                Calculated PowerScore Grow 
             @endif
-        </h3>
-        @if (isset($sessData["powerscore"][0]->ps_characterize))
-            {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
-                $sessData["powerscore"][0]->ps_characterize) }}
-            @if (!isset($GLOBALS["SL"]->x["indivFilters"])
-                || !$GLOBALS["SL"]->x["indivFilters"])
-                <input type="hidden" id="filtFarmID" name="filtFarm" value="{{ 
-                    $sessData['powerscore'][0]->ps_characterize }}">
-            @endif
+        @else 
+            PowerScore Estimate 
         @endif
+        </h3>
+    @if (isset($sessData["powerscore"][0]->ps_characterize))
+        {{ $GLOBALS["SL"]->def->getVal('PowerScore Farm Types', 
+            $sessData["powerscore"][0]->ps_characterize) }}
+        @if (!isset($GLOBALS["SL"]->x["indivFilters"])
+            || !$GLOBALS["SL"]->x["indivFilters"])
+            <input type="hidden" id="filtFarmID" name="filtFarm" value="{{ 
+                $sessData['powerscore'][0]->ps_characterize }}">
+        @endif
+    @endif
         #{{ $psid }},
         
         <nobr>
-        @if (isset($sessData["powerscore"][0]->ps_zip_code)
-            && $usr 
-            && ($usr->hasRole('administrator|staff')
-                || ($usr->hasRole('partner') 
-                    && isset($GLOBALS["SL"]->x["partnerPSIDs"])
-                    && in_array($sessData["powerscore"][0]->ps_id, 
-                        $GLOBALS["SL"]->x["partnerPSIDs"]))))
-            {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipProperty(
-                $sessData["powerscore"][0]->ps_zip_code
-            ))) }},
-        @endif
-        @if (isset($sessData["powerscore"][0]->ps_state)) 
-            {{ $sessData["powerscore"][0]->ps_state }}, 
-        @endif
+    @if (isset($sessData["powerscore"][0]->ps_zip_code)
+        && $usr 
+        && ($usr->hasRole('administrator|staff')
+            || ($usr->hasRole('partner') 
+                && isset($GLOBALS["SL"]->x["partnerPSIDs"])
+                && in_array($sessData["powerscore"][0]->ps_id, 
+                    $GLOBALS["SL"]->x["partnerPSIDs"]))))
+        {{ ucwords(strtolower($GLOBALS["SL"]->states->getZipProperty(
+            $sessData["powerscore"][0]->ps_zip_code
+        ))) }},
+    @endif
+    @if (isset($sessData["powerscore"][0]->ps_state)) 
+        {{ $sessData["powerscore"][0]->ps_state }}, 
+    @endif
         </nobr>
-        @if (isset($sessData["powerscore"][0]->ps_ashrae)) 
-            <nobr> 
-            @if ($sessData["powerscore"][0]->ps_ashrae != 'Canada') Climate Zone @endif 
-            {{ $sessData["powerscore"][0]->ps_ashrae }},</nobr>
-        @endif
-        @if (isset($sessData["powerscore"][0]->ps_start_month)
-            && intVal($sessData["powerscore"][0]->ps_start_month) > 0
-            && isset($scoreYearMonths[$sessData["powerscore"][0]->ps_id])
-            && $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["has"])
-            <nobr>
-            {{ date("F Y", mktime(0, 0, 0, 
-                $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["endMonth"], 1, 
-                $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["endYear"])) }}
-            - 
-            {{ date("F Y", mktime(0, 0, 0, 
-                $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["startMonth"], 1, 
-                $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["startYear"])) }}
-            </nobr> 
-        @endif
+    @if (isset($sessData["powerscore"][0]->ps_ashrae)) 
+        <nobr> 
+        @if ($sessData["powerscore"][0]->ps_ashrae != 'Canada') Climate Zone @endif 
+        {{ $sessData["powerscore"][0]->ps_ashrae }},</nobr>
+    @endif
+    @if (isset($sessData["powerscore"][0]->ps_start_month)
+        && intVal($sessData["powerscore"][0]->ps_start_month) > 0
+        && isset($scoreYearMonths[$sessData["powerscore"][0]->ps_id])
+        && $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["has"])
+        <nobr>
+        {{ date("F Y", mktime(0, 0, 0, 
+            $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["endMonth"], 1, 
+            $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["endYear"])) }}
+        - 
+        {{ date("F Y", mktime(0, 0, 0, 
+            $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["startMonth"], 1, 
+            $scoreYearMonths[$sessData["powerscore"][0]->ps_id]["startYear"])) }}
+        </nobr> 
+    @endif
     </div>
 </div>
 
@@ -75,12 +72,11 @@
     <div id="scoreCalcsWrap" class="row">
         <div id="scoreCalcsWrapLeft" class="col-lg-9 col-md-12">
 
-            <table border=0 cellpadding="0" cellspacing="0" 
-                id="scoreCalcsTbl" class="table tableScore w100 m0">
+            <table id="scoreCalcsTbl" class="table tableScore w100 m0">
             
-        @if (!isset($sessData["powerscore"][0]->ps_is_flow)
-            || intVal($sessData["powerscore"][0]->ps_is_flow) == 0)
-                <?php $cnt = 0; ?>
+        @if (!$isFlow)
+            <?php $cnt = 0; ?>
+
                 <tr class="scoreRowHeader"><td><div class="efficBlock">
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-6 efficHeadLabel">
@@ -98,6 +94,7 @@
                 && isset($sessData["powerscore"][0]->ps_effic_fac_non) 
                 && $sessData["powerscore"][0]->ps_effic_fac_non > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowFacAll" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -134,6 +131,7 @@
             @if (isset($sessData["powerscore"][0]->ps_effic_facility) 
                 && $sessData["powerscore"][0]->ps_effic_facility > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowFac" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -164,11 +162,13 @@
                     </div>
                 </div></td>
                 </tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_fac_non) 
                 && $sessData["powerscore"][0]->ps_effic_fac_non > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowFacNon" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -200,6 +200,7 @@
                         {!! $printEfficFacNon !!}
                     </div>
                 </div></td></tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_production) 
@@ -207,6 +208,7 @@
                 && isset($sessData["powerscore"][0]->ps_effic_prod_non) 
                 && $sessData["powerscore"][0]->ps_effic_prod_non > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowProdAll" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -221,7 +223,8 @@
                                     $sessData["powerscore"][0]->ps_effic_prod_all, 
                                     3
                                 ) }}
-                            @else 0 @endif
+                            @else 0 
+                            @endif
                             <nobr>g / kBtu</nobr>
                         </nobr></div></div>
                         <div class="col-lg-3 col-md-3 col-6 efficHeadGuage pL30" 
@@ -237,11 +240,13 @@
                         {!! $printEfficProdAll !!}
                     </div>
                 </div></td></tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_production) 
                 && $sessData["powerscore"][0]->ps_effic_production > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowProd" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -268,11 +273,13 @@
                         {!! $printEfficProd !!}
                     </div>
                 </div></td></tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_prod_non) 
                 && $sessData["powerscore"][0]->ps_effic_prod_non > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowProdNon" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -302,12 +309,14 @@
                         {!! $printEfficProdNon !!}
                     </div>
                 </div></td></tr>
+
             @endif
         @endif
-
+ 
             @if (isset($sessData["powerscore"][0]->ps_effic_emis) 
                 && $sessData["powerscore"][0]->ps_effic_emis > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowEmis" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -335,11 +344,13 @@
                         {!! $printEfficEmis !!}
                     </div>
                 </div></td></tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_emis_prod) 
                 && $sessData["powerscore"][0]->ps_effic_emis_prod > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowEmisProd" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -367,20 +378,21 @@
                         {!! $printEfficEmisProd !!}
                     </div>
                 </div></td></tr>
+
             @endif
 
+        @if ($isPro)
             @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
-                && $sessData["powerscore"][0]->ps_effic_lighting > 0)
+                && $sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowLight" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-6 efficHeadLabel">
                             <nobr>Lighting Efficiency
-                            @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
-                                <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"
-                                    ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
-                            @endif
+                            <a id="hidivBtnCalcsLgt" class="hidivBtn fPerc66" href="javascript:;"
+                                ><i class="fa fa-question-circle-o" aria-hidden="true"></i></a></nobr>
                         </div>
                         <div class="col-lg-2 col-md-2 col-6"><div class="efficHeadScore"><nobr>
                             @if (isset($sessData["powerscore"][0]->ps_effic_lighting) 
@@ -400,17 +412,17 @@
                             <div id="efficGuageTxtLighting" class="efficGuageTxt"></div>
                         </div>
                     </div>
-                @if ($sessData["powerscore"][0]->ps_effic_lighting > 0.00001)
                     <div id="hidivCalcsLgt" class="scoreCalcs">
                         {!! $printEfficLgt !!}
                     </div>
-                @endif
                 </div></td></tr>
+
             @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_hvac) 
                 && $sessData["powerscore"][0]->ps_effic_hvac > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowHvac" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -443,11 +455,16 @@
                         {!! $printEfficHvac !!}
                     </div>
                 </div></td></tr>
-            @endif
 
-        @if (isset($sessData["powerscore"][0]->ps_effic_water) 
+            @endif
+        @endif
+
+
+        @if (!$isGrow
+            && isset($sessData["powerscore"][0]->ps_effic_water) 
             && $sessData["powerscore"][0]->ps_effic_water > 0)
-            <?php $cnt = 0; ?>
+            <?php $cnt = 1; ?>
+
                 <tr class="scoreRowHeader"><td><div class="efficBlock">
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-6 efficHeadLabel">
@@ -460,9 +477,6 @@
                     </div>
                 </div></td></tr>
                 
-            @if (isset($sessData["powerscore"][0]->ps_effic_water) 
-                && $sessData["powerscore"][0]->ps_effic_water > 0)
-                <?php $cnt++; ?>
                 <tr id="scoreRowWater" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -495,11 +509,11 @@
                         {!! $printEfficWtr !!}
                     </div>
                 </div></td></tr>
-            @endif
 
             @if (isset($sessData["powerscore"][0]->ps_effic_water_prod) 
                 && $sessData["powerscore"][0]->ps_effic_water_prod > 0)
                 <?php $cnt++; ?>
+
                 <tr id="scoreRowWaterProd" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -532,12 +546,14 @@
                         {!! $printEfficWtrProd !!}
                     </div>
                 </div></td></tr>
+
             @endif
         @endif
 
         @if (isset($sessData["powerscore"][0]->ps_effic_waste) 
             && $sessData["powerscore"][0]->ps_effic_waste > 0)
-    <?php $cnt = 0; ?>
+            <?php $cnt = 1; ?>
+
                 <tr class="scoreRowHeader"><td><div class="efficBlock">
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-6 efficHeadLabel">
@@ -550,9 +566,6 @@
                     </div>
                 </div></td></tr>
                 
-            @if (isset($sessData["powerscore"][0]->ps_effic_waste) 
-                && $sessData["powerscore"][0]->ps_effic_waste > 0)
-                <?php $cnt++; ?>
                 <tr id="scoreRowWaste" @if ($cnt%2 == 0) class="rw2" @endif >
                 <td><div class="efficBlock">
                     <div class="row">
@@ -582,7 +595,6 @@
                         {!! $printEfficWst !!}
                     </div>
                 </div></td></tr>
-            @endif
                 
             @if (isset($sessData["powerscore"][0]->ps_effic_waste_prod) 
                 && $sessData["powerscore"][0]->ps_effic_waste_prod > 0)
@@ -617,6 +629,7 @@
                     </div>
                 </div></td></tr>
             @endif
+        @endif
             
             @if (isset($noprints) && trim($noprints) != '')
                 <tr><td>
@@ -668,12 +681,13 @@
                 </style>
 
             @endif
-        @endif
         
+
             </table>
+
+
     @if ($canEdit)
-        @if (isset($sessData["powerscore"][0]->ps_is_flow)
-            && intVal($sessData["powerscore"][0]->ps_is_flow) == 1)
+        @if ($isFlow)
             <div class="p30">
                 <a href="/start/calculator?go=pro&time=232&cpyFlow={{ 
                     $sessData['powerscore'][0]->ps_id }}-{{ 
@@ -681,8 +695,7 @@
                     class="btn btn-primary btn-xl btn-block"
                     >BENCHMARK MY PERFORMANCE</a>
             </div>
-        @elseif (!isset($sessData["powerscore"][0]->ps_is_pro)
-            || intVal($sessData["powerscore"][0]->ps_is_pro) != 1)
+        @elseif ($isGrow)
             <div class="p30">
                 <a href="/start/calculator?go=pro&time=232&cpyGrow={{ 
                     $sessData['powerscore'][0]->ps_id }}-{{ 
@@ -696,8 +709,7 @@
         </div>
         <div class="col-lg-3 col-md-12" id="psScoreOverall">
             
-        @if (isset($sessData["powerscore"][0]->ps_is_pro)
-            && intVal($sessData["powerscore"][0]->ps_is_pro) == 1)
+        @if ($isPro)
             <div id="efficGuageTxtOverall" class="efficGuageTxt"></div>
             <center><iframe id="guageFrameOverall" class="guageFrame" src="" 
                 frameborder="0" width="180" height="120" ></iframe></center>
@@ -713,8 +725,7 @@
             </h5></div>
             <div id="efficGuageTxtOverall3" class="pT15">
             @if ($canEdit)
-                @if (isset($sessData["powerscore"][0]->ps_is_flow)
-                    && intVal($sessData["powerscore"][0]->ps_is_flow) == 1)
+                @if ($isFlow)
                     Click the "Benchmark My Performance' button for a deeper 
                     understanding of how your facility's use of energy and 
                     waste compares to other facilities throughout North America.
@@ -724,8 +735,7 @@
                     water compares to other facilities throughout North America.
                 @endif
             @else
-                <center><a class="btn btn-lg btn-primary" 
-                    href="/start/calculator?new=1"
+                <center><a href="/start/calculator?new=1" class="btn btn-lg btn-primary"
                     >Calculate PowerScore</a></center>
             @endif
             </div>
@@ -735,6 +745,7 @@
     </div> <!-- scoreCalcsWrap.row -->
         
 @if (!$GLOBALS["SL"]->REQ->has('print') && !$isPast)
+
     <p><br /><sup>*</sup>
     {!! view('vendor.cannabisscore.nodes.490-report-calculations-rank-about')->render() !!}
     </p><p>
@@ -742,14 +753,12 @@
     are estimates purely based on the average results of real grow 
     years using similar combinations of technologies and strageties.
     </p>
+
 @endif
 
 </div> <!-- end bigScoreWrap -->
 <div id="guageReloader" class="disNon"></div>
 
-@else
-    <!-- Has Preview Param -->
-@endif
 
 <style>
 table#scoreCalcsTbl tr {

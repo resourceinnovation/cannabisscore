@@ -23,8 +23,6 @@ guageList[guageList.length] = new Array('WasteProd',    10, 0, '', '', '');
 var reloadComplete = false;
 var g = 0;
 
-@if (!$GLOBALS["SL"]->REQ->has('isPreview'))
-
 $(document).ready(function() {
     
     {!! view('vendor.cannabisscore.inc-filter-powerscores-js', [ "psid" => $psid ])->render() !!}
@@ -72,7 +70,7 @@ $(document).ready(function() {
         }
         var baseUrl = "/ajax/powerscore-rank?ps={{ $psid }}"+gatherFilts();
         var fullUrl = ""+baseUrl+"&eff=Overall&loadAll=1";
-console.log("reloadGuages() "+fullUrl);
+        console.log("reloadGuages() "+fullUrl);
         $("#guageReloader").load(fullUrl);
         setTimeout(function() { chkGuageReload(baseUrl); }, 400);
         return true;
@@ -85,10 +83,10 @@ console.log("reloadGuages() "+fullUrl);
         $("#futureForm").load("/ajax/future-look?ps={{ $psid }}");
     }, 3000);
 @endif
+
 @if ($GLOBALS["SL"]->REQ->has('print'))
     setTimeout("window.print()", 3000);
 @endif
     
 });
 
-@endif

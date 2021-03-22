@@ -38,10 +38,10 @@
             @foreach ($GLOBALS['SL']->x['usrInfo']->companies[0]->manus as $manu)
                 <div class="row mT30">
                     <div class="col-lg-6 pB10">
-                        <a href="#" 
-                <?php /* /dash/competitive-performance?manu={{ 
-                    urlencode($manu->name) }} */ ?>
-                            class="btn btn-lg btn-secondary btn-block disabled"
+                        <a href="/dash/lighting-manufacturer-report" 
+                        <?php /* /dash/competitive-performance?manu={{ 
+                            urlencode($manu->name) }} */ ?>
+                            class="btn btn-lg btn-secondary btn-block"
                             >{{ $manu->name }} Competitive Performance</a>
                     </div>
                     <div class="col-lg-6 pB10">
