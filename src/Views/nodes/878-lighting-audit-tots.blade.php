@@ -9,18 +9,18 @@
 </div>
 
 @forelse ($areas as $a => $area)
-    @if (isset($area->ps_area_has_stage) 
+    @if (isset($area->ps_area_has_stage)
         && intVal($area->ps_area_has_stage) == 1
-        && isset($area->ps_area_size) 
+        && isset($area->ps_area_size)
         && intVal($area->ps_area_size) > 0
-        && isset($area->ps_area_lgt_artif) 
+        && isset($area->ps_area_lgt_artif)
         && intVal($area->ps_area_lgt_artif) == 1)
         <div class="row mB10">
             <div class="col-3">{!! $GLOBALS["SL"]->def->getVal(
-                'PowerScore Growth Stages', 
+                'PowerScore Growth Stages',
                 $area->ps_area_type
             ) !!}</div>
-            <div class="col-3"><nobr>{{ 
+            <div class="col-3"><nobr>{{
                 number_format($area->ps_area_size)
             }} Sq Ft</nobr></div>
             <div class="col-3">
@@ -28,11 +28,11 @@
                     {!! number_format($areaCnts[$area->ps_area_id]) !!}
                 @endif
             </div>
-            @if (isset($areaCnts[$area->ps_area_id]) 
-                && $areaCnts[$area->ps_area_id] > 0 
+            @if (isset($areaCnts[$area->ps_area_id])
+                && $areaCnts[$area->ps_area_id] > 0
                 && isset($area->ps_area_sq_ft_per_fix2))
                 @if ($area->ps_area_sq_ft_per_fix2 < 4
-                    || $area->ps_area_sq_ft_per_fix2 > 81) 
+                    || $area->ps_area_sq_ft_per_fix2 > 81)
                     <div class="col-3 red bld">
                         <nobr>
                         <i class="fa fa-exclamation-triangle mR5"
@@ -41,8 +41,8 @@
                         Sq Ft</nobr>
                     </div>
                 @else
-                    <div class="col-3"><nobr>{{ 
-                        round($area->ps_area_sq_ft_per_fix2) 
+                    <div class="col-3"><nobr>{{
+                        round($area->ps_area_sq_ft_per_fix2)
                     }} Sq Ft</nobr></div>
                 @endif
             @else

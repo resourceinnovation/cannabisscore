@@ -19,7 +19,7 @@ use ResourceInnovation\CannabisScore\Controllers\ScoreCondsCustom;
 
 class ScoreFormsCustom extends ScoreCondsCustom
 {
-    
+
     protected function getLoopItemNextLabelCustom($singular)
     {
         if ($singular == 'Types of Room Light Fixture') {
@@ -27,28 +27,28 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return '';
     }
-    
+
     protected function postZipCode($nID)
     {
-        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld') 
+        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')
             && trim($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) != '') {
             $this->sessData->updateZipInfo(
-                $GLOBALS["SL"]->REQ->get('n' . $nID . 'fld'), 
-                'powerscore', 
-                'ps_state', 
-                'ps_county', 
-                'ps_ashrae', 
+                $GLOBALS["SL"]->REQ->get('n' . $nID . 'fld'),
+                'powerscore',
+                'ps_state',
+                'ps_county',
+                'ps_ashrae',
                 'ps_country'
             );
         }
         return true;
     }
-    
+
     protected function postPsReportingMonth($nID)
     {
-        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld') 
+        if ($GLOBALS["SL"]->REQ->has('n' . $nID . 'fld')
             && trim($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld')) != ''
-            && isset($this->sessData->dataSets["powerscore"]) 
+            && isset($this->sessData->dataSets["powerscore"])
             && isset($this->sessData->dataSets["powerscore"][0])) {
             $newMonth = intVal($GLOBALS["SL"]->REQ->get('n' . $nID . 'fld'));
             $this->sessData->dataSets["powerscore"][0]->ps_year = intVal(date("Y"));
@@ -75,7 +75,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
                             if (isset($lnk->ps_lnk_rm_ar_room_id)
                                 && $lnk->ps_lnk_rm_ar_room_id == $roomID
                                 && isset($lnk->ps_lnk_rm_ar_area_id)
-                                && intVal($lnk->ps_lnk_rm_ar_area_id) 
+                                && intVal($lnk->ps_lnk_rm_ar_area_id)
                                     == intVal($area->ps_area_id)) {
                                 $found = true;
                             }
@@ -92,7 +92,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return false;
     }
-    
+
     protected function postHeatPumpOther($nID)
     {
         if ($GLOBALS["SL"]->REQ->has('otherThermal1328')
@@ -105,20 +105,20 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return true;
     }
-    
+
     protected function loadHeatPumpOther($nID)
     {
         if (isset($this->sessData->dataSets["powerscore"])) {
             $ps = $this->sessData->dataSets["powerscore"][0];
             if (isset($ps->ps_tech_other) && trim($ps->ps_tech_other) != '') {
                 $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
-                    . "document.getElementById(\"otherThermal1328ID\").value=" 
+                    . "document.getElementById(\"otherThermal1328ID\").value="
                     . json_encode($ps->ps_tech_other) . "', 10); ";
             }
         }
         return true;
     }
-    
+
     protected function postRenewOther($nID)
     {
         if ($GLOBALS["SL"]->REQ->has('otherRenewable1075')
@@ -131,7 +131,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return true;
     }
-    
+
     protected function loadRenewOther($nID)
     {
         if (isset($this->sessData->dataSets["ps_onsite"])) {
@@ -139,13 +139,13 @@ class ScoreFormsCustom extends ScoreCondsCustom
             if (isset($ps->ps_on_produce_renewable_other)
                 && trim($ps->ps_on_produce_renewable_other) != '') {
                 $GLOBALS["SL"]->pageJAVA .= " setTimeout('"
-                    . "document.getElementById(\"otherRenewable1075ID\").value=" 
+                    . "document.getElementById(\"otherRenewable1075ID\").value="
                     . json_encode($ps->ps_on_produce_renewable_other) . "', 10); ";
             }
         }
         return true;
     }
-    
+
     protected function postRoomCnt($nID)
     {
         $roomCnt = $currCnt = 0;
@@ -170,7 +170,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         $this->sessData->refreshDataSets();
         return false;
     }
-    
+
     protected function postRoomLightCnt($nID)
     {
         $rooms = RIIPsGrowingRooms::where('ps_room_psid', $this->coreID)
@@ -223,7 +223,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
         $this->sessData->refreshDataSets();
         return false;
     }
-    
+
     protected function getLoopDoneItemsCustom($loopName)
     {
         if ($loopName == 'Types of Room Light Fixtures') {
@@ -259,10 +259,10 @@ class ScoreFormsCustom extends ScoreCondsCustom
             }
             $lgt->save();
             $this->sessData->logDataSave(
-                $nID, 
-                'ps_light_types', 
-                $lgt->getKey(), 
-                'complete', 
+                $nID,
+                'ps_light_types',
+                $lgt->getKey(),
+                'complete',
                 $lgt->ps_lg_typ_complete
             );
         }
@@ -280,14 +280,14 @@ class ScoreFormsCustom extends ScoreCondsCustom
             case '1093res4': $title .= 'HVAC System D energy flow summary'; break;
         }
         if ($title != ''
-            && isset($this->allNodes[$nID]) 
+            && isset($this->allNodes[$nID])
             && isset($this->allNodes[$nID]->nodeRow->node_prompt_text)
             && trim($this->allNodes[$nID]->nodeRow->node_prompt_text) != '') {
             $title = ' <i class="fa fa-info-circle mL3 mR3" aria-hidden="true"></i> ' . $title;
-            $body = trim($this->allNodes[$nID]->nodeRow->node_prompt_text) 
+            $body = trim($this->allNodes[$nID]->nodeRow->node_prompt_text)
                 . '<div class="p20"></div>';
-            return '<div class="row2 p15 pB30">' 
-                . $GLOBALS["SL"]->printAccordian($title, $body, false, false, 'text') 
+            return '<div class="row2 p15 pB30">'
+                . $GLOBALS["SL"]->printAccordian($title, $body, false, false, 'text')
                 . '</div>';
         }
         return '<!-- no energy summary -->';
@@ -313,7 +313,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
     protected function saveMonthKwh($nID)
     {
         $tot = 0;
-        if (isset($this->sessData->dataSets["ps_monthly"]) 
+        if (isset($this->sessData->dataSets["ps_monthly"])
             && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
             foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
                 if (isset($mon->ps_month_kwh1)) {
@@ -405,24 +405,24 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return $ret;
     }
-    
+
     protected function postMonthlies($nIDtxt, $fld2)
     {
         $powerMonths = $this->sortMonths();
         foreach ($powerMonths as $i => $row) {
             $row->ps_month_month = (1+$i);
             $fldName = 'month' . $nIDtxt . 'ly' . $row->ps_month_month;
-            $row->{ $fld2 }  = (($GLOBALS["SL"]->REQ->has($fldName)) 
+            $row->{ $fld2 }  = (($GLOBALS["SL"]->REQ->has($fldName))
                 ? intVal($GLOBALS["SL"]->REQ->get($fldName)) : null);
             $row->save();
         }
         return true;
     }
-    
+
     public function monthlyCalcPreselections($nID, $nIDtxt = '')
     {
         $ret = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-        $fld = (($nID == 70) ? 'ps_month_kwh1' 
+        $fld = (($nID == 70) ? 'ps_month_kwh1'
             : (($nID == 74) ? 'ps_month_grams' : 'ps_month_waste_lbs'));
         $powerMonths = $this->sortMonths();
         if ($powerMonths->isNotEmpty()) {
@@ -432,17 +432,17 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return $ret;
     }
-    
+
     public function printGramForm($nID, $nIDtxt)
     {
         $this->v["nID"] = $nID;
         $this->v["currSessData"] = 0;
-        if (isset($this->sessData->dataSets["powerscore"]) 
+        if (isset($this->sessData->dataSets["powerscore"])
             && isset($this->sessData->dataSets["powerscore"][0])
             && isset($this->sessData->dataSets["powerscore"][0]->ps_grams)) {
             $this->v["currSessData"] = $this->sessData
                 ->dataSets["powerscore"][0]->ps_grams;
-        } elseif (isset($this->sessData->dataSets["compliance_ma"]) 
+        } elseif (isset($this->sessData->dataSets["compliance_ma"])
             && isset($this->sessData->dataSets["compliance_ma"][0]->com_ma_grams)) {
             $this->v["currSessData"] = $this->sessData
                 ->dataSets["compliance_ma"][0]->com_ma_grams;
@@ -451,12 +451,12 @@ class ScoreFormsCustom extends ScoreCondsCustom
         if ($nID == 1124) {
             $min = 0;
         }
-        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt 
+        $this->pageJSvalid .= "addReqNodeRadio('" . $nIDtxt
             . "', 'reqFormFldGreater', " . $min . ");\n";
         $presel = $this->monthlyCalcPreselections($nID, $nIDtxt);
         $this->v["gramFormMonths"] = $this->printMonthlyCalculator(
-            $nIDtxt, 
-            $presel, 
+            $nIDtxt,
+            $presel,
             'convertGrams();'
         );
         return view('vendor.cannabisscore.nodes.74-total-grams', $this->v)->render();
@@ -518,15 +518,15 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return $ret;
     }
-    
+
     protected function prepFeedbackSkipBtn()
     {
-        $this->v["psOwner"] = (($GLOBALS["SL"]->REQ->has('psid') 
-            && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0) 
-            ? intVal($GLOBALS["SL"]->REQ->get('psid')) 
-            : ((session()->has('PowerScoreOwner')) 
+        $this->v["psOwner"] = (($GLOBALS["SL"]->REQ->has('psid')
+            && intVal($GLOBALS["SL"]->REQ->get('psid')) > 0)
+            ? intVal($GLOBALS["SL"]->REQ->get('psid'))
+            : ((session()->has('PowerScoreOwner'))
                 ? intVal(session()->get('PowerScoreOwner')) : -3));
-        if (intVal($this->v["psOwner"]) > 0 
+        if (intVal($this->v["psOwner"]) > 0
             && isset($this->sessData->dataSets["ps_feedback"])
             && isset($this->sessData->dataSets["ps_feedback"][0])) {
             $this->sessData->dataSets["ps_feedback"][0]->psf_psid = $this->v["psOwner"];
@@ -534,18 +534,18 @@ class ScoreFormsCustom extends ScoreCondsCustom
         }
         return true;
     }
-    
+
     protected function prepUtilityRefTitle()
     {
-        if (isset($this->sessData->dataSets["ps_referral"]) 
+        if (isset($this->sessData->dataSets["ps_referral"])
             && sizeof($this->sessData->dataSets["ps_referral"]) > 0) {
-            if ($GLOBALS["SL"]->REQ->has('u') 
+            if ($GLOBALS["SL"]->REQ->has('u')
                 && intVal($GLOBALS["SL"]->REQ->get('u')) > 0) {
                 $this->sessData->dataSets["ps_referral"][0]
                     ->ps_ref_utility = intVal($GLOBALS["SL"]->REQ->get('u'));
                 $this->sessData->dataSets["ps_referral"][0]->save();
             }
-            if ($GLOBALS["SL"]->REQ->has('s') 
+            if ($GLOBALS["SL"]->REQ->has('s')
                 && intVal($GLOBALS["SL"]->REQ->get('s')) > 0) {
                 $scoreID = intVal($GLOBALS["SL"]->REQ->get('s'));
                 $this->sessData->dataSets["ps_referral"][0]->ps_ref_power_score = $scoreID;
@@ -558,7 +558,7 @@ class ScoreFormsCustom extends ScoreCondsCustom
                             $powerscoreOwner = true;
                         }
                         $sess = 'PowerScoreOwner' . $scoreID;
-                        if (session()->has($sess) 
+                        if (session()->has($sess)
                             && intVal(session()->get($sess)) == $scoreID) {
                             $powerscoreOwner = true;
                         }
@@ -588,11 +588,11 @@ class ScoreFormsCustom extends ScoreCondsCustom
             if (sizeof($areas) > 0) {
                 foreach ($areas as $a => $area) {
                     $auditAreas[$a] = '';
-                    if (isset($area->ps_area_has_stage) 
+                    if (isset($area->ps_area_has_stage)
                         && intVal($area->ps_area_has_stage) == 1
-                        && isset($area->ps_area_size) 
+                        && isset($area->ps_area_size)
                         && intVal($area->ps_area_size) > 0
-                        && isset($area->ps_area_lgt_artif) 
+                        && isset($area->ps_area_lgt_artif)
                         && intVal($area->ps_area_lgt_artif) == 1) {
                         foreach ($this->v["areaTypes"] as $typ => $defID) {
                             if ($area->ps_area_type == $defID && $typ != 'Dry') {
@@ -612,14 +612,14 @@ class ScoreFormsCustom extends ScoreCondsCustom
                     }
                 }
                 $auditTbl = view(
-                    'vendor.cannabisscore.nodes.878-lighting-audit-tots', 
+                    'vendor.cannabisscore.nodes.878-lighting-audit-tots',
                     [
                         "areas"    => $areas,
                         "areaCnts" => $this->v["areaCnts"]
                     ]
                 )->render();
                 $GLOBALS["SL"]->pageJAVA .= view(
-                    'vendor.cannabisscore.nodes.878-lighting-audit-js', 
+                    'vendor.cannabisscore.nodes.878-lighting-audit-js',
                     [
                         "auditAreas" => $printable,
                         "areas"      => $areas,
@@ -651,95 +651,16 @@ class ScoreFormsCustom extends ScoreCondsCustom
             $ret = 'No lights were added for your <b>' . strtolower($typ) . ' stage</b>.';
         /*
         } elseif ($area->ps_area_sq_ft_per_fix2 < $min) {
-            $ret = 'You only listed ' . $fixCnt . ' lighting fixture' 
+            $ret = 'You only listed ' . $fixCnt . ' lighting fixture'
                 . (($fixCnt == 1) ? '' : 's') . ' in your ' . strtolower($typ) . ' stage. '
                 . round($area->ps_area_sq_ft_per_fix2) . ' square feet per fixture is very low. ';
         } elseif ($area->ps_area_sq_ft_per_fix2 > $max) {
-            $ret = 'You listed ' . $fixCnt . ' lighting fixtures in your ' 
+            $ret = 'You listed ' . $fixCnt . ' lighting fixtures in your '
                 . strtolower($typ) . ' stage. ' . round($area->ps_area_sq_ft_per_fix2)
                 . ' square feet per fixture is very high. ';
         */
         }
         return $ret;
-    }
-
-
-
-
-    // MA-specific functions
-
-    protected function maMonthTblLoad()
-    {
-        if (!isset($this->v["psMonths"])) {
-            $this->v["psMonths"] = [];
-            if (isset($this->sessData->dataSets["ps_monthly"])
-                && sizeof($this->sessData->dataSets["ps_monthly"]) > 0) {
-                foreach ($this->sessData->dataSets["ps_monthly"] as $mon) {
-                    if (isset($mon->ps_month_month) && intVal($mon->ps_month_month) > 0) {
-                        $this->v["psMonths"][$mon->ps_month_month] = $mon;
-                    }
-                }
-            }
-        }
-        return $this->v["psMonths"];
-    }
-
-    protected function maMonthTblElectric($nID)
-    {
-        $this->maMonthTblLoad();
-        return view(
-            'vendor.cannabisscore.nodes.1103-ma-month-table-electric', 
-            [
-                "nID"      => $nID,
-                "months"   => $this->v["psMonths"],
-                "dataSets" => $this->sessData->dataSets,
-                "nKWH"     => 1106,
-                "nKW"      => 1107
-            ]
-        )->render();
-    }
-
-    protected function maMonthTblDelivered($nID)
-    {
-        $this->maMonthTblLoad();
-        return view(
-            'vendor.cannabisscore.nodes.1121-ma-month-table-delivered', 
-            [
-                "nID"      => $nID,
-                "months"   => $this->v["psMonths"],
-                "dataSets" => $this->sessData->dataSets,
-                "nKWH"     => 1122,
-                "nKW"      => 1123
-            ]
-        )->render();
-    }
-
-    protected function maMonthTblWater($nID)
-    {
-        $this->maMonthTblLoad();
-        return view(
-            'vendor.cannabisscore.nodes.1122-ma-month-table-water', 
-            [
-                "nID"      => $nID,
-                "months"   => $this->v["psMonths"],
-                "dataSets" => $this->sessData->dataSets,
-                "nKWH"     => 1124
-            ]
-        )->render();
-    }
-
-    protected function maMonthTblRenew($nID)
-    {
-        $this->maMonthTblLoad();
-        return view(
-            'vendor.cannabisscore.nodes.1123-ma-month-table-renew', 
-            [
-                "nID"      => $nID,
-                "months"   => $this->v["psMonths"],
-                "dataSets" => $this->sessData->dataSets,
-                "nKWH"     => 1125
-            ]
-        )->render();
     }
 
 }

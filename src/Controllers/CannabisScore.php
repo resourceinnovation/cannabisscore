@@ -115,11 +115,6 @@ class CannabisScore extends ScorePrintReport
                 $GLOBALS["SL"]->x["indivFilters"] = true;
             }
             $ret .= $this->customPrint490($nID);
-        } elseif ($nID == 1008) {
-            $ret .= view(
-                'vendor.cannabisscore.nodes.1008-powerscore-calculations-mockup',
-                $this->v
-            )->render();
         } elseif ($nID == 946) {
             $ret .= $this->printPsRankingFilters($nID);
         } elseif (in_array($nID, [878])) { // , 1273

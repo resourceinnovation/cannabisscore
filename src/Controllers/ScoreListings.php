@@ -535,7 +535,7 @@ class ScoreListings extends ScoreListingsCore
         if ($GLOBALS["SL"]->REQ->has('excel')
             && intVal($GLOBALS["SL"]->REQ->get('excel')) == 1) {
             $innerTable = view(
-                'vendor.cannabisscore.nodes.744-cult-classic-report-innertable',
+                'vendor.cannabisscore-rii.nodes.744-cult-classic-report-innertable',
                 $this->v
             )->render();
             $filename = 'CultClassic-PowerScoreReport-' . date("Y-m-d") . '.xls';
@@ -543,7 +543,7 @@ class ScoreListings extends ScoreListingsCore
         }
         $GLOBALS["SL"]->pageBodyOverflowX();
         return view(
-            'vendor.cannabisscore.nodes.744-cult-classic-report',
+            'vendor.cannabisscore-rii.nodes.744-cult-classic-report',
             $this->v
         )->render();
     }
@@ -686,7 +686,7 @@ class ScoreListings extends ScoreListingsCore
         }
         $GLOBALS["SL"]->pageBodyOverflowX();
         return view(
-            'vendor.cannabisscore.nodes.1381-cult-classic-multi-year',
+            'vendor.cannabisscore-rii.nodes.1381-cult-classic-multi-year',
             $this->v
         )->render();
     }
